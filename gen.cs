@@ -48,7 +48,7 @@ public class blog
         public string keywords { get; set; }
     }
 
-    static string do_1055(Site site, string my_path)
+    static string do_1055(string dir_data, Site site, string my_path)
     {
         var content = "";
         content += "<?xml version=\"1.0\" encoding=\"iso-8859-1\" ?>";
@@ -73,7 +73,7 @@ public class blog
             string my_content;
             try
             {
-                my_content = File.ReadAllText("data/" + local_id + ".html");
+                my_content = File.ReadAllText(Path.Combine(dir_data, local_id + ".html"));
             }
             catch
             {
@@ -220,7 +220,7 @@ public class blog
         return content;
     }
 
-    static string do_1182(Site site, string my_path)
+    static string do_1182(string dir_data, Site site, string my_path)
     {
         var content = "";
 
@@ -240,7 +240,7 @@ public class blog
                 string my_content;
                 try
                 {
-                    my_content = File.ReadAllText("data/" + local_id + ".html");
+                    my_content = File.ReadAllText(Path.Combine(dir_data, local_id + ".html"));
                 }
                 catch
                 {
@@ -433,7 +433,7 @@ public class blog
         return content;
     }
 
-    static string do_3052(Site site, string my_path)
+    static string do_3052(string dir_data, Site site, string my_path)
     {
         var content = "";
 
@@ -458,7 +458,7 @@ public class blog
             string my_content;
             try
             {
-                my_content = File.ReadAllText("data/" + local_id + ".html");
+                my_content = File.ReadAllText(Path.Combine(dir_data, local_id + ".html"));
             }
             catch
             {
@@ -506,12 +506,12 @@ public class blog
         return content;
     }
 
-    static string do_js(Site site, string id, string my_path)
+    static string do_js(string dir_data, Site site, string id, string my_path)
     {
         switch (id)
         {
             case "1055":
-                return do_1055(site, my_path);
+                return do_1055(dir_data, site, my_path);
             case "1079":
                 return do_1079(site, my_path);
             case "1150":
@@ -519,7 +519,7 @@ public class blog
             case "1159":
                 return do_1159(site, my_path);
             case "1182":
-                return do_1182(site, my_path);
+                return do_1182(dir_data, site, my_path);
             case "1205":
                 return do_1205(site, my_path);
             case "1207":
@@ -527,7 +527,7 @@ public class blog
             case "1616":
                 return do_1616(site, my_path);
             case "3052":
-                return do_3052(site, my_path);
+                return do_3052(dir_data, site, my_path);
             default:
                 System.Console.WriteLine("TODO");
                 return "";
@@ -721,11 +721,11 @@ public class blog
         }
     }
 
-    static string get_content(string id)
+    static string get_content(string dir_data, string id)
     {
         try
         {
-            return File.ReadAllText("data/" + id + ".html");
+            return File.ReadAllText(Path.Combine(dir_data, id + ".html"));
         }
         catch
         {
@@ -782,7 +782,8 @@ public class blog
 
     public static void Main()
     {
-        var site = JsonConvert.DeserializeObject<Site>(File.ReadAllText("data/esbma.json"));
+		var dir_data = "data";
+        var site = JsonConvert.DeserializeObject<Site>(File.ReadAllText(Path.Combine(dir_data, "esbma.json")));
         var dest = "pub_" + NewId_hex();
 
         Directory.CreateDirectory(dest);
@@ -803,15 +804,15 @@ public class blog
                 }
                 else if ("blob" == it.type)
                 {
-                    File.Copy("data/" + id + ".bin", path);
+                    File.Copy(Path.Combine(dir_data, id + ".bin"), path);
                 }
                 else if ("js" == it.type)
                 {
-                    var js = File.ReadAllText("data/" + id + ".js");
-                    var content = do_js(site, id, my_path);
+                    var js = File.ReadAllText(Path.Combine(dir_data, id + ".js"));
+                    var content = do_js(dir_data, site, id, my_path);
                     if (it.usetemplate)
                     {
-                        var html = File.ReadAllText("data/template.html");
+                        var html = File.ReadAllText(Path.Combine(dir_data, "template.html"));
                         var crunched = crunch(site, id, html, content);
                         File.WriteAllText(path, crunched);
                     }
@@ -825,8 +826,8 @@ public class blog
                 {
                     if (it.usetemplate)
                     {
-                        var html = File.ReadAllText("data/template.html");
-                        var content = get_content(id);
+                        var html = File.ReadAllText(Path.Combine(dir_data, "template.html"));
+                        var content = get_content(dir_data, id);
                         if (content != null)
                         {
                             var crunched = crunch(site, id, html, content);
@@ -835,7 +836,7 @@ public class blog
                     }
                     else
                     {
-                        var content = File.ReadAllText("data/" + id + ".html");
+                        var content = File.ReadAllText(Path.Combine(dir_data, id + ".html"));
                         var crunched = crunch(site, id, content, null);
                         File.WriteAllText(path, crunched);
                     }
