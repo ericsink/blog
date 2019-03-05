@@ -24,7 +24,7 @@ public class Site
 	public Dictionary<string, Item> items { get; set; }
 }
 
-public static class stuff
+public static class csfun
 {
     static int parseInt(string s)
     {
@@ -719,7 +719,7 @@ public class blog
     {
         var t = html;
         var page = site.items[id];
-        var my_path = "/" + stuff.get_path(site, page);
+        var my_path = "/" + csfun.get_path(site, page);
 
         if (content != null)
         {
@@ -750,9 +750,9 @@ public class blog
             {
                 var link_id = m.Groups["id"].Value;
                 var link_it = site.items[link_id];
-                var other_path = "/" + stuff.get_path(site, link_it);
+                var other_path = "/" + csfun.get_path(site, link_it);
 
-                var str_link = stuff.make_link(my_path, other_path);
+                var str_link = csfun.make_link(my_path, other_path);
 
                 t = t.Replace(m.Value, str_link);
             }
@@ -789,8 +789,8 @@ public class blog
             var id = kv.Key;
             var it = kv.Value;
 
-            var path = dest + "/" + stuff.get_path(site, it);
-            var my_path = "/" + stuff.get_path(site, it);
+            var path = dest + "/" + csfun.get_path(site, it);
+            var my_path = "/" + csfun.get_path(site, it);
 
             if (it.active)
             {
@@ -805,7 +805,7 @@ public class blog
                 else if ("js" == it.type)
                 {
                     var js = File.ReadAllText(Path.Combine(dir_data, id + ".js"));
-                    var content = stuff.do_js(dir_data, site, id, my_path);
+                    var content = csfun.do_js(dir_data, site, id, my_path);
                     if (it.usetemplate)
                     {
                         var crunched = crunch(site, id, template, content);
