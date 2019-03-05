@@ -8,6 +8,22 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+namespace blog
+{
+
+public class Site
+{
+	public string type { get; set; }
+	public string title { get; set; }
+	public string tagline { get; set; }
+	public string author { get; set; }
+	public string copyright { get; set; }
+	public string publishhost { get; set; }
+	public string publishpath { get; set; }
+	public string publishaccount { get; set; }
+	public Dictionary<string, Item> items { get; set; }
+}
+
 public class blog
 {
 
@@ -20,32 +36,6 @@ public class blog
             .Replace("}", "")
             .Replace("-", "");
         return id;
-    }
-
-    class Site
-    {
-        public string type { get; set; }
-        public string title { get; set; }
-        public string tagline { get; set; }
-        public string author { get; set; }
-        public string copyright { get; set; }
-        public string publishhost { get; set; }
-        public string publishpath { get; set; }
-        public string publishaccount { get; set; }
-        public Dictionary<string, Item> items { get; set; }
-    }
-
-    class Item
-    {
-        public string type { get; set; }
-        public string pubname { get; set; }
-        public string parentid { get; set; } // TODO maybe int
-        public bool active { get; set; }
-        public bool usetemplate { get; set; }
-        public string title { get; set; }
-        public string teaser { get; set; }
-        public string datefiled { get; set; }
-        public string keywords { get; set; }
     }
 
     static string do_1055(string dir_data, Site site, string my_path)
@@ -851,6 +841,8 @@ public class blog
             }
         }
     }
+
+}
 
 }
 
