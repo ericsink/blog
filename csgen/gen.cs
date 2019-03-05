@@ -11,19 +11,6 @@ using Newtonsoft.Json.Linq;
 namespace blog
 {
 
-public class Site
-{
-	public string type { get; set; }
-	public string title { get; set; }
-	public string tagline { get; set; }
-	public string author { get; set; }
-	public string copyright { get; set; }
-	public string publishhost { get; set; }
-	public string publishpath { get; set; }
-	public string publishaccount { get; set; }
-	public Dictionary<string, Item> items { get; set; }
-}
-
 public static class csfun
 {
     static int parseInt(string s)
