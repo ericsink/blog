@@ -50,81 +50,26 @@ public static class csfun
 
     static Dictionary<string, Item> find_by_keyword_match(Site site, IList<string> keywords)
     {
-        var result = new Dictionary<string, Item>();
-
-        foreach (var kv in site.items)
-        {
-            var id = kv.Key;
-            var it = kv.Value;
-
-            if ("html" != it.type)
-            {
-                continue;
-            }
-
-            if (!it.usetemplate)
-            {
-                continue;
-            }
-
-            if (it.keywords != null)
-            {
-                for (var i = 0; i < keywords.Count; i++)
-                {
-                    if (0 <= it.keywords.IndexOf(keywords[i]))
-                    {
-                        result.Add(id, it);
-                        break;
-                    }
-                }
-            }
-        }
-
-        return result;
+		return site.items
+			.Where(kv => kv.Value.type == "html")
+			.Where(kv => kv.Value.usetemplate)
+			.Where(kv => (kv.Value.keywords != null) && keywords.Any(s => kv.Value.keywords.IndexOf(s) >= 0))
+			.ToDictionary(
+				kv => kv.Key,
+				kv => kv.Value
+				);
     }
 
     static Dictionary<string, Item> find_by_keyword_block(Site site, IList<string> keywords)
     {
-        var result = new Dictionary<string, Item>();
-
-        foreach (var kv in site.items)
-        {
-            var id = kv.Key;
-            var it = kv.Value;
-
-            if ("html" != it.type)
-            {
-                continue;
-            }
-
-            if (!it.usetemplate)
-            {
-                continue;
-            }
-
-            if (it.keywords != null)
-            {
-                var ok = true;
-                for (var i = 0; i < keywords.Count; i++)
-                {
-                    if (0 <= it.keywords.IndexOf(keywords[i]))
-                    {
-                        ok = false;
-                        break;
-                    }
-                }
-                if (ok)
-                {
-                    result.Add(id, it);
-                }
-            }
-            else
-            {
-                result.Add(id, it);
-            }
-        }
-
-        return result;
+		return site.items
+			.Where(kv => kv.Value.type == "html")
+			.Where(kv => kv.Value.usetemplate)
+			.Where(kv => (kv.Value.keywords == null) || keywords.All(s => kv.Value.keywords.IndexOf(s) < 0))
+			.ToDictionary(
+				kv => kv.Key,
+				kv => kv.Value
+				);
     }
 
     static string path_combine(string a, string b)
