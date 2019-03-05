@@ -24,18 +24,193 @@ public class Site
 	public Dictionary<string, Item> items { get; set; }
 }
 
-public class blog
+public static class stuff
 {
-
-    public static string NewId_hex()
+    static int parseInt(string s)
     {
-        string id = Guid
-            .NewGuid()
-            .ToString()
-            .Replace("{", "")
-            .Replace("}", "")
-            .Replace("-", "");
-        return id;
+        return int.Parse(s);
+    }
+
+    static DateTime parse_date(string s)
+    {
+        var twoparts = s.Split(' ');
+        var dateparts = twoparts[0].Split('-');
+        var timeparts = twoparts[1].Split(':');
+        var year = parseInt(dateparts[0]);
+        var month = parseInt(dateparts[1]);
+        var day = parseInt(dateparts[2]);
+        var hour = parseInt(timeparts[0]);
+        var min = parseInt(timeparts[1]);
+        var sec = parseInt(timeparts[2]);
+
+        var d = new DateTime(year, month, day, hour, min, sec, 0);
+
+        return d;
+    }
+
+    static string format_date_rss(string s)
+    {
+        //<pubDate>{{{loop.datefiled:format='ddd, dd MMM yyyy HH:mm:ss CST'}}}</pubDate>
+        var d = parse_date(s);
+        return d.ToString("ddd, dd MMM yyyy HH:mm:ss CST");
+    }
+
+    static string format_date(string s)
+    {
+        var d = parse_date(s);
+        return d.ToString("dddd, d MMMM yyyy");
+    }
+
+    static Dictionary<string, Item> find_by_keyword_match(Site site, IList<string> keywords)
+    {
+        var result = new Dictionary<string, Item>();
+
+        foreach (var kv in site.items)
+        {
+            var id = kv.Key;
+            var it = kv.Value;
+
+            if ("html" != it.type)
+            {
+                continue;
+            }
+
+            if (!it.usetemplate)
+            {
+                continue;
+            }
+
+            if (it.keywords != null)
+            {
+                for (var i = 0; i < keywords.Count; i++)
+                {
+                    if (0 <= it.keywords.IndexOf(keywords[i]))
+                    {
+                        result.Add(id, it);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    static Dictionary<string, Item> find_by_keyword_block(Site site, IList<string> keywords)
+    {
+        var result = new Dictionary<string, Item>();
+
+        foreach (var kv in site.items)
+        {
+            var id = kv.Key;
+            var it = kv.Value;
+
+            if ("html" != it.type)
+            {
+                continue;
+            }
+
+            if (!it.usetemplate)
+            {
+                continue;
+            }
+
+            if (it.keywords != null)
+            {
+                var ok = true;
+                for (var i = 0; i < keywords.Count; i++)
+                {
+                    if (0 <= it.keywords.IndexOf(keywords[i]))
+                    {
+                        ok = false;
+                        break;
+                    }
+                }
+                if (ok)
+                {
+                    result.Add(id, it);
+                }
+            }
+            else
+            {
+                result.Add(id, it);
+            }
+        }
+
+        return result;
+    }
+
+    static string path_combine(string a, string b)
+    {
+        if (a.Length == 0)
+        {
+            return b;
+        }
+
+        if (b.Substring(0, 1) == "/")
+        {
+            return b;
+        }
+
+        if (a.Substring(a.Length - 1, 1) == "/")
+        {
+            return a + b;
+        }
+
+        return a + "/" + b;
+    }
+
+    public static string make_link(string myPath, string otherPath)
+    {
+        var myParts = myPath.Split('/');
+        var otherParts = otherPath.Split('/');
+
+        // TODO this feels like a hack
+        if (myPath == otherPath)
+        {
+            return myParts[myParts.Length - 1];
+        }
+
+        var ndx = 0;
+        while (
+            (ndx < myParts.Length)
+            && (ndx < otherParts.Length)
+            && (myParts[ndx] == otherParts[ndx])
+            )
+        {
+            ndx++;
+        }
+
+        var result = "";
+
+        var i = ndx;
+        while (i < (myParts.Length - 1))
+        {
+            result = path_combine(result, "..");
+            i++;
+        }
+
+        while (ndx < (otherParts.Length))
+        {
+            result = path_combine(result, otherParts[ndx]);
+            ndx++;
+        }
+
+        return result;
+    }
+
+    public static string get_path(Site site, Item it)
+    {
+        if (it.parentid != null)
+        {
+            var pit = site.items[it.parentid];
+
+            return get_path(site, pit) + "/" + it.pubname;
+        }
+        else
+        {
+            return it.pubname;
+        }
     }
 
     static string do_1055(string dir_data, Site site, string my_path)
@@ -496,7 +671,7 @@ public class blog
         return content;
     }
 
-    static string do_js(string dir_data, Site site, string id, string my_path)
+    public static string do_js(string dir_data, Site site, string id, string my_path)
     {
         switch (id)
         {
@@ -524,210 +699,27 @@ public class blog
         }
     }
 
-    static int parseInt(string s)
+}
+
+public class blog
+{
+
+    public static string NewId_hex()
     {
-        return int.Parse(s);
-    }
-
-    static DateTime parse_date(string s)
-    {
-        var twoparts = s.Split(' ');
-        var dateparts = twoparts[0].Split('-');
-        var timeparts = twoparts[1].Split(':');
-        var year = parseInt(dateparts[0]);
-        var month = parseInt(dateparts[1]);
-        var day = parseInt(dateparts[2]);
-        var hour = parseInt(timeparts[0]);
-        var min = parseInt(timeparts[1]);
-        var sec = parseInt(timeparts[2]);
-
-        var d = new DateTime(year, month, day, hour, min, sec, 0);
-
-        return d;
-    }
-
-    static string format_date_rss(string s)
-    {
-        //<pubDate>{{{loop.datefiled:format='ddd, dd MMM yyyy HH:mm:ss CST'}}}</pubDate>
-        var d = parse_date(s);
-        return d.ToString("ddd, dd MMM yyyy HH:mm:ss CST");
-    }
-
-    static string format_date(string s)
-    {
-        var d = parse_date(s);
-        return d.ToString("dddd, d MMMM yyyy");
-    }
-
-    static Dictionary<string, Item> find_by_keyword_match(Site site, IList<string> keywords)
-    {
-        var result = new Dictionary<string, Item>();
-
-        foreach (var kv in site.items)
-        {
-            var id = kv.Key;
-            var it = kv.Value;
-
-            if ("html" != it.type)
-            {
-                continue;
-            }
-
-            if (!it.usetemplate)
-            {
-                continue;
-            }
-
-            if (it.keywords != null)
-            {
-                for (var i = 0; i < keywords.Count; i++)
-                {
-                    if (0 <= it.keywords.IndexOf(keywords[i]))
-                    {
-                        result.Add(id, it);
-                        break;
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
-
-    static Dictionary<string, Item> find_by_keyword_block(Site site, IList<string> keywords)
-    {
-        var result = new Dictionary<string, Item>();
-
-        foreach (var kv in site.items)
-        {
-            var id = kv.Key;
-            var it = kv.Value;
-
-            if ("html" != it.type)
-            {
-                continue;
-            }
-
-            if (!it.usetemplate)
-            {
-                continue;
-            }
-
-            if (it.keywords != null)
-            {
-                var ok = true;
-                for (var i = 0; i < keywords.Count; i++)
-                {
-                    if (0 <= it.keywords.IndexOf(keywords[i]))
-                    {
-                        ok = false;
-                        break;
-                    }
-                }
-                if (ok)
-                {
-                    result.Add(id, it);
-                }
-            }
-            else
-            {
-                result.Add(id, it);
-            }
-        }
-
-        return result;
-    }
-
-    static string path_combine(string a, string b)
-    {
-        if (a.Length == 0)
-        {
-            return b;
-        }
-
-        if (b.Substring(0, 1) == "/")
-        {
-            return b;
-        }
-
-        if (a.Substring(a.Length - 1, 1) == "/")
-        {
-            return a + b;
-        }
-
-        return a + "/" + b;
-    }
-
-    static string make_link(string myPath, string otherPath)
-    {
-        var myParts = myPath.Split('/');
-        var otherParts = otherPath.Split('/');
-
-        // TODO this feels like a hack
-        if (myPath == otherPath)
-        {
-            return myParts[myParts.Length - 1];
-        }
-
-        var ndx = 0;
-        while (
-            (ndx < myParts.Length)
-            && (ndx < otherParts.Length)
-            && (myParts[ndx] == otherParts[ndx])
-            )
-        {
-            ndx++;
-        }
-
-        var result = "";
-
-        var i = ndx;
-        while (i < (myParts.Length - 1))
-        {
-            result = path_combine(result, "..");
-            i++;
-        }
-
-        while (ndx < (otherParts.Length))
-        {
-            result = path_combine(result, otherParts[ndx]);
-            ndx++;
-        }
-
-        return result;
-    }
-
-    static string get_path(Site site, Item it)
-    {
-        if (it.parentid != null)
-        {
-            var pit = site.items[it.parentid];
-
-            return get_path(site, pit) + "/" + it.pubname;
-        }
-        else
-        {
-            return it.pubname;
-        }
-    }
-
-    static string get_content(string dir_data, string id)
-    {
-        try
-        {
-            return File.ReadAllText(Path.Combine(dir_data, id + ".html"));
-        }
-        catch
-        {
-            return null;
-        }
+        string id = Guid
+            .NewGuid()
+            .ToString()
+            .Replace("{", "")
+            .Replace("}", "")
+            .Replace("-", "");
+        return id;
     }
 
     static string crunch(Site site, string id, string html, string content)
     {
         var t = html;
         var page = site.items[id];
-        var my_path = "/" + get_path(site, page);
+        var my_path = "/" + stuff.get_path(site, page);
 
         if (content != null)
         {
@@ -758,9 +750,9 @@ public class blog
             {
                 var link_id = m.Groups["id"].Value;
                 var link_it = site.items[link_id];
-                var other_path = "/" + get_path(site, link_it);
+                var other_path = "/" + stuff.get_path(site, link_it);
 
-                var str_link = make_link(my_path, other_path);
+                var str_link = stuff.make_link(my_path, other_path);
 
                 t = t.Replace(m.Value, str_link);
             }
@@ -769,6 +761,18 @@ public class blog
         return t;
     }
 
+
+    static string get_content(string dir_data, string id)
+    {
+        try
+        {
+            return File.ReadAllText(Path.Combine(dir_data, id + ".html"));
+        }
+        catch
+        {
+            return null;
+        }
+    }
 
     public static void Main()
     {
@@ -785,8 +789,8 @@ public class blog
             var id = kv.Key;
             var it = kv.Value;
 
-            var path = dest + "/" + get_path(site, it);
-            var my_path = "/" + get_path(site, it);
+            var path = dest + "/" + stuff.get_path(site, it);
+            var my_path = "/" + stuff.get_path(site, it);
 
             if (it.active)
             {
@@ -801,7 +805,7 @@ public class blog
                 else if ("js" == it.type)
                 {
                     var js = File.ReadAllText(Path.Combine(dir_data, id + ".js"));
-                    var content = do_js(dir_data, site, id, my_path);
+                    var content = stuff.do_js(dir_data, site, id, my_path);
                     if (it.usetemplate)
                     {
                         var crunched = crunch(site, id, template, content);
