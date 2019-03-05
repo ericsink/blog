@@ -782,7 +782,7 @@ public class blog
 
     public static void Main()
     {
-		var dir_data = "data";
+		var dir_data = Path.Combine("..", "data");
         var site = JsonConvert.DeserializeObject<Site>(File.ReadAllText(Path.Combine(dir_data, "esbma.json")));
         var dest = "pub_" + NewId_hex();
 
