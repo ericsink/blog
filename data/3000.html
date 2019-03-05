@@ -1,0 +1,53 @@
+<p>Version 1.1 (coming sometime in the next few weeks) of Veracity will have support for import and export using the <a href="http://www.google.com/search?q=git+fast-import">fast-import</a> format popularized by git.  (If you are interested in trying this feature before the 1.1 release, grab a recent <a href="http://download.sourcegear.com/Veracity/nightly/">nightly build</a>.)</p>
+
+<p>I was initially a bit resistant to having this feature.  Getting people to switch from git to Veracity isn't really a big focus for us, so I didn't think we needed it.</p>
+
+<p>But it seems like the fast-import format is becoming a de facto standard for interchange of version control data.  In addition to git itself, it is now possible to export in this format from Mercurial, Bazaar, Subversion and Perforce.  By supporting fast-import, we make it possible for a wide range of users to import their data and give Veracity a test drive.</p>
+
+<p>Veracity can export into this format as well.  Some people will try Veracity and decide it is not for them.  They can export their Veracity repository into a fast-import file and take it to git or Mercurial or wherever they want.  Hopefully that makes it a little less scary to give young Veracity a closer look.</p>
+
+<h3>Using fast-import with Veracity</h3>
+
+<p>To import into Veracity, first you need to get your repo into a fast-import file.  The steps to do this will vary depending on what VCS you are using now.  For example, from git, it looks something like this:</p>
+
+<pre style="background-color: #E0EFF1; padding:0.15in; border-radius:12pt;">
+git fast-export --all --signed-tags=strip &gt; ~/my_repository.fi
+</pre>
+
+<p>Then create a new Veracity repo using that import file:</p>
+
+<pre style="background-color: #E0EFF1; padding:0.15in; border-radius:12pt;">
+vv fast-import ~/my_repository.fi name_of_new_repo
+</pre>
+
+<p>To go in the other direction:</p>
+
+<pre style="background-color: #E0EFF1; padding:0.15in; border-radius:12pt;">
+vv fast-export name_of_repo ~/my_repository.fi
+</pre>
+
+<p>Which should produce a fast-import file that can be imported into whatever participating VCS you choose.  For example, importing into git would look like this:</p>
+
+<pre style="background-color: #E0EFF1; padding:0.15in; border-radius:12pt;">
+mkdir new_git_repo
+cd new_git_repo
+git init
+git fast-import &lt; ~/my_repository.fi
+</pre>
+
+<h3>Current state of the feature</h3>
+
+<p>This feature is new and is currently being tested.  I won't be surprised if there are some wrinkles that need to be ironed out.  But we've successfully handled some significant test cases.</p>
+
+<ul>
+    <li>We have exported the Perl repository (with 24 years of history) from git and then imported it into Veracity.</li>
+    <li>We have exported the Mercurial repo from hg (using hg-fast-export) and then imported it into Veracity.</li>
+    <li>We have exported the Veracity repo from Veracity and then imported it into git.</li>
+    <li>We have not yet tested interoperability with other tools like Subversion or Bazaar.</li>
+    <li>Currently, incremental import and export are not supported.</li>
+</ul>
+
+<p>Any questions about this feature should go to our <a href="http://veracity-scm.com/qa">Q&amp;A area</a> on the Veracity website.</p>
+
+<p>Enjoy!</p>
+

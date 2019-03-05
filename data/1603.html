@@ -1,0 +1,191 @@
+<p>During the month of May 2006, we conducted an experiment
+with the coupon code feature of our online store.&nbsp; On May 1<sup>st</sup>, I
+posted a coupon code <a href="{{{link:id='1590'}}}">here
+on my blog</a>.&nbsp; The coupon was good for a 20% discount during the month of
+May.&nbsp; Now I am ready to report the results of the experiment.</p>
+
+<h3>The Data</h3>
+
+<ul style='margin-top:0in' type=disc>
+ <li >During the month of May, the coupon code was used for 9.5%
+     of the transactions processed through the SourceGear store. <br>
+     <br>
+ </li>
+ <li >Most of the coupon transactions were significantly smaller
+     than the average size of the transactions for the month as a whole.<br>
+     <br>
+ </li>
+ <li >31% of the coupon transactions came from outside the United States.&nbsp; For the month as a whole, 34% of the transactions came from outside the United States.<br>
+     <br>
+ </li>
+ <li >All of the coupon transactions used a credit card as the
+     method of payment.&nbsp; For the month as a whole, 23% of the transactions were
+     paid with a purchase order, but none of them used the coupon.<br>
+     <br>
+ </li>
+ <li >I selected 25 of the coupon users and asked them how the
+     coupon affected their purchasing decision:</li>
+ <ul style='margin-top:0in' type=circle>
+  <li >4 people did not respond to the question.</li>
+  <li >5 people said that the coupon swung their decision toward
+      Vault.&nbsp; They were undecided about their Vault purchase, and the coupon
+      affected their decision.&nbsp; Note also:&nbsp; The average size of those 5 transactions
+      was dramatically less than the average transaction size for the month as
+      a whole.</li>
+  <li >3 people said they were already planning to buy our
+      product, but the coupon prompted them to do it sooner than they had
+      planned.</li>
+  <li >1 person said the coupon caused them to buy more licenses
+      than they had planned.</li>
+  <li >12 people said the coupon did not affect their decision
+      in any way.&nbsp; They were already planning to make a purchase at full price,
+      but they found the coupon, so they used it.&nbsp; (Of those 12 people, 3 of
+      them volunteered that they simply Googled for the coupon code when they
+      saw the place for it on the order form.&nbsp; This is consistent with
+      indications from the Apache log files on my blog server.)</li>
+ </ul>
+</ul>
+
+<h3>The Observations and Conclusions</h3>
+
+<h5>Positives and Negatives</h5>
+
+<p>Looking at the customers who responded to my question, I see
+several positives:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >5 people said that the coupon swung their decision toward
+     Vault.&nbsp; These are customers we would not have gained.<br>
+     <br>
+ </li>
+ <li >1 person said the coupon caused them buy more licenses
+     than they had planned.&nbsp; <br>
+     <br>
+ </li>
+ <li >3 people said they were already planning to buy our
+     product, but the coupon caused them to do it sooner than they had
+     planned.&nbsp; A pessimist might say that this is a bad thing, since we would
+     have gotten full price from these people later.&nbsp; I think this is a good
+     thing because even if they planned to buy later, they might have ended up
+     changing their mind.</li>
+</ul>
+
+<p>In contrast, 12 people said the coupon did not affect their
+decision.&nbsp; They were planning to make a purchase at full price, but they were
+able to pay less because they found the coupon.&nbsp; An optimist could find
+positive things to say about those 12 transactions.&nbsp; After all, we don't want
+to be in the habit of complaining when we people trade us cash for our
+software.</p>
+
+<p>But the fact is that these 12 transactions can also be seen
+in a negative light.&nbsp; Those customers paid 20% less than they were willing to
+pay.&nbsp; The aggregate amount saved by those customers is effectively a cost of
+having the coupon.</p>
+
+<p>A rather simplistic judgment of the coupon experiment would
+be to add up an estimate of the incremental revenue produced by the coupon and
+subtract the total amount saved by the 12 folks who would have been willing to
+pay full price.&nbsp; (I'm sure there are several reasons why this analysis is
+simplistic, but the first one that comes to mind is that it ignores the future
+positive effects of having 5 customers we would not otherwise have.)</p>
+
+<p>Anyway, I'm not disclosing actual revenue numbers here, but
+I will say this:&nbsp; It appears that the net revenue from this coupon experiment
+was positive, but it was not a very large number.&nbsp; (Keep in mind that I only
+asked for feedback from 25 of the coupon customers, and only 21 of them
+replied.)</p>
+
+<h5>Measuring Reach</h5>
+
+<p>One interesting way to use coupon codes is to track the
+effectiveness and reach of an advertisement.&nbsp; For example, we might put a
+coupon code in a print ad and then watch how many times the coupon gets used.&nbsp;
+This would give us some sort of indication of the effectiveness of that ad.</p>
+
+<p>In this case, the coupon appeared in a blog entry, not in a
+print ad.&nbsp; Can we look at the data from this experiment and draw any
+conclusions about the reach and effectiveness of my blog?&nbsp; I'm not sure, but it
+seems like I would be extrapolating from very little data.&nbsp; I'll predict that
+if we place a coupon in a print ad, it will show up in less than 9.5% of our
+transactions.&nbsp; Nonetheless, the 9.5% number seemed kind of low to me.&nbsp; Think of
+it this way:&nbsp; Over 90% of our customers in May could have saved money on their
+purchase if they were reading my blog.&nbsp; :-)</p>
+
+<p>For now, I will decline to draw any solid conclusions on
+this issue.&nbsp; The 9.5% number may end up being useful for comparisons later.</p>
+
+<h5>Segmenting the Market</h5>
+
+<p>Traditional coupons are a way of charging lower prices to
+customers who are more price-sensitive.&nbsp; Joel Spolsky explains this concept
+rather well in his article on <a
+href="http://www.joelonsoftware.com/articles/CamelsandRubberDuckies.html">pricing</a>.&nbsp;
+I summarize it like this:&nbsp; </p>
+
+<p style='margin-left:.5in'>Grocery store coupons are a form of
+market segmentation.&nbsp; People who are willing to take the time to clip coupons
+from the Sunday newspaper inserts are rewarded for their efforts with discounted
+prices.&nbsp; The value of the coupons (the amount of the discount) is specifically
+tuned to ensure that the time spent clipping them is worth approximately
+minimum wage.&nbsp; Most affluent customers eventually realize that clipping
+coupons is a very low-paying job, so they stop doing it.&nbsp; Therefore, the
+groceries get sold to two different groups of people at two different prices, and
+the "consumer surplus" is captured.</p>
+
+<p>Obviously, some of our customers are more price-sensitive
+than others.&nbsp; It makes sense that our coupon would be appealing to the more
+price-sensitive folks in our customer base.&nbsp; Some of the data from our
+experiment seems consistent with this:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Most of the coupon transactions were significantly smaller
+     than the average size of the transactions for the month as a whole.<br>
+     <br>
+ </li>
+ <li >Looking at the 5 people who said the coupon swung their
+     decision, all of them spent dramatically less than our average customer
+     spends.<br>
+     <br>
+ </li>
+ <li >Nobody who used a coupon paid with a purchase order.&nbsp;
+     Purchase orders are more commonly used in larger companies with purchasing
+     departments, which we can assume are likely to be somewhat less
+     price-sensitive.</li>
+</ul>
+
+<p>But one piece of data suggests that if our coupon was an
+attempt at market segmentation, it failed miserably:&nbsp; 12 out of 25 people
+questioned used the coupon to get a discount even though they would have been willing
+to pay full price.&nbsp; Why did this happen?</p>
+
+<p>I observe that the coupon on my blog was simply far too easy
+to find.&nbsp; Just Google for "SourceGear coupon code" and it shows up as the
+second result.&nbsp; If we want to decrease the percentage of people who used the
+coupon simply because they saw it, we need to add more hassle.&nbsp; The grocery
+store example suggests that a relatively small amount of tedium will be an
+effective obstacle.&nbsp; Clipping coupons from the Sunday newspaper isn't really
+that difficult, but lots of people just don't bother.</p>
+
+<h3>Final Thoughts</h3>
+
+<p>The transparency in this note is, well, atypical.&nbsp; I am
+writing this because I think people might find it interesting, but I am taking
+somewhat of a risk.&nbsp; I hope that nothing I have written here causes offense to
+any of our customers.&nbsp; <b>:-)</b></p>
+
+<p>If you are reading this and you happen to be one of our more
+"price-sensitive" customers, please know that we appreciate your business.&nbsp; I
+feel humbled by <i>every</i> customer who chooses our products, from the small
+shop with one license to the large enterprise with hundreds of seats. &nbsp;</p>
+
+<p>Also, if you are one of the coupon customers who responded
+to my question, thank you again for taking the time to provide useful
+information.</p>
+
+<p>I think this coupon experiment was interesting.&nbsp; It's over
+for now, and there are currently no valid coupon codes in the SourceGear
+store.&nbsp; But I think we'll probably try this concept again sometime in the
+future.&nbsp; As I've hinted here, I want to see what kind of different results we
+might get by placing a coupon code someplace other than here on my blog.</p>
+
+<p>{{{haloscan}}}</p>

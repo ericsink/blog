@@ -1,0 +1,91 @@
+
+<p>Whenever I explain database sync for mobile, somebody asks,
+"What kinds of apps would benefit from that?"</p>
+
+<p>The correct answer is:  "ALL apps".</p>
+
+<p>Actually, that's an exaggeration.  I see no reason for my alarm clock or
+calculator apps to sync data with a server.  Let me rephrase:
+
+<p style='text-align:center'><b>Sync
+    is the best architecture<br/>for apps where a
+database and a server are involved</b>.</p>
+
+<h3>CRUD over REST is an Anti-Pattern</h3>
+
+<p>Many apps today keep the data only on the server and access it using REST.
+This approach has some big negative consequences:</p>
+
+<ul>
+    <li>
+
+    <p><b>Performance</b>:  Your app is less responsive.</p>
+
+    <p>A round-trip from a mobile device to a server takes a LONG time.  Under
+    good network conditions, it could be a quarter of a second.  That's enough time for the
+    user to perceive a lag.</p>
+
+    <p>Sometimes the round-trip will take longer, more like a full second, or more.
+    That's an eternity, a one-star review in the App Store.</p>
+
+    <p>Numerous studies show that when it comes to the responsiveness of a
+    user interface, fractions of a second matter a LOT.  And people don't
+    necessarily complain about your app.  They just stop
+    using it.</p>
+
+    <p>If you're going to make a round-trip to the server in response to a user
+    action, your app is going to feel sluggish.</p>
+
+    </li>
+
+    <li>
+
+    <p><b>Reliability</b>:  Your app doesn't work offline.</p>
+
+    <p>WiFi is great, but not everything is a coffee shop.</p>
+
+    <p>Cellular data networks have dead spots, sometimes in surprising places. 
+    Even in areas with solid 3G or LTE coverage, the latency varies wildly.</p>
+
+    <p>If your app is going to stop working when the wireless network is
+    unavailable or unreliable, then your app is going to stop working a lot.</p>
+
+    </li>
+
+    <li>
+
+    <p><b>Complexity</b>:  Your app's code has to deal with networking issues everywhere.</p>
+
+    <p>People wrap their REST calls in pretty wrappers to make them look like networking is not involved.
+    But it is.
+    A robust app needs to deal with all the things that can go wrong.</p>
+
+    <p>If you're going to do all your basic database operations over a REST API,
+    all your code is networking code.</p>
+
+    </li>
+</ul>
+
+<p>The real question is "What kinds of apps would benefit from having user interaction
+dependent on a wireless network with inconsistent coverage and random latency spikes?"</p>
+
+<p>Your app does lots of basic database operations which are often referred to as <a
+    href="http://en.wikipedia.org/wiki/Create,_read,_update_and_delete">CRUD</a>
+(Create, Read, Update, Delete).  These operations do not want to happen over a
+network.  They want to happen in a database which is local, on the mobile device.</p>
+
+<p>And so you need sync.  In the background (so the user doesn't have to wait on it).
+With automatic conflict resolution.</p>
+
+<p>And that's hard.</p>
+
+<h3>Solutions that make sync easy</h3>
+
+<p>Do you like SQL?  If so, I invite you to look at <a href="http://zumero.com">Zumero</a>, our database sync platform based on SQLite, the relational database software preinstalled on over a billion mobile devices.</p>
+
+<p>Do you prefer NoSQL?  Then I'm sure our worthy competitors over at Couchbase would be happy for you to look at <a href="https://github.com/couchbase/couchbase-lite-ios/wiki/Why-Couchbase-Lite%3F">Couchbase Lite</a>.</p>
+
+<p>Either way, keep your CRUD off the Internet.</p>
+
+<p>&nbsp;</p>
+

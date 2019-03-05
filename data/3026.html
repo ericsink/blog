@@ -1,0 +1,75 @@
+
+<p>I am pleased to announce that <a href="http://components.xamarin.com/view/zumero/">Zumero SQLite</a> is now available in the Xamarin Component Store.  It's free, and it supports Android and iOS.</p>
+
+<p>Zumero SQLite for Xamarin starts with the core "replicate and sync" functionality from the Zumero Client SDK and adds:</p>
+
+<ul>
+    <li><p>ADO.NET -- Familiar C# API for SQL developers.  (provided by <a href="http://system.data.sqlite.org">System.Data.SQLite</a>, which is maintained by the same folks who develop SQLite itself)</p></li>
+    <li><p>Full-database encryption -- Critical piece of the "replicate and sync" story.  Mobile devices get lost.  (provided by the excellent <a href="https://github.com/sqlcipher/sqlcipher">SQLCipher</a> library)</p></li>
+    <li><p>Painless setup -- Install the component and you've got everything you need.  (provided by the neato component store feature of Xamarin Studio)</p></li>
+</ul>
+
+<h3>Comfy</h3>
+
+<p>In some ways, the core of the Zumero Client SDK is not very easy to use.
+That is intentional.  It is designed to be the sort of SDK that leaves many things
+as the responsibility of the app (or the next layer up).</p>
+
+<ul>
+    <li><p>It doesn't actually include SQLite itself, since the app might care about which version of SQLite it wants, or how it needs to be compiled.</p></li>
+
+    <li><p>It doesn't include any page-level encryption support, since it doesn't know whether the app wants to use SQLCipher or the <a href="http://www.hwaci.com/sw/sqlite/see.html">SQLite Encryption Extension</a> or something else.</p></li>
+
+    <li><p>It plugs into SQLite using C, because that's the native language that SQLite uses for its API.</p></li>
+</ul>
+
+<p>Power users and control freaks need this kind of SDK.  And it comes
+first, since everything else is built on top of it.  But most
+users want an experience that is more "comfy".</p>
+
+<ul>
+    <li><p>They don't want to think about versions of SQLite or compile options for same.</p></li>
+
+    <li><p>They don't want to choose an encryption library and figure out how to integrate it with their app.</p></li>
+
+    <li><p>They don't want to write their mobile app in C.</p></li>
+</ul>
+
+<p>The Zumero Client SDK actually does include some carpeting and furniture on top of that cold, hard C floor.  For
+Android developers using Java, it presents the android.database.sqlite API.  And
+for iOS developers using Objective-C, it offers a wrapper that lets you work
+with things that have NS prefixes.</p>
+
+<p>(Which reminds me, check out our <a href="https://github.com/zumero/wiki">iOS wiki app</a> sample on
+GitHub.)</p>
+
+<p>Anyway, these efforts are just the beginning.
+Our direction is toward "comfy", and we are moving fast.</p>
+
+<p>This component for Xamarin is a step forward, and I think it is an important
+one.</p>
+
+<h3>Samples</h3>
+
+<p>This new component includes three sample apps, all of which are modified versions of samples provided by Xamarin.</p>
+
+<ul>
+    <li><p>Data (iOS, based on <a href="https://github.com/xamarin/monotouch-samples/tree/master/Data">https://github.com/xamarin/monotouch-samples/tree/master/Data</a>)</p></li>
+    <li><p>Notepad (Android, based on <a href="https://github.com/xamarin/monodroid-samples/tree/master/NotePad-Mono.Data.Sqlite">https://github.com/xamarin/monodroid-samples/tree/master/NotePad-Mono.Data.Sqlite</a>)</p></li>
+    <li><p>Tasky (cross-platform, based on <a href="https://github.com/xamarin/mobile-samples/tree/master/Tasky">https://github.com/xamarin/mobile-samples/tree/master/Tasky</a>)</p></li>
+</ul>
+
+<p>The Data and Notepad samples have simply been ported to System.Data.SQLite
+(which involved very few changes).</p>
+
+<p>The Tasky sample goes a bit further and adds a very simple ability to sync the
+task list.</p>
+
+<h3>Evolve</h3>
+
+<p>I am in Austin for Xamarin's Evolve conference, which starts today.
+Xamarin is doing some of the coolest stuff in mobile development today.  We are
+thrilled to be a part of it.</p>
+
+<p>&nbsp;</p>
+

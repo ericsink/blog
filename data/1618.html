@@ -1,0 +1,299 @@
+<P>This is part of an online book called <a href="{{{link:id='1079'}}}">Source Control HOWTO</a>, a best practices guide on source control, version control, and configuration management.</p>
+<table border=0 width="100%">
+<tr>
+<td align="left"><a href="{{{link:id='1089'}}}">&lt; Chapter 8</a></td>
+<td align="right">&nbsp;</td>
+</tr>
+</table>
+<hr>
+<h2>Background:&nbsp; What is an IDE?</h2>
+
+<p>The various applications used by software developers are
+traditionally called "tools".&nbsp; When we speak of "developer tools", we're
+talking about the essential items that programmers use every day, like compilers
+and text editors and syntax checkers and Mountain Dew.&nbsp; Just as a master carpenter
+uses her tools to build a house, developers use their tools to build software
+applications.</p>
+
+<p>In the old days, each developer would assemble their own
+collection of their favorite tools.&nbsp; Back around 1991, my preferred toolset
+looked something like this:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >gcc (for compiling source code)</li>
+ <li >gdb (for debugging)</li>
+ <li >make (for managing builds)</li>
+ <li >rcs (for managing versions)</li>
+ <li >emacs (for editing source code)</li>
+ <li >vi (for editing the emacs makefile)</li>
+</ul>
+
+<p>Fifteen years later, most developers would consider this
+approach to be strange.&nbsp; Today, everything is "integrated".&nbsp; Instead of
+selecting one of each kind of tool, we select an Integrated Development
+Environment (IDE), an application which collects all the necessary tools
+together in one place.&nbsp; To continue the metaphor, we would say that the focus today
+is not on the individual tools, but rather, on the workshop in which those
+tools are used.</p>
+
+<p>This trend is hardly new.&nbsp; Ever since Borland released <a
+href="http://en.wikipedia.org/wiki/Turbo_Pascal">Turbo Pascal</a> in 1983, IDEs
+have become more popular every year.&nbsp; In the last ten years, many IDE products have
+disappeared as the industry has consolidated.&nbsp; Today, it is only a small exaggeration
+to say that there are just two IDEs left:&nbsp; Visual Studio and Eclipse.</p>
+
+<p>But despite the industry consolidation, the trend is clear.&nbsp;
+Developers want their tools to be <i>very</i> well integrated together.&nbsp; Most
+recently, Microsoft's <a
+href="http://msdn.microsoft.com/vstudio/teamsystem/default.aspx">Visual Studio
+Team System</a> takes this trend to a higher level than we have previously seen.&nbsp;
+Mainstream IDEs in the past have provided base operations such as editing,
+compiling, building and documentation.&nbsp; Now Visual Studio also has unit tests, visual
+modeling, code generators, and work item tracking.&nbsp; Furthermore, the IDE isn't
+just for coders anymore.&nbsp; Every task performed by every person involved in the
+software development process is moving into the IDE.</p>
+
+<h2>Benefits of source control integration with IDEs</h2>
+
+<p>Source control is one of the development tools which has
+been commonly integrated into IDEs for quite some time.&nbsp; The fit is very
+natural.&nbsp; Here at SourceGear, our source control product has two main client
+applications:</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >A standalone client application which is specifically
+     designed to talk with the source control server.</li>
+ <li >A client plugin which adds source control features into
+     Visual Studio.</li>
+</ol>
+
+<p>Unsurprisingly, the IDE client is very popular with our
+users.&nbsp; Many of our users would never think about using source control without
+IDE integration.</p>
+
+<p>Why does version control work so nicely inside an IDE?&nbsp; Because
+it makes the three most common operations a lot easier:</p>
+
+<h3 style='margin-left:.5in'>Checkout</h3>
+
+<p style='margin-left:.5in'>When using the
+checkout-edit-checkin model, files must be checked out before they are edited.&nbsp;
+With source control integrated into an IDE, this task can be quite automatic.&nbsp;
+Specifically, when you begin to edit a file, the IDE will notice that you do
+not have it checked out yet and check the file out for you.&nbsp; Effectively, this
+means developers never need to remember to checkout a file.</p>
+
+<h3 style='margin-left:.5in'>Add</h3>
+
+<p style='margin-left:.5in'>A common and frustrating mistake is
+to add a new file to a project but forget to place it under source control.&nbsp; So
+when I am done with my coding task, I checkin my changes to the existing files,
+but the newly added file never makes it into the repository.&nbsp; The build is
+broken.</p>
+
+<p style='margin-left:.5in'>When using source control
+integration with an IDE, this mistake is basically impossible to make.&nbsp; Most
+IDEs today support the notion of a "project", a list of all files which are
+considered part of the build process.&nbsp; When used with source control, the IDE
+decides what files to place under source control because it knows every file
+that is part of the project.&nbsp; The act of adding a file to the project also adds
+it to source control.</p>
+
+<h3 style='margin-left:.5in'>Checkin</h3>
+
+<p style='margin-left:.5in'>IDEs excel at nagging developers.&nbsp;
+The user interface of an IDE has special places to nag the developer about
+compiler errors and unsaved files and even unfixed bugs.&nbsp; Similarly, visual
+indicators in the IDE can be used to remind the developer that he has not yet
+checked in his changes.</p>
+
+<p>When source control is integrated into an IDE, developers
+don't have to think about it very much.&nbsp; They don't have to try to remember to
+Checkout, Add or Checkin because the IDE is either performing those actions
+automatically or reminding them to do it.</p>
+
+<h2>Bigger benefits</h2>
+
+<p>Once you integrate source control into an IDE, you open the
+possibility for cool features that go beyond the basics.&nbsp; For example, source
+control integration can be incredibly helpful when used with refactoring.&nbsp; When
+I use the refactoring features of Eclipse to rename a Java class, it is
+obviously nice that Eclipse figures out all the changes that need to be made.&nbsp;
+It's even nicer that Eclipse automatically handles all the necessary source
+control operations.&nbsp; It even performs the name change of the source file.</p>
+
+<p>For another example, here is a screen shot of a <a href="{{{link:id='1087'}}}">Blame</a>
+feature integrated into Eclipse:</p>
+
+<p><a href="{{{link:id='1621'}}}"><img border=0 width=576 height=395
+src="{{{link:id='1621'}}}"></a></p>
+
+<p>The user story for this feature goes like this:&nbsp; The
+developer is coding and she encounters something that deserves to be on <a
+href="http://thedailywtf.com/">The Daily WTF</a>.&nbsp; She wants to immediately
+know who is responsible, so she right-clicks on the offensive line and selects
+the Blame feature.&nbsp; The source control plugin queries the repository for
+history and determines who made the change.&nbsp; The task was simpler because the
+Blame feature is conveniently located in the place where it is most likely to
+be needed.</p>
+
+<h2>Tradeoffs and Problems</h2>
+
+<p>For source control, IDE integration is great in theory, but it
+has not always been so great in practice.&nbsp; The tradeoffs of having your IDE do
+source control for you are the same as the tradeoffs of having your IDE do
+anything else.&nbsp; It's easier, but you have less control over the process.</p>
+
+<p>Before I continue, I need to make a confession:</p>
+
+<p style='margin-left:.5in'>I personally have never used source
+control integration with an IDE.&nbsp; Heck, for a long time I didn't use IDEs at
+all.&nbsp; I'm a control freak.&nbsp; It's not enough for me to know what's going on
+under the hood.&nbsp; Sometimes I prefer to just do everything myself.&nbsp; I don't like
+project-based build systems where I add a few files and the IDE magically
+builds my app.&nbsp; I like diving make systems where I can control exactly where everything
+is and where the build targets are placed.</p>
+
+<p style='margin-left:.5in'>Except for a brief and passionate
+affair with <a href="http://en.wikipedia.org/wiki/THINK_C">Think C</a> during
+the late eighties, I didn't really start using IDE project files until Visual
+Studio .NET.&nbsp; Today, I am gradually becoming more and more of an IDE user, but
+I still prefer to do all source control operations using a standalone GUI
+client.&nbsp; Eventually, that will change, and my transformation to IDE user will
+be complete.</p>
+
+<p>Anyway, for the sake of completeness, I will explain the
+tradeoffs I see with using source control integration with IDEs.&nbsp; This should
+be taken as information, not as an argument against the feature.&nbsp; IDE
+integration is the most natural way to use source control on a daily basis.</p>
+
+<p>The first observation is that IDE clients have fewer
+features than standalone clients.&nbsp; The IDE is great for basic source control
+operations, but it is definitely not the natural place to perform <i>all</i>
+source control operations.&nbsp; Some things, such as branching, don't fit very well
+at all.&nbsp; However, this is a minor point which merely illustrates that an IDE
+client cannot be the only user interface for accessing a source control
+repository.&nbsp; If this were the only problem, it would not be a problem.&nbsp; This is
+the sort of tradeoff that I would consciously accept.</p>
+
+<p>The real problem with source control integration for IDEs is
+that it just doesn't work very well.&nbsp; For this sad state of affairs, I put most
+of the blame on MSSCCI.&nbsp; </p>
+
+<h2>MSSCCI</h2>
+
+<p>It's pronounced "misskee", and it stands for Microsoft
+Source Code Control Interface.&nbsp; MSSCCI is the API which defines the interaction
+between Microsoft Visual Studio and source control tools.</p>
+
+<p>A source control tool which wants to support integration
+with Visual Studio must implement this API.&nbsp; Basically, it's a DLL which
+defines a number of documented entry points.&nbsp; When configured properly, the IDE
+makes calls into the DLL to perform source control operations as needed or as
+requested by the user.</p>
+
+<p>Originally, Microsoft's developer tools were the only host
+environments for MSSCCI.&nbsp; Today, MSSCCI is used by lots of other IDEs as well.&nbsp;
+It has become sort of a de facto standard.&nbsp; Source control vendors implemented
+MSSCCI plugins so that their products could be used within Microsoft IDEs.&nbsp; In
+turn, vendors of other IDEs implemented MSSCCI hosting so that their products
+could be used with the already-available source control plugins.</p>
+
+<p>The ubiquity of MSSCCI is very unfortunate.&nbsp; MSSCCI was
+designed to be a bridge between SourceSafe and early versions of Microsoft Visual
+Studio.&nbsp; It served this purpose just fine, but now the API is being used for
+lots of other version control tools besides SourceSafe and lots of other IDEs
+besides Visual Studio.&nbsp; It is being used in ways that it was never designed to
+be used, resulting in lots of frustration.&nbsp; </p>
+
+<p>The top three problems with MSSCCI are:</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li ><b>Poor performance</b>.&nbsp; SourceSafe has no support for
+     networking, but the architecture of most modern version control tools
+     involves a client and a server with TCP in between.&nbsp; To get excellent
+     performance from a client-server application, careful attention must be
+     paid to the way the networking is done.&nbsp; Things like threading and
+     blocking and buffering are very important.&nbsp; Unfortunately, MSSCCI makes
+     this rather difficult.</li>
+ <li ><b>No Edit-Merge-Commit</b>.&nbsp; SourceSafe is basically
+     built around the Checkout-Edit-Checkin approach, so that's how MSSCCI
+     works.&nbsp; Building a satisfactory MSSCCI plugin for the Edit-Merge-Commit
+     paradigm is very difficult.</li>
+ <li ><b>No Atomic transactions</b>.&nbsp; SourceSafe has no support
+     for atomic transactions, so MSSCCI and Visual Studio were not designed to
+     use them.&nbsp; This means that sometimes modern version control tools like
+     Vault can't group things together properly at commit time.</li>
+</ol>
+
+<p>On top of all this, all the world's MSSCCI hosts tend to implement
+their side of the API a little differently.&nbsp; If you implement a MSSCCI plugin and
+get everything working with Visual Studio 2003, you have approximately zero
+chance of it working well with Visual Basic 6, FoxPro or Visual Interdev.&nbsp;
+After you code in all the special hacks to get things compatible with these
+fringe Microsoft environments, your plugin still has no real chance of working
+with third party products like <a href="http://www.multiedit.com/">MultiEdit</a>.&nbsp;
+Every IDE requires some different tweaks and quirky behavior to make it work.&nbsp;
+By the time you get your plugin working with some of these other IDEs, your
+regression testing shows that it doesn't work with Visual Studio 2003 anymore.&nbsp;
+Lather.&nbsp; Rinse.&nbsp; Repeat.</p>
+
+<p>Most developers who work with MSSCCI eventually turn to
+recreational pharmaceuticals in a futile effort to cope.</p>
+
+<h2>A brighter future</h2>
+
+<p>Luckily, MSSCCI is fading away.&nbsp; Earlier in this article I
+flippantly joked that Visual Studio and Eclipse were the only IDEs left in the
+world.&nbsp; This is of course an exaggeration, but the fact remains that these two
+products have the lion's share, so we can take some comfort in their dominance
+when we think about the prevalence of MSSCCI in the future:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Eclipse does not use MSSCCI.&nbsp; It has its own source
+     control integration APIs.</li>
+ <li >Visual Studio 2005 introduced a new and greatly improved API
+     for source control integration.&nbsp; </li>
+</ul>
+
+<p>So, the two dominant IDEs today inspire us to dream of a
+MSSCCI-free world.&nbsp; The planet will certainly be a nicer place to live when
+MSSCCI is a distant memory.</p>
+
+<p>Here at SourceGear, the various problems with MSSCCI have
+caused us to hold a cautious and reserved stance toward IDE integration.&nbsp; Most
+of our customers really would prefer an IDE client, so we give them one.&nbsp; But
+we consider our standalone GUI client to be the primary UI because it is faster
+and more full-featured.&nbsp; And internally, most of us on the Vault team use the
+standalone GUI client for our everyday work.</p>
+
+<p>But our posture is changing dramatically.&nbsp; We are currently
+working on an Eclipse plugin as well as a completely new plugin for the new
+source control API in Visual Studio 2005.&nbsp; Sometime in early 2007, we will be
+ready to consider our IDE clients to be primary, with our other client
+applications to be available for less common operations.&nbsp; What do I mean when I
+say "primary"?&nbsp; Well, among other things, I mean that the IDE clients will be
+the way we use our own product.&nbsp; Including me.&nbsp; <b>:-)</b></p>
+
+<p>It's not yet terribly impressive to look at, but here's a
+screen shot of our new Visual Studio 2005 client:</p>
+
+<p><a href="{{{link:id='1619'}}}"><img border=0 width=576 height=395
+src="{{{link:id='1619'}}}"></a></p>
+
+<h2>Final thoughts</h2>
+
+<p>The direction of this industry right now is toward more and
+more integration.&nbsp; This is a very good thing.&nbsp; We're going to see many new
+improvements.&nbsp; Users will be happier.&nbsp; Just as a spice rack belongs near the
+stove, source control should always be available where the developer is
+working.</p>
+<P>&nbsp;</p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align="left"><a href="{{{link:id='1089'}}}">&lt; Chapter 8</a></td>
+<td align="right">&nbsp;</td>
+</tr>
+</table>
+{{{haloscan}}}

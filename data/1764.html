@@ -1,0 +1,173 @@
+<p>One of the popular complaints about CVS and Subversion
+(before 1.5) was the lack of merge history.&nbsp; In a nutshell, merge history is
+remembering what has been merged and taking that information into account on
+future merges.</p>
+
+<h2>In a bucket?</h2>
+
+<p>In something bigger than a nutshell, merge history is a lot
+more complicated.</p>
+
+<p>Unless you completely eschew branching, you are going to
+frequently find yourself wanting to take some changes you made in one place and
+re-apply them somewhere else.&nbsp; When you do this, you want your version control
+to make it painless.&nbsp; Without merge history, it is very difficult to make
+change migration painless, since the tool will try to do things that have
+already been done.</p>
+
+<p>A common example is the case of two branches that
+occasionally want to merge changes from one side to the other.</p>
+
+<p align=center style='text-align:center'><img width=450
+height=761 src="{{{link:id='2109'}}}"></p>
+
+<p>Here I have two branches of development.&nbsp; On two occasions,
+somebody merged changes from branch (b) over to branch (a).&nbsp; (Arrows go from a
+changeset to its parents.)</p>
+
+<p>Without merge history, this can be a real pain.&nbsp; When branch
+(a) tries to grab changes from changeset 5b, CVS doesn't remember that 3b and
+2b have already been applied. So it attempts to apply them a second time,
+resulting in conflicts, pain and frustration and a general fear of branching.</p>
+
+<p>One of the coolest things about DAG-based version control
+tools is that the DAG is an expression of merge history.&nbsp; We interpret arrows
+in the DAG to mean "'I've got this".</p>
+
+<p>So, when it comes time to do merge from 5b over to the (a)
+branch, we can use information in the DAG to know that 3b and 2b are already
+done.&nbsp; I'm not saying the algorithm to use this information properly is
+trivial, but there are multiple implementations, and they work pretty well in
+practice.</p>
+
+<p>For example, Git has a repuation for excellent and painless
+branching and merging, and the DAG is the main reason why.</p>
+
+<h2>Cherrypicking</h2>
+
+<p>But a DAG is just one implementation of merge history, and
+it is definitely not perfect.</p>
+
+<p>An arrow in a verson control DAG goes from child to parent.&nbsp;
+It tells us that the child contains all of the changes in the parent.&nbsp; And its
+grandparents.&nbsp; And its great grandparents.&nbsp; And so on.</p>
+
+<p>But what if this isn't true?</p>
+
+<p>Consider the following picture:</p>
+
+<p align=center style='text-align:center'><img width=450
+height=448 src="{{{link:id='2110'}}}"></p>
+
+<p>I want to create changeset 4.&nbsp; I want to start at changeset
+1, and then I want to apply the changes from changeset 3, but NOT the stuff in
+changeset 2.&nbsp; This operation is sometimes called "cherrypicking".&nbsp; I don't want
+to merge all changes from one branch to another.&nbsp; I just want to pluck one
+changeset (or one part of a changeset) and apply it as a patch to some other
+place.</p>
+
+<p>How do I represent this in the DAG?</p>
+
+<p>I can't.</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >I could draw an arrow from 4 to 3 (shown above in red).&nbsp;
+     This would correctly say that 4 contains the changes in 3, but it would
+     INCORRECTLY claim that 4 contains the changes in 2.</li>
+ <li >OR, I could draw no arrow.&nbsp; Effectively, my merge history would
+     simply not record the fact that 4 is really 3 converted to a patch and
+     applied to 1.</li>
+</ul>
+
+<p>In either case, something bad is going to happen next time I
+merge from one branch to the other:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >If I draw that lying arrow, I will not be given the chance
+     to apply changeset 2, because the merge history believes I already did it.</li>
+ <li >If I don't draw any arrow, the tool will expect me to deal
+     with changeset 3, because there is no merge history recording the fact
+     that I already did it.</li>
+</ul>
+
+<p>Neither of these problems is disastrous enough to make the
+evening news, but still.</p>
+
+<h2>DAG-Like Things</h2>
+
+<p>It's tempting to think that the problem lies in the way I
+defined my DAG lines.&nbsp; Perhaps a line should mean "just you, not your parents?"&nbsp;
+But then I would I need to have a line from every changeset to every one of its
+ancestors.&nbsp; This would be completely infeasible.</p>
+
+<p>Or perhaps we need two kinds of DAG lines?</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Regular lines are the normal case.&nbsp; They imply recursive
+     inclusion.&nbsp; We'll draw them in black.</li>
+ <li >Red lines are for cherrypicking.&nbsp; When a red line points
+     to a changeset, it says, "I've got this, but not its ancestors."&nbsp; Red
+     lines imply shallow inclusion.</li>
+</ul>
+
+<p>But now our DAG is not really a DAG anymore.&nbsp; If we're going
+to use a DAG, we'd like to be able to use the decades of computer science
+research about how to deal with them.&nbsp; AFAIK, all the well understood
+algorithms about DAGs assume there is only one kind of line.</p>
+
+<p>For example, is changeset 3 a leaf?&nbsp; Well, maybe.&nbsp; If you
+ignore the red lines, then 3 is a leaf.&nbsp; But if red lines count, then 3 is an
+interior node.</p>
+
+<p>Many CS algorithms become less useful when questions start
+getting answered with "maybe".</p>
+
+<h2>Darcs</h2>
+
+<p>So, even though the DAG is a pretty good representation of
+merge history, it isn't perfect.</p>
+
+<p><a href="http://darcs.net/">Darcs</a> is an attempt to build
+a better solution to the problem.</p>
+
+<p>Several weeks ago I <a
+href="{{{link:id='1761'}}}">divided</a> version control
+tools into two groups:</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >Those where the history is a Line.</li>
+ <li >Those where the history is a Directed Acyclic Graph (a
+     DAG).</li>
+</ol>
+
+<p>But darcs doesn't really fit in either of these categories.&nbsp;
+Its model of history is certainly not a Line.&nbsp; But it's not really a DAG
+either, at least not in the same way as Git and Mercurial.</p>
+
+<p>A darcs changeset records the full merge history at the
+patch level.&nbsp; Darcs has a nice well-defined algebra of patches which allows it
+to accomplish some very clever things.</p>
+
+<p>But while I consider the concepts behind Darcs to be
+fascinating, I also consider them to be raw and unproven in practice.&nbsp; I can't
+see how the algorithm would scale to big problems.&nbsp; And people who know darcs
+are always talking about the possibility of the merge algorithm going <a
+href="http://www.google.com/search?q=darcs+exponential+merge">exponential</a>. </p>
+
+<p>Darcs seems to have a more complete representation for merge
+history.&nbsp; But that doesn't mean there is any practical algorithm for making use
+of that information.</p>
+
+<p>For now, I must consider darcs to be in the category of research,
+not development.</p>
+
+<h2>Final Thoughts</h2>
+
+<p>Merge history is a very hard problem.&nbsp; Some of the imperfect
+solutions have found their way into common usage and proven themselves to be
+quite practical.&nbsp; But there is a lot more that could be done.</p>
+
+<p>Need a thesis topic for your PhD in computer science?&nbsp; Go
+find a better solution to the merge history problem.</p>
+
+<p>{{{haloscan}}}</p>

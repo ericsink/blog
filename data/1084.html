@@ -1,0 +1,141 @@
+<P>This is part of an online book called <a href="{{{link:id='1079'}}}">Source Control HOWTO</a>, a best practices guide on source control, version control, and configuration management.</p>
+<table border=0 width="100%">
+<tr>
+<td align="left"><a href="{{{link:id='1083'}}}">&lt; Chapter 2</a></td>
+<td align="right"><a href="{{{link:id='1085'}}}">Chapter 4 &gt;</a></td>
+</tr>
+</table>
+<hr>
+<h4>How did we get ourselves into this mess?</h4>
+<p>There are several reasons why we may need to merge two modified versions of a file:</p>
+<ul>
+<li>When using "edit-merge-commit" (sometimes called "optimistic locking"), it is possible for two developers to edit the same file at the same time.
+</li>
+<li>Even if we use "checkout-edit-checkin", we may allow multiple checkouts, resulting once again in the possibility of two developers editing the same file.
+</li>
+<li>When merging between branches, we may have a situation where the file has been modified in both branches.
+</li>
+</ul>
+<p>In other words, this mess only happens when people are working in parallel.&nbsp; If we serialize the efforts of our team by never branching and never allowing two people to work on a module at the same time, we can avoid ever facing the need to merge two versions of a file.</p>
+<p>However, we want our developers to work concurrently.&nbsp; Think of your team as a multithreaded piece of software, each developer running in its own thread.&nbsp; The key to high performance in a multithreaded system is to maximize concurrency.&nbsp; Our goal is to never have a thread which is blocked on some other thread.</p>
+<p>So we embrace concurrent development, but the threading metaphor continues to apply.&nbsp; Multithreaded programming can sometimes be a little bit messy, and the same can be said of a multithreaded software team.&nbsp; There is a certain amount of overhead involved in things like synchronization and context switching.&nbsp; This overhead is inevitable.&nbsp; If your team is allowing concurrent development to happen, it will periodically face a situation where two versions of a file need to be merged into one.</p>
+<p>In rare cases, the situation can be properly resolved by simply choosing one version of the file over the other.&nbsp; However, most of the time, we actually need to merge the two versions to create a new version.&nbsp;</p>
+<h4>What do we do about it?</h4>
+<p>Let's carefully state the problem as follows:&nbsp; We have two versions of a file, each of which was derived from the same common ancestor.&nbsp; We sometimes call this common ancestor the "original" file.&nbsp; Each of the other versions is merely the result of someone applying a set of changes to the original.&nbsp; What we want to create is a new version of the file which is conceptually equivalent to starting with the original and applying both sets of changes.&nbsp; We call this process "merging".</p>
+<p>The difficulty of doing this merge varies greatly for different types of files.&nbsp; How would we perform a merge of two Excel spreadsheets?&nbsp; Two PNG images?&nbsp; Two files which have digital signatures?&nbsp; In the general case, the only way to merge two modified versions of a file is to have a very smart person carefully construct a new copy of the file which properly incorporates the correct elements from each of the other two.
+</p>
+<p>However, in software and web development there is a special case which is very common.&nbsp;&nbsp;As luck would have it, most source code files are plain text files with an average of less than 80 characters per line.&nbsp; Merging files of this kind is vastly simpler than the general case.&nbsp; Many SCM tools contain special features to assist with this sort of a merge.&nbsp; In fact, in a majority of these cases, the two files can be automatically merged without requiring the manual effort of a developer.</p>
+<h4>An example</h4>
+<p>Let's call our two developers Jane and Joe.&nbsp; Both of them have retrieved version 4 of the same file and both of them are working on making changes to it.</p>
+<p>One of these developers will checkin before the other one.&nbsp; Let's assume it is Jane who gets there first.&nbsp; When Jane tries to checkin her changes, nothing unusual will happen.&nbsp; The current version of the file is 4, and that was the version she had when she started making her changes.&nbsp; In other words, version 4 was her baseline for these changes.&nbsp; Since her baseline matches the current version, there is no merge necessary.&nbsp; Her changes are checked in, and a version of the file is created in the repository.&nbsp; After her checkin, the current version of the file is now 5.</p>
+<p>The responsibility for merging is going to fall upon Joe.&nbsp; When he tries to checkin his changes, the SCM tool will protest.&nbsp; His baseline version is 4, but the current version in the repository is now 5.&nbsp; If Joe is allowed to checkin his version of the file, the changes made by Jane in version 5 will be lost.&nbsp; Therefore, Joe will not be allowed to checkin this file until he convinces the SCM tool that he has merged Jane's version 5 changes into his working copy of the file.</p>
+<p>Vault reports this situation by setting the status on this file to be "Needs Merge", as shown in the screen dump below:</p>
+<p><img height="376" alt="" src="{{{link:id='1025'}}}" width="547" border="0" /></p>
+<p style="BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: black 1px solid; PADDING-LEFT: 5px; FONT-SIZE: smaller; FLOAT: right; PADDING-BOTTOM: 5px; MARGIN: 5px; BORDER-LEFT: black 1px solid; WIDTH: 50%; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid; BACKGROUND-COLOR: rgb(230,230,230)"><b>Best Practice: Keep the repository in sight</b><br /><br />
+This example happens to involve the need to merge only a single checkin.&nbsp; Since Joe's baseline is 4 and the current repository version&nbsp; is 5, Joe is only 1 version out of date.&nbsp; If the repository version were 25 instead of 5, then Joe would be 21 versions out of date instead of just 1, but the technique is the same.&nbsp; No matter how old his baseline is, Joe still needs to retrieve the latest version and do a three-way merge.&nbsp; However, the older his baseline, the more likely he is to encounter conflicts in the merge.&nbsp;<br /><br />
+Keep in touch with the repository.&nbsp; Update your working folder as often as you can without interrupting your own work.  Commit your work to the repository as often as you can without breaking the build.  It isn't wise to let the distance between your working folder and the repository grow too large.</p>
+<p>In order to resolve this situation, Joe effectively needs to do a three-way comparison between the following three versions of the file:</p>
+<ul>
+<li>Version 4 (the baseline from which he and Jane both started)
+</li>
+<li>Version 5 (Jane's version)
+</li>
+<li>Joe's working file (containing his own changes)
+</li>
+</ul>
+<p>Version 4 is the common ancestor for both Joe's version and Jane's version of the file.&nbsp; By running a diff between version 4 and version 5, Joe can see exactly what changes Jane made.&nbsp; He can use this information to apply those changes to his own version of the file.&nbsp; Once he has done so, he can credibly claim that his version is a merge of his changes and Jane's.</p>
+<p>Strictly speaking, Joe is responsible for whatever changes Jane made, regardless of how difficult the merge may be.&nbsp; He must perform the changes to his file that Jane would have made if she has started with his file instead of with version 4.&nbsp; In theory, this could be very difficult:</p>
+<ul>
+<li>What happens if Jane changed some of the same lines that Joe changed, but in different ways?
+</li>
+<li>What happens if Jane's changes are functionally incompatible with Joe's?
+</li>
+<li>What happens if Jane made a change to a C# function which Joe has deleted?
+</li>
+<li>What happens if Jane changed 80 percent of the lines in the file?
+</li>
+<li>What happens if Jane and Joe each changed 80 percent of the lines in the file, but each did so for entirely different reasons?
+</li>
+<li>What happens if Jane's intent was not clear and she cannot be reached to ask questions?
+</li>
+</ul>
+<p>All of these situations are possible, and all of them are Joe's responsibility.&nbsp; He must incorporate Jane's changes into his file before he can checkin a version 6.</p>
+<p>In certain rare situations, Joe may examine Jane's changes and realize that his version needs nothing from Jane's version 5.&nbsp; Maybe Jane's change simply isn't relevant anymore.&nbsp; In these cases, the merge isn't needed, and Joe can simply declare the merge to be resolved without actually doing anything.&nbsp; This decision remains subject to Joe's judgment.</p>
+<p>However, most of the time it will be necessary for the merge to actually happen.&nbsp; In these cases, Joe has the following options:</p>
+<ul>
+<li>Attempt to automerge
+</li>
+<li>Use a visual merge tool
+</li>
+<li>Redo one set of changes by hand
+</li>
+</ul>
+<p>Each of these will be explained further in the sections below.</p>
+<h4 dir="ltr" style="MARGIN-RIGHT: 0px">Attempt to automerge</h4>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">As I mentioned above, a surprising number of cases can be easily handled automatically.&nbsp; Most source control tools include the ability to attempt an automatic merge.&nbsp; The algorithm uses all three of the involved versions of the file and attempts to safely produce a merged version.</p>
+<p style="BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: black 1px solid; PADDING-LEFT: 5px; FONT-SIZE: smaller; FLOAT: right; PADDING-BOTTOM: 5px; MARGIN: 5px; BORDER-LEFT: black 1px solid; WIDTH: 50%; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid; BACKGROUND-COLOR: rgb(230,230,230)"><b>Best Practice: Only use "automerge on get"</b><br /><br />
+It is widely accepted that SCM tools should only attempt automerge on the "get" of a file.  In other words, when Joe realizes that he must merge in the changes Jane made between version 4 and version 5, he will tell his SCM client application to "get" version 5 and attempt to automatically merge it into his working file.&nbsp; CVS, Subversion and Vault all function in this manner.<br /><br />
+Unfortunately, SourceSafe attempts to "automerge on checkin".  This is just a really bad idea.  When Joe tries to checkin his changes, SourceSafe attempts the automerge.&nbsp; If it believes that it has succeeded, then his changes are checked in and version 6 was created.&nbsp; However, it is possible that Joe never examined version 6, or even compiled it.&nbsp; The repository now contains a file which has never existed in the working folder of any developer on earth.&nbsp; Its contents have never been seen by human eyes, and it has never been run through a compiler.&nbsp; Automerge is safe, but it's not &nbsp;<em>that</em> safe.<br /><br />
+It is much better to "automerge on get".  This way, the developer can (and should) examine the file after the automerge has happened.  This simple change makes it easier to trust automerge.&nbsp; Instead of trying to do the developer's job, automerge simply becomes a tool which the developer can use to get his job done faster.</p><p dir="ltr" style="MARGIN-RIGHT: 0px">The reason that automerge is so safe in practice is that the algorithm is extremely conservative.&nbsp; Automerge will refuse to produce a merged version if Joe's changes and Jane's changes appear to be in conflict.&nbsp; In the most obvious case, if Joe and Jane both modified the same line, automerge will detect this "conflict" and refuse to proceed.&nbsp; In other cases, automerge may fail with conflicts if two changes are too close to each other.</p>
+<h4 dir="ltr" style="MARGIN-RIGHT: 0px">Use a visual merge tool</h4>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">In cases where automerge cannot automatically resolve conflicts, we can use a visual merge tool to make the job easier.&nbsp; These tools provide a visual display which shows all three files and highlights exactly what has changed.&nbsp; This makes it much easier for the developer to perform the merge, since she can zero in on the conflicts very quickly.</p>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">There are several excellent visual merge tools available, including <a href="http://www.guiffy.com/">Guiffy</a> and&nbsp; <a href="http://www.araxis.com/">Araxis Merge</a>.&nbsp; The following screen dump is from "SourceGear DiffMerge", the visual merge tool which is included with Vault.&nbsp; (Please note sometimes I have to reduce the size of screen dumps to make them fit.&nbsp; In those cases, you can click on the image to see it at full resolution).</p>
+<p dir="ltr" style="MARGIN-RIGHT: 0px"><a href="{{{link:id='1027'}}}"><img height="411" alt="" src="{{{link:id='1027'}}}" width="570" border="0" /></a></p>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">This picture is typical of other three-way visual merge applications.&nbsp; The left pane shows Jane's version of the file.&nbsp; The right pane shows Joe's version.&nbsp; The center pane shows the original file, the common ancestor from which they both started to make changes.&nbsp;&nbsp;As you can see, Jane and Joe have each inserted a one-line comment.&nbsp; By right-clicking on each change, the developer can choose whether to apply that change to the middle pane.&nbsp; In this example, the two changes don't conflict.&nbsp; There is no reason that the resulting file cannot incorporate both changes.</p>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">The following picture shows an example of changes which are conflicting.</p>
+<p dir="ltr" style="MARGIN-RIGHT: 0px"><a href="{{{link:id='1026'}}}"><img height="248" alt="" src="{{{link:id='1026'}}}" width="570" border="0" /></a></p>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">Both Jane and Joe have tried to change the wording of this comment.&nbsp; In the original file, the word used in the comment was "Global".&nbsp; Jane decided to change this word to "Worldwide", but Joe has changed it to the word "Rampant".&nbsp; These two changes are conflicting, as indicated by the yellow background color being used to display them.&nbsp; Automerge cannot automatically handle cases like these.&nbsp; Only a human being can decide which change to keep.</p>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">The visual merge tool makes it easy to handle this situation.&nbsp; I can decide which change I want to keep and apply it to the center pane.</p>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">A visual merge tool can make file merging a lot easier by quickly showing the developer exactly what has changed and allowing him to specify which changes should be applied to get the final merged result.</p>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">However, as useful as these kinds of tools can be, they're not magic.</p>
+<h4 dir="ltr" style="MARGIN-RIGHT: 0px">Redo one set of changes by hand</h4>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">Some situations are so complicated that a visual merge tool just isn't very helpful.&nbsp; In the worst case scenario, Joe might have to manually redo one set of&nbsp; changes.
+</p>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">This situation recently happened here at SourceGear.&nbsp; We currently have Vault development happening in two separate branches:</p>
+<ul dir="ltr">
+<li>
+<div style="MARGIN-RIGHT: 0px">When we shipped version 2.0, we created a branch for maintenance of the 2.0 release.&nbsp; This is the tree where we develop minor bug fix releases like 2.0.1.</div>
+</li>
+<li>
+<div style="MARGIN-RIGHT: 0px">Our "trunk" is the place where active development of the next major release is taking place.</div>
+</li>
+</ul>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">Obviously we want any bug fixes that happen in the 2.0 branch to also happen in the trunk so that they can be included in our upcoming 2.1 release.&nbsp; We use Vault's "Merge Branches" command to migrate changes from one place to the other.</p>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">I will talk more about branching and merging in a later chapter.&nbsp; For now, suffice it to say that the merging of branches can create exactly the same kind of three-way merge situation that we've been discussing in this chapter.</p>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">In this case, we ended up with a very difficult merge in the sections of code that deal with logins.&nbsp;</p>
+<ul dir="ltr">
+<li>
+<div style="MARGIN-RIGHT: 0px">In the 2.0 branch, we implemented a fix to prevent dictionary attacks on passwords.&nbsp; We considered this a bug fix, since it is related to the security of our product.&nbsp; In concept this change was simple.&nbsp; We simply block login for any account which is seeing too many failed login attempts.&nbsp; However, implementing this mini-feature required a surprising number of lines to be changed.</div>
+</li>
+<li>
+<div style="MARGIN-RIGHT: 0px">In the trunk, we added the ability for Vault to authenticate logins against Active Directory.</div>
+</li>
+</ul>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">In other words, we made substantial changes to the login code in both these branches.&nbsp; When it came time to merge, the DiffMerge was extremely colorful.</p>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">In this case, it was actually simpler to just start with the trunk version and reimplement the dictionary attack code.&nbsp; This may seem crazy, but it's actually not that bad.&nbsp; Redoing the changes takes a lot less time than coding the feature the first time.&nbsp; We could still copy and paste code from the 2.0 version.&nbsp;</p>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">Getting back to the primary example, Joe has a choice to make.&nbsp; His current working file already contains his own set of changes.&nbsp; He could therefore choose to redo Jane's change starting with his current working file.&nbsp; The problem here is that he might not really know how.&nbsp; He might have no idea what Jane's approach was.&nbsp; Jane's office might be 10,000 miles away.&nbsp; Jane might have written a lousy comment explaining her checkin.</p>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">As an alternative, Joe could set aside his working file, start with the latest repository version and redo his own changes.</p>
+<p dir="ltr" style="MARGIN-RIGHT: 0px">Bottom line:&nbsp; If a merge gets this bad, it takes some time and care to resolve it properly.&nbsp; Luckily, this situation doesn't happen very often.</p>
+<h4>Verifying the merge</h4>
+<p>Regardless of which of the above methods is used to complete the merge, it is highly recommended for Joe to verify the correctness of his work.&nbsp; Obviously he should check that the entire source tree still compiles.&nbsp; If a test suite is available, he should build and verify that the tests still pass.</p>
+<p>After Joe has completed the merge and verified it, he can declare the merge to be "resolved", after which the SCM tool will allow him to checkin the file.&nbsp; In the case of Vault, this is done by using the Resolve Merge Status command, which explicitly tells the Vault client application that the merge is completed.&nbsp; At this time, Vault would change the baseline version number from 4 to 5, indicating that as far as anyone knows, Joe made his changes by starting with version 5 of the file, not with version 4.</p>
+<p>Since his baseline version now matches the current version of the file, the Vault server will now allow Joe to do his checkin.</p>
+<h4>Worth the trouble</h4>
+<p style="BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: black 1px solid; PADDING-LEFT: 5px; FONT-SIZE: smaller; FLOAT: right; PADDING-BOTTOM: 5px; MARGIN: 5px; BORDER-LEFT: black 1px solid; WIDTH: 50%; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid; BACKGROUND-COLOR: rgb(230,230,230)"><b>Best Practice: Give concurrent development a try</b><br /><br />
+Many teams avoid all forms of concurrent development.  Their entire team uses "checkout-edit-checkin" with exclusive locks, and they never branch.<br /><br />
+For some small teams, this approach works just fine.  However, the larger your team, the more frequently a developer becomes "blocked" by having to wait for someone else.<br /><br />
+Modern source control systems are designed to make concurrent development easy.  Give them a try.</p>
+<p>I hope I have not scared you away from concurrent development by explaining the gory details of merging files.&nbsp; In fact, my goal is quite the opposite.</p>
+<p>Remember that easily-resolved merges are the most common case.&nbsp; Automerge handles a large percentage of situations with no problems at all.&nbsp; A large percentage of the remaining cases can be easily handled with a visual merge tool.&nbsp; The difficult situations are rare, and can still be handled easily by a developer who is patient and careful.</p>
+<p>Many software teams have discovered that the tradeoff here is worth the trouble.&nbsp; Concurrent development can bring substantial gains in the productivity of a team.&nbsp; The extra effort to deal with merge situations is usually a small price to pay.</p>
+<h4>Looking Ahead</h4>
+<p>In the next chapter I will be discussing the concept of a repository in a lot more detail.</p>
+<p>&nbsp;</p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align="left"><a href="{{{link:id='1083'}}}">&lt; Chapter 2</a></td>
+<td align="right"><a href="{{{link:id='1085'}}}">Chapter 4 &gt;</a></td>
+</tr>
+</table>
+{{{haloscan}}}

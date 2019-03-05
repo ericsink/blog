@@ -1,0 +1,127 @@
+<p>This entry is part 3 of a <a
+href="{{{link:id='1684'}}}">12-part series</a> on WPF
+3D.</p>
+
+<h3>Saving a WPF 3D Scene to a Bitmap</h3>
+
+<p>WPF has some really handy classes in it.&nbsp; Have you seen
+RenderTargetBitmap?&nbsp; Basically, it's a simple way to capture a bitmap of any
+WPF Visual.&nbsp; It works with 3D too:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:#2B91AF'>RenderTargetBitmap</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> bmp = <span
+style='color:blue'>new</span> <span style='color:#2B91AF'>RenderTargetBitmap</span>(<br>
+width, height, 96, 96, <span style='color:#2B91AF'>PixelFormats</span>.Pbgra32);</span></p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New"'>bmp.Render(myViewport3D);</span></p>
+
+<p>Wanna copy that image to the clipboard so you can paste it
+into some other application?</p>
+
+<p style='text-indent:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:#2B91AF'>Clipboard</span><span
+style='font-size:10.0pt;font-family:"Courier New"'>.SetImage(bmp);</span></p>
+
+<p>Wanna save that image to a PNG file?</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:#2B91AF'>PngBitmapEncoder</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> png = <span
+style='color:blue'>new</span> <span style='color:#2B91AF'>PngBitmapEncoder</span>();</span></p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New"'>png.Frames.Add(<span
+style='color:#2B91AF'>BitmapFrame</span>.Create(bmp));</span></p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:blue'>using</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> (<span style='color:#2B91AF'>Stream</span>
+stm = <span style='color:#2B91AF'>File</span>.Create(filepath))</span></p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New"'>{</span></p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New"'>&nbsp;&nbsp;&nbsp; png.Save(stm);</span></p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New"'>}</span></p>
+
+<p>Nifty.&nbsp; The pictures in this series of blog entries were
+rendered in just this fashion.&nbsp; But there are a couple of details worth
+mentioning.</p>
+
+<p>When using RenderTargetBitmap, you should probably erase it
+before you draw anything into it:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:#2B91AF'>Rectangle</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> vRect = <span
+style='color:blue'>new</span> <span style='color:#2B91AF'>Rectangle</span>();</span></p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New"'>vRect.Width = width;</span></p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New"'>vRect.Height = height;</span></p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New"'>vRect.Fill = <span
+style='color:#2B91AF'>Brushes</span>.White;</span></p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New"'>vRect.Arrange(<span
+style='color:blue'>new</span> <span style='color:#2B91AF'>Rect</span>(0, 0,
+vRect.Width, vRect.Height));</span></p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New"'>bmp.Render(visual);</span></p>
+
+<p>If your Viewport3D was created offscreen, it's not ready to
+draw.&nbsp; You need to give it a size (the same as the bitmap you're rendering
+into) and call Measure() and Arrange() to get it ready:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New"'>myViewport3D.Width = width;</span></p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New"'>myViewport3D.Height =
+height;</span></p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New"'>myViewport3D.Measure(<span
+style='color:blue'>new</span> <span style='color:#2B91AF'>Size</span>(width,
+height));</span></p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New"'>myViewport3D.Arrange(<span
+style='color:blue'>new</span> <span style='color:#2B91AF'>Rect</span>(0, 0,
+width, height));</span></p>
+
+<p>Note that none of the above is specific to the 3D features
+of WPF.&nbsp; RenderTargetBitmap just works with a Viewport3D like any other
+visual.&nbsp; This is one of the best things about WPF:&nbsp; The 3D features are not
+special or weird.&nbsp; They're seamlessly integrated into the framework.</p>
+
+<p>If you have experience programming with some other 3D API
+such as OpenGL or Direct3D (upon which WPF is built, by the way), you are
+probably accustomed to thinking of 3D stuff as very distinct from other stuff.&nbsp;
+Simple things like getting a 3D graphic to appear in the same window next to a
+listbox can require all kinds of gymnastics.&nbsp; WPF doesn't have those sorts of
+boundaries.&nbsp; If you want to put an animated 3D scene as the graphic for a
+toolbar button, you can.</p>
+
+<p>That level of integration is deeply neato.&nbsp; </p>
+
+<p>Just one more detail about RenderTargetBitmap, and this one <i>is</i>
+sort-of 3D-specific:</p>
+
+<p>If your Viewport3D was created offscreen and you're using
+our friend ScreenSpaceLines3D, you'll need to make sure your lines get scaled
+at least once.&nbsp; Since I hacked my copy of ScreenSpaceLines3D.cs to remove the
+use of CompositionTarget.Rendering, I simply call my Rescale() method on every
+instance just after I call Measure() and Arrange() on the offscreen Viewport3D.</p>
+
+<p>{{{haloscan}}}</p>

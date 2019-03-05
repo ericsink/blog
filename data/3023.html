@@ -1,0 +1,159 @@
+
+<p>All right, which one of you people added <a href="http://www.pcmag.com/author-bio/john-c.-dvorak">John C. Dvorak</a> to my list of RSS
+feeds?</p>
+
+<pre class="screen">
+eric$ ./sqlite3
+SQLite version 3.7.15.2 2013-01-09 11:53:05
+Enter ".help" for instructions
+Enter SQL statements terminated with a ";"
+sqlite> SELECT zumero_sync(
+    'main',
+    'https://zinst393e9343b87.s.zumero.net',
+    'all_feeds'
+    );
+0;0;0;3584;0;476;213;217
+
+sqlite> SELECT * FROM feeds;
+2|http://ericsink.com/rss.xml
+1|http://feeds.hanselman.com/ScottHanselman
+3|http://rssnewsapps.ziffdavis.com/PCMAG_dvorak.xml
+</pre>
+
+<p>Yes, I left the permissions wide open, specifically so that you
+could add to the list.  </p>
+
+<p>But... Dvorak?</p>
+
+<p>Really?</p>
+
+<h3>Mobile offline RSS reader, Part 2</h3>
+
+<p>In <a href="{{{link:id='3020'}}}">part 1</a>, I got started with a single 'feeds' table that
+contained nothing but the URL.  Now I want to add a place to store
+the title of the feed, and a place to remember the last time I retrieved the XML.</p>
+
+<pre class="screen">
+CREATE VIRTUAL TABLE IF NOT EXISTS about USING zumero(
+    feedid INTEGER UNIQUE NOT NULL REFERENCES feeds (feedid),
+    title TEXT NOT NULL
+    );
+
+CREATE VIRTUAL TABLE IF NOT EXISTS last_update USING zumero(
+    feedid INTEGER UNIQUE NOT NULL REFERENCES feeds (feedid),
+    when_unix_time INTEGER NOT NULL
+    );
+</pre>
+
+<p>Note that unlike the feeds table, these two tables are
+protected from changes by unauthenticated users.  Let's
+take a closer look at the SQL statements from part 1 where I configured the Access
+Control List (ACL).</p>
+
+<p>First, I use a convenience function to create the ACL table itself, which,
+by convention, is named "z_acl".</p>
+
+<pre class="screen">
+SELECT zumero_define_acl_table('main');
+</pre>
+
+<p>Then it is time to insert several ACL entries, each of which is just a row
+in the z_acl table.  Here is the first one:</p>
+
+<pre class="screen">
+INSERT INTO z_acl (scheme,who,tbl,op,result) VALUES (
+    '',
+    zumero_named_constant('acl_who_anyone'),
+    '',
+    '*',
+    zumero_named_constant('acl_result_deny')
+    );
+</pre>
+
+<p>This entry establishes a default.  Basically it says, "don't let anybody do
+anything".</p>
+
+<ul>
+
+    <li><p>The 'who' column specifies which users
+this will match at permission-checking time.  An entry that specifies 'anyone'
+will match, well, anyone at all, whether they are authenticated or not.</p></li>
+
+<li><p>The meaning of the 'scheme' column depends on the value of the 'who'
+column.  In this case, 'scheme' is not needed, so it is an empty
+string.</p></li>
+
+<li><p>The 'tbl' column is also not used in this entry, so it is an empty string as well.</p></li>
+
+<li><p>The 'op' column specifies which operations this will match at
+permission-checking time.  The asterisk here is interpreted as a wildcard.
+</p></li>
+
+<li><p>Finally, the 'result' column is used to provide a result for the
+permission-check when this entry has matched, which it always will.</p></li>
+
+</ul>
+
+<p>When checking for permissions, entries are checked in order from
+most-specific to least-specific.  The ACL entry above will always match, but if
+something else matches first, it will not apply.  The following entries are
+the exceptions, the cases where we want to actually allow something.</p>
+
+<p>The following entry says, "people who are members of the admin group are
+allowed to do anything they want":</p>
+
+<pre class="screen">
+INSERT INTO z_acl (scheme,who,tbl,op,result) VALUES (
+    zumero_internal_auth_scheme('zumero_users_admin'),
+    zumero_named_constant('acl_who_any_authenticated_user'),
+    '',
+    '*',
+    zumero_named_constant('acl_result_allow')
+    );
+</pre>
+
+<p>For many situations, I would just stop here and add no further entries to
+the ACL.  Only the admins can do anything.</p>
+
+<p>But in this situation, I specifically wanted to allow unauthenticated users
+to have a couple of permissions.  This one allows 'read' access ('pull') to the
+entire dbfile:</p>
+
+<pre class="screen">
+INSERT INTO z_acl (scheme,who,tbl,op,result) VALUES (
+    '',
+    zumero_named_constant('acl_who_anyone'),
+    '',
+    zumero_named_constant('acl_op_pull'),
+    zumero_named_constant('acl_result_allow')
+    );
+</pre>
+
+<p>And the following ACL entry is the one that isn't looking so wise in the
+hindsight of the moment:</p>
+
+<pre class="screen">
+INSERT INTO z_acl (scheme,who,tbl,op,result) VALUES (
+    '',
+    zumero_named_constant('acl_who_anyone'),
+    'feeds',
+    zumero_named_constant('acl_op_tbl_add_row'),
+    zumero_named_constant('acl_result_allow')
+    );
+</pre>
+
+<p>Note the value for the 'tbl' column in this final ACL entry.  I've
+granted
+'add_row' permission to 'anyone', but only for the 'feeds' table.  This is why the two new tables I just created will 
+remain safe from changes by non-admin users.</p>
+
+<p>These permissions are enforced at the server not on the client.  When
+performing operations on the local copy of the SQLite database, you can do
+anything you want.  But when you sync, if you are attempting to push changes
+which include operations beyond your permissions, your push will fail with
+"zumero:permission_denied".</p>
+
+<p>Stay tuned for <a href="{{{link:id='3024'}}}">part 3</a>.</p>
+
+<p>&nbsp;</p>
+

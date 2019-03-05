@@ -1,0 +1,43 @@
+<tr class="ArticleBlurbCell"><td colspan="3">&nbsp;<a name="10135" href="item_10135.html"><span class="DayPageArticleTitle">Source Control for One, Part Two</span></a> <span class="ArticleDate">(Tuesday, 04 November 2003)</span></td></tr>
+<tr bgcolor="white">
+<td width="5">&nbsp;</td>
+<td width="99%" valign="top">
+<P>There is one thing I forgot to mention in my blurb last night about source 
+control for single developers.</P>
+<P><FONT face=Arial,Helvetica,sansserif><STRONG>Background:</STRONG></FONT></P>
+<P>There are two basic models for how&nbsp;a developer&nbsp;interacts 
+with&nbsp;a source control&nbsp;repository:</P>
+<BLOCKQUOTE dir=ltr style="MARGIN-RIGHT: 0px">
+  <P><STRONG>"checkout-edit-checkin"</STRONG>:&nbsp; A working copy of the 
+  repository files is maintained on the client machine, and the files are marked 
+  as "read-only" when they are retrieved.&nbsp; The developer uses the Check Out 
+  operation to get a copy of the file which she intends to edit, and that file 
+  is then changed to be writable.&nbsp; When the edits are complete, the file is 
+  checked in and the working file is once again marked read-only.&nbsp; VSS 
+  works this way.</P>
+  <P><STRONG>"edit-merge-commit"</STRONG>:&nbsp; Once again, the client machine 
+  has a working copy of the repository files, but those working files are left 
+  in a writable state.&nbsp; When the developer is ready to edit a file, she 
+  doesn't need to do anything to let the source control tool know about 
+  it.&nbsp; Just edit the file as if source control were not involved.&nbsp; 
+  When it's time to checkin those changes, the tool will notice which files have 
+  changed and be ready to commit those changes to the repository.&nbsp; It may 
+  be necessary to perform a merge if somebody else has modified the file in the 
+  meantime.&nbsp; CVS works this way.</P></BLOCKQUOTE>
+<P><FONT face=Arial,Helvetica,sansserif><STRONG>Shameless plug for&nbsp;my 
+product:</STRONG></FONT></P>
+<P>SourceGear Vault supports either of these models, depending on the option 
+settings.&nbsp; By default, Vault uses the "checkout-edit-checkin" model, for 
+consistency with VSS.&nbsp; But it's easy to switch into what we call "CVS 
+mode".</P>
+<P><FONT face=Arial,Helvetica,sansserif><STRONG>The thing I forgot to 
+say:</STRONG></FONT></P>
+<P>The cool thing to notice is that when using source control all by yourself, 
+the "edit-merge-commit" style degenerates to simply "edit-commit".&nbsp; If 
+you're thinking source control for a single developer is just too much of a pain 
+to be worth the trouble, you might try&nbsp;using a tool that 
+supports&nbsp;"edit-merge-commit".&nbsp; Source control can be very unintrusive 
+when working that way.</P>
+<br></td>
+<td width="5">&nbsp;</td>
+</tr>

@@ -1,0 +1,79 @@
+<p>This entry is part 2 of a <a
+href="{{{link:id='1684'}}}">12-part series</a> on WPF
+3D.</p>
+
+<h3>Transparency in WPF 3D</h3>
+
+<p><img width=300 height=245 src="{{{link:id='2065'}}}"
+align=right hspace=12>I love transparency in 3D graphics.&nbsp; For example, in this
+picture of my workbench, I have made one foot transparent so it is easier to see
+the <a href="http://en.wikipedia.org/wiki/Mortise_and_tenon">mortise and tenon
+joint</a> used to attach the leg to the foot.</p>
+
+<p>Unfortunately, transparency in WPF 3D doesn't work quite the
+way I would have expected.</p>
+
+<p>The drawing model for WPF 3D is called a "retained scene".&nbsp;
+Basically, this means that you need to gather up all the triangles necessary to
+draw your scene and stuff them into a data structure which is owned by WPF.&nbsp;
+WPF will take responsibility for drawing the scene based on the information you
+gave it.</p>
+
+<p>This is actually quite nice.&nbsp; The alternative is a lot more
+work.&nbsp; I started learning Windows programming in 1992.&nbsp; I still remember
+feeling sort of cheated when I first realized that Windows wasn't going to draw
+my objects for me.&nbsp; You mean just because somebody covered up my window and
+then uncovered it, now I have to handle WM_PAINT if I want my stuff drawn back
+the way it was?&nbsp; Why can't I just build a list of objects and let Windows
+handle all the redraws whenever they're needed?&nbsp; I was young and
+inexperienced.&nbsp; I eventually came to "get it".&nbsp; Nonetheless, fifteen years
+later, WPF is giving me what I wanted.</p>
+
+<p>And WPF does this very well.&nbsp; I can add all my triangles in
+whatever order I want.&nbsp; WPF figures out which triangles are in front and which
+ones are hidden.</p>
+
+<p>However, in WPF 3D, the proper functioning of transparency
+is dependent on the order in which the objects are drawn.&nbsp; This is a little disappointing.&nbsp;
+Certainly I know how to cope with such things.&nbsp; I just don't want to.&nbsp; I'm spoiled.&nbsp;
+I thought those days were behind me.</p>
+
+<p>Luckily, the impact of this problem is minor.&nbsp; Basically,
+when you are building the scene for your Viewport3D, add all the opaque objects
+first.&nbsp; Then add all the transparent objects.</p>
+
+<p>But this still leaves one problem:&nbsp; What happens if your app
+has an interactive way to select an opaque object and make it transparent?&nbsp; For
+example, suppose I select an object which happens to be the very first
+GeometryModel3D in my scene.&nbsp; If I simply grab its brush and set the Opacity to
+less than one, the object will turn transparent, but the objects behind it will
+not show through as they should.&nbsp; WPF 3D wants transparent objects to be drawn <i>after</i>
+opaque objects.</p>
+
+<p>The solution to this problem is rather simple as well.&nbsp; Just
+move it to the end.&nbsp; The code looks something like this:</p>
+
+<p style='text-autospace:none'><span style='font-size:10.0pt;
+font-family:"Courier New";color:#2B91AF'>DiffuseMaterial</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> mat = (<span
+style='color:#2B91AF'>DiffuseMaterial</span>)myGeometryModel3D.Material;</span></p>
+
+<p style='text-autospace:none'><span style='font-size:10.0pt;
+font-family:"Courier New";color:#2B91AF'>SolidColorBrush</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> br = (<span
+style='color:#2B91AF'>SolidColorBrush</span>)mat.Brush;</span></p>
+
+<p style='text-autospace:none'><span style='font-size:10.0pt;
+font-family:"Courier New"'>br.Opacity = 0.3;</span></p>
+
+<p style='text-autospace:none'><span style='font-size:10.0pt;
+font-family:"Courier New"'>myModel3DGroup.Children.Remove(myGeometryModel3D);</span></p>
+
+<p style='text-autospace:none'><span style='font-size:10.0pt;
+font-family:"Courier New"'>myModel3DGroup.Children.Add(myGeometryModel3D);</span></p>
+
+<p>Bottom line:&nbsp; I wish WPF 3D handled transparency without
+caring about the ordering, but once you know how to deal with the problem, it's
+not that big of a deal.</p>
+
+<p>{{{haloscan}}}</p>

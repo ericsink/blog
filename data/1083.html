@@ -1,0 +1,176 @@
+<P>This is part of an online book called <a href="{{{link:id='1079'}}}">Source Control HOWTO</a>, a best practices guide on source control, version control, and configuration management.</p>
+<table border=0 width="100%">
+<tr>
+<td align="left"><a href="{{{link:id='1082'}}}">&lt; Chapter 1</a></td>
+<td align="right"><a href="{{{link:id='1084'}}}">Chapter 3 &gt;</a></td>
+</tr>
+</table>
+<hr>
+<p>In this chapter, I will explore the various situations wherein a repository is modified, starting with the simplest case of a single developer making a change to a single file.</p>
+<h4>Editing a single file</h4>
+<p>Consider the simple situation where a developer needs to make a change to one source file.&nbsp; This case is obviously rather simple:</p>
+<ol>
+<li>Checkout the file
+</li>
+<li>Edit the working file as needed
+</li>
+<li>Checkin the file
+</li>
+</ol>
+<p>I won't talk much about step 2 here, as it doesn't really involve the SCM tool directly.&nbsp; Editing the file usually involves the use of some other tools, like an integrated development environment (IDE).</p>
+<p>But I do want to explore steps 1 and 3 in greater detail.</p><h4>Step 1:  Checkout</h4>
+<p>Checking out a file has two basic effects:</p>
+<ul>
+<li>On the server, the SCM tool will remember the fact that you have the file checked out so that others may be informed.
+</li>
+<li>On your client, the SCM tool will prepare your working file for editing by changing it to be writable.
+</li>
+</ul>
+<h5>The server side of checkout</h5>
+
+<p>File checkouts are a way of communicating your intentions to others.&nbsp; When you have a file checked out, other users can be aware and avoid making changes to that file until you are done with it.&nbsp; The checkout status of a file is usually displayed somewhere in the user interface of the SCM client application.&nbsp; For example, in the following screendump from Vault, users can see that I have checked out libsgdcore.cpp:</p>
+<p><img height="475" alt="" src="{{{link:id='1030'}}}" width="577" border="0" /></p>
+<p style="BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: black 1px solid; PADDING-LEFT: 5px; FONT-SIZE: smaller; FLOAT: right; PADDING-BOTTOM: 5px; MARGIN: 5px; BORDER-LEFT: black 1px solid; WIDTH: 50%; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid; BACKGROUND-COLOR: rgb(230,230,230)"><b>Best Practice: Use checkouts and locks carefully</b><br /><br />
+It is best to use checkouts and locks only when you need them.  A checkout discourages others from modifying a file, and a lock prevents them from doing so.  You should therefore be careful to use these features only when you actually need them.<br /><br />
+Don't checkout files just because you think you might need to edit them.<br /><br />
+Don't checkout whole folders.  Checkout the specific files you need.<br /><br />
+Don't checkout hundreds or thousands of files at one time.<br /><br />
+Don't hold exclusive locks any longer than necessary.<br /><br />
+Don't go on vacation while holding exclusive locks on files.</p><p>This screendump also hints at the fact there are actually two kinds of checkouts.&nbsp; The issue here is the question of whether two people can checkout a file at the same time.&nbsp; The answer varies across SCM tools.&nbsp; Some SCM tools can be configured to behave either way.</p>
+<p>Sometimes the SCM tool will allow multiple people to checkout a file at the same time.&nbsp; SourceSafe and Vault both offer this capability as an option.&nbsp; When this "multiple checkouts" feature is used, things can get a bit more complicated.&nbsp; I'll talk more about this later.</p>
+<p>If the SCM tool prevents anyone else from checking out a file which I have checked out, then my checkout is "exclusive" and may be described as a "lock".&nbsp; In the screendump above, the user interface is indicating that I have an exclusive lock on libsgdcore.cpp.&nbsp; Vault will allow no one else to checkout this file.</p>
+<h5>The client side of checkout</h5>
+<p>On the client side, the effect of a checkout is quite simple:&nbsp; If necessary, the latest version of the file is retrieved from the server.&nbsp; The working file is then made writable, if it was not in that state already.</p>
+<p>All of the files in a working folder are made read-only when the SCM tool retrieves them from the repository.&nbsp; A file is not made writable until it is checked out.&nbsp; This prevents the developer from accidentally editing a file.</p>
+<h5>Undoing a checkout</h5>
+<p>Normally, a checkout ends when a checkin happens.&nbsp; However, sometimes we checkout a file and subsequently decide that we did not need to do so.&nbsp; When this happens, we "undo the checkout".&nbsp; Most SCM tools have a command which offers this functionality.&nbsp; On the server side, the command will remove the checkout and release any exclusive lock that was being held.&nbsp; On the client side, Vault offers the user three choices for how the working file should be treated:</p>
+<ul>
+<li><strong>Revert</strong>:&nbsp; Put the working file back in the state it was in when I checked it out.&nbsp; Any changes I made while I had the file checked out will be lost.
+</li>
+<li><strong>Leave</strong>:&nbsp; Leave the working file alone.&nbsp; This option will effectively leave the file in a state which we call "Renegade".&nbsp; It is a bad idea to edit a file without checking it out.&nbsp; When I do so, Vault notices my transgression and chastises me by letting me know that the file is "Renegade".
+</li>
+<li><strong>Delete</strong>:&nbsp; Delete the working file.
+</li>
+</ul>
+<p>I usually prefer to work with "Revert" as my option for how the Undo Check Out command behaves.</p>
+<h4>Step 3:  Checkin</h4>
+
+<p style="BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: black 1px solid; PADDING-LEFT: 5px; FONT-SIZE: smaller; FLOAT: right; PADDING-BOTTOM: 5px; MARGIN: 5px; BORDER-LEFT: black 1px solid; WIDTH: 50%; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid; BACKGROUND-COLOR: rgb(230,230,230)"><b>Best Practice: Explain your checkins completely</b><br /><br />
+Every SCM tool provides a way to associate a comment when checking changes into the repository.  This comment is important.  If we consistently use good checkin comments, our repository's history contains not only every change we have ever made, but it also contains an explanation of why those changes happened.  These kinds of records can be invaluable later as we forget things.<br /><br />
+I believe developers should be encouraged to enter checkin comments which are as long as necessary to explain what is going on.  Don't just type "minor change".  Tell us what the minor change was.  Don't just tell us "fixed bug 1234".  Tell us what bug 1234 is and tell us a little bit about the changes that were necessary to fix it.</p><p>One issue does deserve special mention.&nbsp; Most SCM tools ask the user to enter a comment when making a checkin.&nbsp; This comment will be stored in the repository forever along with the changes being submitted.&nbsp; The comment provides a place for the developer to explain what was changed and why the change was made.</p><p>After the file is checked out, the developer proceeds to make her changes.&nbsp; She edits the file and verifies that her change is correct.&nbsp; Having completed all this, she is ready to submit her changes to the repository.&nbsp; Doing so will make her change permanent and official.&nbsp; Submitting her changes to the repository is the operation we call "checkin".</p>
+<p>The process of a checkin isn't terribly complicated:</p>
+<ol>
+<li>The new version of the file is sent to the SCM server where it is stored.
+</li>
+<li>The version number of the file in the repository is incremented by one.
+</li>
+<li>The file is no longer considered to be checked out or locked.
+</li>
+<li>The working file on the client side is made read-only again.
+</li>
+</ol>
+<p>The following screendump shows the checkin dialog box from Vault:</p>
+<p><img height="456" alt="" src="{{{link:id='1028'}}}" width="409" border="0" /></p>
+<h4>Checkins are additive</h4>
+<p>It is reassuring to remember one fundamental axiom of source control:&nbsp; Nothing is ever destroyed.&nbsp; Let us suppose that we are editing a file which is currently at version 4.&nbsp; When we checkin our changes, our new version of the file becomes version 5.&nbsp; Clients will be notified that the latest version is now 5.&nbsp; Clients that are still holding version 4 in their working folder will be warned that the file is now "Old".</p>
+<p>But version 4 is still there.&nbsp; If we ask the server for the latest version, we will get 5.&nbsp; But if we specifically ask for version 4, and for any previous version, we can still get it.</p>
+<p>Each checkin adds to the history of our repository.&nbsp; We never subtract anything from that history.</p>
+<h4>Other kinds of checkins</h4>
+<p>We will informally use the word "checkin" to refer to any change which is made to the repository.&nbsp;&nbsp;It is common for a developer to say, "I made some checkins this afternoon to fix that bug", using the word "checkin" to include any of the following types of changes to the repository:</p>
+<ul>
+<li>Create a new folder
+</li>
+<li>Add a file
+</li>
+<li>Rename a file or folder
+</li>
+<li>Delete a file or folder
+</li>
+<li>Move a file or folder
+</li>
+</ul>
+<p>It may seem odd to refer to these operations using the word "checkin", because there is no corresponding "checkout" step.&nbsp; However, this looseness is typical of the way people use the word "checkin", so you'll get used to it.</p>
+<p>I will take this opportunity to say a few things about how these operations behave.&nbsp; If we conceptually think of a folder as a list of files and subfolders, each of these operations is actually a modification of a folder.&nbsp; When we create a folder inside folder A, then we are modifying folder A to include a new subfolder in its list.&nbsp; When we rename a file or folder, the parent folder is being modified.</p>
+<p>Just as the version number of a file is incremented when we modify it, these folder-level changes cause the version number of a folder to be incremented.&nbsp; If we ask for the previous version of a folder, we can still retrieve it just the way it was before.&nbsp; The renamed file will be back to the old name.&nbsp; The deleted file will reappear exactly where it was before.</p>
+<p>It may bother you to realize that the "delete" command in your SCM tool doesn't actually delete anything.&nbsp; However, you'll get used to it.</p>
+<h4>Atomic transactions</h4>
+<p>I've been talking mostly about the simple case of making a change to a single source code file.&nbsp; However, most programming tasks require us to make multiple repository changes.&nbsp; Perhaps we need to edit more than one file to accomplish our task.&nbsp; Perhaps our task requires more than just file modifications, but also folder-level changes like the addition of new files or the renaming of a file.</p>
+<p>When faced with a complex task that requires several different operations, we would like to be able to submit all the related changes together in a single checkin operation.&nbsp; Although tools like SourceSafe and CVS do not offer this capability, some source control systems (like Vault and Subversion) do include support for "atomic transactions".&nbsp;</p>
+<p style="BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: black 1px solid; PADDING-LEFT: 5px; FONT-SIZE: smaller; FLOAT: right; PADDING-BOTTOM: 5px; MARGIN: 5px; BORDER-LEFT: black 1px solid; WIDTH: 50%; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid; BACKGROUND-COLOR: rgb(230,230,230)"><b>Best Practice: Group your checkins logically</b><br /><br />
+I recommend that each transaction you check into the repository should correspond to one task.  A "task" might be a bug fix or a feature.  Include all of the repository changes which were necessary to complete that task, and nothing else.  Avoid fixing multiple bugs in a single checkin transaction.</p><p>The concept is similar to the behavior of atomic transactions in a SQL database.&nbsp; The Vault server guarantees that all operations within a transaction will stay together.&nbsp; Either they will all succeed, or they will all fail.&nbsp; It is impossible for the repository to end up in a state with only half of the operations done.&nbsp; The integrity of the repository is assured.</p>
+<p>To ensure that a transaction can contain all kinds of operations, Vault supports the notion of a pending change set.&nbsp; Essentially, the Vault client keeps a running list of changes you have made which are waiting to be sent to the server.&nbsp; When you invoke the Delete command, not only will it not actually delete anything, but it doesn't even send the command to the server.&nbsp; It merely adds the Delete operation to the pending change set, so that it can be sent later as part of a group.</p>
+<p>In the following screen dump, my pending change set contains three operations.&nbsp; I have modified libsgdcore.cpp.&nbsp; I have renamed libsgdcore.h to headerfile.h.&nbsp; And I have deleted libsgdcore_diff_file.c.</p>
+<p><img height="477" alt="" src="{{{link:id='1029'}}}" width="579" border="0" /></p>
+<p>Note that these operations have not actually happened yet.&nbsp; They won't happen unless I submit them to the server, at which time they will take place as a single atomic transaction.</p>
+<p>Vault persists the pending change set between sessions.&nbsp;&nbsp;If I shutdown my Vault client and turn off my computer, next time I launch the Vault client the pending change set will contain the same items it does now.</p>
+<h4>The Church of "Edit-Merge-Commit"</h4>
+<p>Up until now, I have explained everything about checkouts and checkins in a very "matter of fact" fashion.&nbsp; I have claimed that working files are always read-only until they are checked out, and I have claimed that files are always checked out before they are checked in.&nbsp; I have made broad generalizations and I have explained things in terms that sound very absolute.&nbsp;</p>
+<p>I lied.</p>
+<p>In reality, there are two very distinct doctrines for how this basic interaction with an SCM tool can work.&nbsp; I have been describing the doctrine I call "checkout-edit-checkin".&nbsp; Reviewing the simple case when a developer needs to modify a single file, the practice of this faith involves the following steps::</p>
+<ol>
+<li>Checkout the file
+</li>
+<li>Edit the working file as needed
+</li>
+<li>Checkin the file
+</li>
+</ol>
+<p>Followers of the "checkout-edit-checkin" doctrine are effectively submitting to live according to the following rules:</p>
+<ul>
+<li>Files in the working folder are read-only unless they are checked out.
+</li>
+<li>Developers must always checkout a file before editing it.&nbsp; Therefore, the entire team always knows who is editing which files.
+</li>
+<li>Checkouts are made with exclusive locks, so only one developer can checkout a file at one time.
+</li>
+</ul>
+<p>This approach is the default behavior for SourceSafe and for Vault.&nbsp; However, CVS doesn't work this way at all.&nbsp; CVS uses the doctrine I call "edit-merge-commit".&nbsp; Practicers of this religion will perform the following steps to modify a single file:</p>
+<ul>
+<li>Edit the working file as needed
+</li>
+<li>Merge any recent changes from the server into the working file
+</li>
+<li>Commit the file to the repository
+</li>
+</ul>
+<p>The edit-merge-commit doctrine is a liberal denomination which preaches a message of freedom from structure.&nbsp; Its followers live by these rules:</p>
+<ul>
+<li>Files in the working folder are always writable.
+</li>
+<li>Nobody uses checkouts at all, so nobody knows who is editing which files.
+</li>
+<li>When a developer commits his changes, he is responsible for ensuring that his changes were made against the latest version in the repository.
+</li>
+</ul>
+<p>As I said, this is the approach which is supported by CVS.&nbsp; Vault supports edit-merge-commit as an option.&nbsp; In fact, when this option is turned on, we informally say that Vault is running in "CVS mode".</p>
+<p>Each of these approaches corresponds to a different style of managing concurrent development on a team.&nbsp; People tend to have <em>very</em> strong feelings about which style they prefer.&nbsp; The religious flame war between these two churches can get very intense.</p>
+<h4>Holy Wars</h4>
+<p>The "checkout-edit-checkin" doctrine is obviously more traditional and conservative.&nbsp; When applied strictly, it is impossible for two people to modify a given file at the same time, thus avoiding the necessity of merging two versions of a file into one.&nbsp;&nbsp;</p>
+<p>The "edit-merge-commit" teaches a lifestyle which is riskier.&nbsp; The risk is that the merge step may be tedious or cause problems.&nbsp; However, the acceptance of this risk rewards us with a concurrent development style which causes developers to trip over each other a lot less often.</p>
+<p>Still, these risks are real, and we will not flippantly disregard them.&nbsp;A detailed discussion of file merging appears in the next chapter.&nbsp; For now I will simply mention that most SCM tools include features that can safely do a three-way merge automatically.&nbsp; Not all developers are willing to trust this feature, but many do.</p>
+<p>So, when using the "edit-merge-commit" approach, the merge must happen, and we are left with two choices:</p>
+<ul>
+<li>Attempt the automerge.&nbsp; (can be scary)
+</li>
+<li>Merge the files by hand.&nbsp; (can be tedious)
+</li>
+</ul>
+<p>Developers who prefer "checkout-edit-checkin" often find both of these choices to be unacceptable.</p>
+<p style="BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: black 1px solid; PADDING-LEFT: 5px; FONT-SIZE: smaller; FLOAT: right; PADDING-BOTTOM: 5px; MARGIN: 5px; BORDER-LEFT: black 1px solid; WIDTH: 50%; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid; BACKGROUND-COLOR: rgb(230,230,230)"><b>Best Practice: Get the best of both worlds</b><br /><br />
+Here at SourceGear we are quite proud of the fact that Vault allows each developer to choose their own concurrent development style.&nbsp; Developers who prefer "checkout-edit-checkin" can work that way.&nbsp; Developers who prefer "edit-merge-commit" can use that approach, and they still have exclusive locks available to them for those times when they are needed.&nbsp; As far as I know, Vault is the only product that offers this flexibility.<br />
+<br />
+I apologize for this completely shameless plug.&nbsp; I won't do it very often.</p><p>I will confess that I am a disciple of the edit-merge-commit religion.&nbsp;&nbsp;People who use edit-merge-commit often say that they cannot imagine going back to what life was like before.&nbsp; I agree.</p>
+<p>It is so very convenient to never be required to checkout a file.&nbsp; All the files in my working folder are always writable.&nbsp; If I want to start working on a bugfix or a feature, I simply open a text editor and begin making my changes.</p>
+<p>This benefit is especially useful when I am disconnected from the server.&nbsp; When people ask me about the best way to use Vault while "offline", I tell them to consider using edit-merge-commit.&nbsp; Since I don't have to contact the server to checkout a file, I can simply proceed with my changes.&nbsp; The only time I need the server is when it comes time to merge and commit.</p>
+<p>As I said, automerge is amazingly safe in practice.&nbsp; Thousands of teams use it every day without incident.&nbsp; I have been actively using edit-merge-commit as my development style for over five years, and I cannot remember a situation where automerge produced an incorrect file.&nbsp; Experience has made me a believer.</p>
+<h4>Looking Ahead</h4>
+<p>In the next chapter, I will be talking in greater detail about the process of merging two modified versions of a file.</p>
+<p>&nbsp;</p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align="left"><a href="{{{link:id='1082'}}}">&lt; Chapter 1</a></td>
+<td align="right"><a href="{{{link:id='1084'}}}">Chapter 3 &gt;</a></td>
+</tr>
+</table>
+{{{haloscan}}}

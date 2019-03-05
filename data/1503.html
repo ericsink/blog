@@ -1,0 +1,44 @@
+<p><span class="ArticleTitle">CMake</span><br><span class="ArticleDate">29 Jan 2004</span></p>
+<P>Despite my current monogamous relationship with C#, I've spent most of my 
+career writing code which really needed to be cross-platform.&nbsp; I've come to 
+understand how very hard it is to create any non-trivial body of code that runs 
+on multiple platforms, and I have a great deal of admiration for solutions that 
+actually work well.</P>
+<P>One of the toughest parts of cross-platform&nbsp;development is the build 
+system.&nbsp; No matter how clean and portable your C code is, getting the tree 
+to build on multiple platforms is a whole different problem.</P>
+<P>One solution I have used in the past is to do a completely Unix-centric build 
+system with bash and make, using <A href="http://www.cygwin.org/">cygwin</A> to 
+run it under Windows.&nbsp; This works very well, except that it really annoys 
+the folks who prefer Visual Studio project files.&nbsp; (I've had people assert 
+that my tendency to run emacs on Windows is proof that my parents were brother 
+and sister.)</P>
+<P>Personally, I have always believed that build management was by far the 
+weakest part of the Visual Studio environment.&nbsp; MSBuild looks like a step 
+in the right direction.&nbsp; VS.NET is actually pretty decent.&nbsp; (The build 
+system for Vault is done entirely in a VS.NET .sln file, and it's quite 
+complicated.)&nbsp; Previous Visual Studio releases simply didn't have the power 
+to do custom builds of larger projects, and the result wasn't cross-platform 
+anyway.</P>
+<P>This week I discovered a nifty tool I had never seen before.&nbsp; It's 
+called <A href="http://www.cmake.org/">CMake</A>, and it's the build system used 
+for Kitware's <A href="http://www.vtk.org/">Visualization Toolkit</A>.&nbsp; 
+I've seen lots of alternatives to 'make', but this tool is surprisingly 
+different and deeply neato.</P>
+<P>I started by downloading the VTK tarball on a MacOS X system, which from my 
+point of view is Unix with a nice UI.&nbsp; I ran CMake and edited the 
+configuration settings without much&nbsp;difficulty.&nbsp; But then, instead of 
+performing the build, CMake generated a regular Unix makefile.&nbsp; I typed 
+'make' and the entire tree was built with no problems.&nbsp; I was impressed 
+with the fact that CMake was not replacing my standard toolset, but I didn't 
+really appreciate this tool until I repeated the&nbsp;build on Windows.</P>
+<P>I downloaded the exact same tarball to my Windows machine.&nbsp; I ran CMake 
+and once again edited the configuration settings.&nbsp; When I told CMake to 
+proceed, it generated a complete set of Visual Studio .NET 2003 project and 
+solution files.&nbsp; I opened the .sln and built the entire tree with no 
+problems.</P>
+<P>I didn't go further, but I saw indications that CMake can generate output for 
+other build systems as well, including CodeWarrior on the Mac, and presumably 
+others.</P>
+<P>Very, very&nbsp;cool.&nbsp; If I ever end up working on a cross-platform 
+project again, I will be inclined to use CMake.</P>

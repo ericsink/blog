@@ -1,0 +1,60 @@
+<p>In the transition from C# 1.0 to C# 2.0, they added
+generics.&nbsp; This was an <i>enormous</i> improvement.&nbsp; Huge.</p>
+
+<p>(At first I was actually kind of skeptical of generics.&nbsp;
+They reminded me of C++ templates, the use of which I had opposed on several
+occasions.&nbsp; But my 1993 reasons for advocacy against C++ templates really
+weren't relevant to the C# generics in 2005.)</p>
+
+<p>So when I started my recent exploration of Java, one of my
+main questions was:&nbsp; Are the generics in Java 1.5 similar to generics in C#
+2.0?</p>
+
+<p>The answer:&nbsp; Sort of.&nbsp; Not really.</p>
+
+<p>To be fair, I'll admit right up front that Java generics are
+better than no generics.&nbsp; I'm using them.&nbsp; They work just fine in practice for
+most situations.</p>
+
+<p>But they're fundamentally different from C# generics.&nbsp; In
+C#, a generic is implemented at the CLR level.&nbsp; When you instantiate a
+List&lt;T&gt;, at runtime it will generate an implementation of a List which is
+specifically for type T.</p>
+
+<p>When TPTB added generics to Java, one of their goals was to
+avoid the need for any changes to the VM.&nbsp; So Java's generics are implemented
+at the compiler level using a technique called "type erasure".&nbsp; Basically, the
+Java compiler does all the necessary type checking, but then it throws the
+parameterized type information away and generates regular collection code.&nbsp;
+This has a few consequences which are rather unfortunate:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Since the parameterized type is no longer present in the
+     bytecode, reflection doesn't show it.<br>
+     <br>
+ </li>
+ <li >The compiler inserts all the casts that you would have had
+     to write if you were using the non-generic collection class directly.<br>
+     <br>
+ </li>
+ <li >In a generic collection of a primitive type, the
+     parameterized type gets boxed.</li>
+</ul>
+
+<p>So Java's generics are a nice convenience for the
+programmer, but they don't bring any of the performance benefits which we get
+from generics in C#.</p>
+
+<p>Note that these tradeoffs were not accepted with no gain.&nbsp;
+The primary motivation here was to get generics without sacrificing backward
+compatibility.&nbsp; That's an important consideration, especially given the amount
+of Java code that already existed prior to 1.5.</p>
+
+<p>But if you're coming from C# 2.0 to Java, it's good to
+understand how generics are different.</p>
+
+<p>(For a more authoritative discussion of the topic, check out
+Bruce Eckel's interview with <a href="http://www.artima.com/intv/generics2.html">Anders
+Hejlsberg</a>.)</p>
+
+<p>{{{haloscan}}}</p>

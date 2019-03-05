@@ -1,0 +1,258 @@
+
+<p>So, as we say here in the Midwest, I'm as giddy as a fox in the hen house
+while the dog ain't home.</p>
+
+<p>Today we released version 1.0 of Zumero for SQL Server.</p>
+
+<h3>Eric, what are you talking about here?</h3>
+
+<p>Zumero for SQL Server.  I <a href="{{{link:id='3036'}}}">mentioned</a> it here on my blog a
+few weeks ago.</p>
+
+<ul>
+    <li>
+<p>"Zumero" -- "replication and sync of SQL data for mobile devices"</p>
+</li>
+
+    <li>
+<p>"for SQL Server" -- "it uses Microsoft SQL Server on the backend"</p>
+</li>
+</ul>
+
+<h3>Why do I need this?  Can't I just make my SQL Server data available to mobile devices using a REST API?</h3>
+
+<p>Yes, you can do that.  And if that solution meets your requirements, then you may
+not need Zumero.  But there are some pretty big benefits to the "replicate and
+sync" approach, including performance and offline support.</p>
+
+<p>There's some info about this <a href="http://zumero.com/features/">on our website</a>.</p>
+
+<p>Or you could check out <a
+    href="https://speakerdeck.com/jchris/sync-is-the-future-of-mobile-data">Sync is the Future of Mobile Data</a>, by Couchbase co-founder J. Chris Anderson.
+Most of Chris' preaching tends to be compatible with Zumero, except of course
+that he is of the NoSQL religion and we practice the SQL doctrine.</p> 
+
+<p>Or you could take a look at <a href="http://offlinefirst.org/">offlinefirst.org</a>.  These guys are also sort-of a competitor to Zumero, but they're singing the same tune we are, and they're singing it pretty darn well in my opinion.</p>
+
+<h3>What's in Zumero for SQL Server?</h3>
+
+<p>ZSS consists of three parts:</p>
+
+<ul>
+    <li>ZSS Server</li>
+    <li>ZSS Manager</li>
+    <li>ZSS Client SDK</li>
+</ul>
+
+<p>ZSS Server is a module for Internet Information Services (IIS).
+Simply point it at your SQL Server
+database (which need not be on the same machine) using an ODBC connection
+string.  We include an easy-to-use installer as well as instructions for
+people who prefer to do the installation manually.</p>
+
+<p>ZSS Manager is a desktop application used to setup your data for sync.  You can specify which tables
+you want your mobile devices to see and/or modify.</p>
+
+<p>ZSS Client SDK is a collection of libraries which allow you to sync on mobile devices.</p>
+
+<h3>Do you have a screen shot of ZSS Manager?</h3>
+
+<p>By golly I do!</p>
+
+<p><img width="95%" src="{{{link:id='3038'}}}"/></p>
+
+<p>Lots more of them <a href="http://zumero.com/dev-center/zss/">on the Zumero website</a>, BTW.</p>
+
+<h3>What mobile platforms are supported?</h3>
+
+<ul>
+    <li>iOS (ObjC)</li>
+    <li>Android (Java)</li>
+    <li>WinRT</li>
+    <li>Windows Phone 8</li>
+    <li>Phonegap/Cordova (iOS or Android)</li>
+    <li>Xamarin (iOS or Android)</li>
+</ul>
+
+<h3>So this is only for mobile?  What if I want clients on desktop machines?</h3>
+
+<p>Actually, we've also got sync libraries for MacOS, Linux and Windows.  The
+focus of the product is mobile, so we sometimes list them in the supporting
+cast.</p>
+
+<h3>What SQL database are you using on the mobile device?</h3>
+
+<p>SQLite (see <a href="http://www.sqlite.org/">www.sqlite.org</a>)</p>
+
+<h3>SQLite?  That's lame.</h3>
+
+<p>Certainly not.</p>
+
+<p>The world's population divides very cleanly into two groups:</p>
+
+<ol>
+    <li>Those who are amazed by the sheer awesomeness of SQLite</li>
+    <li>Those who do not understand SQLite</li>
+</ol>
+
+<p>If you write code and you're in group 2, regardless of whether you become our customer or not,
+for your own sake, get yourself into group 1.  It's a better way to live.</p>
+
+<h3>Can I just add ZSS to my existing solution and get mobile?</h3>
+
+<p>Yes.  ZSS is designed to be added into an existing environment without
+screwing up anything already there.  If you've already got a SQL db which
+is serving a website or a bunch of desktop apps, ZSS will play nicely with
+your existing stuff while giving you the ability to replicate your data
+so it can be used with SQLite on mobile devices.</p>
+
+<h3>Do I have to change my existing database tables?</h3>
+
+<p>No.  ZSS does not require you to make any changes to your existing 
+schema, but it does need to install some new housekeeping tables and triggers and views.  The ZSS Manager
+application generates the T-SQL for these items and displays it so that you
+can review everything before any changes to your database are made.</p>
+
+<h3>What does the Zumero sync API look like?</h3>
+
+<p>It's one function.  At the C level, it looks like this:</p>
+
+<pre class="screen">int zumero_sync(
+  const char *zFilename,
+  const char *zCipherKey,
+  const char *zServerUrl,
+  const char *zDbfile,
+  const char *zAuthScheme,
+  const char *zUser,
+  const char *zPassword,
+  const char *zTempDir,
+  char **pzErrorDetails
+);
+</pre>
+
+<p>Much of the Client SDK is wrappers to make this friendlier.  For example, in C#, it looks like this:</p>
+
+<pre class="screen">namespace Zumero
+{
+    public static class ZumeroClient
+    {
+        public static void Sync(
+                string filename,
+                string cipherkey,
+                string server_url,
+                string dbfile,
+                string auth_scheme,
+                string user,
+                string password
+                )
+    }
+}
+</pre>
+
+<p>And so on...</p>
+
+<p>Oh, and by the way, I exaggerated.  It's not one function, it's actually eight.
+But the other seven don't matter very often.  Mostly.</p>
+
+<h3>Can I install ZSS "on-premises", on our existing servers?</h3>
+
+<p>Yep.</p>
+
+<h3>Do you sell a cloud-hosted version of ZSS?</h3>
+
+<p>Currently, no, although you are obviously free to install your licensed ZSS Server
+in your own cloud instance if you like.</p>
+
+<h3>So how does "Zumero for SQL Server" relate to this "Zumero Cloud" thing I see on your website?</h3>
+
+<p>Sorry for the confusion.  We're working to clean all this up.</p>
+
+<p>ZSS and Zumero Cloud are actually quite different.  
+Zumero Cloud was first launched back in March 2013.
+We think of it as "version 0" of the Zumero architecture.
+ZSS is built on a very
+different architecture, which we might call "version 1".
+Simply put, the overall design of ZSS is just better.  We will
+be upgrading the Zumero Cloud service to the new architecture,
+but that will involve some compatibility-breaking changes, so we
+need to do the transition carefully.
+</p>
+
+<h3>What database API do I use on the client to work with my data in SQLite?</h3>
+
+<p>Whatever you like.  ZSS doesn't care.</p>
+
+<p>When you ask the sync library to bring down a copy of the prepared data from
+the ZSS Server, you provide it with the path name of a SQLite database file.
+Once that file is on your mobile device, you can interact with it using whatever
+SQLite API or wrapper that you like.</p>
+
+<p>For example, on Android/Java you would probably use android.data.sqlite.</p>
+
+<p>On iOS/ObjC, you could perhaps use <a href="https://github.com/ccgus/fmdb">FMDB</a>.</p>
+
+<p>On WinRT, there's a <a href="http://visualstudiogallery.msdn.microsoft.com/23f6c55a-4909-4b1f-80b1-25792b11639e">SQLite component</a>.  And there's <a href="http://visualstudiogallery.msdn.microsoft.com/cd120b42-30f4-446e-8287-45387a4f40b7">one for Windows Phone 8</a> as well.  The
+samples in our Client SDK make use of these.</p>
+
+<p>On Cordova (Phonegap), everybody seems to be using <a href="https://github.com/zumero/Cordova-SQLitePlugin">this SQLite plugin</a>.
+Well actually, the link in the previous sentence is to our Github fork of that
+plugin, containing one little tiny change.  Because Zumero needs to know the full
+path name of the SQLite database file, we tweaked the API to provide that info back to the app.</p>
+
+<p>On Xamarin, <a href="https://github.com/praeclarum/sqlite-net">sqlite-net</a> is quite popular.  Or
+you could use Mono.Data.SQLite, an ADO.NET-style API which is built into the Xamarin
+toolset.</p>
+
+<p>The list above is not complete.</p>
+
+<h3>Can I use Core Data with ZSS?</h3>
+
+<p>Short answer: no</p>
+
+<p>Longer answer:</p>
+
+<p>We haven't tried that yet.  If you're not going to be crushingly
+disappointed when it doesn't work, please try it and let us know.</p>
+
+<p>But I'd bet a dollar that this is going to require some
+additional effort.  Core Data isn't really a general-purpose SQLite wrapper.  It's a big, thick
+abstraction which happens to [sometimes] use SQLite under the hood.</p>
+
+<p>There is some progress in this area.  Joel Grasmeyer has <a href="https://github.com/grasmeyer/ZumeroIncrementalStore">done</a> some Core
+Data support for Zumero Cloud.  This code is not compatible with ZSS right now, but we're talking with him.  About stuff.</p>
+
+<h3>Is the ZSS Client SDK compatible with SQLCipher or SQLite Encryption Extension?</h3>
+
+<p>Yes.</p>
+
+<h3>How do I deal with authentication and permissions?</h3>
+
+<p>ZSS Manager allows you to configure permissions at fine granularity, allowing
+you to assign SELECT, UPDATE or DELETE rights to users on a per-table basis.</p>
+
+<p>For ZSS 1.0, the authentication support is fairly basic, allowing you
+to authenticate users against a password list in a SQL table, with support for
+either plaintext passwords (ick) or bcrypt.  Things like Active Directory and
+OAuth2 are on the way.</p>
+
+<h3>Can I sync only part of a table, excluding certain columns, or filtering the rows?</h3>
+
+<p>In ZSS 1.0, no.  This feature is under development for inclusion in a 1.1 release,
+planned for January.</p>
+
+<h3>Is ZSS open source?</h3>
+
+<p>No.</p>
+
+<h3>What about pricing?</h3>
+
+<p>See <a href="http://zumero.com/pricing/">http://zumero.com/pricing/</a>.</p>
+
+<h3>Are you planning to support other SQL databases on the server?</h3>
+
+<p>Yep.  We've been getting plenty of requests for other backends.  PostgreSQL
+is perhaps the most often heard.  Email <a
+    href="mailto:sales@zumero.com">sales@zumero.com</a> to cast your vote.</p>
+
+<p>&nbsp;</p>
+

@@ -1,0 +1,132 @@
+<p>Hi, my name is Eric, and I am a coding addict.</p>
+
+<p>When I founded SourceGear, I was a programmer.&nbsp; Nine years
+later, my company has turned me into a marketing guy.&nbsp; After all the sacrifices
+I made to get this company going, it has coldly turned its back on me, ignoring
+my once prodigious programming talents, callously replacing me with people who
+are younger and better looking, watching apathetically as my technical skills
+atrophy each year, forgetting all the great things I have done, and ---</p>
+
+<p>Ahem.&nbsp; Sorry, I got a little off track there.&nbsp; :-)&nbsp; Where
+was I?</p>
+
+<p>Ah yes, my addiction.&nbsp; You see, although my company has
+grown to the point where it can no longer find a place for me as a coder, I
+have found it rather difficult to stop.&nbsp; I've got some sort of an addiction, a
+disease which compels me to write code.&nbsp; It is this mania which has driven me
+to write things like my <a href="{{{link:id='1574'}}}">solitaire
+game</a> and my <a href="{{{link:id='1576'}}}">blogging
+app</a>.&nbsp; I pretty much always have some kind of a hobby project going on.</p>
+
+<p>Lately my hours as a compulsive coder are spent working on
+some ideas for woodworking design software.&nbsp; Since most of my readers are interested
+in neither woodworking nor solid modeling, I'll spare you the gory details.</p>
+
+<p>About five weeks ago I published a few of my early <a
+href="{{{link:id='1600'}}}">thoughts</a> on WPF
+(Windows Presentation Foundation, formerly called "Avalon").&nbsp; My interest in
+WPF continued to grow, so recently I decided to give it a try by writing a WPF
+front end for my woodworking software.&nbsp; In the process of doing so, I am
+becoming a WPF fan.</p>
+
+<p>The screen shot below is a picture of my WPF viewer in
+action:</p>
+
+<p><img border=0 width=576 height=449
+src="{{{link:id='2037'}}}"></p>
+
+<p>Basically, my woodworking software is designed around the
+concept of a list of steps.&nbsp; Each step corresponds to one woodworking action,
+such as cutting a board or attaching two boards together.&nbsp; A primary job of the
+software is to draw a picture of how the project will look at each step.&nbsp; </p>
+
+<p>In the screen shot above, the ListView on the left contains
+all of the steps to build a simple bookshelf.&nbsp; The larger 3D picture on the
+right is showing the currently selected step.</p>
+
+<p>I am certainly still not an expert on WPF, but here is what
+I like so far:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >It is <i>so</i> easy to put cool things into a ListView.&nbsp; In
+     Win32, list controls are very oriented toward text.&nbsp; WPF has no such
+     bias.&nbsp; I wanted my ListView control to have a little preview picture of
+     each step.&nbsp; This was really simple to do with WPF.<br>
+     <br>
+ </li>
+ <li >WPF 3D is <i>far</i> simpler to use than Managed DirectX.&nbsp;
+     That's kind of a remarkable thing to say when you consider that Managed
+     DirectX is <i>far</i> simpler than using DirectX from unmanaged code.&nbsp; I
+     was able to get excellent results from the 3D features of WPF in very little
+     time.&nbsp; <br>
+     <br>
+ </li>
+ <ul style='margin-top:0in' type=circle>
+  <li >Obviously, there are tradeoffs.&nbsp; For example, I haven't
+      found a way to do volumetric textures using the 3D features in WPF.&nbsp;
+      Still, those tradeoffs seem worth the trouble.<br>
+      <br>
+  </li>
+ </ul>
+ <li >I haven't tried it yet, but apparently WPF is supposed to
+     be able to <i>print</i> my 3D stuff.&nbsp; That's a pretty big win, since I
+     expected printing support to be a heckuva lot of work.<br>
+     <br>
+ </li>
+ <li >I have found XAML to be very nice, after I got past the
+     initial learning curve.&nbsp; At first, XAML looked like a bunch of nonsense on
+     my screen.&nbsp; It didn't take too long to find myself just typing tags and
+     attributes.<br>
+     <br>
+ </li>
+ <li >The Visual Studio support for WPF and XAML is more useful
+     than I thought.&nbsp; The visual UI designer is basically useless, but
+     installing "Cider" also adds other WPF support to Visual Studio 2005,
+     including special project actions and Intellisense.<br>
+     <br>
+ </li>
+ <li >The WPF samples in the Windows SDK are quite helpful.&nbsp; <br>
+     <br>
+ </li>
+ <li >The WPF documentation?&nbsp; Not so much.<br>
+     <br>
+ </li>
+ <li >Since everything in WPF is built on DirectX, controls and
+     3D stuff don't seem to mind sharing the screen with each other.&nbsp; When I
+     was using Managed DirectX with Windows Forms, I couldn't find any easy way
+     to have my 3D view show up in the same window as my controls.&nbsp; With WPF,
+     this is trivial.&nbsp; As the screen shot shows, I have my Viewport3D in the
+     same window as a couple of ListView controls.<br>
+     <br>
+ </li>
+ <li >Finally, here is the coolest example of how smooth this
+     integration is:&nbsp; <br>
+     <br>
+ </li>
+ <ul style='margin-top:0in' type=circle>
+  <li >The preview pictures in the ListView are actually not
+      pictures -- they are little Viewport3D objects.<br>
+      <br>
+  </li>
+  <li >With the Trackball class from <a
+      href="http://blogs.msdn.com/danlehen/default.aspx">Daniel Lehenbauer</a>,
+      I can use the mouse to rotate and zoom the model.&nbsp; <br>
+      <br>
+  </li>
+  <li >I have hooked up all the little viewports in the ListView
+      to the same Trackball as the main view.&nbsp; So, when I rotate or zoom the
+      model on the right, those little previews in the ListView are
+      automatically updated as well.&nbsp; <br>
+      <br>
+  </li>
+  <li >This is what I call Deeply Neato.&nbsp; It's easier to appreciate
+      when you watch it happen, so I captured a <a
+      href="{{{link:id='1611'}}}">short movie</a> (4.5
+      MB AVI, 12 seconds).</li>
+ </ul>
+</ul>
+
+<p>Anyway, I suppose I will soon bump into some sort of a wall,
+but so far, I think WPF is really nice.</p>
+
+<p>{{{haloscan}}}</p>

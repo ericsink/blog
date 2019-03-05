@@ -1,0 +1,398 @@
+<p><b>Summary</b>: Eric talks about the business implications that come into play when we choose languages and components.</p>
+If your parents hauled you to Sunday school every week like mine did, perhaps the following lyrics sound familiar?
+<p></p>
+
+<blockquote>
+<i>The foolish man built his house upon the sand</i></blockquote>
+
+<blockquote>
+<i>And the rains came tumbling down</i></blockquote>
+
+<p>For those of you who were deprived of this early childhood ritual,
+allow me to provide a bit of background. The song tells the tale of two
+men. The so-called "wise man" built his house on some sort of a rock,
+evidently a first-century precursor to modern concrete. Meanwhile, the
+"foolish man" was constructing his home on a foundation of sand. The
+song ends with each of these guys getting the results any grown-up
+would expect them to get. After all, if you're going to put your
+building on a bunch of sand, you should <b>expect</b> it to float away when the rains come.</p>
+
+<p>Unfortunately, the corresponding decisions for a small ISV are
+usually far less obvious. When we build our applications, we have to
+decide what foundation (or platform) to use, and those decisions are
+not at all simple. In fact, these technology choices can be so
+difficult that you don't have to be "foolish" to earn bad results. Many
+a wise man has watched his software product floating away in the
+floodwaters after a big rain.</p>
+
+<h2>What Is a "Platform"?</h2>
+
+<p>Metaphors from the construction industry usually work quite well for
+software. Every application needs to be built on a strong foundation,
+or "platform". Just as with a physical building, the quality of the
+foundation is incredibly important. If you get to the point where you
+regret your platform choice, it can be really painful and expensive to
+fix it.</p>
+
+<p>For the purpose of this article, I will define the word "platform"
+to include everything on which your software is built. In other words,
+your application's platform consists of everything on which it is
+dependent. The following kinds of things are included in my definition
+of a platform:
+</p><ul type="disc">
+	<li>Hardware
+</li>
+<li>Operating system
+</li>
+<li>Programming language
+</li>
+<li>Class libraries
+</li>
+<li>Components
+</li>
+<li>Runtimes
+</li>
+<li>Other applications
+</li>
+</ul>
+
+<p>For example, my company sells a product called <a href="http://www.sourcegear.com/sos/">SourceOffSite</a> that is an add-on for <a href="http://www.microsoft.com/ssafe/">Visual SourceSafe</a>.
+Prior to our 4.0 release, the server side of this product was written
+in Visual J++. Therefore, the platform for the SourceOffSite server
+contained the following things:
+</p><ul type="disc">
+	<li>Visual SourceSafe
+</li>
+<li>Microsoft Java VM
+</li>
+<li>A third-party encryption library
+</li>
+<li>J++
+</li>
+<li>Microsoft Windows
+</li>
+<li>The PC
+</li>
+</ul>
+
+<p>I use this particular example because our application ended up
+"floating away", at least temporarily. The Microsoft Java VM is not
+officially supported on Windows Server 2003. We ended up <a href="http://www.microsoft.com/resources/casestudies/CaseStudy.asp?CaseStudyID=14694">porting</a> that server to C# in order to offer our customers a migration path.</p>
+
+<h2>The Pros and Cons of Large Platforms</h2>
+
+<p>An important issue in platform decisions is the matter of how
+"large" your platform is. How much stuff do you have available for the
+purpose of building your application? How much stuff does your
+application depend upon in order to function?</p>
+
+<p>Larger platforms can lead to shorter development cycles. The more
+the platform provides, the less code you have to write. All else equal,
+most software should be built on the largest platform available.
+However, all else is not equal. There are trade-offs to be considered.
+The benefit of rapid development often comes with other problems.</p>
+
+<h3>Problem: Performance</h3>
+
+<p>Code that was written more quickly runs more slowly. (For now, I'll
+leave this sweeping generalization undefended, but I admit that there
+are exceptions to the rule.)</p>
+
+<h3>Problem: Integration testing</h3>
+
+<p>Projects built on larger platforms often slow down considerably when
+integration testing begins. Your entire product has to pass quality
+assurance (QA), not just the code you wrote. When you choose a
+technology to be part of your platform, you are choosing to test that
+technology and find ways to deal with its bugs.</p>
+
+<h3>Problem: Nightmare install</h3>
+
+<p>In order to run your application, every piece of your platform has
+to somehow get installed on the user's computer. Either it was already
+there, or you have to install it. If your platform is large, installing
+all your app's dependencies can be quite a mess. Users get scared by
+complicated installs.</p>
+
+<h3>Problem: The user's dog is barking at your app</h3>
+
+<p>Some large platforms achieve development speed by doing things in
+ways that don't quite fit with the ways things are usually done. </p>
+
+<p>For example, GUI apps written with Java and Swing do not use the
+operating system's native user interface (UI) controls. On Windows, a
+button in a Swing dialog box is not the same as the one in a regular
+Win32 application. It looks awfully similar, but it's not the same.
+Sometimes the imitation is so good that your user is not consciously
+aware of the problem. However, the user's dog is not fooled and will
+bark at these buttons, because they're just not quite right.</p>
+
+<h2>How Are Platform Decisions Made?</h2>
+
+<p>The latent trade-offs in these platform decisions are tricky. It's
+worth some time to look carefully at the way we approach these
+decisions. </p>
+
+<p>By definition, choosing a platform involves a bunch of technology
+choices. Most organizations therefore delegate these choices to their
+technology people. This approach is not entirely incorrect, but it
+often results in major problems.</p>
+
+<p>The truth is that these technology decisions have major business
+implications. You can't win by choosing the right platform, but you can
+lose by choosing the wrong one.</p>
+
+<blockquote>
+Do we really want some dork with a compiler making decisions that could affect our sales? Probably not.</blockquote>
+
+<blockquote>
+Perhaps we should go to the other extreme and have all platform
+decisions dictated by management? This approach looks even worse.</blockquote>
+
+<blockquote>
+Do we really want some dork with a spreadsheet deciding between wxWindows and Qt? Probably not.</blockquote>
+
+<p>The important point here is that this cannot be an "either/or"
+choice. When making platform decisions, you must not choose between
+"business clue" and "technical clue". Get both.</p>
+
+<h2>A Word to the Business People</h2>
+
+<p>Please stop reading. The rest of this article is for the geeks. You are dismissed.</p>
+
+<p>Oh, and by the way, I apologize for the "dork" remark. Nothing personal.  <b><code>:-)</code></b></p>
+
+<h2>OK, Now a Word to the Geeks</h2>
+
+<p>I asked the business folks to leave the room because the solution to
+this problem begins with us, the geeks. We are the ones who understand
+the technology side. The reality is that these technology choices
+cannot be made without our help. Furthermore, we can probably learn a
+thing or two about business a lot faster than the business guys can
+learn how to find a memory leak or dereference a pointer. Let's agree
+not to get uppity about this. The goal here is to learn how to bring
+our technology expertise into platform decisions as effectively as we
+can.</p>
+
+<p>As it turns out, this is going to be rather simple. In fact, if
+we're going to participate in platform decisions as geeks with a touch
+of business clue, there is only one concept we have to learn:</p>
+
+<blockquote>
+<b>It's all about the user.</b></blockquote>
+
+<p>As geeks, our natural tendency is to focus on the ways in which a technology decision will affect us:
+
+</p><ul type="disc">
+	<li>We want to use the latest tools and technologies so we can stay current.
+</li>
+<li>We would rather buy a component because it will help us make our ship date.
+</li>
+<li>We don't like checking for memory leaks, so we prefer languages with a good garbage collector.
+</li>
+</ul>
+
+<p>We also sometimes base our technology decisions on our own "religious" preferences:
+
+</p><ul type="disc">
+	<li>We prefer C++ because we believe Visual Basic isn't a real language.
+</li>
+<li>We prefer the command line because we don't like using a mouse.
+</li>
+<li>We prefer to write our own grid control because we believe the component vendor didn't do it right.
+</li>
+</ul>
+
+<p>Some of our so-called "religious preferences" are rooted in valid
+concerns, but we must hold them in the proper balance against
+considerations that affect the user. Basically, this whole point can be
+summarized with Eric's First Law of Platform Decisions for Small ISVs: </p>
+
+<blockquote>
+<b>As developers in a small ISV, <br />
+our productivity is important, <br />
+but it must be secondary to <br />
+the comfort and preferences of <br />
+our users.</b></blockquote>
+
+<p>This rule will invite all kinds of criticism; so let me clarify two things:
+
+</p><ul type="disc">
+	<li>If you are developing software as part of a
+corporate IT department, this rule may apply somewhat less to you. Your
+users do not have as much free will as the potential customers of an
+ISV, so you can probably stretch their patience a bit.
+</li>
+<li>This
+rule does not mean that we give up our never-ending quest for more
+efficient and productive ways of developing software. I am merely
+saying that we need to think first about the user. We need to
+understand the limits of what our users will find acceptable in terms
+of usability. That limit becomes the boundary of our choices, and it is
+our responsibility to find the most productive tools and platform we
+can identify within that boundary.
+</li>
+</ul>
+
+<p>Adopting this posture can be very difficult, but in a small ISV, it
+is absolutely necessary. When we make technology decisions that are
+good for ourselves and bad for the user, we walk a well-worn path to
+business failure.</p>
+
+<p>The user is king. He gets to choose whether he wants to buy our
+application or not. If he chooses not to buy, our business will fail.
+Unlike us geeks, the user is a normal person. He expects everything to
+Just Work. The slightest hassle will often scare him away.</p>
+
+<p>Let's talk about some specific platform decisions that many small ISVs are facing.</p>
+
+<h2>The Operating System</h2>
+
+<p>At the risk of being absurdly obvious, let's acknowledge that there
+are an awful lot of people who use Windows. And who can blame them? I
+certainly find Windows to be quite satisfactory. In fact, once I get <a href="http://www.gnu.org/software/emacs/emacs.html">emacs</a> and <a href="http://www.cygwin.com/">cygwin</a> installed, Windows XP is probably the nicest OS I have ever used.  <b><code>:-)</code></b></p>
+
+<p>Seriously, basically every small ISV needs to support Windows. It is
+somewhat more likely that you can ignore the other desktop platforms,
+although we should take a moment or two and talk through this issue.</p>
+
+<h3>MacOS</h3>
+
+<p>Although my usual machine is a Windows box, I am writing this
+article on a Mac. MacOS X is somewhat like the Grand Canyon. It's
+unbelievably beautiful, and it's very hard to describe to somebody who
+has never seen it. Neither words nor screen shots really do it justice.</p>
+
+<p>Most small ISVs don't support the Mac because "the market is too
+small". However, this is clearly not true for all application
+categories. At the recent MacWorld Expo, Steve Jobs claimed that there
+are around 9 million Macintosh users. If your small ISV can sell
+something to 1% of those users every year, you can afford to drive a
+very nice car. Granted, capturing revenue from that 1% is definitely
+not going to be easy. All I'm saying is that the Mac market is bigger
+than most software developers think.</p>
+
+<p>Just make sure of one thing: If you're going to sell applications
+for the Mac, make sure your application is really pretty, or else your
+user's dog will be barking.</p>
+
+<h3>Linux</h3>
+
+<p>Let me start right up front by saying that I like Linux. I've been a
+Linux user for about ten years now. My personal Web server is a Debian
+box.</p>
+
+<p>But Linux is still a lousy market for most small ISVs, especially
+for desktop applications. IBM can make money with a Linux strategy, but
+that doesn't mean you can.</p>
+
+<p>The same basic arithmetic applies here just as it did for MacOS
+above. There are lots of Linux users. If you could sell something to 1%
+of Linux users, you could make very nice money. But capturing revenue
+from that 1% is going to be insanely difficult. After all, one of the
+distinguishing characteristics of this crowd is their tendency to use
+things that have zero cost. If you are one of the people who can,
+please accept my congratulations.</p>
+
+<h2>.NET Yet?</h2>
+
+<p>Here is one of the toughest questions for a small ISV today:</p>
+
+<blockquote>
+Should we be using the .NET Framework or not? </blockquote>
+
+<p>Like I said, this one is tough.</p>
+
+<p>Believe me, I understand the allure. You <b>want</b> to use C#. You
+really do. It's a very nice platform for the developer. Coding is fun
+again. I can get stuff done really quickly in C#, and the resulting app
+performs and looks like it was done in good old C++.</p>
+
+<p>But depending on your circumstances, your users may end up paying
+the price for your increased productivity. Remember, you are a small
+ISV. You don't have a distribution channel. You don't have the clout to
+get your boxed CD on the shelf at Best Buy or Wal-Mart. People are
+going to download your demo and make a decision that determines the
+success of your company. You need your download to be quick and your
+install to be utterly painless. If not, a prospective customer will
+lose interest very quickly. The simple truth is that for some users,
+the .NET common language runtime (CLR) adds too many megabytes to your
+download and another scary step to your install.</p>
+
+<p>When it comes right down to it, we may need to admit that we want to use the .NET Framework for ourselves, not for our users.</p>
+
+<p><tt><b>#ifdef do_as_I_say_not_as_I_do</b></tt></p>
+
+<p>OK, fine--call me a hypocrite. Yes, I admit that we built <a href="http://www.sourcegear.com/vault/">SourceGear Vault</a>
+entirely in C#. Furthermore, the complete platform for the Vault server
+is pretty darn large. In addition to the .NET CLR, our users have to
+set up IIS and SQL Server as well. All this stuff allowed us to
+develop Vault very quickly, but our install procedure is a lot more
+complicated than I wish it were. Why don't I heed my own advice?</p>
+
+<p>The developer tools market is a fantasyland that is loaded with
+exceptions to the usual rules. Our customers are not normal people. By
+and large, they are <a href="http://software.ericsink.com/Geek_Gauntlets.html">geeks</a> like us. They are far more likely than normal people to already have the .NET CLR installed.</p>
+
+<p>We still want our installer to be as painless as possible, but the
+truth is that our users will put up with more hassle because they have
+more expertise and because they are accustomed to it. Like I said, most
+of them have already installed Visual Studio .NET, which is around
+three hours of their life they will never get back. The first time I
+installed Visual Studio .NET was in my hotel room at the Microsoft
+Professional Developers Conference in October 2003. While the
+installation was running, I watched <a href="http://www.imdb.com/title/tt0146984/">The Legend of Bagger Vance</a>, in its entirety. If people will put up with that, then the Vault installation suddenly looks quite painless, by comparison.</p>
+
+<p>Restating this point with a metaphor from grade school: When it
+comes to product usability, it's okay to grade yourself on the curve.</p>
+
+<p>Restating this point with an old joke: If you and a friend encounter
+a mountain lion in the woods, you don't have to outrun the lion--you
+only have to outrun your friend. <b><code>:-)</code></b></p>
+
+<p><tt><b>#endif</b></tt></p>
+
+<p>Remember, "It's all about the user". If your users are normal
+people, you have to think carefully about whether they are ready to
+download and install the .NET CLR. Normal people expect everything to
+Just Work. When something doesn't work, they don't have the skills to
+look under the hood and fix the problem.</p>
+
+<p>The latest toolset from Microsoft is incredibly cool. Someday, the
+.NET Framework will be preinstalled on every PC. On that day, Windows
+Forms applications will Just Work, with no user hassle at all. If you
+are not using .NET by then, you will be hopelessly behind the times.</p>
+
+<p>But today, you have to think about trade-offs. Not every small ISV
+needs to be on the .NET Framework right now. For some small ISVs, it
+just isn't time yet, and the decision depends a lot on your
+circumstances. Using the proven technology from the previous wave is
+not as shameful as you might think--especially if that's what is best
+for your users.</p>
+
+<p>If I were starting a product today for normal people, I would force
+myself to at least consider building it on the solid rock of C++ and
+MFC, especially if I were planning to ship the product sometime this
+year. I really like Visual Studio .NET, but the stuff from the
+Microsoft's previous wave still works, too.</p>
+
+<h2>The Bottom Line</h2>
+
+<p>Let's close this piece by returning from the specific back to the
+general. We can agree or disagree about the trade-offs for specific
+technologies, but my main point remains: It's all about the user.
+Regardless of whether we end up choosing large platforms or small ones,
+if we make that choice without giving consideration to the user, it is
+very likely we are making a mistake.</p>
+
+<p></p><p>&nbsp;</p>
+<hr noshade="noshade" size="1" />
+<p>
+Eric Sink is the <a href="http://notalegend.com/">non-legendary</a> founder of <a href="http://www.sourcegear.com/">SourceGear</a>,
+a developer tools ISV located in Illinois. Please stop by the
+SourceGear booth at Tech-Ed in May so he can gloat over the fact that
+he gets to use C# and you don't. Eric's weblog is at <a href="http://software.ericsink.com/">http://software.ericsink.com/</a>.</p>
+
+<hr noshade="noshade" size="1" />
+<p><i>This article originally appeared on the <a href="http://msdn.microsoft.com">MSDN</a> website.</i></p>
+<p></p>

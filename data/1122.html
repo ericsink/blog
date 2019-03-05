@@ -1,0 +1,112 @@
+<p>I am pleased to announce our second beta release of Vault 3.0 and Dragnet 1.0.&nbsp; Beta 1 was made available privately to a small group of testers.&nbsp; This is the first publicly available beta release.</p>
+<p><strong><font size="4">For Early Adopters only</font></strong></p>
+<p>These are <em>beta</em> releases.&nbsp; We are not done testing and we still have more bugs to fix.&nbsp; A level-headed person wouldn't even consider deploying these builds on a production server.&nbsp;</p>
+<p>However, since I am reckless early adopter, I can only assume that many of my readers are as well.&nbsp; For those of you who will be throwing prudence to the wind, please be aware of the following:</p>
+<ul>
+<li><strong>You can't go back</strong>.&nbsp; Installing Vault 3.0 will upgrade your Vault database to 3.0, and there is no way to go back.&nbsp; The state files on your client will be changed to a new format as well, and there is no way to go back.&nbsp; Upgrading to 3.0 is a one-way trip.
+</li>
+<li><strong>You can't mix and match</strong>.&nbsp; Vault 3.0 clients will not talk with Vault 2.0 servers.&nbsp; Vault 3.0 servers will not talk with Vault 2.0 clients.&nbsp; Everyone will have to upgrade, all at once.
+</li>
+<li><strong>You should not use .NET 2.0</strong>.&nbsp; Right now, Vault 3.0 is only supported and compatible with the current shipping release of the .NET Framework.&nbsp; If you are using the .NET 2.0 betas, you should not use this release of Vault.&nbsp; (Yes, we will test and verify with .NET 2.0 later.)
+</li>
+<li><strong>You should do backups</strong>.&nbsp; Please, before you do the upgrade, backup your data and put the backup in a safe place.&nbsp;&nbsp;Consider doing backups at least once a day while you are using the beta release.&nbsp; (Daily backups are a darn good idea anyway, so once you've started the habit, keep it.)
+</li>
+</ul>
+<p><strong><font size="4">What's new in Vault 3.0?</font></strong></p>
+<ul>
+<li>Bunches-o-bug-fixes
+</li>
+<li>Integration with our new bug-tracking product, Dragnet
+</li>
+<li>Email notifications
+</li>
+<li>New dialog for adding files, much easier
+</li>
+<li>New dialog for setting working folders
+</li>
+<li>Much improved handling of files in status "unknown"
+</li>
+<li>Greatly simplified license tracking
+</li>
+<li>Integration with Active Directory
+</li>
+<li>Several improvements to make Merge Branches even easier to use
+</li>
+<li>Improvements to the DiffMerge tool, including Unicode support
+</li>
+<li>Significant improvements to performance and scalability, especially for larger teams
+</li>
+</ul>
+<p><strong><font size="4">What is Dragnet?</font></strong></p>
+<p><!--StartFragment --><!--StartFragment -->Dragnet is a web-based bug-tracking system.&nbsp; The SourceGear corporate website does not yet contain any basic product information on Dragnet.&nbsp; This stuff will be published soon.&nbsp; For now, here is a list of highlights:</p>
+<ul>
+<li><strong>Built on ASP.NET and SQL Server</strong>.
+&nbsp; Dragnet is entirely web-based.
+</li>
+<li>
+<div class="MsoNormal" style="MARGIN: 0in 0in 0pt"><b>Integration with Vault 3.0 and SourceOffSite 4.1</b>.<span>&nbsp;</span> Dragnet offers full, rich integration with both of SourceGear's version control products.</div>
+</li>
+<li><strong>Item types</strong>.&nbsp; Dragnet can track other kinds of items besides bugs, allowing it to be used as more general project management tool.
+</li>
+<li>
+<div class="MsoNormal" style="MARGIN: 0in 0in 0pt"><b>Audit trails</b>.<span>&nbsp;</span> Dragnet remembers every change which has ever been made to an item, allowing you to see the full history of the issue.</div>
+</li>
+<li>
+<div class="MsoNormal" style="MARGIN: 0in 0in 0pt"><b>Customizable fields</b>.<span>&nbsp;</span> Store the information you want to store for your particular situation.</div>
+</li>
+<li>
+<div class="MsoNormal" style="MARGIN: 0in 0in 0pt"><b>Keyword search</b>.<span>&nbsp;</span> Easily retrieve all items which match one or more search terms.</div>
+</li>
+<li>
+<div class="MsoNormal" style="MARGIN: 0in 0in 0pt"><b>Email notifications</b>.<span>&nbsp;</span> Configure Dragnet to let you know when things happen.</div>
+</li>
+<li>
+<div class="MsoNormal" style="MARGIN: 0in 0in 0pt"><strong>Web Services API</strong>.&nbsp; Access the contents of your Dragnet database through XML Web Services.</div>
+</li>
+<li>
+<div class="MsoNormal" style="MARGIN: 0in 0in 0pt"><b>Milestones</b>.<span>&nbsp;</span> Divide your items into milestones you define, helping your team to focus on immediate goals.</div>
+</li>
+<li>
+<div class="MsoNormal" style="MARGIN: 0in 0in 0pt"><b><span style="FONT-SIZE: 12pt; FONT-FAMILY: 'Times New Roman'">Seamless transition from Collab</span></b><span style="FONT-SIZE: 12pt; FONT-FAMILY: 'Times New Roman'">.</span>&nbsp; Users of SourceOffSite Collab will be able to import all their data into Dragnet.</div>
+</li>
+</ul>
+<p><strong><font size="4">Release date</font></strong></p>
+<p>We plan to release Vault 3.0 and Dragnet 1.0 before the end of November.</p>
+<p><strong><font size="4">Pricing</font></strong></p>
+<p>The base price of Vault will remain at $199 per user (without a support contract).&nbsp; However, it's fair to warn you that the volume discounts will be a bit less aggressive after 3.0 is released.&nbsp; I can't publish the new numbers yet, but I can say this:&nbsp; If you are planning to buy Vault, doing it in the next week or two will save you some money.</p>
+<p>In order to upgrade to Vault 3.0 from a previous release, you will need a current support contract, which we call a "Gold Support subscription".&nbsp; Gold Support costs $99 per user per year.</p>
+<p>Our policy is that all Vault customers receive free tech support and free upgrades for 30 days after your purchase.&nbsp; So, if you buy Vault 2.0 sometime during the 30 days just before the 3.0 release, you will get the 3.0 upgrade for free whether you buy Gold Support or not.</p>
+<p>Dragnet will be priced at $99 per user (without a support contract).&nbsp; As a gesture of goodwill to our best customers, each Vault customer who purchased Gold Support prior to this release will get Dragnet 1.0 for free.</p>
+<p>Please note that the benefits of Gold Support are only available if you have purchased Gold Support for all your users.&nbsp;&nbsp;If you bought 25 Vault licenses and only one Gold Support subscription, you don't really have Gold Support.&nbsp; You'll need to buy the other 24 subscriptions in order to get the upgrade or the free Dragnet licenses.&nbsp; (Unfortunately, the current implementation of our online store allows customers to buy fewer Gold Support subscriptions than Vault licenses.&nbsp; This problem will be fixed when we deploy the new store software for the new release.)</p>
+<p>I'm only mentioning a few key highlights about pricing here.&nbsp; The full details will be available by the time of the release.</p>
+<p><strong><font size="4">Serial numbers</font></strong></p>
+<p>Here are demo serial numbers for 25 users, expiring 60 days from today:</p>
+<table cellpadding="4" border="0">
+<tbody>
+<tr><td align="right">Vault:</td><td><tt>P4YLN-M5639-274MD-EJQK9-FY847</tt></td></tr>
+<tr><td align="right">Dragnet:</td><td><tt>GGYLN-DM6K9-274MD-EJQN4-FU88W</tt></td></tr>
+</tbody>
+</table><p>Please note that your 2.0 serial numbers will not work with 3.0.&nbsp; In part, this is because Vault 3.0 is a paid upgrade, but in addition, Vault serial numbers have changed with the 3.0 release.&nbsp; The new serial numbers are simpler, shorter, and do not require activation.</p>
+<p><strong><font size="4">Download</font></strong></p>
+<p>The download directory for the Vault and Dragnet betas is:</p>
+<p><a href="http://download.sourcegear.com/beta/">http://download.sourcegear.com/beta/</a></p>
+<p>Get build 2711 of Vault, and build 1136 of Dragnet.</p>
+<p><strong><font size="4">Reporting Bugs</font></strong></p>
+<p>If you download and install these builds, you are a beta tester.&nbsp; We hope you'll give us some feedback.&nbsp; Tell us what works.&nbsp; Tell us what doesn't work.&nbsp; Ask us questions.</p>
+<p>The place to do all this is the <a href="http://support.sourcegear.com/viewforum.php?f=6">Vault discussion forum</a>.&nbsp; Please don't email me directly, as we would prefer that discussion of the beta happen publicly on the forum.</p>
+<p><strong><font size="4">FAQs</font></strong></p>
+<p>Q:&nbsp; I want to upgrade to Vault 3.0, but I don't want to buy Gold Support.&nbsp; Is there another way?</p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>A:&nbsp; No.&nbsp; Gold Support is the way to get the upgrade.</p>
+</blockquote>
+<p>Q:&nbsp; Are you guys using Vault and Dragnet internally for your own development?</p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>A:&nbsp; Of course!&nbsp; We've been using early versions of Vault 3.0 and Dragnet 1.0 for several months.</p>
+</blockquote>
+<p dir="ltr">Q:&nbsp; Is SourceOffSite 4.1 beta available yet?</p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>A:&nbsp; Nope -- not yet.</p>
+</blockquote>
+<p dir="ltr">
+</p>
+<p>&nbsp;</p>

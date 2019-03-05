@@ -1,0 +1,71 @@
+
+<P>(This entry is part of a <A href="{{{link:id='3052'}}}">series</A>.  The audience: SQL Server developers.  The topic: SQLite on mobile devices.)</P><hr/>
+
+<h2>I can't use SQLite!  It doesn't support foreign keys!</h2>
+
+<p>Actually, it does.  Since version 3.6.19, released in October 2009.  Before
+the first iPad.  Windows 7 was not quite out yet.
+Miley Cyrus was still Hannah Montana.</p>
+
+<h2>You're wrong!  This code should fail but doesn't!</h2>
+
+<pre class="screen">
+CREATE TABLE [to] (pk int PRIMARY KEY);
+CREATE TABLE [from] (other REFERENCES [to](pk) );
+INSERT INTO [from] (other) VALUES (3);
+</pre>
+
+<p>Fair enough.  It is easy to get the impression that SQLite still lacks
+support for foreign keys because the feature is [usually] turned off by default, to preserve
+backward compatibility.</p>
+
+<h2>How to turn SQLite foreign key support on</h2>
+
+<p>To enable the enforcement of foreign key constraints, execute the following SQL statement, shortly
+after you open your SQLite database connection:</p>
+
+<pre class="screen">
+PRAGMA foreign_keys = 1;
+</pre>
+
+<p>I <i>always</i> use SQLite with foreign keys.  In fact, I always open SQLite
+connections with a helper function
+which (1) opens the SQLite connection and (2) immediately executes the PRAGMA
+above.</p>
+
+<h2>Differences</h2>
+
+<p>Once you've got the feature turned on, foreign key support in SQLite is generally
+similar to what a SQL Server dev would expect.  Full documentation is available <a href="https://www.sqlite.org/foreignkeys.html">on the SQLite website</a>, but there are a few things worth highlighting.</p>
+
+<ul>
+    <li><p>SQLite supports simple foreign keys (with one column referencing one
+    column), or composite foreign keys (with multiple columns referencing
+    multiple columns).</p></li>
+
+    <li><p>SQLite does support ON DELETE and ON CASCADE.</p></li>
+
+    <li><p>SQLite allows a foreign key constraint to be <i>deferred</i>, which
+    means that its enforcement is postponed until the transaction is committed.
+    This is a handy feature that I really wish SQL Server had.</p></li>
+
+</ul>
+
+<h2>Shameless, blatantly self-serving commercial remark</h2>
+
+<p><a href="http://zumero.com/dev-center/zss/">Zumero for SQL Server</a> automatically syncs foreign key constraints.  Microsoft <a href="http://msdn.microsoft.com/en-us/sync/bb736753.aspx">Sync Framework</a> does not.</p>
+
+<p>So there.</p>
+
+<p><tt><b>:-)</b></tt></p>
+
+<h2>Summary</h2>
+
+<p>
+<tt>PRAGMA foreign_keys = 1;</tt>
+Always.
+</p>
+
+<p>&nbsp;</p>
+
+

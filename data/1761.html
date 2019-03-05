@@ -1,0 +1,203 @@
+<p>There are two kinds of people:</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >Those who tend to divide everything into two groups</li>
+ <li >Those who do not.</li>
+</ol>
+
+<p>I am one of the former.&nbsp; <b>:-)</b></p>
+
+<p>There are two kinds of version control tools:</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >Those where the history is a Line.</li>
+ <li >Those where the history is a Directed Acyclic Graph (a
+     DAG).</li>
+</ol>
+
+<p>Traditional tools (like Subversion and Vault) tend to model
+history as a Line.&nbsp; In the DVCS tools (like Git and Mercurial), history is a
+DAG.&nbsp; The differences between these two models are rather interesting.</p>
+
+<p>The Line model is tried and true.&nbsp; History is a sequence of
+versions, one after the other.</p>
+
+<p><img width=500 height=100 src="{{{link:id='2103'}}}"></p>
+
+<p>To create a new version:</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >Grab the latest version</li>
+ <li >Make some changes to it</li>
+ <li >Check it back in</li>
+</ol>
+
+<p>People like the Line model for its simplicity.&nbsp; It provides
+an unambiguous answer to the question of which version is latest.</p>
+
+<p>But the Line model has one big problem:&nbsp; You can only
+checkin a new version if it was based on the latest version.&nbsp; And this kind of
+thing happens a lot:</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >I grab the latest version.&nbsp; At the time I grabbed it, this
+     was version 3.</li>
+ <li >I make some changes to it</li>
+ <li >While I am doing this, somebody checks in version 4.</li>
+ <li >When I go to checkin my changes, I can't, because they are
+     not based on the current version.&nbsp; The "baseline" for my changes was
+     version 3, because that's what was current when I started.</li>
+</ol>
+
+<p><img width=500 height=175 src="{{{link:id='2104'}}}"></p>
+
+<p>The Line model of history won't allow me to create version 5
+as shown in the picture.&nbsp; Instead, a Line model SCM tool will require me to
+take the changes which were made between version 3 and 4 and apply them to my
+version.&nbsp; This operation is usually called a "merge".&nbsp; The result is that my
+baseline gets changed from 3 to 4, thus allowing me to checkin.&nbsp; This model is
+explained in <a href="{{{link:id='1083'}}}">chapter 2</a>
+of my SourceControl HOWTO as "edit-merge-commit".</p>
+
+<p>The obvious question is:&nbsp; What would happen if we allowed 5
+to be checked in with 3 as its baseline?&nbsp; Our history would no longer be a
+Line.&nbsp; Instead it would be a DAG.</p>
+
+<p>And why would we do this?</p>
+
+<p>The major feature of the DAG model for history is that it
+doesn't interrupt the developer at the moment they are trying to commit their
+work.&nbsp; In this fashion, the DAG is probably a more pure representation of what
+happens in a team practicing concurrent development.&nbsp; Version 5 was in fact
+based on version 3, so why not just represent that fact?</p>
+
+<p>Well, it turns out there is a darn good reason why not.&nbsp; In
+the DAG above, we don't know which version is "the latest".&nbsp; This causes all
+kinds of problems:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Suppose we need the changes in version 4 and 5 in order to
+     ship our release.&nbsp; Currently we can't have that.&nbsp; There is no version in
+     the system that includes both.</li>
+ <li >Our build system is configured to always build the latest
+     version.&nbsp; What is it supposed to do now?</li>
+ <li >Even if we build both 4 and 5, which one is QA supposed to
+     test?</li>
+ <li >If a developer wants to update her tree to the latest
+     version, which one is it?</li>
+ <li >When a developer wants to make some changes, which version
+     should they use as the baseline?</li>
+ <li >Our project manager wants to know which tasks are done and
+     how much work is left to do.&nbsp; His notion of "done" is very closely
+     associated with the concept of "latest".&nbsp; If he can't figure out which version
+     is latest, his brain is likely to just blue screen when he tries to update
+     the Gannt chart.</li>
+</ul>
+
+<p>Yep, this is a bad scene.&nbsp; Civilization as we know it will
+probably just shut down.&nbsp; </p>
+
+<p>In order to avoid dogs and cats living together with mass
+hysteria, the tools that use a DAG model of history provide a way to resolve
+the mess.&nbsp; The answer is the same as it is with Line history.&nbsp; We need a merge.&nbsp;
+But instead of requiring the developer to merge before they commit, we allow
+that merge to happen later.</p>
+
+<p><img border=0 width=500 height=174
+src="{{{link:id='2105'}}}"></p>
+
+<p>Somebody needs to construct a version which contains all the
+changes in both version 4 and version 5.&nbsp; When this version gets committed, it
+will have arrows pointing to both of its "parents".&nbsp; </p>
+
+<p>Order has been restored.&nbsp; Once again we know which version
+is "the latest".&nbsp; If somebody will remember to reboot the project manager, he
+will probably realize that this DAG looks almost like a Line.&nbsp; Except for that
+weird stuff happening between version 3 and 6, it <i>is</i> a Line.&nbsp; Best not
+to lose sleep over it.</p>
+
+<p>What this project manager doesn't know is that this
+particular crisis was minor.&nbsp; He thinks that his paradigm has been completely
+challenged, but one day he's going to come into his office and find this:</p>
+
+<p><img border=0 width=500 height=353
+src="{{{link:id='2106'}}}"></p>
+
+<p>&amp;@#$!</p>
+
+<p>Now what?</p>
+
+<p>If you're living in the Line model paradigm, this DAG is an
+absolute disaster.&nbsp; It has FOUR leaf nodes.&nbsp; Everything that needs to know
+which version is latest is about to completely fall apart, including the
+aforementioned product manager who is probably now in his office curled up in a
+fetal position and hoping that Mommy includes cookies with his SpaghettiOs at
+lunch.</p>
+
+<p>The Line model is looking pretty good right now.&nbsp; There's a
+good reason why 99.44% of developers are using an SCM tool built on the Line
+model of history.&nbsp; (Yes, I made that statistic up.)</p>
+
+<p>And yet, despite all this apparent chaos, we should remind
+ourselves of the primary benefit of the DAG model:&nbsp; It more accurately
+describes the way developers work.&nbsp; It doesn't make developers bend to its will
+like the Line model does.&nbsp; When a developer wants to check something in, he
+does, and the DAG merely records what happened.</p>
+
+<p>Many teams will always prefer the Line model, and there's
+nothing wrong with that.&nbsp; Life is simpler that way.</p>
+
+<p>But for some other teams, the DAG model can be really
+valuable.&nbsp; </p>
+
+<p>And for other teams, the DAG model might be coming along simply
+because they want to use a DVCS tool for other reasons.&nbsp; DVCS tools use a DAG
+because they have to.&nbsp; If we can't assume a live connection to a central
+server, there isn't any way to force developers to make everything fit into the
+Line model.</p>
+
+<p>So we need to figure out ways of coping with the DAG.&nbsp; How
+do we do this?</p>
+
+<p>One way is to reframe every operation.&nbsp; If you tell a doctor
+that "it hurts when I need to know which version is latest", the doctor will
+tell you to "stop doing that".&nbsp; Instead, always specify exactly which node to
+use:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >The build machine doesn't build the latest node.&nbsp; Instead,
+     it builds whichever node we tell it to build.&nbsp; Or maybe it builds <i>every</i>
+     node.</li>
+ <li >QA tests whichever build somebody decides they should
+     test.</li>
+ <li >Developers don't update their tree to "the latest".&nbsp;
+     Instead, they look at the DAG, pick a node, and update to that one.</li>
+</ul>
+
+<p>I'm not saying this approach is practical.&nbsp; I am merely
+observing that it is conceptually valid.&nbsp; As long as you're willing to specify
+which node you want to use, any operation that needs a node can proceed.</p>
+
+<p>But how do we specify a node?&nbsp; One thing that makes this
+approach problematic is that these nodes tend to have odd names.&nbsp; For example,
+in Git, the name of a node is something like e69de29bb2d1d6434b8b29ae775ad8c2e48c5391.&nbsp;
+Developers are going to find this naming scheme to be a <i>little</i>
+unintuitive.</p>
+
+<p>All DVCS tools use a DAG.&nbsp; And all these tools do various
+things to either prevent "the crisis of multiple leaf nodes" or to help the
+team cope with it.&nbsp; But they all seem to do it a little differently.</p>
+
+<p>Happily, this presents me with an opportunity to divide them
+all into two groups:</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >Those who handle this problem in ways that I like.</li>
+ <li >Those who handle this problem in ways that I do <i>not</i>
+     like.</li>
+</ol>
+
+<p>This blog entry is already longer than I thought it would be,
+so I'm going to stop here and continue next week.</p>
+
+<p>{{{haloscan}}}</p>

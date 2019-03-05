@@ -1,0 +1,139 @@
+<p>This entry is part 5 of a <a
+href="{{{link:id='1684'}}}">12-part series</a> on WPF
+3D.</p>
+
+<h3>Back to Basics</h3>
+
+<p>After several posts about the quirky minutia of WPF 3D, now
+I want to go back and cover some basic principles for those who may be less familiar
+with 3D graphics.&nbsp; A full introduction would be far beyond the scope of a blog
+entry, so I'm just going to hit a few highlights I consider significant,
+especially for those who are coming from a background in 2D graphics.</p>
+
+<h3>Floating point</h3>
+
+<p>When I first started doing 3D graphics programming, I was surprised
+when I saw all the floating point numbers.&nbsp; If the pixel I want is at X=7, and
+the next pixel is at X=8, what the heck is at X=7.5?</p>
+
+<p>When I learned 2D graphics on APIs like Win32, we worked
+with integers.&nbsp; In fact, we usually worked directly with pixels.&nbsp; Pixels are
+very discrete, so integers are the right way of dealing with them.&nbsp; We have X
+and Y coordinates.&nbsp; If we increase X by one, we have moved one pixel to the
+right.&nbsp; There is nothing in between.&nbsp; Life is simple that way.&nbsp; [Footnote 1]</p>
+
+<p>In 3D graphics, coordinates are floating point numbers and
+pixels are abstracted away.&nbsp; We just don't think very much about pixels.</p>
+
+<p>OK, so everything is in floating point.&nbsp; So if the units are
+not pixels, what are they?&nbsp; Inches?&nbsp; Centimeters?&nbsp; Miles?</p>
+
+<p>Answer:&nbsp; It doesn't matter.&nbsp; The coordinate system of 3D
+graphics is unit-less.&nbsp; You can think of the units as whatever you want them to
+be, if in fact your 3D scene has physical dimensions at all.&nbsp; In my woodworking
+app, I set one unit equal to one inch.</p>
+
+<h3>Triangles</h3>
+
+<p>One of the next things I noticed when I started 3D graphics
+programming was all the triangles.&nbsp; Why does everything have to be about
+triangles?&nbsp; In woodworking, every board starts out with six sides that are flat
+and rectangular.&nbsp; Triangles sometimes happen in the woodshop, but not really
+all that often.&nbsp; Why can't I just tell the graphics system that I've got a
+six-sided rectangular solid?</p>
+
+<p>Most things in the architecture of a computer system are
+built layer upon layer.&nbsp; The lower layers deal with the simplest concepts, the
+things from which all the more complicated things can be built.&nbsp; Assembly
+language is a very low-level layer.&nbsp; It is tedious, but ultimately quite
+powerful, as everything in software is built upon it.</p>
+
+<p>Triangles are somewhat like the assembly language of 3D
+graphics.</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >All triangles are convex.&nbsp; Computational geometry
+     algorithms become much more complex when have to consider concave
+     polygons.</li>
+ <li >All triangles are planar.&nbsp; With only three points, you
+     either have a degenerate triangle or you have a plane.&nbsp; No other cases can
+     come up.</li>
+ <li >Every polygon can be broken up into a set of triangles.&nbsp;
+     We call this triangulation.</li>
+</ol>
+
+<p>If computer graphics engines were built on any other
+fundamental item, none of these things would be true.&nbsp; For example, suppose we
+built the system on quadrilaterals.&nbsp; Now we have all kinds of problems.&nbsp; Given
+any four points, there may not be a plane which passes through all four of
+them.&nbsp; Even if they are coplanar, the resulting quad might not be convex.&nbsp;
+Furthermore, there are lots of polygons which cannot be broken up into quads.</p>
+
+<p>In 3D graphics, including WPF 3D, everything is a triangle.&nbsp;
+In order to display a 3D scene, you have to break it all down into triangles.</p>
+
+<h3>Front and Back</h3>
+
+<p>The three points of a triangle determine a plane.&nbsp; [Footnote
+2].&nbsp; This makes it quite simple to determine, for any given point, which side
+of the triangle's plane the point is on.&nbsp; Why is this important?&nbsp; Because in 3D
+graphics, a triangle has a front and a back.&nbsp; The front of the triangle is
+drawn while the back is completely ignored.&nbsp; [Footnote 3]</p>
+
+<p><img width=300 height=262 src="{{{link:id='2067'}}}"
+align=right hspace=12>Consider the solid object in this picture.&nbsp; It has six
+rectangular sides.&nbsp; Each side is drawn as two triangles.</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Three of the sides (top, right and end1) are visible, so
+     those six triangles are being drawn.</li>
+ <li >The other three sides (bottom, left, and end2) are facing
+     away from the camera.&nbsp; Those six triangles can be completely ignored.</li>
+</ul>
+
+<p>Ignoring triangles can save a lot of rendering time in a
+complicated 3D scene.&nbsp; This simple drawing has only 12 triangles, but the full
+workbench picture (shown in entry 2 of this series) has 2,208 triangles, and
+that is still a very simple scene.</p>
+
+<p>OK, so a triangle has a front and a back.&nbsp; Which side is the
+front?</p>
+
+<p>We adopt a convention depending on the order of the
+vertices.&nbsp; On the front of the triangle, the vertices are specified in
+counter-clockwise order.</p>
+
+<h3>Summary</h3>
+
+<p>Most programmers don't code in assembly language, choosing
+instead to spend their day at a higher level of abstraction like C or Java.&nbsp;
+The same thing happens in 3D programming.&nbsp; Typically, you build a layer of
+abstraction so you don't have to spend your day working directly with triangles.&nbsp;
+In my solid modeling library, each face of a solid can be any kind of polygon.&nbsp;
+Since I already have the code to triangulate those polygons and stuff them into
+WPF, I actually don't think about triangles very often.</p>
+
+<p>Still, I always find it helpful to understand what's going
+on "under the hood".&nbsp; You'll probably find WPF 3D programming easier when you
+grab these three first concepts:</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >Vertices are 3D coordinates, floating point numbers, with
+     no units.</li>
+ <li >Everything is a triangle.</li>
+ <li >On the front of the triangle, the vertices are listed
+     counter-clockwise.</li>
+</ol>
+
+<h3>Footnotes</h3>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >Yes, WPF uses floating point numbers for 2D graphics as
+     well.</li>
+ <li >Degenerate triangles don't matter in this discussion.</li>
+ <li >Actually WPF allows you to draw the back side of a
+     triangle if you want.&nbsp; I don't have much use for this feature, but it's
+     there.</li>
+</ol>
+
+<p>{{{haloscan}}}</p>

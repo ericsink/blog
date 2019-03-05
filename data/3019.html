@@ -1,0 +1,310 @@
+
+<p>I've claimed that "Porting an existing SQLite app to use Zumero is usually
+straightforward."  Here's an example:  I'm going to make Fossil
+(http://fossil-scm.org/) work with Zumero by changing 15 lines of code.</p>
+
+<p>Let me start by saying this exercise is far more illustrative than useful.
+I just want to show an example of taking an existing SQLite application and
+making it use Zumero.  Fossil serves that purpose well, because:</p>
+
+<ul>
+<li>It's open source,</li>
+<li>It's written in C, and for this article, that's the layer I wanted to show,
+<li>It exercises a lot of SQLite features,
+<li>And it's cool that Fossil and SQLite are both developed by D. Richard Hipp.</li>
+</ul>
+
+<p>But if I were choosing an example to be useful, Fossil would be a terrible
+choice, because:</p>
+
+<ul>
+<li>It's not a mobile app,</li>
+<li>I would have to learn a lot about the Fossil code to make this production-ready,</li>
+<li>And Fossil doesn't even need Zumero, since it already has its own sync feature.</li>
+</ul>
+
+<p>So anyway.  Let's do this.  And then we'll throw it away.</p>
+
+<h3>Grab the Fossil code</h3>
+
+<pre class="screen">
+valor:fossil_zumero eric$ curl -O \
+        http://www.fossil-scm.org/download/fossil-src-20130216000435.tar.gz
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 3458k  100 3458k    0     0  1081k      0  0:00:03  0:00:03 --:--:-- 1091k
+
+valor:fossil_zumero eric$ tar xzf fossil-src-20130216000435.tar.gz 
+
+valor:fossil_zumero eric$ mv fossil-src-20130216000435 z_fossil
+
+valor:fossil_zumero eric$ ls -l z_fossil/
+total 168
+-rw-r--r--    1 eric  staff   2706 Feb 15 18:13 BUILD.txt
+-rw-r--r--    1 eric  staff   1528 Feb 15 18:13 COPYRIGHT-BSD2.txt
+-rw-r--r--    1 eric  staff   2386 Feb 15 18:13 Makefile.classic
+-rw-r--r--    1 eric  staff   1763 Feb 15 18:13 Makefile.in
+-rw-r--r--    1 eric  staff      5 Feb 15 18:13 VERSION
+drwxr-xr-x    8 eric  staff    272 Feb 15 18:13 ajax
+drwxr-xr-x   25 eric  staff    850 Feb 15 18:13 art
+-rw-r--r--    1 eric  staff   8041 Feb 15 18:13 auto.def
+drwxr-xr-x   16 eric  staff    544 Feb 15 18:13 autosetup
+drwxr-xr-x    3 eric  staff    102 Feb 15 18:13 compat
+-rwxr-xr-x    1 eric  staff    118 Feb 15 18:13 configure
+drwxr-xr-x    3 eric  staff    102 Feb 15 18:13 debian
+-rw-r--r--    1 eric  staff   1824 Feb 15 18:13 fossil.nsi
+-rw-r--r--    1 eric  staff  41264 Feb 15 18:13 manifest
+-rw-r--r--    1 eric  staff     41 Feb 15 18:13 manifest.uuid
+drwxr-xr-x  125 eric  staff   4250 Feb 15 18:13 src
+drwxr-xr-x   31 eric  staff   1054 Feb 15 18:13 test
+drwxr-xr-x    7 eric  staff    238 Feb 15 18:13 tools
+drwxr-xr-x   10 eric  staff    340 Feb 15 18:13 win
+drwxr-xr-x   91 eric  staff   3094 Feb 15 18:13 www
+</pre>
+
+<p>The first step is to change the CREATE TABLE statements.  If a regular
+SQLite table is created like this:</p>
+
+<pre class="screen">
+CREATE TABLE foo (...);
+</pre>
+
+<p>then we can change that to a Zumero table like this:</p>
+
+<pre class="screen">
+CREATE VIRTUAL TABLE foo USING zumero (...);
+</pre>
+
+<p>The Fossil source file src/schema.c appears to contain all of its table
+definitions.  And there are lots of them, divided into two basic categories:
+Schema1 and Schema2.  The stuff in Schema1 is the canonical form.  The stuff in
+Schema2 is basically just another copy of the stuff in Schema1, expressed in a
+more queryable form.  Fossil has a 'rebuild' command which throws away all of
+its Schema2 tables and rebuilds them using the canonical data in Schema1.</p>
+
+<p>I'm going to Zumerify just the Schema1 tables.</p>
+
+<p>But even within Schema1, the following comment from src/schema.c raises a
+question about whether I should convert all the tables to Zumero or just two of
+them.</p>
+
+<pre class="screen">
+@ -------------------------------------------------------------------------
+@ -- The BLOB and DELTA tables above hold the "global state" of a Fossil
+@ -- project; the stuff that is normally exchanged during "sync".  The
+@ -- "local state" of a repository is contained in the remaining tables of
+@ -- the zRepositorySchema1 string.
+@ -------------------------------------------------------------------------
+</pre>
+
+<p>If I wanted "z_fossil" to be useful, I would obsess about this.  Instead,
+I'm going to convert all nine of the Schema1 tables to Zumero and see what
+happens.  So in each of those nine definitions, I insert the word "VIRTUAL"
+between "CREATE" and "TABLE", and I insert "USING zumero" between the table
+name and the paren.</p>
+
+<pre class="screen">
+valor:src eric$ egrep -n "USING zumero" schema.c
+72:@ CREATE VIRTUAL TABLE blob USING zumero(
+80:@ CREATE VIRTUAL TABLE delta USING zumero(
+96:@ CREATE VIRTUAL TABLE rcvfrom USING zumero(
+113:@ CREATE VIRTUAL TABLE user USING zumero(
+129:@ CREATE VIRTUAL TABLE config USING zumero(
+146:@ CREATE VIRTUAL TABLE shun USING zumero(
+156:@ CREATE VIRTUAL TABLE private USING zumero(rid INTEGER PRIMARY KEY);
+161:@ CREATE VIRTUAL TABLE reportfmt USING zumero(
+199:@ CREATE VIRTUAL TABLE concealed USING zumero(
+</pre>
+
+<p>Well then.  The next step is to see if any CREATE INDEX statements need to
+be tweaked.</p>
+
+<p>SQLite does not support the CREATE INDEX syntax for virtual tables (and
+Zumero tables are implemented as SQLite virtual tables).  The workaround is to
+prefix the table name with "z$".  The Zumero documentation explains this
+further, so I won't bore you with the details here.</p>
+
+<p>In this case there is only one change needed.  Line 84 looks like this:</p>
+
+<pre class="screen">
+@ CREATE INDEX delta_i1 ON   delta(srcid);
+</pre>
+
+<p>So I insert z$ and now it looks like this:</p>
+
+<pre class="screen">
+@ CREATE INDEX delta_i1 ON z$delta(srcid);
+</pre>
+
+<p>Actually, it's TWO changes.  In src/rebuild.c line 33, there's another
+statement that ensures the creation of that same index.  I added z$ to that one
+as well.</p>
+
+<p>If I were to build z_fossil now, everything would fail, since SQLite doesn't
+know what "USING zumero" means until I register the module.  This is done by
+calling zumero_register() on the sqlite3* database connection.</p>
+
+<p>In src/db.c, in db_open(), there is a call to sqlite3_open_v2().  After that
+call (and its error checking), I add a call to zumero_register():</p>
+
+<pre class="screen">
+  rc = sqlite3_open_v2(
+       zDbName, &db,
+       SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
+       zVfs
+  );
+  if( rc!=SQLITE_OK ){
+    db_err("[%s]: %s", zDbName, sqlite3_errmsg(db));
+  }
+  zumero_register(db);
+  sqlite3_busy_timeout(db, 5000);
+</pre>
+
+<p>And I added #include "zumero_register.h" near the top of src/db.c as well.</p>
+
+<p>Finally, I need to make sure the Zumero client code gets linked in when
+Fossil is built.  In this case, I appended the zumero.a library to the link
+line in src/main.mk.  And since I'm on a Mac, and since zumero.a needs
+networking libraries so it can sync with a Zumero server, I added "-framework
+CoreFoundation -framework CoreServices" as well.</p>  
+
+<p>So far I have done 4 things:</p>
+
+<ol>
+<li>Change "CREATE TABLE x" to "CREATE VIRTUAL TABLE x USING zumero"</li>
+<li>In each "CREATE INDEX n ON foo" where foo is now a Zumero table, prefix foo with z$</li>
+<li>Call zumero_register() on your sqlite3* connect handle</li>
+<li>Add the Zumero client library to your link</li>
+</ol>
+
+<p>Those 4 things are always necessary.  Depending on your app, you might need
+to do more.  But the starting point is to do the 4 things above, build it, and
+see if it works.</p>
+
+<p>In this case, it doesn't.  Fossil needs one more thing.  In src/rebuild.c,
+in rebuild_db(), the following snippet of code appears:</p>
+
+<pre class="screen">
+  for(;;){
+    zTable = db_text(0,
+       "SELECT name FROM sqlite_master /*scan*/"
+       " WHERE type='table'"
+       " AND name NOT IN ('blob','delta','rcvfrom','user',"
+                         "'config','shun','private','reportfmt',"
+                         "'concealed','accesslog','modreq')"
+       " AND name NOT GLOB 'sqlite_*'"
+    );
+    if( zTable==0 ) break;
+    db_multi_exec("DROP TABLE %Q", zTable);
+    free(zTable);
+  }
+</pre>
+
+<p>This snippet goes through all the tables in the SQLite database and drops
+everything that is not a canonical table in Schema1 (plus, er, 2 more that it
+apparently wants to rescue as well).  Unfortunately, this has the side effect
+of destroying Zumero's housekeeping tables as well.  Not good.</p>
+
+<p>All Zumero housekeeping tables have a $ in the name, so I just added one more thing to the SELECT statement:
+
+<pre class="screen">
+       " AND name = replace(name, '$', '@')"
+</pre>
+
+<p>OK, I've changed 15 lines of code.  I'm ready to type 'make' and build my Zumerified version of Fossil.</p>
+
+<p>TODO comment out sqlite3_config(SQLITE_CONFIG_LOG, ...) in src/main.c</p>
+
+<p>Now let's take z_fossil for a spin.  First I'm going to clone the fossil
+repo itself, using the command in the TODO quick start.</p>
+
+<pre class="screen">
+valor:fossil_zumero eric$ ./fossil clone http://www.fossil-scm.org/ myclone.fossil
+Round-trips: 6   Artifacts sent: 0  received: 20262
+Clone finished with 1418 bytes sent, 26604817 bytes received
+Rebuilding repository meta-data...
+  100.0% complete...
+project-id: CE59BB9F186226D80E49D1FA2DB29F935CCA0333
+server-id:  8ebf2059f413347b4ad150d45d9e1a9eaa52d79f
+admin-user: eric (password is "991e9f")
+
+valor:fossil_zumero eric$ ls -l ./myclone.fossil
+-rw-r--r--  1 eric  staff  69630976 Mar 13 20:45 myclone.fossil
+</pre>
+
+<p>Whoa!  What are all those error messages?  They're harmless, and you can
+ignore them, but here's why they are showing up:  Fossil has registered a
+function using sqlite3_config(SQLITE_CONFIG_LOG, ...) so that it will be
+notified for any SQLite error that happens.  But these errors are normal, sort
+of.  They occur within the Zumero virtual table code as part of an outer
+statement which was invoked with SQLITE_IGNORE conflict policy.  When the inner
+statement returns SQLITE_CONSTRAINT, the outer statement ignores it, as it was
+instructed to do.</p>
+
+<p>Let's use SQLite to look inside this Fossil repo.</p>
+
+<pre class="screen">
+Erics-MacBook-Pro-2:z_fossil eric$ sqlite3 myclone.fossil 
+SQLite version 3.7.7 2011-06-25 16:35:41
+Enter ".help" for instructions
+Enter SQL statements terminated with a ";"
+sqlite> .tables
+attachment    mlink         t$q           ticket        z$rd$blob   
+backlink      orphan        t$r           ticketchng    z$rd$delta  
+blob          phantom       t$t           unclustered   z$repl$delta
+concealed     plink         t$tx          unsent        z$rv$blob   
+config        private       t$v           user          z$rv$delta  
+delta         rcvfrom       t$zc          z$blob      
+event         reportfmt     t$zr          z$delta     
+filename      shun          tag           z$old$blob  
+leaf          t$c           tagxref       z$old$delta 
+sqlite> 
+</pre>
+
+<p>Whoa!  What are all those extra tables?</p>
+
+<p>The tables with a $ in the name are Zumero's housekeeping tables.  In
+order to support synchronization, Zumero needs to keep track of extra
+information.  In a nutshell, it doesn't just record the results of every
+operation -- it also records the steps you took to get there.
+</p>
+
+<p>Let's use Zumero's sync feature on this database:</p>
+
+<pre class="screen">
+Erics-MacBook-Pro-2:z_fossil eric$ ./sqlite3 ./myclone.fossil 
+SQLite version 3.7.11 2012-03-20 11:35:50
+Enter ".help" for instructions
+Enter SQL statements terminated with a ";"
+sqlite> .load zumero.dylib
+sqlite> select zumero_sync('main', 'https://myserver.s.zumero.net', 'fossil');
+0;0;57543680;0;52992954;0;20365;26407
+</pre>
+
+<pre class="screen">
+Erics-MacBook-Pro-2:z_fossil eric$ ./sqlite3 new.fossil
+SQLite version 3.7.11 2012-03-20 11:35:50
+Enter ".help" for instructions
+Enter SQL statements terminated with a ";"
+sqlite> .load zumero.dylib
+sqlite> select zumero_sync('main', 'https://myserver.s.zumero.net', 'fossil');
+0;0;0;57602560;0;53003670;5208;20997
+sqlite> .tables
+blob                               t6423f9c4b00e94be75444754cbbb93e8
+delta                              t6734793664387be85ab16f6362581bc7
+t$c                                z$blob                           
+t$q                                z$delta                          
+t$r                                z$old$blob                       
+t$t                                z$old$delta                      
+t$tx                               z$rd$blob                        
+t$v                                z$rd$delta                       
+t$zc                               z$rv$blob                        
+t$zr                               z$rv$delta                       
+</pre>
+
+<pre class="screen">
+Erics-MacBook-Pro-2:z_fossil eric$ ls -l new.fossil 
+-rw-r--r--  1 eric  staff  62937088 Mar 13 20:50 new.fossil
+</pre>
+
+

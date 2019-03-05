@@ -1,0 +1,52 @@
+<p><span class="ArticleTitle">Profiler=Good,  RichTextBox=Bad</span><br><span class="ArticleDate">29 Aug 2003</span></p>
+<P>Call me a fan of the <A 
+href="http://www.red-gate.com/code_profiling.htm">Ants Profiler</A> from Red 
+Gate Software.&nbsp; </P>
+<P>Our top priority at SourceGear right now is making Vault faster.&nbsp; I 
+don't get to do much coding these days, so I decided to get my hands dirty and 
+pitch in.&nbsp; Several of the other folks here have been using Ants to profile 
+Vault, so I thought I would give it a try.&nbsp; The tool was extremely 
+smooth.&nbsp; I installed it with no problems.&nbsp; I didn't read a word of the 
+documentation.&nbsp; I launched the profiler and told it to profile the Vault 
+GUI client EXE.&nbsp; I did my test and exited the Vault client.&nbsp; Ants 
+showed me the results.</P>
+<P>The results browser is cool.&nbsp; I cruised around the various functions and 
+examined the timings.&nbsp; Soon I discovered one of those problems which 
+profilers were born to find:&nbsp; The .NET RichTextBox class is really, really 
+slow.</P>
+<P>We use a RichTextBox to display user messages in a pane at the bottom of the 
+Vault client window.&nbsp; I suppose any plain text box would suffice, but we do 
+use a little bit of color for highlighting errors in red.&nbsp; Anyway, the 
+profiler was showing that Vault spends an obscene amount of time showing user 
+progress messages.&nbsp; My test case involved the retrieval of 6,000 files from 
+a repository, which means I was adding 6,000 messages to that RichTextBox.</P>
+<P>At first I suspected string concatenation.&nbsp; The code to append messages 
+looked something like this:</P>
+<BLOCKQUOTE dir=ltr style="MARGIN-RIGHT: 0px">
+  <P><FONT size=2><STRONG><FONT 
+  face="Courier New,Courier,monospace">AppendText("["+msg.When+"] "+</FONT><FONT 
+  face="Courier New,Courier,monospace">msg.Message+"\r\n");</FONT></STRONG></FONT></P></BLOCKQUOTE>
+<P><FONT face="Times New Roman,Times,serif"><FONT size=2><FONT size=3>So I 
+changed it to eliminate the string concatenation:</FONT></FONT><FONT size=3></P>
+<BLOCKQUOTE dir=ltr style="MARGIN-RIGHT: 0px">
+  <P><FONT face="Courier New,Courier,monospace" 
+  size=2><STRONG>AppendText("[");<BR>AppendText(msg.When);<BR>AppendText("] 
+  ");<BR></STRONG></FONT><FONT face="Courier New,Courier,monospace" 
+  size=2><STRONG>AppendText(msg.Message);<BR>AppendText("\r\n");</STRONG></FONT></P></BLOCKQUOTE>
+<P><FONT face="Times New Roman,Times,serif">This made no real difference in 
+performance, but the profiler results&nbsp;became even more useful.&nbsp; Ants 
+can show how much time is being spent on each line of code.&nbsp; When I broke 
+things up, Ants reported that the first four calls to AppendText were fast, and 
+the fifth one was slow.&nbsp; Then I realized what's going on.&nbsp; When you 
+append&nbsp;a CRLF&nbsp;to the RichTextBox, it's re-running its internal layout 
+algorithm.</FONT></P>
+<P>RichTextBox is obviously overkill for the way we are using it.&nbsp; It's not 
+like we need full justification or embedded&nbsp;tables in our user messages 
+pane, but we're paying for these features in performance.&nbsp; This 
+innocent-looking&nbsp;piece of the .NET framework is actually a word 
+processor.</P>
+<P><FONT face="Times New Roman,Times,serif">The problem was easily fixed.&nbsp; 
+Instead of calling AppendText() on every single message,&nbsp;I batched up the 
+non-urgent messages into groups so we could append them with a single 
+call.&nbsp; Much faster, no lost functionality, everybody will be 
+happier.</FONT></P></FONT></FONT>

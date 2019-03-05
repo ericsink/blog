@@ -1,0 +1,442 @@
+<p>Storage is one of the most difficult challenges for a
+version control system.&nbsp; For every file, we must store every version that has
+ever existed.&nbsp; The logical size of a version control repository never shrinks.&nbsp;
+It just keeps growing and growing, and every old version needs to remain
+available.</p>
+
+<p>So, what is the best way to store every version of
+everything?</p>
+
+<p>As we look for the right scheme, let's remember three things
+we consider to be important:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Data integrity is paramount.&nbsp; In a version control tool,
+     nothing can be considered to be more important than guarding the safety of
+     the data.<br>
+     <br>
+ </li>
+ <li >Performance is critical.&nbsp; Software developers have about
+     as much patience as a German Shepherd sitting in front of a pot roast.<br>
+     <br>
+ </li>
+ <li >Space matters too.&nbsp; We're going to be storing lots of
+     data, much of which is being kept almost entirely for the purpose of
+     archiving history.&nbsp; We'd prefer to keep this archive as compact as
+     possible.</li>
+</ul>
+
+<p>In this blog entry I will report the results of some
+exploration I've been doing.&nbsp; I am experimenting with different ways of storing
+the full history of one source code file.&nbsp; In this case, the file comes from
+the source code for SourceGear Vault.&nbsp; It has been regularly edited for almost
+seven years.&nbsp; There are 508 versions of this file.</p>
+
+<p>As I describe the various things I have tried, a running
+theme will be the <a href="http://en.wikipedia.org/wiki/Time-space_tradeoff">classic
+tradeoff</a> of space vs. speed.&nbsp; In physics, we know that matter and energy
+are interchangeable.&nbsp; In computer science, we know that time and space are
+interchangeable.&nbsp; Usually, we can find a way to make things faster by using
+more space, or make things smaller by taking more time.</p>
+
+<p>As I said, I'll be storing 508 versions of the same file.&nbsp;
+It's a C# source code file.&nbsp; For each attempt, I will report two things:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >The total amount of space required to store all 508
+     versions.<br>
+     <br>
+ </li>
+ <li >The total amount of time required to retrieve (or
+     decompress or decode) all 508 versions, one at a time.</li>
+</ul>
+
+<p>Before we get started, a few caveats:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >I realize that these experiments would yield different
+     results for a different kind of file.&nbsp; If you're storing source code,
+     there might be some things here you can apply.&nbsp; If you're storing JPEG
+     images, not so much.<br>
+     <br>
+ </li>
+ <li >All these experiments were done on my Mac Book Pro laptop.&nbsp;
+     The CPU is a Core 2 Duo, which I consider to be decently fast.&nbsp; But like
+     most laptops, this machine has an I/O system which I consider to be
+     quasi-crappy.&nbsp; I would probably get somewhat different results if I were
+     running on a more serious piece of hardware.</li>
+</ul>
+
+<p>OK, how should we store these 508 versions of the file?</p>
+
+<h3>No compression at all</h3>
+
+<p>As a first attempt, let's just store them.&nbsp; No compression
+or funky encoding.&nbsp; Each of the 508 versions will be stored in full and
+uncompressed form.</p>
+
+<p>This is the starting point, even if it is not very
+practical.</p>
+
+<p style='margin-left:.5in'>Size:&nbsp; 112,643 KB</p>
+
+<p style='margin-left:.5in'>Time:&nbsp; 2.5 s</p>
+
+<p><b><span style='font-size:10.0pt;font-family:"Courier New"'>#ifdef
+DIGRESSION</span></b></p>
+
+<p>Yes, dear reader, I admit that this file is far too long.</p>
+
+<p>You can do the math.&nbsp; If the archive takes 112 MB and there
+are 508 versions, then each one is 230 KB.&nbsp; That's pretty big for a source code
+file.</p>
+
+<p>Actually, it's worse than you think.&nbsp; The 230 KB figure is
+just the average.&nbsp; The first version of the file is around 90 KB.&nbsp; The latest
+version is over 400 KB.&nbsp; </p>
+
+<p>In our defense, I'd like to point out that this piece of code
+needs to stay compatible with .NET 1.1, so the entire class must be in a single
+file.&nbsp; However, I'd still have to answer to the charge of "First Degree Failure
+to Refactor".&nbsp; Fine.&nbsp; I'll have my attorney contact you to plead out on a
+lesser charge.&nbsp; I'm thinking maybe "Third Degree Contributing to the
+Delinquency of an Intern", or something like that.</p>
+
+<p><b><span style='font-size:10.0pt;font-family:"Courier New"'>#endif</span></b></p>
+
+<p>This "full and uncompressed" format uses an awful lot of
+space, but it is also the fastest.&nbsp; We will find ways of making this smaller, but
+all of those ways will be slower.</p>
+
+<p>The relevant questions are:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >How much smaller?</li>
+ <li >How much slower?&nbsp; </li>
+</ul>
+
+<p>Some solutions will allow us to make this a lot smaller and
+only a little slower.&nbsp; Those are interesting.&nbsp; Other possibilities will be only
+a little smaller but a lot slower.&nbsp; Those are not so interesting.</p>
+
+<h3>Simple compression</h3>
+
+<p>OK, for our next idea, let's just compress every version
+with zlib.</p>
+
+<p style='margin-left:.5in'>Size:&nbsp; 22,516 KB</p>
+
+<p style='margin-left:.5in'>Time:&nbsp; 4.0 sec</p>
+
+<p>The results of this idea are surprisingly impressive.&nbsp; The
+archive is over 80% smaller, and only about 60% slower.&nbsp; That's darn good,
+considering that I didn't have to be terribly clever.</p>
+
+<p>This tradeoff is probably worth it.&nbsp; In fact, it establishes
+a new baseline that might be tough to beat.</p>
+
+<p>How do we get better than this?</p>
+
+<h3>Deltas</h3>
+
+<p>Instead of just compressing every file independently, we
+could store things as deltas.&nbsp; Think of a delta as simply the difference
+between one version and the next.</p>
+
+<p>Compression with zlib takes one standalone thing and makes
+an equivalent standalone thing which is smaller.</p>
+
+<p>In contrast, a delta is a representation of the differences
+between two files.&nbsp; Suppose that somebody takes file X and makes a few changes
+to it, resulting in file Y.&nbsp; With a delta algorithm, we could calculate the
+delta between X and Y, and call it D.&nbsp; Then, instead of storing Y, we can store
+D.</p>
+
+<p>The nice thing here is that D will be approximately the size
+of the edits, regardless of the size of the two files.&nbsp; If X was a 100 MB file
+and Y was the same file with an extra 50 bytes appended to the end, then D will
+be somewhere around 50 bytes,</p>
+
+<p>A delta is a concept which might be implemented in a lot of
+different ways.&nbsp; In my case, the delta algorithm I am using is VCDIFF, which is
+described in <a href="http://www.faqs.org/rfcs/rfc3284.html">RFC 3284</a>.&nbsp; We
+have our own implementation of VCDIFF.&nbsp; Other implementations include <a
+href="http://xdelta.org/">xdelta</a> and <a
+href="http://code.google.com/p/open-vcdiff/">open-vcdiff</a>.</p>
+
+<p>The important thing to remember about deltas for storage is
+that you must have the reference item.&nbsp; D is a representation of Y, but only if
+you have X handy.&nbsp; X is the reference.</p>
+
+<p>OK, it should be obvious that this concept can be helpful in
+storing a repository, but how do we set things up?</p>
+
+<h3>One big delta chain</h3>
+
+<p>As a first attempt, let's store all 508 versions as a big
+chain of deltas.&nbsp; Every version is stored as a delta against the version just
+before it.&nbsp; Version 1 is the reference, and is the only version that is not
+stored as a delta.&nbsp; </p>
+
+<p style='margin-left:.5in'>Size:&nbsp; 7,682 KB</p>
+
+<p style='margin-left:.5in'>Time:&nbsp; Way too long to wait</p>
+
+<p>Wow -- this is really small.&nbsp; It's over 93% smaller than the
+full/uncompressed form.&nbsp; It'll be hard to find a general purpose approach that
+is smaller than this.</p>
+
+<p><img border=0 width=500 height=84
+src="{{{link:id='2111'}}}"></p>
+
+<p>But good grief this is slow.&nbsp; Fetching version 508 takes an
+eternity, because first you have to construct a temporary version of 507.&nbsp; And to
+construct version 507, you first have to construct a temporary version of 506.&nbsp;
+And so on.</p>
+
+<h3>Key frames</h3>
+
+<p>Let's try something else.&nbsp; The problem with the chaining
+case above is that retrieving version 508 requires us to go all the way back to
+version 1, which is incredibly inefficient.&nbsp; Instead, let's insert "key frames"
+every 10 versions.&nbsp; We borrow this idea from the video world where compressed
+video streams store every frame as a delta, but every 10 seconds they insert a
+full, uncompressed frame of video.</p>
+
+<p>By using key frames with chaining deltas, we can cut the
+time required to fetch the average version of the file.&nbsp; For example, with a
+key frame every 10 versions, we get most of the benefits of chaining, but in
+the worst case, we only need 9 delta operations to retrieve any version.</p>
+
+<p style='margin-left:.5in'>Size: 18,024 KB</p>
+
+<p style='margin-left:.5in'>Time: 41.0 sec</p>
+
+<p>This is better, but still not very good.&nbsp; The compression here
+isn't much better than zlib, and the perf is still a lot worse.&nbsp; Compared to
+zlib, we don't want to pay a 10x speed penalty just to get 20% better
+compression.</p>
+
+<p>All the key frames are stored as full and uncompressed
+files, and they're taking up a lot of space.&nbsp; Maybe we should zlib those key frames?</p>
+
+<p style='margin-left:.5in'>Size: 9,092 KB</p>
+
+<p style='margin-left:.5in'>Time: 42.7 sec</p>
+
+<p>Now at least the compression is starting to look
+interesting.&nbsp; This is less than half the size of the zlib case, and 91.9%
+smaller than the full form, which is a level of compression that is probably
+worth the trouble.&nbsp; But the overall perf is still quite slow.&nbsp; In fact, it's
+even slower here than plain chaining with key frames, because we have to
+un-zlib the key frame.</p>
+
+<h3>Flowers</h3>
+
+<p>The big problem here is that chains of deltas are killing
+our performance.&nbsp; Chained deltas can be used to make things very small because
+each delta matches up nicely with one set of user edits.&nbsp; But chained deltas
+are slow because we need multiple operations to retrieve a given file.</p>
+
+<p>Another approach would be to use each reference for more
+than one delta.&nbsp; I call this the flower approach.&nbsp; With a flower, we deltify a
+line of versions by picking one version (say, the first one) and using it as
+the reference to make all the others into deltas.</p>
+
+<p>Flower deltas should be much faster, since any file can be reconstructed
+with just one undeltify operation.</p>
+
+<p><img border=0 width=340 height=203
+src="{{{link:id='2112'}}}"></p>
+
+<p>So let's try to flower all 508 versions using version 1 as
+the reference for all of them.</p>
+
+<p style='margin-left:.5in'>Size:&nbsp; 35,851 KB</p>
+
+<p style='margin-left:.5in'>Time:&nbsp; 10.9 sec</p>
+
+<p>As expected, the performance here is much better.</p>
+
+<p>But the overall space savings is lousy.&nbsp; Only version 2 was
+based directly on version 1.&nbsp; Every version after that has less and less in
+common with version 1, so the delta algorithm can't draw as much stuff from the
+reference.</p>
+
+<p>This particular approach isn't going to win.&nbsp; Plain zlib is both
+smaller and faster.</p>
+
+<h3>Flowers with key frames</h3>
+
+<p>Maybe we should try the flower concept with key frames?</p>
+
+<p>Like before, every 10 frames go together as a group.&nbsp; But instead
+of chaining, we're going to run each group as a flower.&nbsp; The first version in
+the group will serve as the reference for the other 9.&nbsp; We can reasonably
+assume that the deltification of frame 10 won't be as good as frame 2, but
+hopefully 10 and 1 still have enough in common to be worthwhile.</p>
+
+<p style='margin-left:.5in'>Size:&nbsp; 18,648 KB</p>
+
+<p style='margin-left:.5in'>Time:&nbsp; 12.2 sec</p>
+
+<p>Wow.&nbsp; This looks a lot better than chaining.&nbsp; The space used
+is about 17% smaller than zlib, but instead of being 10 times slower, it's only
+3 times slower.</p>
+
+<p>Of course, we can use the same trick we tried before.&nbsp; Let's
+zlib all those key frames.</p>
+
+<p style='margin-left:.5in'>Size:&nbsp; 9,716 KB</p>
+
+<p style='margin-left:.5in'>Time:&nbsp; 13.6 sec</p>
+
+<p>This seems like a potentially useful spot.&nbsp; It's less than
+half the size of zlib.&nbsp; The perf still a lot slower than zlib, but at only
+about 3X slower, the tradeoff is the best we've seen so far.</p>
+
+<p>OK.&nbsp; So we've made a lot of progress on saving space, but 3X
+slower than zlib still seems like a high price to pay.&nbsp; Do we really want to
+make that trade?&nbsp; Do we have to?</p>
+
+<h3>Some things get retrieved more often than others</h3>
+
+<p>Let's look at the patterns for how this data is going to be
+accessed.</p>
+
+<p>I've been reporting the total time required to fetch all 508
+versions of the file.&nbsp; However, this benchmark doesn't reflect real usage very
+well at all.&nbsp; In practice, the recent stuff gets retrieved a LOT more often
+than the older stuff.&nbsp; Most of the time, developers are updating their working
+copy to whatever is latest.</p>
+
+<p>As a rough guess, I'm going to say that version 508 gets
+retrieved twice as often as 507, which gets retrieved twice as often as 506,
+and so on.&nbsp; A timing test based on that assumption gives us results something
+like this:</p>
+
+<p style='margin-left:.5in'>Full&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.1
+sec</p>
+
+<p style='margin-left:.5in'>Zlib&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.7
+sec</p>
+
+<p style='margin-left:.5in'>One big flower&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4.0
+sec</p>
+
+<p style='margin-left:.5in'>Flower with key frames&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5.1
+sec</p>
+
+<p style='margin-left:.5in'>Chain with key frames&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 24.5
+sec</p>
+
+<p>Not too surprising.</p>
+
+<p>In the spirit of optimizing performance for the most common
+operations, why not keep all the more recent versions in a faster form?&nbsp; We
+could still use something more aggressive for the older stuff, but we can
+probably get a nice performance boost if we just refuse to use deltification
+for the most recent 10 versions of the file.</p>
+
+<p>But how should we store those 10 versions?&nbsp; In full format?&nbsp;
+Or zlib?&nbsp; This is an arbitrary choice with a clear tradeoff.&nbsp; For now, I choose
+zlib.&nbsp; If we wanted a little more speed at the expense of using a little more
+space, we could just keep those 10 versions in full form.</p>
+
+<p>By choosing zlib for the most recent 10 revisions, now my "get
+the recent stuff" benchmark runs in 1.7 seconds no matter what scheme I use.</p>
+
+<p>But we still care about performance for the case where
+somebody fetches an older version, even if that fetch doesn't happen as often.&nbsp;
+That's the point of version control storage.&nbsp; Every version has to be
+available.&nbsp; And when somebody does fetch version 495, we want our version
+control system to still be reasonably fast.</p>
+
+<h3>Reversing the direction of the chains</h3>
+
+<p>Since the more recent versions are retrieved more often,
+obviously, our chains are all going the wrong direction.&nbsp; If we had them go the
+other way, then retrieval would get slower as the versions get older instead of
+as the versions get newer.</p>
+
+<p>But this approach doesn't lend itself well to the way
+version control repositories naturally grow in the wild.&nbsp; In these tests, I
+have mostly ignored the issues of constructing each storage scheme.&nbsp; I've
+already got all 508 versions, so I'm just fiddling around with different
+schemes of storing them all, comparing size and retrieval time.</p>
+
+<p>In practice, those 508 versions happened one at a time, in
+order.&nbsp; If we're going to store the versions with backward chains, then each
+time we commit a new version of the file, we're going to need to re-encode something
+that was previously stored.&nbsp; This makes the commit operation slower.&nbsp; It is
+also a questionable idea from the perspective of data integrity.&nbsp; The safest
+way to maintain data is to not touch it after it has been written.&nbsp; Once it's
+there, leave it alone.</p>
+
+<p>One case where we <i>might</i> want to be a bit more liberal
+toward rewriting data is in a "pack" operation, such as the one Git has.&nbsp; It
+wouldn't be terribly crazy to consider a standalone pack operation in a DVCS to
+be better than rewriting data for each commit, for several reasons:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >It allows us to keep commit fast.<br>
+     <br>
+ </li>
+ <li >Since pack would be done offline, its implementation can
+     be focused more on data integrity and space savings than on performance.<br>
+     <br>
+ </li>
+ <li >Since the pack code can be separated from the commit code,
+     all the risky code can be kept together where it is easier to maintain.<br>
+     <br>
+ </li>
+ <li >Since the pack operation is separate from commit, a user
+     that does not want to run pack does not have to.<br>
+     <br>
+ </li>
+ <li >A pack operation in a DVCS is happening on just one
+     instance (clone) of the repository, not on the only copy.</li>
+</ul>
+
+<p>Anyway, a pack operation would allow us to use storage
+schemes that do not work well on the fly, incrementally updating as each
+version comes in.</p>
+
+<h3>Visualizing the results</h3>
+
+<p><img border=0 width=550 height=370
+src="{{{link:id='2113'}}}"></p>
+
+<p>This plot makes it easier to see which schemes are better
+than others.&nbsp; </p>
+
+<p>In my experimentation, I actually did a lot more schemes.&nbsp;
+For example, instead of key frames every 10 versions, I also tried every 5, 15
+and 20.&nbsp; However, all those extra data points really cluttered the graph.&nbsp; So I
+only included the most important ones here.</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >In the lower right, we find "full".&nbsp; Very fast and very
+     large.<br>
+     <br>
+ </li>
+ <li >In the upper left, we find "chains".&nbsp; Very slow and very
+     small.<br>
+     <br>
+ </li>
+ <li >We can ignore any point which is both above AND to the
+     right of any other point.&nbsp; The "1flower" point is the one where I made one
+     big flower, using version 1 as the reference for every other version.&nbsp;
+     This scheme ends up being useless since zlib is better in both ways that
+     matter.<br>
+     <br>
+ </li>
+ <li >All the other points represent possible tradeoffs which
+     might be interesting, depending upon our priorities</li>
+</ul>
+
+<p>Intuitively, the schemes which are closer to the origin are
+better.&nbsp; This graph makes it easy to see that "zlib" and "flowers" are probably
+the two most interesting options I have discussed here.</p>
+
+<p>{{{haloscan}}}</p>

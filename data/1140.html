@@ -1,0 +1,74 @@
+<p>I thoroughly enjoyed reading Paul Graham's recent essay <a href="http://www.paulgraham.com/gh.html">Great Hackers</a>.&nbsp;&nbsp;His sermon is well-written, and I assume it played very well when he preached it to the choir at <a href="http://conferences.oreillynet.com/os2004/">OSCON</a>.</p>
+<p>Graham describes the notion of a "great hacker", which he seems to roughly define as a programmer who is several times more productive than average.&nbsp; (Please note that some people use the word "hacker" to describe programmers who engage in illegal activity.&nbsp; That connotation is not applicable here or in Graham's essay.)&nbsp; He then asks the following questions:</p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p><em>How do you recognize [great hackers]?&nbsp; How do you get them to come and work for you?"</em></p>
+</blockquote>
+<p>Note carefully:&nbsp;&nbsp;Graham proceeds from the assumption that we do in fact <strong>want</strong> to hire these great hackers, but he never explains why.&nbsp;</p>
+<p>I concede that this assumption is intuitive.&nbsp; After all, doesn't every company want the most productive employees they can hire?&nbsp;</p>
+<p>But this assumption deserves to be examined and challenged.</p>
+<h4>For the love of the code</h4>
+<p>Graham begins his description of great hackers by explaining the intrinsic motivation and passion they have for writing code:</p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>
+<em>Their defining quality is probably that they really love to program. Ordinary programmers write code to pay the bills. Great hackers think of it as something they do for fun, and which they're delighted to find people will pay them for.
+</em>
+</p>
+</blockquote>
+<p>On this point, we agree.&nbsp; The best developers simply love to create software.&nbsp; They get paid, and their compensation is important, but it isn't really the primary reason why they write code.&nbsp; They wrote code before they were getting paid for it.&nbsp; They would continue to write code even after winning the lottery.&nbsp; When I hire developers, I am looking for this quality.</p>
+<p>However, the remainder of Graham's essay does a pretty good job of explaining why many <a href="{{{link:id='1211'}}}">small ISVs</a> might not want to hire a "great hacker".&nbsp; In a nutshell, great hackers are often very fussy people.
+</p>
+<h4>Fussy about tools and platforms</h4>
+<p>Graham explains the well-known fact that great hackers are extremely picky about the tools, platforms and technologies they use:</p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p><em>Good hackers find it unbearable to use bad tools. They'll simply refuse to work on projects with the wrong infrastructure.</em></p>
+</blockquote>
+<p>Bad tools?&nbsp; Wrong infrastructure?&nbsp; Graham sounds like he is right on the money.&nbsp; Nobody could object to the idea that great hackers care deeply about these kinds of choices, right?</p>
+<p>Unfortunately, Graham goes on to explain what great hackers mean by "bad tools" and "wrong infrastructure".&nbsp; Painting with a very wide brush, he observes that great hackers don't use technologies like Windows and Java.&nbsp; They prefer languages like Python and Perl.&nbsp; They prefer to use open source technologies whenever possible.</p>
+<p>I'm not saying I am a great hacker, but I do sympathize with this fussiness.&nbsp; I have similar religious preferences about technologies.&nbsp; I really do like Python.&nbsp; My personal server runs Debian.&nbsp; The first things I install when I repave my Windows machine are emacs and cygwin.</p>
+<p>However, I work at an ISV.&nbsp; I love building software, but SourceGear is not my hobby -- it is my profession.&nbsp; We sell products to users.&nbsp;&nbsp;We have learned to value the needs of the users over our own preferences.&nbsp;</p>
+<p>Graham seems to suggest that if we choose to build our products on the technologies that great hackers prefer, then it is more likely that we will be able to hire them.&nbsp; This opinion may be true, but it ignores the fact that technology choices have marketing implications.&nbsp; I've written about this topic several times now:</p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p><a href="{{{link:id='1203'}}}">Law #21</a>:&nbsp; "These may not seem like marketing decisions, but they are.&nbsp; Technology choices have big marketing implications.&nbsp; When you choose a platform, you define the maximum size of your market."</p>
+<p><a href="{{{link:id='1180'}}}">Geek Gauntlets</a>:&nbsp; "<!--StartFragment -->We need to talk about what customers want, but our own preferences get in the way.&nbsp; We bring our technology prejudices and biases to the discussion, often without ever being aware of the problems they can cause."</p>
+<p><a href="{{{link:id='1170'}}}">Be Careful Where you Build</a>:&nbsp; "As developers in a small ISV, our productivity is important, but it must be secondary to the comfort and preferences of our users."</p>
+</blockquote>
+<p>The higher productivity of a great hacker is a big advantage, but probably not big enough to overcome our attempts to sell something that users don't want.</p>
+<p>If Graham is right, a great hacker is someone who believes that his own preferences are more important than doing what is best for the users.&nbsp; Small ISVs don't need people like that.</p>
+<h4>Fussy about doing interesting projects</h4>
+<p>Graham goes on to explain how important it is for great hackers to be doing interesting projects:</p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p><em>Along with good tools, hackers want interesting projects. It's pretty easy to say what kinds of problems are not interesting: those where instead of solving a few big, clear, problems, you have to solve a lot of nasty little ones. One of the worst kinds of projects is writing an interface to a piece of software that's full of bugs.</em></p>
+</blockquote>
+<p>Here again, I am sympathetic.&nbsp; I like interesting stuff too.&nbsp; My To-Do list tells me that I am supposed to be working on some enhancements to our online store website.&nbsp;&nbsp;Frankly, that programming task doesn't interest me very much.&nbsp; I'll confess that I'm procrastinating on that particular task.</p>
+<p>However, I work at an ISV.&nbsp; I love building software, but SourceGear is not my hobby -- it is my profession.&nbsp; We sell products to users.&nbsp; The reality is that lots of highly profitable software development tasks are just not very interesting.&nbsp;</p>
+<p>Graham strikes particularly close to home when he says, "<em>One of the worst kinds of projects is writing an interface to a piece of software that's full of bugs.</em>"&nbsp; Our SourceOffSite product provides an Internet-based interface to a piece of software that's full of bugs (SourceSafe).&nbsp; That same product supports integration with IDEs by means of a piece of software that's full of bugs (the MSSCCI API).&nbsp; If we had been great hackers and refused to do this work because it is not interesting, we would have missed out on millions of dollars of revenue.</p>
+<p>If Graham is right, a great hacker is someone who is not willing to do any of the un-fun things that need to be done.&nbsp; Small ISVs don't need people like that.</p>
+<h4>Fussy about interacting with users</h4>
+<p>Graham characterizes great hackers as people don't want to be involved with users:</p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p><em>Bigger companies solve the problem by partitioning the company.&nbsp; They get smart people to work for them by establishing a separate R&amp;D department where employees don't have to work directly on customers' nasty little problems.</em></p>
+<p><em>You may not have to go to this extreme. Bottom-up programming suggests another way to partition the company: have the smart people work as toolmakers. ... This way you might be able to get smart people to write 99% of your code, but still keep them almost as insulated from users as they would be in a traditional research department.</em></p>
+</blockquote>
+<p>This kind of attitude is a big problem in a small ISV.&nbsp; I concede that it is frustrating to be interrupted when I'm working on a coding problem.&nbsp; I concede that users sometimes ask dumb questions.&nbsp; I concede that writing a great piece of code is more fun than figuring out how somebody screwed up their Web.config file.</p>
+<p>However, I work at an ISV.&nbsp; I love building software, but SourceGear is not my hobby -- it is my profession.&nbsp; We sell products to users.&nbsp;&nbsp;Nothing here is more important than our users.&nbsp; Nothing.</p>
+<p>Last year I wrote an <a href="{{{link:id='1208'}}}">article</a> in which I claim that small ISVs should only hire "developers", which I define as "programmers who also contribute in non-coding ways".&nbsp; The thesis statement of this article said:</p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>"<!--StartFragment -->For the purpose of this article, a "programmer" is someone who does nothing but code new features and [if you're lucky] fix bugs.&nbsp; They don't write specs.&nbsp; They don't write automated test cases.&nbsp; They don't help keep the automated build system up to date.&nbsp; They don't help customers work out tough problems.&nbsp; They don't help write documentation.&nbsp; They don't help with testing.&nbsp; They don't even <em>read</em> code.&nbsp; All they do is write new code.&nbsp; In a small ISV, you don't want <em>any</em> of these people in your company."</p>
+</blockquote>
+<p dir="ltr">If Graham is right, a great hacker is someone who is not willing to help the people who use the software he creates.&nbsp; Small ISVs don't need people like that.
+</p>
+<h4>Bottom Line</h4>
+<p>Like I said, I enjoyed Graham's essay very much.&nbsp; He describes great hackers by enumerating all of their worst qualities, and yet, the essay still makes us want to admire these super-productive people.&nbsp; That's good writing.</p>
+<p>But the essay causes concern.&nbsp; I worry that lots of small ISVs will read his article and believe that they need to hire great hackers.&nbsp; When great hackers are as fussy as Graham says they are, they're not worth the trouble.&nbsp; We want the super-productivity, and we want the innate love of software development, but we don't want all the extra baggage.&nbsp; Instead:
+</p>
+<ul>
+<li>Hire people who care about users.
+</li>
+<li>Hire people who understand the difference between a job and a hobby.
+</li>
+<li>Hire people who want to contribute in lots of different ways to the success of the product.
+</li>
+</ul>
+<p>It's okay to be in awe of these great hackers.&nbsp;&nbsp;But as a practical matter, small ISVs would be much better off hiring professionals.</p>
+<p>&nbsp;</p>
+{{{haloscan}}}

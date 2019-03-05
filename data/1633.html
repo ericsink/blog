@@ -1,0 +1,63 @@
+<p>A month or two ago, Joel Spolsky posted a <a
+href="http://www.joelonsoftware.com/items/2006/08/01.html">piece</a> on his
+blog entitled "Can Your Programming Language Do This?"&nbsp; In a nutshell, he wrote
+about how languages with anonymous functions can do things similar to the
+notions of <a
+href="http://en.wikipedia.org/wiki/Map_%28higher-order_function%29">map</a> and
+<a href="http://en.wikipedia.org/wiki/Fold_%28higher-order_function%29">reduce</a>
+(from functional programming) which (in the absence of side effects) can make
+it easier to make things "trivially parallelizable".</p>
+
+<p>(This is the point where I stopped writing this blog entry and
+paused to reflect on the fact that Microsoft Word drew a red squiggly line
+under the word "blog" but not under the word "parallelizable".)</p>
+
+<p>Lots of people responded to the challenge in the title of
+Joel's blog entry by writing an implementation of Map and/or Reduce in their
+favorite language.&nbsp; Most of these implementations didn't actually contain any
+functionality for parallel execution on multiple threads or processes.&nbsp; They
+simply demonstrated the language-level features necessary to call Map.&nbsp; In
+other words, these implementations were primarily examples of how to do
+anonymous functions as arguments.&nbsp; I didn't mind, because my primary machine
+had only one core anyway.</p>
+
+<p>Then a few weeks ago I bought a Sony Vaio SZ with a Core 2
+Duo processor, and suddenly I was unhappy.&nbsp; A non-parallel implementation of
+Map doesn't help me at all!&nbsp; If my primary machine has two cores, I want ways
+to use both of them.</p>
+
+<p>(BTW, I <i>really</i> like my new Vaio laptop.&nbsp; Highly
+recommended.)</p>
+
+<p>So I wrote a multicore library in C# using the .NET
+ThreadPool.&nbsp; It contains several implementations of Map, customized for
+specific situations.</p>
+
+<p>(I did not implement Reduce, mostly because I didn't see
+much use for it.&nbsp; A parallel Reduce doesn't bring as much benefit as a parallel
+Map.)</p>
+
+<p>If you'd like to see the code, you can download it <a
+href="{{{link:id='1632'}}}">here</a> (8KB zip).&nbsp; The
+main file is multicore.cs.&nbsp; It contains the Map code as well as a bunch of
+comments with additional information and URLs for related sources of
+information.&nbsp; A Visual Studio 2005 project file is included, as well as a small
+suite of NUnit tests.</p>
+
+<p>I'm using this code to speed up some of the solid modeling
+operations in my woodworking app.&nbsp; It seems to work pretty well.</p>
+
+<p>Updates:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >22 October 2006:&nbsp; Oops!&nbsp; Somebody pointed out that my code
+     does bad things when the inputs list is empty.&nbsp; <a
+     href="{{{link:id='1634'}}}">Fixed</a>.</li>
+ <li >26 October 2006:&nbsp; Somebody pointed out that Map_AnyTrue
+     could possibly end up referencing an object after it was disposed.&nbsp; <a
+     href="{{{link:id='1635'}}}">Fixed</a>.</li>
+</ul>
+
+<p>Enjoy!</p>
+
+<p>{{{haloscan}}}</p>

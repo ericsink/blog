@@ -1,0 +1,220 @@
+<p>In <a href="{{{link:id='1761'}}}">Part
+1</a> of this article, I talked about the differences between modeling version
+control history as a DAG vs. a Line.&nbsp; The two most noteworthy kinds of feedback
+I received on this entry were:</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >Several people accused me of spreading pro-Line-model FUD
+     because I mentioned some of the problems that happen with the DAG model
+     and stopped short of saying that the DAG model is going to cure cancer,
+     eliminate global warming and bring peace to the Middle East.<br>
+     <br>
+ </li>
+ <li >Several people asked me how I drew those really cool
+     diagrams.</li>
+</ol>
+
+<p>Before I continue with Part 2, allow me to briefly respond
+to these two pieces of feedback.</p>
+
+<h3>My response about DVCS advocacy</h3>
+
+<p>Yes, my company ships a version control tool that is built
+on the Line model of history.&nbsp; Therefore, any DVCS is, to a certain extent, a
+competitor to my product.</p>
+
+<p>I further acknowledge that I am breaking the rules.&nbsp; </p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Business folks like me aren't supposed to <i>ever</i> say
+     anything positive about their competitors.<br>
+     <br>
+ </li>
+ <li >Our job is to feel threatened by change, and to spread
+     that fear around to others.<br>
+     <br>
+ </li>
+ <li >We're supposed to pretend like we don't know that every
+     design choice has tradeoffs, and to insist that our way is better in all
+     situations.</li>
+</ul>
+
+<p>As my Mother can confirm, I don't always follow the rules
+very well.&nbsp; <b>:-)</b></p>
+
+<p>The simple fact is that I find this stuff interesting.&nbsp; I have
+been working in the version control industry for over a decade.&nbsp; I am writing a
+book on the topic.&nbsp; This is what I do.&nbsp; It's interesting to me.</p>
+
+<p>Really.</p>
+
+<p>But there is more happening here than just me being an
+entrepreneurial rebel.&nbsp; Let's see -- how can I say this nicely?</p>
+
+<p style='text-indent:.5in'>You Git fans need to chill.</p>
+
+<p>Seriously, rabid advocacy by Git fans is making the world a
+lousy place to live.&nbsp; Git is really cool, but it is not the right tool for
+every situation.</p>
+
+<p>In their defense, let's acknowledge that the apple didn't
+fall far from the tree on this particular issue.&nbsp; When people begin exploring
+DVCS, often one of the first things they find is the <a
+href="http://www.youtube.com/watch?v=4XpnKHJAok8">video</a> of Linus Torvalds
+and his 2007 presentation about Git.&nbsp; And what they find there is someone who doesn't
+seem to get it. </p>
+
+<p>Folks, Subversion is probably the most popular version
+control tool in the world right now.&nbsp; Almost everyone using a version control
+tool today is using one that is built on the Line model of history, and they're
+using these tools successfully and productively.&nbsp; When someone refuses to
+acknowledge <i>any</i> validity in that model, they look clueless.</p>
+
+<p>The Torvalds video has done plenty of damage.&nbsp; That kind of
+attitude is a big turn-off for people interested in what's new in the world of
+version control.</p>
+
+<p>So, my fellow admirers of Git, if you are trying to prevent
+people from using DVCS tools and make sure that they stay confined to their
+current niches, then keep up the good work.</p>
+
+<p>But if you really want to help the world see the benefits of
+Git and similar tools, then start realizing that people were getting productive
+work done before they existed.</p>
+
+<h3>My response about those cool diagrams</h3>
+
+<p>My DAG pictures were drawn by SourceGear's graphic artist,
+John Woolley, who also did all the artwork for the <a
+href="http://www.sourcegear.com/TEM/TEMcomic.html">Evil Mastermind comic books</a>.&nbsp;
+John is doing the layout and illustration work for my upcoming source control
+book as well.</p>
+
+<p>However, because John's DAG pictures got more praise than my
+"thousand words", I have decided to be bitter and refuse to include any of his
+work in this blog entry.&nbsp; <b>:-)</b></p>
+
+<h3>OK, let's talk more about DAGs</h3>
+
+<p>As I mentioned in Part 1, if a DAG is allowed to grow
+without guidance, things can turn into a real mess.&nbsp; DAGs are easier to
+create.&nbsp; Lines are easier to use.&nbsp; As soon as we embrace the DAG model to gain
+all its benefits, the very next thing that happens is that we want Lines back.</p>
+
+<p>This is why every DVCS has features that can be used to make
+sure the DAG grows with guidance.&nbsp; Those features are designed to discourage
+people from committing without taking any responsibility for the complexity
+that increases every time we add another point of divergence.</p>
+
+<p>In other words, every DVCS has features that allow
+developers to take a piece of the DAG and treat it like a Line.</p>
+
+<h3>Git</h3>
+
+<p>Git guides the growth of the DAG through its support for named
+branches.&nbsp; You are discouraged from committing something unless its parent is a
+leaf.</p>
+
+<p>So, if I use the git checkout command to point my working
+directory to a DAG node which is not a leaf, Git politely fusses at me:</p>
+
+<p style='margin-left:.5in'>eric$ git checkout 9542b<br>
+Note: moving to &quot;9542b&quot; which isn't a local branch<br>
+If you want to create a new branch from this checkout, you may do so<br>
+(now or later) by using -b with the checkout command again. Example:<br>
+&nbsp; git checkout -b &lt;new_branch_name&gt;<br>
+HEAD is now at 9542b5f... initial</p>
+
+<p>If you only commit things that are based on the leaf, then
+your history stays very Line-like.</p>
+
+<h3>Mercurial</h3>
+
+<p>Historically, Mercurial has been described as supporting
+only one branch per repository instance.&nbsp; Comparisons to Git often focused on
+Mercurial's apparent lack of inter-repository branching.</p>
+
+<p>I speak in the past tense here because I have heard that
+Mercurial has added additional features in this area.</p>
+
+<p>I mention Mercurial here only so that its fans don't feel
+too left out.&nbsp; I can't speak from much experience using this particular tool.</p>
+
+<p>Still, I feel comfortable citing Mercurial as an example of
+my point:&nbsp; In [at least] its early releases, Mercurial was guiding the growth
+of the DAG by preventing the user from diverging it.&nbsp; This almost certainly
+contributed to the widespread perception of Mercurial as a very easy-to-use
+tool.</p>
+
+<h3>Bazaar</h3>
+
+<p>This tool is the DVCS I have used the most, but I still
+can't call myself an expert.&nbsp; From my own experience, I would characterize Bzr as
+a tool that works <i>very</i> hard to guide the growth of the DAG.</p>
+
+<p>Whenever I push changes from my local repo to a central
+server, Bzr requires me to merge in other changes and commit from the leaf,
+just like a Line model tool would do.</p>
+
+<p>It's rather cool that Bazaar offers me the option of using a
+central server instead of as a pure DVCS.&nbsp; But in this mode, the same basic
+restriction applies:&nbsp; I can't commit anything unless my baseline is the leaf in
+the repo.</p>
+
+<p>When I use Bzr, it usually feels like I am using a
+Line-model tool.</p>
+
+<h3>My own preferences</h3>
+
+<p>On this particular issue, I actually prefer Git's way of
+doing things.</p>
+
+<p>Bazaar seems to believe that DAG divergence is only
+legitimate when it happens in separate repo instances and must be resolved
+before anything can be pushed or committed together.&nbsp; This just feels too
+heavy-handed for a DVCS.&nbsp; Once I know about the DAG, I want to be allowed to
+think that way.&nbsp; I don't mind being warned when I am about to commit a DAG node
+which would have an older sibling.&nbsp; But forcing me to merge in order to commit
+feels very un-DVCS-like to me.</p>
+
+<p>I like Git's ability to switch my baseline using "git
+checkout branchname".&nbsp; I understand that people who are not accustomed to
+thinking about the DAG do find this capability to be unintuitive.&nbsp; But I like
+it.</p>
+
+<p>Note that I still like Line-model tools like Subversion and
+Vault as well.&nbsp; I'm just saying that a DAG-model tool should act like one.</p>
+
+<h3>Fossil</h3>
+
+<p>Lately, the DVCS which intrigues me the most is <a
+href="http://fossil-scm.org/index.html/doc/tip/www/index.wiki">Fossil</a>.&nbsp; It
+was written by D. Richard Hipp, the same guy who wrote <a
+href="http://sqlite.org/">SQLite</a>.</p>
+
+<p>Fossil has a number of interesting features.&nbsp; Most notable
+is the built-in support for bug tracking.&nbsp; This is one area where the other
+DVCS's all fail.&nbsp; They bring you distributed version control, but when it comes
+time for a developer to update the bug tracking system,&nbsp; things suddenly go
+back to the centralized world.</p>
+
+<p>Anyway, I'm just getting started with looking closely at
+Fossil, but I do like the way its website <a
+href="http://fossil-scm.org/index.html/doc/tip/www/branching.wiki">talks</a>
+about this problem of DAG divergence:</p>
+
+<p style='margin-left:.5in'><i>Having more than one leaf in the
+check-in tree is usually considered undesirable, and so forks are usually
+either avoided entirely, as in figure 1, or else quickly resolved as shown in
+figure 3. But sometimes, one does want to have multiple leaves. For example, a
+project might have one leaf that is the latest version of the project under
+development and another leaf that is the latest version that has been tested.
+When multiple leaves are desirable, we call the phenomenon branching instead of
+forking.</i></p>
+
+<p>Nice.&nbsp; So far, I get the impression that Fossil works like
+Git does in this respect.&nbsp; When the DAG diverges, complexity increases.&nbsp; Feel
+free to offer me a little protection from that complexity by informing me of
+what's going on.&nbsp; But don't get in my way.</p>
+
+<p>{{{haloscan}}}</p>

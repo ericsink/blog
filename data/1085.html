@@ -1,0 +1,168 @@
+<P>This is part of an online book called <a href="{{{link:id='1079'}}}">Source Control HOWTO</a>, a best practices guide on source control, version control, and configuration management.</p>
+<table border=0 width="100%">
+<tr>
+<td align="left"><a href="{{{link:id='1084'}}}">&lt; Chapter 3</a></td>
+<td align="right"><a href="{{{link:id='1086'}}}">Chapter 5 &gt;</a></td>
+</tr>
+</table>
+<hr>
+<h4 align="left">Cars and clocks</h4>
+<p align="left">In previous chapters I have mentioned the concept of a repository, but I haven't said much further about it.&nbsp; In this chapter, I want to provide a lot more detail.&nbsp; Please bear with me as I spend a little time talking about how an SCM tool works "under the hood".&nbsp;&nbsp;I am doing this because an SCM tool is more like a car than a clock.&nbsp;</p>
+<ul>
+<li>
+<div align="left">An SCM tool is not like a clock.&nbsp; Clock users have no need to know how a clock works inside.&nbsp; We just want to know what time it is.&nbsp; Those who understand the inner workings of a clock cannot tell time any more skillfully than the rest of us.</div>
+</li>
+<li>
+<div align="left">An SCM tool is more like a car.&nbsp; Lots of people do use cars without knowing how they work.&nbsp; However, people who really understand cars tend to get better performance out of them.</div>
+</li>
+</ul>
+<p align="left">Rest assured, that this book is still a "HOWTO".&nbsp; My goal here remains to create a <em>practical</em> explanation of how to do source control.&nbsp; However, I believe that you can use an SCM tool more effectively if you know a little bit about what's happening inside.</p>
+<h4 align="left">Repository = File System * Time</h4>
+<p align="left">A repository is the official place where you store all your source code.&nbsp; It keeps track of all your files, as well as the layout of the directories in which they are stored.&nbsp; It resides on a server where it can be shared by all the members of your team.</p>
+<p align="left">But there has to be more.&nbsp; If the definition in the previous paragraph were the whole story, then an SCM repository would be no more than a network file system.&nbsp; A repository is much more than that.&nbsp; A repository contains history.</p>
+<p align="left">A file system is two-dimensional:&nbsp; its space is defined by directories and files.&nbsp; In contrast, a repository is three-dimensional:&nbsp; it exists in a continuum defined by directories, files and time.&nbsp; An SCM repository contains every version of your source code that has ever existed.&nbsp; The additional dimension creates some rather interesting challenges in the architecture of a repository and the decisions about how it manages data.</p>
+<h4 align="left">How do we store all those old versions of everything?</h4>
+<p align="left">As a first guess, let's not be terribly clever.&nbsp; We need to store every version of the source tree.&nbsp; Why not just keep a complete copy of the entire tree for every change that has happened?</p>
+<p align="left">We obviously use Vault as the SCM tool for our own development of Vault.&nbsp; We began development of Vault in the fall of 2001.&nbsp; In the summer of 2002, we started "dogfooding".&nbsp; On October 25th, 2002, we abandoned our repository history and started a fresh repository for the core components of Vault.&nbsp;&nbsp;Since that day, this tree has been modified 4,686 times.</p>
+<p align="left">This repository contains approximately 40 MB of source code.&nbsp; If we chose to store the entire tree for every change, those 4,686 copies of the source tree would consume approximately 183 GB, without compression.&nbsp; At today's prices for disk space, this option is worth considering.</p>
+<p align="left">However, this particular repository is just not very large.&nbsp; We have several others as well, but the sum total of all the code we have ever written still doesn't qualify as "large".&nbsp; Many of our Vault customers have trees which are a <strong>lot</strong> bigger.</p>
+<p align="left">As an example, consider the source tree for OpenOffice.org.&nbsp; This tree is approximately 634 MB.&nbsp; Based on their claim of 270 developers and the fact that their repository is almost four years old, I'm going to conservatively estimate that they have made perhaps 20,000 checkins.&nbsp; So, if we used the dumb approach of storing a full copy of their tree for every change, we'll need around 12 TB of disk space.&nbsp; That's 12 <a href="http://dictionary.reference.com/search?q=terabytes">terabytes</a>.</p>
+<p align="left">At this point, the argument that "disk space is cheap" starts to break down.&nbsp; The disk space for 12 TB of data is cheaper than it has ever been in the history of the planet.&nbsp; But this is mission critical data.&nbsp; We have to consider things like performance and backups and RAID and administration.&nbsp; The cost of storing 12 TB of ultra-important data is more than just the cost of the actual disk platters.</p>
+<p align="left">So we actually do have an incentive to store this information a bit more efficiently.&nbsp; Fortunately, there is an obvious reason why this is going to be easy to do.&nbsp; We observe that tree N is often not terribly different from tree N-1.&nbsp; By definition, each version of the tree is derived from its predecessor.&nbsp; A checkin might be as simple as a one-line fix to a single file.&nbsp; All of the other files are unchanged, so we don't really need to store another copy of them.</p>
+<p align="left">So, we don't want to store the full contents of the tree for every single change.&nbsp; Instead, we want a way to store a tree represented as a set of changes to another tree.&nbsp; We call this a "delta".</p>
+<h4 align="left">Delta direction</h4>
+<p align="left">As we decide to store our repositories using deltas, we must be concerned about performance.&nbsp; Retrieving a tree which is in a deltified representation requires more effort than retrieving one which is stored in full.&nbsp; For example, let's suppose that version 1 of the tree is stored in full, but every subsequent revision is represented as a delta from its predecessor.&nbsp; This means that in order to retrieve version 4,686, we must first retrieve version 1 and then apply 4,685 deltas. Obviously, this approach would mean that retrieving some versions will be faster than others. When using this approach we say that we are using "forward deltas", because each delta expresses the set of changes from one version to the next.&nbsp;</p>
+<p align="left">We observe that not all versions of the tree are equally likely to be retrieved.&nbsp; For example, version 83 of the Vault tree is not special in any way.&nbsp; It is likely that we have not retrieved that version in over a year.&nbsp;&nbsp;I suspect that we will never retrieve it again.&nbsp; However, we retrieve the latest version of the tree many times per day.&nbsp; In fact, as a broad generalization, we can say that at any given moment, the most recent version of the tree is probably the most likely one to be needed.</p>
+<p align="left">The simplistic use of forward deltas delivers its worst performance for the most common case.&nbsp; Not good.</p>
+<p align="left">Another idea is to use "reverse deltas".&nbsp; In this approach, we store the most recent tree in full.&nbsp; Every other tree N is represented as a set of differences from tree N+1.&nbsp; This approach delivers its best performance for the most common case, but it can still take an awfully long time to retrieve older trees.</p>
+<p align="left">Some SCM tools use some sort of a compromise design.&nbsp;&nbsp;In one approach, instead of storing just one full tree and representing every other tree as a delta, we sprinkle a few more full trees along the way.&nbsp; For example, suppose that we store a full tree for every 10th version.&nbsp; This approach uses more disk space, but the SCM server never has to apply more than 9 deltas to retrieve any tree.</p>
+<h4 align="left">What is a delta?</h4>
+<p align="left">I've been throwing around this concept of deltas, but I haven't stopped to describe them.</p>
+<p align="left">A tree is a hierarchy of folders and files.&nbsp;&nbsp;A delta is the difference between two trees.&nbsp; In theory, those two trees do not need to be related.&nbsp; However, in practice, the only reason we calculate the difference between them is because one of them is derived from the other.&nbsp; Some developer started with tree N and made one or more changes, resulting in tree N+1.</p>
+<p align="left">We can think of the delta as a set of changes.&nbsp; In fact, many SCM tools use the term "changeset" for exactly this purpose.&nbsp; A changeset is merely a list of the changes which express the difference between two trees.</p>
+<p align="left">For example, let's suppose that Wilbur starts with tree N and makes the following changes:</p>
+<ol>
+<li>
+<div align="left">He deletes $/top/subfolder/foo.c because it is no longer needed.</div>
+</li>
+<li>
+<div align="left">He edits $/top/subfolder/Makefile to remove foo.c from the list of file names</div>
+</li>
+<li>
+<div align="left">He edits $/top/bar.c to remove all the calls to the functions in foo.c</div>
+</li>
+<li>
+<div align="left">He renames $/top/hello.c and gives it the new name hola.c</div>
+</li>
+<li>
+<div align="left">He adds a new file called feature_creep.c to $/top/</div>
+</li>
+<li>
+<div align="left">He edits $/top/Makefile to add feature_creep.c to the list of filenames</div>
+</li>
+<li>
+<div align="left">He moves $/top/subfolder/readme.txt into $/top</div>
+</li>
+</ol>
+<p align="left">At this point, he commits all of these changes to the repository as a single transaction.&nbsp; When the SCM server stores this delta, it must remember all of these changes.</p>
+<p align="left">For changeset item 1 above, the delete of foo.c is easily represented.&nbsp; We simply remember that foo.c existed in tree N but does not exist in tree N+1.</p>
+<p align="left">For changeset item 4, the rename of hello.c is a bit more complex.&nbsp; To handle renames, we need each object in the repository to have an identifier which never changes, even when the name or location of the item changes.</p>
+<p align="left">For changeset item 7, the move of readme.txt is another example of why repositories need IDs for each item.&nbsp; If we simply remember every item by its path, we cannot remember the occasions when that path changes.</p>
+<p align="left">Changeset item 5 is going to be a lot bulkier than some of the other items here.&nbsp; For this item we need to remember that tree N+1 has a file called feature_creep.c which was never present in tree N.&nbsp; However, a full representation of this changeset item needs to contain the entire contents of that file.</p>
+<p align="left">Changeset items 2, 3 and 6 represent situations where a file which already existed has been modified in some way.&nbsp; We could handle these items the same way as item 5, by storing the entire contents of the new version of the file.&nbsp; However, we will be happier if we can do deltas at the file level just as we are doing deltas at the tree level.</p>
+<h4 align="left">File deltas</h4>
+<p align="left">A file delta merely expresses the difference between two files.&nbsp; Once again, the reason we calculate a file delta is because we believe it will be smaller than the file itself, usually because one of the files is derived from the other.</p>
+<p align="left">For text files, a well-known approach to the file delta problem is to compare line-by-line and output a list of lines which have been modified, inserted or changed.&nbsp; This is the same kind of results which are produced by the Unix 'diff' command.&nbsp; The bad news is that this approach only works for text files.&nbsp; The good news is that software developers and web developers have a lot of text files.</p>
+<p align="left">CVS and Perforce use this approach for repository storage.&nbsp; Text files are deltified using a line-oriented diff.&nbsp; Binary files are not deltified at all, although Perforce does reduce the penalty somewhat by compressing them.&nbsp;</p>
+<p align="left">Subversion and Vault are examples of tools which use binary file deltas for repository storage.&nbsp; Vault uses a file delta algorithm called VCDiff, as described in <a href="http://www.faqs.org/rfcs/rfc3284.html">RFC 3284</a>.&nbsp; This algorithm is byte-oriented, not line-oriented.&nbsp; It outputs a list of byte ranges which have been changed.&nbsp; This means it can handle any kind of file, binary or text.&nbsp; As an ancillary benefit, the VCDiff algorithm compresses the data at the same time.</p>
+<p align="left">Binary deltas are a critical feature for some SCM tool users, especially in situations where the binary files are large.&nbsp; Consider the case where a user checks out a 10 MB file, changes a few bytes, and checks it back in.&nbsp; In CVS, the size of the repository will increase by 10 MB.&nbsp; In Subversion and Vault, the repository will only grow by a small amount.</p>
+<h4 align="left">Deltas and diffs are different</h4>
+<p align="left">Please note that I make a distinction between the terms "delta" and "diff".</p>
+<ul>
+<li>
+<div align="left">A "delta" is the difference between two versions.&nbsp; If we have one full file and a delta, then we can construct the other full file.&nbsp; A delta is used primarily because it is smaller than the full file, not because it is useful for a human being to read.&nbsp; The purpose of a delta is efficiency.&nbsp; When deltas are done at the level of bytes instead of textual lines, that efficiency becomes available to all kinds of files, not just text files.</div>
+</li>
+<li>
+<div align="left">A "diff" is the human-readable difference between two versions of a text file.&nbsp; It is usually line-oriented, but really cool visual diff tools can also highlight the specific characters on a line which differ.&nbsp; The purpose of a diff is to show a developer exactly what has changed between two versions of a file.&nbsp; Diffs are really useful for text files, because human beings tend to read text files.&nbsp; Most human beings don't read binary files, and human-readable diffs of binary files are similarly uninteresting.</div>
+</li>
+</ul>
+<p align="left">As mentioned above, some SCM tools use binary deltas for repository storage or to improve performance over slow network lines.&nbsp; However, those tools also support textual diffs.&nbsp; Deltas and diffs serve two distinct purposes, both of which are important.&nbsp; It is merely coincidence that some SCM tools use textual diffs as their repository deltas.</p>
+<h4 align="left">The evolution of source control technology</h4>
+<p align="left">At this point I should admit that I have presented a somewhat idealized view of the world.&nbsp; Not all SCM tools work the way I have described.&nbsp; In fact, I have presented things exactly backwards, discussing tree-wide deltas before file deltas.&nbsp; That is not the way the history of the world unfolded.</p>
+<p align="left">Prehistoric ancestors of modern programmers had to live with extremely primitive tools.&nbsp; Early version control systems like RCS only handled file deltas.&nbsp; There was no way for the system to remember folder-level operations like add, renaming or deleting files.</p>
+<p align="left">Over time, the design of SCM tools matured.&nbsp;&nbsp;CVS is probably the most popular source control tool in the world today.&nbsp; It was originally developed as a set of wrappers around RCS which essentially provided support for some folder-level operations.&nbsp; Although CVS still has some important limitations, it was a big step forward.</p>
+<p align="left">Today, several modern source control systems are designed around the notion of tree-wide deltas.&nbsp; By accurately remembering every possible operation which can happen to a repository, these tools provide a truly complete history of a project.</p>
+<h4 align="left">What can be stored in a repository?</h4>
+<p style="BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: black 1px solid; PADDING-LEFT: 5px; FONT-SIZE: smaller; FLOAT: right; PADDING-BOTTOM: 5px; MARGIN: 5px; BORDER-LEFT: black 1px solid; WIDTH: 50%; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid; BACKGROUND-COLOR: rgb(230,230,230)"><b>Best Practice: Checkin all the canonical stuff, and nothing else</b><br /><br />
+Although you can store anything you want in a repository, that doesn't mean you should.  The best practice here is to store everything which is necessary to do a build, and nothing else.  I call this "the canonical stuff".<br /><br />
+To put this another way, I recommend that you do not store any file which is automatically generated.  Checkin your hand-edited source code.  Don't checkin EXEs and DLLs.  If you use a code generation tool, checkin the input file, not the generated code file.  If you generate your product documentation in several different formats, checkin the original format, the one that you manually edit.<br /><br />
+If you have two files, one of which is automatically generated from the other, then you just don't need to checkin both of them.  You would in effect be managing two expressions of the same thing.  If one of them gets out of sync with the other, then you have a problem.</p>
+<p align="left">People sometimes ask us what kind of things can be stored in a repository.&nbsp; In general, the answer is: "Any file".&nbsp; It is true that I am focusing on tools which are designed for software developers and web developers.&nbsp; However, those tools don't really care what kind of file you store inside them.&nbsp; Vault doesn't care.&nbsp; Perforce, Subversion and CVS don't care.&nbsp; Any of these tools will gratefully accept any file you want to store.</p>
+<p align="left">If you will be storing a lot of binary files, it is helpful to know how your SCM tool handles them.&nbsp; A tool which uses binary deltas in the repository may be a better choice.</p>
+<p align="left">If <em>all</em> of your files are binary, you may want to explore other solutions.&nbsp; Tools like Vault and Subversion were designed for programmers.&nbsp; These products contain features designed specifically for use with source code, including diff and automerge.&nbsp; You can use these systems to store all of your Excel spreadsheets, but they are probably not the best tool for the job.&nbsp; Consider exploring "document management" systems instead.</p>
+<h4 align="left"> How is the repository itself stored?</h4>
+<p align="left">We need to descend through one more layer of abstraction before we turn our attention back to more practical matters.&nbsp; So far I have been talking about how things are stored and managed within a repository, but I have not broached the subject of how the repository itself is stored.
+</p><p align="left">A repository must store every version of every file.&nbsp; It must remember the hierarchy of files and folders for every version of the tree.&nbsp; It must remember <em>metadata</em>, information about every file and folder.&nbsp; It must remember checkin comments, explanations provided by the developer for each checkin.&nbsp; For large trees and trees with very many revisions, this can be a lot of data that needs to be managed efficiently and reliably.&nbsp; There are several different ways of approaching the problem.</p>
+<p align="left">RCS kept one archive file for every file being managed.&nbsp; If your file was called "foo.c" then the archive file was called "foo.c,v".&nbsp; Usually these archive files were kept in a subdirectory of the working directory, just one level down.&nbsp; RCS files were plain text, you could just look at them with any editor.&nbsp; Inside the file you would find a bunch of metadata and a full copy of the latest version of the file, plus a series of line-oriented file deltas, one for each previous version.&nbsp; (Please forgive me for speaking of RCS in the past tense.&nbsp; Despite all the fond memories, that particular phase of my life is over.)</p>
+<p align="left">CVS uses a similar design, albeit with a lot more capabilities.&nbsp; A CVS repository is distinct, completely separate from the working directory, but it still uses ",v" files just like RCS.&nbsp; The directory structure of a CVS repository contains some additional metadata.</p>
+<p align="left">When managing larger and larger source trees, it becomes clear that the storage challenges of a repository are exactly the same as the storage challenges of a database.&nbsp; For this reason, many SCM tools use an actual database as the backend data store.&nbsp; Subversion uses Berkeley DB.&nbsp; Vault uses SQL Server 2000.&nbsp; The benefit of this approach is enormous, especially for SCM tools which support atomic transactions.&nbsp; Microsoft has invested lots of time and money to ensure that SQL Server is a safe place to store important information.&nbsp; Data corruption simply doesn't happen.&nbsp; All of the ultra-tricky details of transactions are handled by the underlying database.</p>
+<p align="left">Perforce uses somewhat of a hybrid approach, storing all of the metadata in a database but keeping all of the actual file contents in RCS files.&nbsp; This approach trades some safety for speed.&nbsp; Since Perforce manages its own archive files, it has to take responsibility for all the strange things that threaten to corrupt them.&nbsp; On the other hand, writing a file is a bit faster than writing a blob into a SQL database.&nbsp; Perforce has the reputation of being one of the fastest SCM tools.</p>
+<h4 align="left">Managing repositories</h4>
+<p style="BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: black 1px solid; PADDING-LEFT: 5px; FONT-SIZE: smaller; FLOAT: right; PADDING-BOTTOM: 5px; MARGIN: 5px; BORDER-LEFT: black 1px solid; WIDTH: 50%; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid; BACKGROUND-COLOR: rgb(230,230,230)"><b>Best Practice: Use separate repositories for things which are truly separate</b><br /><br />
+Most SCM tools offer the ability to have multiple distinct repositories.  Vault can even host multiple repositories on the same Vault server.  People often ask us when this capability should be used.<br /><br />
+In general, you should store related items in the same repository.  Start a separate repository only in situations where the contents of the two are completely unrelated.&nbsp; In a small ISV, it may be quite logical to have only one repository which contains every project.&nbsp;
+</p>
+<p align="left">Creating a source control repository is kind of a special event.&nbsp; It's a little bit like adopting a cat.&nbsp; People often get a cat without realizing the animal is going to be around for 10-20 years.&nbsp; Your repository may have similar longevity, or even longer.</p>
+<p align="left">Shortly after SourceGear was founded in 1997, we created a SourceSafe repository.&nbsp; Over seven years later, that repository is still in use, almost every day.&nbsp; (Along with a whole bunch of legacy projects, it contains the source code for SourceOffSite.&nbsp; We never migrated that project to Vault because we wanted the SourceOffSite developers to continue eating their own dogfood.)</p>
+<p align="left">That repository is well over a gigabyte in size (which is actually rather small, but then SourceGear has never been a very big company).&nbsp; It contains thousands of files, thousands of checkins, and has been backed up thousands of times.</p>
+<p align="left">Treat your repository well and it will serve you well:</p>
+<ul>
+<li>
+<div align="left">Obviously you should do regular backups.&nbsp; That repository contains everything your fussy and expensive programmers have ever created.&nbsp; Don't risk losing it.&nbsp;</div>
+</li>
+<li>
+<div align="left">Just for fun, take an hour this week and check your backup to see if it actually works.&nbsp; It's shocking how many people are doing daily backups that cannot actually be restored when they are needed.</div>
+</li>
+<li>
+<div align="left">Put your repository on a reliable server.&nbsp;&nbsp;If your repository goes down, your entire team is blocked from doing work.&nbsp; Disk drives like to fail, so use RAID.&nbsp; Power supplies like to fail, so get a server with redundant power supplies.&nbsp; The electrical grid likes to fail, so get a good Uninterruptible Power Supply (UPS).</div>
+</li>
+<li>
+<div align="left">Be conservative in the way your SCM server machine is managed.&nbsp; Don't put anything on that machine that doesn't need to be there.&nbsp; Don't feel the need to install every single Service Pack on the day it gets released.&nbsp; I've been shocked how many times one of our servers went south simply because we installed a service pack or hotfix from Windows Update.&nbsp; Obviously I want our machines to be kept current with the latest security fixes, but I've been burned too many times not to be cautious.&nbsp; Install those patches on some other machine before you put them on critical servers.</div>
+</li>
+<li>
+<div align="left">Keep your SCM server inside a firewall.&nbsp; If you need to allow your developers to access the repository from home, carefully poke a hole, but leave everything else as tight as you can.&nbsp; Make sure your developers are using some sort of bulk encryption.&nbsp; Vault uses SSL.&nbsp; Tools like Perforce, CVS and Subversion can be tunneled through ssh or something similar.</div>
+</li>
+</ul>
+<p align="left">This brief list of tips is hardly a complete guide for administrators.&nbsp; I am merely trying to describe the level of care and caution which should be used for your SCM repository.</p>
+<h4 align="left">Undo</h4>
+<p align="left">As I have mentioned, one of the best things about source control is that it contains your entire history.&nbsp; Every version of everything is stored.&nbsp; Nothing is ever deleted.</p>
+<p align="left">However, sometimes this benefit can be a real pain.&nbsp; What if I made a mistake and checked in something that should not be checked in?&nbsp; My history contains something I would rather forget.&nbsp; I want to pretend that it never happened.&nbsp; Isn't there some way to really delete from a repository?</p>
+<p align="left">In general, the recommended way to fix a problem is to checkin a new version which fixes it.&nbsp; Try not to worry about the fact that your repository contains a full history of the error.&nbsp; Your mistakes are a part of your past.&nbsp;&nbsp;Accept them and move on with your life.</p>
+<p align="left">However, most SCM tools do provide one or more ways of dealing with this situation.&nbsp; First, there is a command I call "rollback".&nbsp; This command is essentially an "undo" for revisions of a file.&nbsp; For example, let's say that a certain file is at version 7 and we want to go back to version 6.&nbsp; In Vault, we select version 6 and choose the Rollback command.</p>
+<p align="left">To be fair, I should admit that the rollback command is not always destructive.&nbsp; In some SCM tools, the rollback feature really does make version 7 disappear forever.&nbsp; Vault's rollback is non-destructive.&nbsp; It simply creates a version 8 which is identical to version 6.&nbsp; The designers of Vault are fanatical purists, or at the very least, one of them is.</p>
+<p align="left">As a concession to those who are less fanatical, Vault does support a way to truly destroy things in a repository.&nbsp; We call this feature "obliterate".&nbsp; I believe Subversion and Perforce use the same term.&nbsp; The obliterate command is the only way to delete something and make it truly gone forever.</p>
+<p style="BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: black 1px solid; PADDING-LEFT: 5px; FONT-SIZE: smaller; FLOAT: right; PADDING-BOTTOM: 5px; MARGIN: 5px; BORDER-LEFT: black 1px solid; WIDTH: 50%; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid; BACKGROUND-COLOR: rgb(230,230,230)"><b>Best Practice: Never obliterate anything that was real work</b><br /><br />
+The purist in me wants to recommend that nothing should ever be obliterated.  However, my pragmatist side prevails.  There <i>are</i> situations where obliterate is not sinful.<br /><br />
+However, obliterate should never be used to delete actual work.  Don't obliterate a file simply because you discovered it to be a bad idea.  Don't obliterate a file simply because you don't need it anymore.  Obliterate is for situations where something in the repository should never have been there at all.  For example, if you accidentally checkin a gigabyte of MP3s alongside your C++ include files, obliterate is a justifiable choice.</p>
+<p align="left">In my original spec for Vault, I had decided that we would not implement any form of destructive delete.&nbsp; We eventually decided to compromise and implement this command, but I really wanted to discourage its use.&nbsp; SourceSafe makes it far too easy to rewrite history and pretend that something never happened.&nbsp; In the Delete dialog box, SourceSafe includes a checkbox called "Destroy Permanently".&nbsp; This is an atrocious design decision, roughly equivalent to leaving a sledgehammer next to the server machine so that people can bash the hard disks with it every once in a while.&nbsp;&nbsp;This checkbox is almost irresistible.&nbsp; It simply begs to be checked, even though it is very rarely the right thing to do.</p>
+<p align="left">When we first designed the obliterate command for Vault, I wanted its user interface to somehow make the user feel guilty.&nbsp; I argued that the obliterate dialog box should include a photograph of a 75-year old catholic nun scowling and holding a yardstick.</p>
+<p align="left">The rest of the team agreed that we should discourage people from using this command, but in the end, we settled on a less graphical approach.&nbsp; In Vault, the obliterate command is available only in the Admin client, not the regular client people use every day.&nbsp; In effect, we made the obliterate command available, but inconvenient.&nbsp; People who really need to obliterate can find the command and get it done.&nbsp; Everyone else has to think twice before they try to rewrite history and pretend something never happened.</p><p align="left"> </p>
+<h4>Kimchi again?</h4>
+<p align="left"> Recently when I asked my fifth grade daughter what she had learned in school, she proudly informed me that "<em>everyone</em> in Korea eats kimchi at <em>every</em> meal, <em>every</em> day".&nbsp; In the world of a ten-year-old, things are simpler.&nbsp; Rules don't have exceptions.&nbsp; Generalizations always apply.&nbsp;</p>
+<p align="left">This is how we learn.&nbsp; We understand the basic rules first and see the finer points later.&nbsp; First we learn that memory leaks are impossible in the CLR.&nbsp; Later, when our app consumes all available RAM, we learn more.</p>
+<p align="left">My habit as I write these chapters is to first present the basics in a "matter of fact" fashion, rarely acknowledging that there are exceptions to my broad generalizations.&nbsp; I did this during the chapter on checkins, failing to mention the "edit-merge-commit" until I had thoroughly explored "checkout-edit-checkin".</p>
+<p align="left">In this chapter, I have written everything from the perspective of just one specific architecture.&nbsp; SCM tools like Vault, Perforce, CVS and Subversion are based on the concept of a centralized server which hosts a single repository.&nbsp; Each client has a working folder.&nbsp; All clients contact the same server.&nbsp;</p>
+<p align="left">I confess that not all SCM tools work this way.&nbsp; Tools like <a href="http://www.bitkeeper.com/">BitKeeper</a> and <a href="http://www.gnu.org/software/gnu-arch/">Arch</a> are based on the concept of distributed repositories.&nbsp; Instead of one repository, there can be several, or even many.&nbsp; Things can be retrieved or committed to any repository at any time.&nbsp; The repositories are synchronized by migrating changesets from one repository to another.&nbsp; This results in a merge situation which is not altogether different from merging branches.</p>
+<p align="left">From the perspective of this SCM geek, distributed repositories are an attractive concept.&nbsp; Admittedly, they are advanced and complex, requiring a bit more of a learning curve on the part of the end user.&nbsp; But for the power user, this paradigm for source control is very cool.</p>
+<p align="left">Having no experience in the implementation of these systems, I will not be explaining their behavior in any detail.&nbsp; Suffice it to say that this approach is similar in some ways, but very different in others.&nbsp; This series of articles will continue to focus on the more mainstream architecture for source control.</p>
+<h4 align="left">Looking ahead</h4>
+<p align="left">In this chapter, I discussed the details of repositories.&nbsp; In the next chapter, I'll go back over to the client side and dive into the details of working folders.</p>
+<p align="left"> </p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align="left"><a href="{{{link:id='1084'}}}">&lt; Chapter 3</a></td>
+<td align="right"><a href="{{{link:id='1086'}}}">Chapter 5 &gt;</a></td>
+</tr>
+</table>
+{{{haloscan}}}
