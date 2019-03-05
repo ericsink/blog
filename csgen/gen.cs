@@ -786,6 +786,8 @@ public class blog
         var site = JsonConvert.DeserializeObject<Site>(File.ReadAllText(Path.Combine(dir_data, "esbma.json")));
         var dest = "pub_" + NewId_hex();
 
+		var template = File.ReadAllText(Path.Combine(dir_data, "template.html"));
+
         Directory.CreateDirectory(dest);
 
         foreach (var kv in site.items)
@@ -812,8 +814,7 @@ public class blog
                     var content = do_js(dir_data, site, id, my_path);
                     if (it.usetemplate)
                     {
-                        var html = File.ReadAllText(Path.Combine(dir_data, "template.html"));
-                        var crunched = crunch(site, id, html, content);
+                        var crunched = crunch(site, id, template, content);
                         File.WriteAllText(path, crunched);
                     }
                     else
@@ -826,11 +827,10 @@ public class blog
                 {
                     if (it.usetemplate)
                     {
-                        var html = File.ReadAllText(Path.Combine(dir_data, "template.html"));
                         var content = get_content(dir_data, id);
                         if (content != null)
                         {
-                            var crunched = crunch(site, id, html, content);
+                            var crunched = crunch(site, id, template, content);
                             File.WriteAllText(path, crunched);
                         }
                     }
