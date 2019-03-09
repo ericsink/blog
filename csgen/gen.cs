@@ -13,22 +13,17 @@ namespace blog
 
 public static class csfun
 {
-    static int parseInt(string s)
-    {
-        return int.Parse(s);
-    }
-
     static DateTime parse_date(string s)
     {
         var twoparts = s.Split(' ');
         var dateparts = twoparts[0].Split('-');
         var timeparts = twoparts[1].Split(':');
-        var year = parseInt(dateparts[0]);
-        var month = parseInt(dateparts[1]);
-        var day = parseInt(dateparts[2]);
-        var hour = parseInt(timeparts[0]);
-        var min = parseInt(timeparts[1]);
-        var sec = parseInt(timeparts[2]);
+        var year = int.Parse(dateparts[0]);
+        var month = int.Parse(dateparts[1]);
+        var day = int.Parse(dateparts[2]);
+        var hour = int.Parse(timeparts[0]);
+        var min = int.Parse(timeparts[1]);
+        var sec = int.Parse(timeparts[2]);
 
         var d = new DateTime(year, month, day, hour, min, sec, 0);
 
