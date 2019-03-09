@@ -59,3 +59,10 @@ module fsfun =
 
             result
 
+    let rec get_path (site: Site) (it: Item) =
+        if (it.parentid <> null) then
+            let pit = site.items.[it.parentid];
+            (get_path site pit) + "/" + it.pubname
+        else
+            it.pubname
+
