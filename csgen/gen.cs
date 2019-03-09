@@ -72,45 +72,6 @@ public static class csfun
 				);
     }
 
-    public static string make_link(string myPath, string otherPath)
-    {
-        var myParts = myPath.Split('/');
-        var otherParts = otherPath.Split('/');
-
-        // TODO this feels like a hack
-        if (myPath == otherPath)
-        {
-            return myParts[myParts.Length - 1];
-        }
-
-        var ndx = 0;
-        while (
-            (ndx < myParts.Length)
-            && (ndx < otherParts.Length)
-            && (myParts[ndx] == otherParts[ndx])
-            )
-        {
-            ndx++;
-        }
-
-        var result = "";
-
-        var i = ndx;
-        while (i < (myParts.Length - 1))
-        {
-            result = fsfun.path_combine(result, "..");
-            i++;
-        }
-
-        while (ndx < (otherParts.Length))
-        {
-            result = fsfun.path_combine(result, otherParts[ndx]);
-            ndx++;
-        }
-
-        return result;
-    }
-
     public static string get_path(Site site, Item it)
     {
         if (it.parentid != null)
@@ -160,7 +121,7 @@ public static class csfun
             if (local_it.active && (my_content != null))
             {
                 var local_path = "/" + get_path(site, local_it);
-                var local_link = "http://www.ericsink.com/" + make_link(my_path, local_path);
+                var local_link = "http://www.ericsink.com/" + fsfun.make_link(my_path, local_path);
 
                 content += "<item>";
                 content += "<title>";
@@ -212,7 +173,7 @@ public static class csfun
             var local_id = kv.Key;
             var local_it = kv.Value;
             var local_path = "/" + get_path(site, local_it);
-            var local_link = make_link(my_path, local_path);
+            var local_link = fsfun.make_link(my_path, local_path);
 
             content += "<span class=\"DayPageArticleTitle\"><a href=\"";
             content += local_link;
@@ -240,7 +201,7 @@ public static class csfun
             var local_id = kv.Key;
             var local_it = kv.Value;
             var local_path = "/" + get_path(site, local_it);
-            var local_link = make_link(my_path, local_path);
+            var local_link = fsfun.make_link(my_path, local_path);
 
             content += "<span class=\"DayPageArticleTitle\"><a href=\"";
             content += local_link;
@@ -276,7 +237,7 @@ public static class csfun
             var local_id = kv.Key;
             var local_it = kv.Value;
             var local_path = "/" + get_path(site, local_it);
-            var local_link = make_link(my_path, local_path);
+            var local_link = fsfun.make_link(my_path, local_path);
 
             content += "<span class=\"DayPageArticleTitle\"><a href=\"";
             content += local_link;
@@ -327,7 +288,7 @@ public static class csfun
                 if (local_it.active && (my_content != null))
                 {
                     var local_path = "/" + get_path(site, local_it);
-                    var local_link = make_link(my_path, local_path);
+                    var local_link = fsfun.make_link(my_path, local_path);
 
                     content += "<tr><td><span align=\"right\" class=ArticleDate>";
                     content += format_date(local_it.datefiled);
@@ -372,7 +333,7 @@ public static class csfun
             var local_id = kv.Key;
             var local_it = kv.Value;
             var local_path = "/" + get_path(site, local_it);
-            var local_link = make_link(my_path, local_path);
+            var local_link = fsfun.make_link(my_path, local_path);
 
             content += "<li><a href=\"";
             content += local_link;
@@ -421,7 +382,7 @@ public static class csfun
                 var local_id = kv.Key;
                 var local_it = kv.Value;
                 var local_path = "/" + get_path(site, local_it);
-                var local_link = make_link(my_path, local_path);
+                var local_link = fsfun.make_link(my_path, local_path);
 
                 content += "<span class=\"DayPageArticleTitle\"><a href=\"";
                 content += local_link;
@@ -452,7 +413,7 @@ public static class csfun
                 var local_id = kv.Key;
                 var local_it = kv.Value;
                 var local_path = "/" + get_path(site, local_it);
-                var local_link = make_link(my_path, local_path);
+                var local_link = fsfun.make_link(my_path, local_path);
 
                 content += "<span class=\"DayPageArticleTitle\"><a href=\"";
                 content += local_link;
@@ -488,7 +449,7 @@ public static class csfun
             var local_id = kv.Key;
             var local_it = kv.Value;
             var local_path = "/" + get_path(site, local_it);
-            var local_link = make_link(my_path, local_path);
+            var local_link = fsfun.make_link(my_path, local_path);
 
             content += "<span class=\"DayPageArticleTitle\"><a href=\"";
             content += local_link;
@@ -547,7 +508,7 @@ public static class csfun
                 if (my_content != null)
                 {
                     var local_path = "/" + get_path(site, local_it);
-                    var local_link = make_link(my_path, local_path);
+                    var local_link = fsfun.make_link(my_path, local_path);
 
                     content += "<li><p><a href=\"";
                     content += local_link;
@@ -664,7 +625,7 @@ public class blog
                 var link_it = site.items[link_id];
                 var other_path = "/" + csfun.get_path(site, link_it);
 
-                var str_link = csfun.make_link(my_path, other_path);
+                var str_link = fsfun.make_link(my_path, other_path);
 
                 t = t.Replace(m.Value, str_link);
             }

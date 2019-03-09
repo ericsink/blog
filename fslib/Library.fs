@@ -34,3 +34,28 @@ module fsfun =
         else
             a + "/" + b;
 
+    let make_link (myPath :string) (otherPath: string) =
+        let myParts = myPath.Split('/')
+        let otherParts = otherPath.Split('/')
+
+        // TODO this feels like a hack
+        if (myPath = otherPath) then
+            myParts.[myParts.Length - 1]
+        else
+            let mutable ndx = 0;
+            while ( (ndx < myParts.Length) && (ndx < otherParts.Length) && (myParts.[ndx] = otherParts.[ndx])) do
+                ndx <- ndx + 1
+
+            let mutable result = ""
+
+            let mutable i = ndx
+            while (i < (myParts.Length - 1)) do
+                result <- path_combine result ".."
+                i <- i + 1
+
+            while (ndx < (otherParts.Length)) do
+                result <- path_combine result otherParts.[ndx]
+                ndx <- ndx + 1
+
+            result
+
