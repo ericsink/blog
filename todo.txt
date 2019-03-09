@@ -1,4 +1,13 @@
 
+maybe write script to convert all the entries
+to markdown
+
+investigate fornax
+
+investate md with layout
+
+scss
+
 update style and template
 
 update copyright dates

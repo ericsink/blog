@@ -72,26 +72,6 @@ public static class csfun
 				);
     }
 
-    static string path_combine(string a, string b)
-    {
-        if (a.Length == 0)
-        {
-            return b;
-        }
-
-        if (b.Substring(0, 1) == "/")
-        {
-            return b;
-        }
-
-        if (a.Substring(a.Length - 1, 1) == "/")
-        {
-            return a + b;
-        }
-
-        return a + "/" + b;
-    }
-
     public static string make_link(string myPath, string otherPath)
     {
         var myParts = myPath.Split('/');
@@ -118,13 +98,13 @@ public static class csfun
         var i = ndx;
         while (i < (myParts.Length - 1))
         {
-            result = path_combine(result, "..");
+            result = fsfun.path_combine(result, "..");
             i++;
         }
 
         while (ndx < (otherParts.Length))
         {
-            result = path_combine(result, otherParts[ndx]);
+            result = fsfun.path_combine(result, otherParts[ndx]);
             ndx++;
         }
 
