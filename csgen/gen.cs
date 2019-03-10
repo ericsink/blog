@@ -13,36 +13,6 @@ namespace blog
 
 public static class csfun
 {
-    static DateTime parse_date(string s)
-    {
-        var twoparts = s.Split(' ');
-        var dateparts = twoparts[0].Split('-');
-        var timeparts = twoparts[1].Split(':');
-        var year = int.Parse(dateparts[0]);
-        var month = int.Parse(dateparts[1]);
-        var day = int.Parse(dateparts[2]);
-        var hour = int.Parse(timeparts[0]);
-        var min = int.Parse(timeparts[1]);
-        var sec = int.Parse(timeparts[2]);
-
-        var d = new DateTime(year, month, day, hour, min, sec, 0);
-
-        return d;
-    }
-
-    static string format_date_rss(string s)
-    {
-        //<pubDate>{{{loop.datefiled:format='ddd, dd MMM yyyy HH:mm:ss CST'}}}</pubDate>
-        var d = parse_date(s);
-        return d.ToString("ddd, dd MMM yyyy HH:mm:ss CST");
-    }
-
-    static string format_date(string s)
-    {
-        var d = parse_date(s);
-        return d.ToString("dddd, d MMMM yyyy");
-    }
-
     static Dictionary<string, Item> find_by_keyword_match(Site site, IList<string> keywords)
     {
 		return site.items
@@ -83,7 +53,7 @@ public static class csfun
         var local_items = find_by_keyword_block(site, new string[] { "(hide)", "(sol)", "(cornsharp)", "(ignoretoc)" });
         foreach (var kv in
             local_items
-                .OrderByDescending(x => parse_date(x.Value.datefiled))
+                .OrderByDescending(x => fsfun.parse_date(x.Value.datefiled))
             )
         {
             var local_id = kv.Key;
@@ -115,7 +85,7 @@ public static class csfun
                 content += local_link;
                 content += "</link>";
                 content += "<pubDate>";
-                content += format_date_rss(local_it.datefiled);
+                content += fsfun.format_date_rss(local_it.datefiled);
                 //<pubDate>{{{loop.datefiled:format="ddd, dd MMM yyyy HH:mm:ss CST"}}}</pubDate>
                 content += "</pubDate>";
                 content += "<description>";
@@ -146,7 +116,7 @@ public static class csfun
         var local_items = find_by_keyword_match(site, new string[] { "(dev)" });
         foreach (var kv in
             local_items
-                .OrderByDescending(x => parse_date(x.Value.datefiled))
+                .OrderByDescending(x => fsfun.parse_date(x.Value.datefiled))
             )
         {
             var local_id = kv.Key;
@@ -160,7 +130,7 @@ public static class csfun
             content += local_it.title;
             content += "</a></span>";
             content += " (<span class=ArticleDate>";
-            content += format_date(local_it.datefiled);
+            content += fsfun.format_date(local_it.datefiled);
             content += "</span>)";
             content += "<blockquote>";
             if (local_it.teaser != null)
@@ -182,7 +152,7 @@ public static class csfun
         var local_items = find_by_keyword_match(site, new string[] { "(bos)" });
         foreach (var kv in
             local_items
-                .OrderByDescending(x => parse_date(x.Value.datefiled))
+                .OrderByDescending(x => fsfun.parse_date(x.Value.datefiled))
             )
         {
             var local_id = kv.Key;
@@ -196,7 +166,7 @@ public static class csfun
             content += local_it.title;
             content += "</a></span>";
             content += " (<span class=ArticleDate>";
-            content += format_date(local_it.datefiled);
+            content += fsfun.format_date(local_it.datefiled);
             content += "</span>)";
             content += "<blockquote>";
             if (local_it.teaser != null)
@@ -220,7 +190,7 @@ public static class csfun
             var local_items = find_by_keyword_block(site, new string[] { "(hide)", "(sol)", "(cornsharp)", "(ignoretoc)" });
             foreach (var kv in
                 local_items
-                    .OrderByDescending(x => parse_date(x.Value.datefiled))
+                    .OrderByDescending(x => fsfun.parse_date(x.Value.datefiled))
                 )
             {
                 var local_id = kv.Key;
@@ -242,7 +212,7 @@ public static class csfun
                     var local_link = fsfun.make_link(my_path, local_path);
 
                     content += "<tr><td><span align=\"right\" class=ArticleDate>";
-                    content += format_date(local_it.datefiled);
+                    content += fsfun.format_date(local_it.datefiled);
                     content += "</span><br><a class=\"ArticleTitleGreen\" href=\"";
                     content += local_link;
                     content += "\">";
@@ -291,7 +261,7 @@ public static class csfun
             var local_items = find_by_keyword_match(site, new string[] { "(mfg_strategy)" });
             foreach (var kv in
                 local_items
-                    .OrderByDescending(x => parse_date(x.Value.datefiled))
+                    .OrderByDescending(x => fsfun.parse_date(x.Value.datefiled))
                 )
             {
                 var local_id = kv.Key;
@@ -305,7 +275,7 @@ public static class csfun
                 content += local_it.title;
                 content += "</a></span>";
                 content += " (<span class=ArticleDate>";
-                content += format_date(local_it.datefiled);
+                content += fsfun.format_date(local_it.datefiled);
                 content += "</span>)";
                 content += "<blockquote>";
                 if (local_it.teaser != null)
@@ -322,7 +292,7 @@ public static class csfun
             var local_items = find_by_keyword_match(site, new string[] { "(mfg_marcomm)" });
             foreach (var kv in
                 local_items
-                    .OrderByDescending(x => parse_date(x.Value.datefiled))
+                    .OrderByDescending(x => fsfun.parse_date(x.Value.datefiled))
                 )
             {
                 var local_id = kv.Key;
@@ -336,7 +306,7 @@ public static class csfun
                 content += local_it.title;
                 content += "</a></span>";
                 content += " (<span class=ArticleDate>";
-                content += format_date(local_it.datefiled);
+                content += fsfun.format_date(local_it.datefiled);
                 content += "</span>)";
                 content += "<blockquote>";
                 if (local_it.teaser != null)
@@ -358,7 +328,7 @@ public static class csfun
         var local_items = find_by_keyword_match(site, new string[] { "(laughs)" });
         foreach (var kv in
             local_items
-                .OrderByDescending(x => parse_date(x.Value.datefiled))
+                .OrderByDescending(x => fsfun.parse_date(x.Value.datefiled))
             )
         {
             var local_id = kv.Key;
@@ -372,7 +342,7 @@ public static class csfun
             content += local_it.title;
             content += "</a></span>";
             content += " (<span class=ArticleDate>";
-            content += format_date(local_it.datefiled);
+            content += fsfun.format_date(local_it.datefiled);
             content += "</span>)";
             content += "<blockquote>";
             if (local_it.teaser != null)

@@ -66,3 +66,26 @@ module fsfun =
         else
             it.pubname
 
+    let parse_date (s :string) =
+        let twoparts = s.Split(' ')
+        let dateparts = twoparts.[0].Split('-')
+        let timeparts = twoparts.[1].Split(':')
+        let year = System.Int32.Parse(dateparts.[0])
+        let month = System.Int32.Parse(dateparts.[1])
+        let day = System.Int32.Parse(dateparts.[2])
+        let hour = System.Int32.Parse(timeparts.[0])
+        let min = System.Int32.Parse(timeparts.[1])
+        let sec = System.Int32.Parse(timeparts.[2])
+
+        let d = new System.DateTime(year, month, day, hour, min, sec, 0)
+        d
+
+    let format_date_rss s =
+        //<pubDate>{{{loop.datefiled:format='ddd, dd MMM yyyy HH:mm:ss CST'}}}</pubDate>
+        let d = parse_date(s)
+        d.ToString("ddd, dd MMM yyyy HH:mm:ss CST")
+
+    let format_date s =
+        let d = parse_date(s)
+        d.ToString("dddd, d MMMM yyyy")
+
