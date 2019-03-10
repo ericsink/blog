@@ -2148,7 +2148,7 @@
 		},
 		"1205" : 
 		{
-			"type" : "js",
+			"type" : "html",
 			"pubname" : "Immutable_Laws_Marketing.html",
 			"parentid" : 1008,
 			"active" : true,
