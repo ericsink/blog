@@ -139,36 +139,6 @@ public static class csfun
         return content;
     }
 
-    static string do_1079(Site site, string my_path)
-    {
-        var content = "";
-
-        content += "<p>Note:  This series of articles provides an introduction to source control using \"centralized\" version control tools such as SourceGear Vault.  You may also be interested in my book, \"Version Control by Example\".  Its content is somewhat more oriented toward \"decentralized\" version control tools.  Its home page is <a href=\"http://www.ericsink.com/vcbe\">http://www.ericsink.com/vcbe</a>.</p> <hr/> <blockquote>";
-
-        var local_items = find_by_keyword_match(site, new string[] { "(scm)" });
-        foreach (var kv in
-            local_items
-                .OrderBy(x => x.Key)
-            )
-        {
-            var local_id = kv.Key;
-            var local_it = kv.Value;
-            var local_path = "/" + fsfun.get_path(site, local_it);
-            var local_link = fsfun.make_link(my_path, local_path);
-
-            content += "<span class=\"DayPageArticleTitle\"><a href=\"";
-            content += local_link;
-            content += "\">";
-            content += local_it.title;
-            content += "</a></span><br /><br />";
-            content += local_it.teaser;
-            content += "<br /><br />";
-        }
-        content += "</blockquote> <p> </p>";
-
-        return content;
-    }
-
     static string do_1150(Site site, string my_path)
     {
         var content = "";
@@ -531,8 +501,6 @@ public static class csfun
         {
             case "1055":
                 return do_1055(dir_data, site, my_path);
-            case "1079":
-                return do_1079(site, my_path);
             case "1150":
                 return do_1150(site, my_path);
             case "1159":

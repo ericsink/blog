@@ -834,7 +834,7 @@
 		},
 		"1079" : 
 		{
-			"type" : "js",
+			"type" : "html",
 			"pubname" : "source_control.html",
 			"parentid" : 1000,
 			"active" : true,
