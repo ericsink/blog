@@ -14,3 +14,49 @@ update copyright dates
 
 where is vcbe content?
 
+--
+
+autogen dsl
+
+viewmodels all rx
+
+validators
+
+layout completely separate layer
+
+XF but mostly doesn't know, no XAML,
+no binding
+
+viewmodel invocations.  no implicit back
+stack.  name + params.  params are checked
+and type-checked.  catch errors earlier.
+
+props with origins, merging, fix ordering
+and race problems with init vs set
+
+sqlite on the client, of course  :-)
+
+postgres on the server
+
+query server, subscribe to queries
+
+state of each client db instance kept on server
+
+scale out not up
+
+websockets, persistent connections
+
+other plain rest, but same msg format
+
+DI, but plain, no container
+
+testing with a fake implementation of XF
+
+in rxui, everything is a prop first and reflection
+is used to make it observable.  WhenAnyValue.  in my
+approach, the observable is first-class and the prop
+nature is secondary.
+
+
+
+
