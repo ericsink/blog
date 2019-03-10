@@ -1,12 +1,15 @@
 
+the toc entries converted from a script to static
+are now using hard-coded links instead of
+{{{link:id='n'}}}
+which may not be a problem
+
 maybe write script to convert all the entries
 to markdown
 
 investigate fornax
 
-investate md with layout
-
-scss
+investigate md with layout, scss
 
 update style and template
 
@@ -18,7 +21,8 @@ where is vcbe content?
 
 autogen dsl
 
-viewmodels all rx
+viewmodels, but maybe not using the term
+the way everyone else does.  all rx.
 
 validators
 
