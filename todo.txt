@@ -1,4 +1,21 @@
 
+consider not having ids?  store the content
+in the same layout as the site.  directories
+are not items.  use file suffix to denote whether
+to crunch and/or use template.  everything else
+is just copied.
+
+.ehtml
+
+does meta go inside there, or in a separate .emeta file?
+
+link crunching doesn't seem that useful.  although
+it does eliminate the problem of a link that goes
+nowhere because of a typo.  but this could be
+checked differently.
+
+--
+
 the toc entries converted from a script to static
 are now using hard-coded links instead of
 {{{link:id='n'}}}
