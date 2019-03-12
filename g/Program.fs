@@ -60,8 +60,9 @@ let get_front_matter (s :string) =
             // the final pair line is empty
             if n_colon > 0 then
                 let k = pair.Substring(0, n_colon).Trim()
-                let v = pair.Substring(n_colon).Trim()
-                d.Add(k, v)
+                let v = pair.Substring(n_colon + 1).Trim()
+                if (k.Length > 0) && (v.Length > 0) then
+                    d.Add(k, v)
         (d, remain)
     else
         (d, s)
@@ -74,6 +75,7 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (template :strin
         let basename = Path.GetFileNameWithoutExtension(from)
         let filename_html = basename + ".html"
         let url_path = blog.fsfun.path_combine url_dir filename_html
+        (*
         let title = index.[url_path].title
         let datefiled = 
             if title <> null then
@@ -83,7 +85,8 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (template :strin
         let pairs = Dictionary<string,string>()
         pairs.Add("title", title)
         pairs.Add("datefiled", datefiled)
-        let all = crunch template content url_path pairs
+        *)
+        let all = crunch template content url_path front_matter
         let dest = Path.Combine(dest_dir, filename_html)
         File.WriteAllText(dest, all)
         ()

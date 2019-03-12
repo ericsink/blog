@@ -67,9 +67,12 @@ let do_file (url_dir :string) (from :string) dest_dir (new_index :Dictionary<str
                 let data_name = sprintf "%s.html" id
                 let data_path = Path.Combine(dir_data, data_name)
                 let pairs = Dictionary<string,string>()
-                pairs.Add("title", it.title)
-                pairs.Add("datefiled", it.datefiled)
-                pairs.Add("keywords", it.keywords)
+                if it.title <> null then
+                    pairs.Add("title", it.title)
+                if it.datefiled <> null then
+                    pairs.Add("datefiled", it.datefiled)
+                if it.keywords <> null then
+                    pairs.Add("keywords", it.keywords)
                 if (File.Exists(data_path)) then
                     let data = File.ReadAllText(data_path)
                     let d2 = blog.pre.crunch(old_index, id, data)
