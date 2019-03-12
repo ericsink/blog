@@ -1,5 +1,7 @@
 namespace blog
 
+open System.Collections.Generic
+
 type Item() =
     member val ``type`` = null : string with get,set
     member val pubname = null : string with get,set
@@ -59,10 +61,10 @@ module fsfun =
 
             result
 
-    let rec get_path (site: Site) (it: Item) =
+    let rec get_path (items: Dictionary<string,Item>) (it: Item) =
         if (it.parentid <> null) then
-            let pit = site.items.[it.parentid];
-            (get_path site pit) + "/" + it.pubname
+            let pit = items.[it.parentid];
+            (get_path items pit) + "/" + it.pubname
         else
             it.pubname
 

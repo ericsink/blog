@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    </ItemGroup>
+
+<ItemGroup>
+	<ProjectReference Include="..\fslib\fslib.fsproj" />
+	<ProjectReference Include="..\c\c.csproj" />
+</ItemGroup>
+
+</Project>

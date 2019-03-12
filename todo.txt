@@ -1,4 +1,38 @@
 
+front matter
+
+take exact contents of s3 bucket
+
+for every file, see if it is templated, and
+if so, remove the template, leaving the actual
+inner content in a .ehtml file
+
+then g, for every file, if .ehtml, then apply
+the the template, alpha and omega.  should match
+the content retrieved from s3 bucket.
+
+--
+
+what to do about the print- items?
+
+should be able to take the output of h, process
+with the template, and the result should be
+identical to blog_live
+
+article title and date filed kinda move into the content
+
+when gen with template from output of h, how to get
+the title so we can put it in the HTML title element
+in head?
+
+--
+
+starting point data dir is missing a bunch of
+entries as a compared to the live site
+
+responsive:  get rid of sidebar?  just a header
+and footer?
+
 consider not having ids?  store the content
 in the same layout as the site.  directories
 are not items.  use file suffix to denote whether
