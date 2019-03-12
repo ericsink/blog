@@ -45,6 +45,7 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
             t4
 
         let create_front_matter (d: Dictionary<string,string>) =
+            // front matter parsing is strict
             let sb = StringBuilder()
             sb.Append("---\n")
             for kv in d do
@@ -79,6 +80,7 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
                     write_ehtml_text pairs d2
                 else
                     // probably js
+                    // TODO Add something to pairs to indicate it was a script?
 
                     let text = File.ReadAllText(from)
                     let a = remove_template_text text

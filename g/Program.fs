@@ -1,5 +1,4 @@
-﻿// Learn more about F# at http://fsharp.org
-
+﻿
 open System
 open System.IO
 open System.Linq
@@ -39,6 +38,7 @@ let crunch (template :string) (content :string) (my_path :string) (pairs: Dictio
     t
 
 let get_front_matter (s :string) =
+    // front matter parsing is strict
     let d = Dictionary<string,string>()
     let marker = "---\n"
     if (s.StartsWith(marker)) then
@@ -61,7 +61,6 @@ let get_front_matter (s :string) =
 
 let do_file (url_dir :string) (from :string) (dest_dir :string) (template :string) =
     if (from.EndsWith(".ehtml")) then
-        printfn "ehtml: %s" from
         let ehtml = File.ReadAllText(from)
         let (front_matter, content) = get_front_matter ehtml
         let basename = Path.GetFileNameWithoutExtension(from)
@@ -71,7 +70,6 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (template :strin
         let dest = Path.Combine(dest_dir, filename_html)
         File.WriteAllText(dest, all)
     else
-        printfn "copy: %s" from
         let name = Path.GetFileName(from)
         let dest_path = Path.Combine(dest_dir, name)
         File.Copy(from, dest_path)
@@ -79,11 +77,9 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (template :strin
 let rec do_dir (url_dir :string) (from :string) (dest_dir :string) template =
     Directory.CreateDirectory(dest_dir)
     for f in (Directory.GetFiles(from)) do
-        printfn "from: %s" f
         do_file url_dir f dest_dir template
 
     for from_sub in (Directory.GetDirectories(from)) do
-        printfn "from_sub: %s" from_sub
         let name = Path.GetFileName(from_sub)
         let dest_sub = Path.Combine(dest_dir, name)
         let url_subdir = blog.fsfun.path_combine url_dir name

@@ -1,27 +1,63 @@
 
-front matter?  or separate .emeta?
+does everything have a datefiled?
 
---
+specify layout in the front matter like jekyll?
+put template.html in a special place?  make sure
+gen doesn't copy it over to the output directory.
+
+fix rss generation.  how to get list of
+articles?
+
+still need rss?
+
+still need google analytics?
 
 what to do about the print- items?
 
+do we need keywords at all?
+
+teaser?
+
+argument can be made that everything in the esbma.json
+file should be salvaged into front matter just in case
+we want it later.  maybe even put in the old id?
+
+.ehtml suffix?  or just always look inside .html?
+
+once everything with h is clean, commit c1
+to the repo and deploy to s3
+
+link gen does solve the problem of the same
+snippet of content being embedded in two different
+ways, like in its own page under entries/ but also
+in the top index.html, where the relative link
+is different.  same problem for rss.  keep ids
+for this?  don't pre-crunch after all?
+
+what about ids + paths for images/assets ?
+nowhere to put these without an index.json.
+
+fewer issues if all within-site urls are absolute
+
+3 cases:
+    /absolute/url
+    rel/url/just/sibling/or/child
+    ../rel/url/which/goes/up
+
+jekyll doesn't deal with url issues like this, does it?
+
 --
+
+redo front page.  no more complete copies of
+recent items.  each item appears on its own page.
 
 responsive:  get rid of sidebar?  just a header
 and footer?
-
-.ehtml suffix?  or just always look inside .html?
 
 link crunching doesn't seem that useful.  although
 it does eliminate the problem of a link that goes
 nowhere because of a typo.  but this could be
 checked differently.
-
-also, link gen does solve the problem of the same
-snippet of content being embedded in two different
-ways, like in its own page under entries/ but also
-in the top index.html, where the relative link
-is different.
 
 --
 
@@ -30,12 +66,7 @@ are now using hard-coded links instead of
 {{{link:id='n'}}}
 which may not be a problem
 
-maybe write script to convert all the entries
-to markdown
-
 investigate fornax
-
-update style and template
 
 update copyright dates
 
@@ -82,7 +113,5 @@ in rxui, everything is a prop first and reflection
 is used to make it observable.  WhenAnyValue.  in my
 approach, the observable is first-class and the prop
 nature is secondary.
-
-
 
 
