@@ -10,16 +10,20 @@ type Item() =
     member val title = null : string with get,set
     member val datefiled = null : string with get,set
 
-let crunch (template :string) (content :string) (my_path :string) (index :Dictionary<string, Item>) =
+let crunch (template :string) (content :string) (my_path :string) (pairs: Dictionary<string,string>) =
     let mutable t = template
 
     t <- t.Replace("{{{page.content}}}", content)
 
-    let title = index.[my_path].title
+    let title =
+        if pairs.ContainsKey("title") then
+            pairs.["title"]
+        else
+            null
 
     if title <> null then
         t <- t.Replace("{{{page.title}}}", title)
-        let datefiled = index.[my_path].datefiled
+        let datefiled = pairs.["datefiled"]
         let s = "<p class=\"ArticleDate\" align=right>" + datefiled + "</p><h1>" + title + "</h1>";
         t <- t.Replace("{{{article.title}}}", s)
     else
@@ -42,14 +46,44 @@ let crunch (template :string) (content :string) (my_path :string) (index :Dictio
 
     t
 
+let get_front_matter (s :string) =
+    let d = Dictionary<string,string>()
+    let marker = "---\n"
+    if (s.StartsWith(marker)) then
+        let s2 = s.Substring(marker.Length)
+        let n = s2.IndexOf(marker)
+        let s3 = s2.Substring(0, n)
+        let remain = s2.Substring(n + marker.Length)
+        let a = s3.Split("\n")
+        for pair in a do
+            let n_colon = pair.IndexOf(":")
+            // the final pair line is empty
+            if n_colon > 0 then
+                let k = pair.Substring(0, n_colon).Trim()
+                let v = pair.Substring(n_colon).Trim()
+                d.Add(k, v)
+        (d, remain)
+    else
+        (d, s)
+
 let do_file (url_dir :string) (from :string) (dest_dir :string) (template :string) (index :Dictionary<string, Item>) =
     if (from.EndsWith(".ehtml")) then
         printfn "ehtml: %s" from
-        let content = File.ReadAllText(from)
+        let ehtml = File.ReadAllText(from)
+        let (front_matter, content) = get_front_matter ehtml
         let basename = Path.GetFileNameWithoutExtension(from)
         let filename_html = basename + ".html"
         let url_path = blog.fsfun.path_combine url_dir filename_html
-        let all = crunch template content url_path index
+        let title = index.[url_path].title
+        let datefiled = 
+            if title <> null then
+                index.[url_path].datefiled
+            else
+                null
+        let pairs = Dictionary<string,string>()
+        pairs.Add("title", title)
+        pairs.Add("datefiled", datefiled)
+        let all = crunch template content url_path pairs
         let dest = Path.Combine(dest_dir, filename_html)
         File.WriteAllText(dest, all)
         ()

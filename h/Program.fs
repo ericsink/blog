@@ -3,6 +3,7 @@ open System
 open System.IO;
 open System.Linq;
 open System.Collections.Generic
+open System.Text
 
 open Newtonsoft.Json
 
@@ -43,11 +44,21 @@ let do_file (url_dir :string) (from :string) dest_dir (new_index :Dictionary<str
             let t4 = t3.Substring(0, n4 - 2)
             t4
 
-        let write_ehtml_text (s :string) =
+        let create_front_matter (d: Dictionary<string,string>) =
+            let sb = StringBuilder()
+            sb.Append("---\n")
+            for kv in d do
+                let line = sprintf "%s: %s\n" kv.Key kv.Value
+                sb.Append(line)
+            sb.Append("---\n")
+            sb.ToString()
+
+        let write_ehtml_text (d: Dictionary<string,string>) (s :string) =
+            let front = create_front_matter d
             let basename = Path.GetFileNameWithoutExtension(name)
             let filename_ehtml = basename + ".ehtml"
             let dest = Path.Combine(dest_dir, filename_ehtml)
-            File.WriteAllText(dest, s)
+            File.WriteAllText(dest, front + s)
 
         if (id_by_path.ContainsKey(url_path)) then
             let id = id_by_path.[url_path]
@@ -55,19 +66,20 @@ let do_file (url_dir :string) (from :string) dest_dir (new_index :Dictionary<str
             if it.usetemplate then
                 let data_name = sprintf "%s.html" id
                 let data_path = Path.Combine(dir_data, data_name)
+                let pairs = Dictionary<string,string>()
+                pairs.Add("title", it.title)
+                pairs.Add("datefiled", it.datefiled)
+                pairs.Add("keywords", it.keywords)
                 if (File.Exists(data_path)) then
                     let data = File.ReadAllText(data_path)
                     let d2 = blog.pre.crunch(old_index, id, data)
-                    let basename = Path.GetFileNameWithoutExtension(name)
-                    let filename_ehtml = basename + ".ehtml"
-                    let dest = Path.Combine(dest_dir, filename_ehtml)
-                    File.WriteAllText(dest, d2)
+                    write_ehtml_text pairs d2
                 else
                     // probably js
 
                     let text = File.ReadAllText(from)
                     let a = remove_template_text text
-                    write_ehtml_text a
+                    write_ehtml_text pairs a
             else
                 let dest_path = Path.Combine(dest_dir, name)
                 File.Copy(from, dest_path)
@@ -96,7 +108,7 @@ let do_file (url_dir :string) (from :string) dest_dir (new_index :Dictionary<str
 
                 let text = File.ReadAllText(from)
                 let a = remove_template_text text
-                write_ehtml_text a
+                write_ehtml_text dnew a
             else
                 let dest_path = Path.Combine(dest_dir, name)
                 File.Copy(from, dest_path)
