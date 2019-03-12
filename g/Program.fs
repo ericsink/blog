@@ -6,22 +6,13 @@ open System.Linq
 open System.Collections.Generic
 open Newtonsoft.Json
 
-type Item() =
-    member val title = null : string with get,set
-    member val datefiled = null : string with get,set
-
 let crunch (template :string) (content :string) (my_path :string) (pairs: Dictionary<string,string>) =
     let mutable t = template
 
     t <- t.Replace("{{{page.content}}}", content)
 
-    let title =
-        if pairs.ContainsKey("title") then
-            pairs.["title"]
-        else
-            null
-
-    if title <> null then
+    if pairs.ContainsKey("title") then
+        let title = pairs.["title"]
         t <- t.Replace("{{{page.title}}}", title)
         let datefiled = pairs.["datefiled"]
         let s = "<p class=\"ArticleDate\" align=right>" + datefiled + "</p><h1>" + title + "</h1>";
@@ -32,6 +23,7 @@ let crunch (template :string) (content :string) (my_path :string) (pairs: Dictio
 
     t <- t.Replace("{{{site.copyright}}}", "Copyright 2001-2017 Eric Sink. All Rights Reserved")
 
+    // TODO remove all these
     t <- (t.Replace("{{{link:id='1205'}}}", (blog.fsfun.make_link my_path "/laws/Immutable_Laws_Marketing.html")))
     t <- (t.Replace("{{{link:id='1150'}}}", (blog.fsfun.make_link my_path "/tocs/Software_Development.html")))
     t <- (t.Replace("{{{link:id='1616'}}}", (blog.fsfun.make_link my_path "/tocs/Laughs.html")))
@@ -56,9 +48,9 @@ let get_front_matter (s :string) =
         let remain = s2.Substring(n + marker.Length)
         let a = s3.Split("\n")
         for pair in a do
-            let n_colon = pair.IndexOf(":")
             // the final pair line is empty
-            if n_colon > 0 then
+            if pair.Length > 0 then
+                let n_colon = pair.IndexOf(":")
                 let k = pair.Substring(0, n_colon).Trim()
                 let v = pair.Substring(n_colon + 1).Trim()
                 if (k.Length > 0) && (v.Length > 0) then
@@ -67,7 +59,7 @@ let get_front_matter (s :string) =
     else
         (d, s)
 
-let do_file (url_dir :string) (from :string) (dest_dir :string) (template :string) (index :Dictionary<string, Item>) =
+let do_file (url_dir :string) (from :string) (dest_dir :string) (template :string) =
     if (from.EndsWith(".ehtml")) then
         printfn "ehtml: %s" from
         let ehtml = File.ReadAllText(from)
@@ -75,39 +67,27 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (template :strin
         let basename = Path.GetFileNameWithoutExtension(from)
         let filename_html = basename + ".html"
         let url_path = blog.fsfun.path_combine url_dir filename_html
-        (*
-        let title = index.[url_path].title
-        let datefiled = 
-            if title <> null then
-                index.[url_path].datefiled
-            else
-                null
-        let pairs = Dictionary<string,string>()
-        pairs.Add("title", title)
-        pairs.Add("datefiled", datefiled)
-        *)
         let all = crunch template content url_path front_matter
         let dest = Path.Combine(dest_dir, filename_html)
         File.WriteAllText(dest, all)
-        ()
     else
         printfn "copy: %s" from
         let name = Path.GetFileName(from)
         let dest_path = Path.Combine(dest_dir, name)
         File.Copy(from, dest_path)
 
-let rec do_dir (url_dir :string) (from :string) (dest_dir :string) template index =
+let rec do_dir (url_dir :string) (from :string) (dest_dir :string) template =
     Directory.CreateDirectory(dest_dir)
     for f in (Directory.GetFiles(from)) do
         printfn "from: %s" f
-        do_file url_dir f dest_dir template index
+        do_file url_dir f dest_dir template
 
     for from_sub in (Directory.GetDirectories(from)) do
         printfn "from_sub: %s" from_sub
         let name = Path.GetFileName(from_sub)
         let dest_sub = Path.Combine(dest_dir, name)
         let url_subdir = blog.fsfun.path_combine url_dir name
-        do_dir url_subdir from_sub dest_sub template index
+        do_dir url_subdir from_sub dest_sub template
 
 [<EntryPoint>]
 let main argv =
@@ -117,8 +97,6 @@ let main argv =
         raise (Exception("dest directory must not already exist"))
     let path_template = Path.Combine(dir_content, "template.html")
     let template = File.ReadAllText(path_template)
-    let path_index = Path.Combine(dir_content, "index.json")
-    let index = JsonConvert.DeserializeObject<Dictionary<string,Item>>(File.ReadAllText(path_index))
-    do_dir "/" dir_content dir_dest template index
+    do_dir "/" dir_content dir_dest template
     0 // return an integer exit code
 
