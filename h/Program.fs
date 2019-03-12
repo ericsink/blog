@@ -28,11 +28,6 @@ let do_file (url_dir :string) (from :string) dest_dir (new_index :Dictionary<str
     let url_path = blog.fsfun.path_combine url_dir name
     if (name.EndsWith(".html")) then
 
-        let remove_template_lines (text :string[]) =
-            let want = text.Length - 165 - 14
-            let a = text.Skip(165).Take(want).ToArray()
-            a
-            
         let remove_template_text (text: string) =
             let t_front_find = "<table cellspacing=\"0\" cellpadding=\"0\" width=\"100%\" border=\"0\" bgcolor=\"white\">\r\n<tr><td>&nbsp;</td></tr>\r\n<tr><td>\r\n"
             let t_back_find = "</td></tr>\r\n</table>\r\n</div>\r\n</td>"
@@ -47,12 +42,6 @@ let do_file (url_dir :string) (from :string) dest_dir (new_index :Dictionary<str
             let n4 = t3.IndexOf(t_back_find)
             let t4 = t3.Substring(0, n4 - 2)
             t4
-
-        let write_ehtml_lines (a :string[]) =
-            let basename = Path.GetFileNameWithoutExtension(name)
-            let filename_ehtml = basename + ".ehtml"
-            let dest = Path.Combine(dest_dir, filename_ehtml)
-            File.WriteAllLines(dest, a)
 
         let write_ehtml_text (s :string) =
             let basename = Path.GetFileNameWithoutExtension(name)
@@ -75,9 +64,6 @@ let do_file (url_dir :string) (from :string) dest_dir (new_index :Dictionary<str
                     File.WriteAllText(dest, d2)
                 else
                     // probably js
-                    //let text = File.ReadAllLines(from)
-                    //let a = remove_template_lines text
-                    //write_ehtml_lines a
 
                     let text = File.ReadAllText(from)
                     let a = remove_template_text text
@@ -107,9 +93,6 @@ let do_file (url_dir :string) (from :string) dest_dir (new_index :Dictionary<str
                 // TODO keywords ?
 
                 new_index.Add(url_path, dnew)
-
-                //let a = remove_template_lines text
-                //write_ehtml_lines a
 
                 let text = File.ReadAllText(from)
                 let a = remove_template_text text

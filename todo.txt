@@ -1,52 +1,27 @@
 
-front matter
-
-take exact contents of s3 bucket
-
-for every file, see if it is templated, and
-if so, remove the template, leaving the actual
-inner content in a .ehtml file
-
-then g, for every file, if .ehtml, then apply
-the the template, alpha and omega.  should match
-the content retrieved from s3 bucket.
+front matter?  or separate .emeta?
 
 --
 
 what to do about the print- items?
 
-should be able to take the output of h, process
-with the template, and the result should be
-identical to blog_live
-
-article title and date filed kinda move into the content
-
-when gen with template from output of h, how to get
-the title so we can put it in the HTML title element
-in head?
-
 --
-
-starting point data dir is missing a bunch of
-entries as a compared to the live site
 
 responsive:  get rid of sidebar?  just a header
 and footer?
 
-consider not having ids?  store the content
-in the same layout as the site.  directories
-are not items.  use file suffix to denote whether
-to crunch and/or use template.  everything else
-is just copied.
-
-.ehtml
-
-does meta go inside there, or in a separate .emeta file?
+.ehtml suffix?  or just always look inside .html?
 
 link crunching doesn't seem that useful.  although
 it does eliminate the problem of a link that goes
 nowhere because of a typo.  but this could be
 checked differently.
+
+also, link gen does solve the problem of the same
+snippet of content being embedded in two different
+ways, like in its own page under entries/ but also
+in the top index.html, where the relative link
+is different.
 
 --
 
@@ -60,13 +35,9 @@ to markdown
 
 investigate fornax
 
-investigate md with layout, scss
-
 update style and template
 
 update copyright dates
-
-where is vcbe content?
 
 --
 
