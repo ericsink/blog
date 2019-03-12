@@ -24,7 +24,7 @@ let has_template (text :string[]) =
     else
         false
 
-let do_file (url_dir :string) (from :string) dest_dir (new_index :Dictionary<string,Dictionary<string,string>>) (old_index :Dictionary<string,blog.Item>) (id_by_path :Dictionary<string,string>) (dir_data :string) =
+let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<string,blog.Item>) (id_by_path :Dictionary<string,string>) (dir_data :string) =
     let name = Path.GetFileName(from)
     let url_path = blog.fsfun.path_combine url_dir name
     if (name.EndsWith(".html")) then
@@ -107,8 +107,6 @@ let do_file (url_dir :string) (from :string) dest_dir (new_index :Dictionary<str
                 // TODO teaser ?
                 // TODO keywords ?
 
-                new_index.Add(url_path, dnew)
-
                 let text = File.ReadAllText(from)
                 let a = remove_template_text text
                 write_ehtml_text dnew a
@@ -119,24 +117,22 @@ let do_file (url_dir :string) (from :string) dest_dir (new_index :Dictionary<str
         let dest_path = Path.Combine(dest_dir, name)
         File.Copy(from, dest_path)
 
-let rec do_dir (url_dir :string) from dest_dir new_index (old_index :Dictionary<string,blog.Item>) id_by_path dir_data =
+let rec do_dir (url_dir :string) from dest_dir (old_index :Dictionary<string,blog.Item>) id_by_path dir_data =
     Directory.CreateDirectory(dest_dir)
     for f in (Directory.GetFiles(from)) do
-        do_file url_dir f dest_dir new_index old_index id_by_path dir_data
+        do_file url_dir f dest_dir old_index id_by_path dir_data
 
     for from_sub in (Directory.GetDirectories(from)) do
         let name = Path.GetFileName(from_sub)
         let dest_sub = Path.Combine(dest_dir, name)
         let url_subdir = blog.fsfun.path_combine url_dir name
-        do_dir url_subdir from_sub dest_sub new_index old_index id_by_path dir_data
+        do_dir url_subdir from_sub dest_sub old_index id_by_path dir_data
 
 [<EntryPoint>]
 let main argv =
     let dir_data = Path.Combine("..", "data")
     let site = JsonConvert.DeserializeObject<blog.Site>(File.ReadAllText(Path.Combine(dir_data, "esbma.json")))
-    let item_by_path = Dictionary<string, blog.Item>()
     let id_by_path = Dictionary<string, string>()
-    let new_index = Dictionary<string, Dictionary<string, string>>()
     let old_index = site.items
     let want typ =
         if typ = "html" then
@@ -150,25 +146,13 @@ let main argv =
         let it = kv.Value
         if want it.``type`` then
             let it_path = "/" + blog.fsfun.get_path old_index it
-            item_by_path.Add(it_path, it)
             id_by_path.Add(it_path, id)
-            let dnew = Dictionary<string, string>()
-            if it.title <> null then
-                dnew.Add("title", it.title)
-            if it.datefiled <> null then
-                dnew.Add("datefiled", it.datefiled)
-            // TODO teaser ?
-            // TODO keywords ?
-            new_index.Add(it_path, dnew)
 
     let dir_live = argv.[0]
     let dir_dest = argv.[1]
     if (Directory.Exists(dir_dest)) then
         raise (Exception("dest directory must not already exist"))
-    do_dir "/" dir_live dir_dest new_index old_index id_by_path dir_data
-    let json = JsonConvert.SerializeObject(new_index, Formatting.Indented)
-    let path_json = Path.Combine(dir_dest, "index.json")
-    File.WriteAllText(path_json, json)
+    do_dir "/" dir_live dir_dest old_index id_by_path dir_data
     File.Copy(Path.Combine(dir_data, "template.html"), Path.Combine(dir_dest, "template.html"))
     0 // return an integer exit code
 
