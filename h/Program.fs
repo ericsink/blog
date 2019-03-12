@@ -123,20 +123,28 @@ let main argv =
     let id_by_path = Dictionary<string, string>()
     let new_index = Dictionary<string, Dictionary<string, string>>()
     let old_index = site.items
+    let want typ =
+        if typ = "html" then
+            true
+        elif typ = "js" then
+            true
+        else
+            false
     for kv in old_index do
         let id = kv.Key
         let it = kv.Value
-        let it_path = "/" + blog.fsfun.get_path old_index it
-        item_by_path.Add(it_path, it)
-        id_by_path.Add(it_path, id)
-        let dnew = Dictionary<string, string>()
-        if it.title <> null then
-            dnew.Add("title", it.title)
-        if it.datefiled <> null then
-            dnew.Add("datefiled", it.datefiled)
-        // TODO teaser ?
-        // TODO keywords ?
-        new_index.Add(it_path, dnew)
+        if want it.``type`` then
+            let it_path = "/" + blog.fsfun.get_path old_index it
+            item_by_path.Add(it_path, it)
+            id_by_path.Add(it_path, id)
+            let dnew = Dictionary<string, string>()
+            if it.title <> null then
+                dnew.Add("title", it.title)
+            if it.datefiled <> null then
+                dnew.Add("datefiled", it.datefiled)
+            // TODO teaser ?
+            // TODO keywords ?
+            new_index.Add(it_path, dnew)
 
     let dir_live = argv.[0]
     let dir_dest = argv.[1]
