@@ -5,14 +5,7 @@ open System.Linq
 open System.Collections.Generic
 open System.Text
 
-type item = 
-    { 
-        path: string
-        title: string
-        datefiled: string
-    }
-
-let make_rss dir_data items =
+let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) = 
     let add (sb :StringBuilder) (s :string) =
         sb.Append(s) |> ignore
 
@@ -27,13 +20,19 @@ let make_rss dir_data items =
     add content "<copyright>{{{site.copyright}}}</copyright>"
     add content "<generator>mine</generator>"
 
-    for it in items do
+    // TODO sort and filter and limit the items
+
+    for kv in items do
+        let path = kv.Key
+        let title = if kv.Value.ContainsKey("title") then kv.Value.["title"] else null
+        let datefiled = kv.Value.["datefiled"]
+
         let my_content = "TODO ReadAllLines"
-        let local_link = "http://www.ericsink.com/" + it.path
+        let local_link = "http://www.ericsink.com/" + path
 
         add content "<item>"
         add content "<title>"
-        add content it.title
+        add content title
         add content "</title>"
         add content "<guid>"
         add content local_link
@@ -42,7 +41,7 @@ let make_rss dir_data items =
         add content local_link
         add content "</link>"
         add content "<pubDate>"
-        add content (blog.fsfun.format_date_rss(it.datefiled))
+        add content (blog.fsfun.format_date_rss(datefiled))
         //<pubDate>{{{loop.datefiled:format="ddd, dd MMM yyyy HH:mm:ss CST"}}}</pubDate>
         add content "</pubDate>"
         add content "<description>"
@@ -141,7 +140,7 @@ let get_front_matter (s :string) =
     else
         (null, s)
 
-let do_file (url_dir :string) (from :string) (dest_dir :string) (template :string) =
+let do_file (url_dir :string) (from :string) (dest_dir :string) (template :string) (items: Dictionary<string,Dictionary<string,string>>) =
     let name = Path.GetFileName(from)
     let dest_path = Path.Combine(dest_dir, name)
     if (from.EndsWith(".html")) then
@@ -152,15 +151,16 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (template :strin
             // TODO check layout here instead of always using the default
             let all = crunch template content url_path front_matter
             File.WriteAllText(dest_path, all)
+            items.Add(url_path, front_matter)
         else
             File.Copy(from, dest_path)
     else
         File.Copy(from, dest_path)
 
-let rec do_dir (url_dir :string) (from :string) (dest_dir :string) template =
+let rec do_dir (url_dir :string) (from :string) (dest_dir :string) template (items: Dictionary<string,Dictionary<string,string>>) =
     Directory.CreateDirectory(dest_dir) |> ignore
     for f in (Directory.GetFiles(from)) do
-        do_file url_dir f dest_dir template
+        do_file url_dir f dest_dir template items
 
     for from_sub in (Directory.GetDirectories(from)) do
         let name = Path.GetFileName(from_sub)
@@ -168,7 +168,7 @@ let rec do_dir (url_dir :string) (from :string) (dest_dir :string) template =
         if name <> "_layouts" then
             let dest_sub = Path.Combine(dest_dir, name)
             let url_subdir = blog.fsfun.path_combine url_dir name
-            do_dir url_subdir from_sub dest_sub template
+            do_dir url_subdir from_sub dest_sub template items
 
 [<EntryPoint>]
 let main argv =
@@ -180,6 +180,10 @@ let main argv =
         let dir_layouts = Path.Combine(dir_content, "_layouts")
         Path.Combine(dir_layouts, "default.html")
     let default_template = File.ReadAllText(path_template)
-    do_dir "/" dir_content dir_dest default_template
+    let items = Dictionary<string,Dictionary<string,string>>()
+    do_dir "/" dir_content dir_dest default_template items
+
+    let rss = make_rss dir_content items
+    printfn "%s" rss
     0 // return an integer exit code
 
