@@ -82,6 +82,7 @@ let get_front_matter (s :string) =
                 let n_colon = pair.IndexOf(":")
                 let k = pair.Substring(0, n_colon).Trim()
                 let v = pair.Substring(n_colon + 1).Trim()
+                // TODO we may want to allow v to be empty string or null
                 if (k.Length > 0) && (v.Length > 0) then
                     d.Add(k, v)
         (d, remain)

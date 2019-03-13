@@ -1,27 +1,12 @@
 
-front matter parser will need to be less strict.
-what if those lines involve crlf because they
-were done with a text editor?
-
 switch to just two braces like jekyll/liquid?
-
-does everything have a datefiled?
 
 specify layout in the front matter like jekyll?
 put template.html in a special place?  make sure
 gen doesn't copy it over to the output directory.
 
 fix rss generation.  how to get list of
-articles?
-
-what to do about the print- items?
-
-do we need keywords at all?  teaser?
-argument can be made that everything in the esbma.json
-file should be salvaged into front matter just in case
-we want it later.  maybe even put in the old id?
-if we harvest the teaser, need to cleanse it.
-force it all onto one line.
+articles?  use datefiled and tags, like before?
 
 .ehtml suffix?  or just always look inside .html?
 or .html.e ?
@@ -41,6 +26,8 @@ doesn't matter.
 
 --
 
+what to do about the print- items?
+
 link to blog repo on github, issues, pull requests,
 etc
 
@@ -54,11 +41,6 @@ need link checking, for within-the-site links,
 just to make sure they actually go somewhere
 
 --
-
-the toc entries converted from a script to static
-are now using hard-coded links instead of
-{{{link:id='n'}}}
-which may not be a problem
 
 investigate fornax
 
