@@ -38,14 +38,43 @@ let crunch (template :string) (content :string) (my_path :string) (pairs: Dictio
     t
 
 let get_front_matter (s :string) =
-    // front matter parsing is strict
     let d = Dictionary<string,string>()
-    let marker = "---\n"
-    if (s.StartsWith(marker)) then
-        let s2 = s.Substring(marker.Length)
-        let n = s2.IndexOf(marker)
+    let marker_lf = "---\n"
+    let marker_crlf = "---\r\n"
+    if (s.StartsWith(marker_lf)) || (s.StartsWith(marker_crlf)) then
+        // first remove that first line
+        let s2 = 
+            // whether it was lf or crlf, we can just find the lf and chop there
+            let n = s.IndexOf("\n") // TODO could assert, must be > 0
+            s.Substring(n + 1)
+
+        // now find the other marker
+
+        // TODO should we be looking for the second marker only at
+        // the beginning of a line?  in other words, matching with the
+        // lf just before the ---
+
+        let n = 
+            let n_lf = s2.IndexOf(marker_lf)
+            let n_crlf = s2.IndexOf(marker_crlf)
+            if n_lf > 0 then
+                if n_crlf > 0 then
+                    // found 2nd marker in BOTH lf and crlf forms?
+                    // take the first one
+                    if n_lf < n_crlf then
+                        n_lf
+                    else
+                        n_crlf
+                else
+                    n_lf
+            elif n_crlf > 0 then
+                n_crlf
+            else
+                raise (Exception("second front matter marker not found"))
+
         let s3 = s2.Substring(0, n)
-        let remain = s2.Substring(n + marker.Length)
+        let remain = s2.Substring(n + marker_lf.Length)
+
         let a = s3.Split("\n")
         for pair in a do
             // the final pair line is empty
