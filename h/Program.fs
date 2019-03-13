@@ -85,6 +85,7 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
                 let data_name = sprintf "%s.html" id
                 let data_path = Path.Combine(dir_data, data_name)
                 let pairs = Dictionary<string,string>()
+                pairs.Add("layout", "default")
                 if it.title <> null then
                     pairs.Add("title", it.title)
                 if it.datefiled <> null then
@@ -105,6 +106,7 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
                     let a = remove_template_text text
                     write_ehtml_text pairs a
             else
+                // TODO write front matter with layout null?
                 let dest_path = Path.Combine(dest_dir, name)
                 File.Copy(from, dest_path)
         else
@@ -174,6 +176,8 @@ let main argv =
     if (Directory.Exists(dir_dest)) then
         raise (Exception("dest directory must not already exist"))
     do_dir "/" dir_live dir_dest old_index id_by_path dir_data
-    File.Copy(Path.Combine(dir_data, "template.html"), Path.Combine(dir_dest, "template.html"))
+    let dir_layouts = Path.Combine(dir_dest, "_layouts")
+    Directory.CreateDirectory(dir_layouts)
+    File.Copy(Path.Combine(dir_data, "template.html"), Path.Combine(dir_layouts, "default.html"))
     0 // return an integer exit code
 

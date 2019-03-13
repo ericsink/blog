@@ -96,6 +96,7 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (template :strin
         let basename = Path.GetFileNameWithoutExtension(from)
         let filename_html = basename + ".html"
         let url_path = blog.fsfun.path_combine url_dir filename_html
+        // TODO check layout here instead of always using the default
         let all = crunch template content url_path front_matter
         let dest = Path.Combine(dest_dir, filename_html)
         File.WriteAllText(dest, all)
@@ -111,9 +112,11 @@ let rec do_dir (url_dir :string) (from :string) (dest_dir :string) template =
 
     for from_sub in (Directory.GetDirectories(from)) do
         let name = Path.GetFileName(from_sub)
-        let dest_sub = Path.Combine(dest_dir, name)
-        let url_subdir = blog.fsfun.path_combine url_dir name
-        do_dir url_subdir from_sub dest_sub template
+        // TODO skip _layouts at every depth, or just at the top?
+        if name <> "_layouts" then
+            let dest_sub = Path.Combine(dest_dir, name)
+            let url_subdir = blog.fsfun.path_combine url_dir name
+            do_dir url_subdir from_sub dest_sub template
 
 [<EntryPoint>]
 let main argv =
@@ -121,8 +124,10 @@ let main argv =
     let dir_dest = argv.[1]
     if (Directory.Exists(dir_dest)) then
         raise (Exception("dest directory must not already exist"))
-    let path_template = Path.Combine(dir_content, "template.html")
-    let template = File.ReadAllText(path_template)
-    do_dir "/" dir_content dir_dest template
+    let path_template = 
+        let dir_layouts = Path.Combine(dir_content, "_layouts")
+        Path.Combine(dir_layouts, "default.html")
+    let default_template = File.ReadAllText(path_template)
+    do_dir "/" dir_content dir_dest default_template
     0 // return an integer exit code
 
