@@ -1,18 +1,11 @@
 
 switch to just two braces like jekyll/liquid?
 
-specify layout in the front matter like jekyll?
-put template.html in a special place?  make sure
-gen doesn't copy it over to the output directory.
-
 fix rss generation.  how to get list of
 articles?  use datefiled and tags, like before?
 
 .ehtml suffix?  or just always look inside .html?
 or .html.e ?
-
-do we need the usetemplate flag?  if we don't use
-file suffix, yes?
 
 once everything with h is clean, commit c1
 to the repo and deploy to s3
