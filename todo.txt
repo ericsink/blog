@@ -4,9 +4,6 @@ switch to just two braces like jekyll/liquid?
 fix rss generation.  how to get list of
 articles?  use datefiled and tags, like before?
 
-.ehtml suffix?  or just always look inside .html?
-or .html.e ?
-
 once everything with h is clean, commit c1
 to the repo and deploy to s3
 

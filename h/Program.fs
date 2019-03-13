@@ -54,11 +54,9 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
             sb.Append("---\n")
             sb.ToString()
 
-        let write_ehtml_text (d: Dictionary<string,string>) (s :string) =
+        let write_with_front_matter (d: Dictionary<string,string>) (s :string) =
             let front = create_front_matter d
-            let basename = Path.GetFileNameWithoutExtension(name)
-            let filename_ehtml = basename + ".ehtml"
-            let dest = Path.Combine(dest_dir, filename_ehtml)
+            let dest = Path.Combine(dest_dir, name)
             File.WriteAllText(dest, front + s)
 
         let clean_teaser (s :string) =
@@ -97,14 +95,14 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
                 if (File.Exists(data_path)) then
                     let data = File.ReadAllText(data_path)
                     let d2 = blog.pre.crunch(old_index, id, data)
-                    write_ehtml_text pairs d2
+                    write_with_front_matter pairs d2
                 else
                     // probably js
                     // TODO Add something to pairs to indicate it was a script?
 
                     let text = File.ReadAllText(from)
                     let a = remove_template_text text
-                    write_ehtml_text pairs a
+                    write_with_front_matter pairs a
             else
                 // TODO write front matter with layout null?
                 let dest_path = Path.Combine(dest_dir, name)
@@ -132,7 +130,7 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
 
                 let text = File.ReadAllText(from)
                 let a = remove_template_text text
-                write_ehtml_text dnew a
+                write_with_front_matter dnew a
             else
                 let dest_path = Path.Combine(dest_dir, name)
                 File.Copy(from, dest_path)

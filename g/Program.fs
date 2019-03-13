@@ -38,7 +38,6 @@ let crunch (template :string) (content :string) (my_path :string) (pairs: Dictio
     t
 
 let get_front_matter (s :string) =
-    let d = Dictionary<string,string>()
     let marker_lf = "---\n"
     let marker_crlf = "---\r\n"
     if (s.StartsWith(marker_lf)) || (s.StartsWith(marker_crlf)) then
@@ -76,6 +75,7 @@ let get_front_matter (s :string) =
         let remain = s2.Substring(n + marker_lf.Length)
 
         let a = s3.Split("\n")
+        let d = Dictionary<string,string>()
         for pair in a do
             // the final pair line is empty
             if pair.Length > 0 then
@@ -87,22 +87,22 @@ let get_front_matter (s :string) =
                     d.Add(k, v)
         (d, remain)
     else
-        (d, s)
+        (null, s)
 
 let do_file (url_dir :string) (from :string) (dest_dir :string) (template :string) =
-    if (from.EndsWith(".ehtml")) then
-        let ehtml = File.ReadAllText(from)
-        let (front_matter, content) = get_front_matter ehtml
-        let basename = Path.GetFileNameWithoutExtension(from)
-        let filename_html = basename + ".html"
-        let url_path = blog.fsfun.path_combine url_dir filename_html
-        // TODO check layout here instead of always using the default
-        let all = crunch template content url_path front_matter
-        let dest = Path.Combine(dest_dir, filename_html)
-        File.WriteAllText(dest, all)
+    let name = Path.GetFileName(from)
+    let dest_path = Path.Combine(dest_dir, name)
+    if (from.EndsWith(".html")) then
+        let html = File.ReadAllText(from)
+        let (front_matter, content) = get_front_matter html
+        if front_matter <> null then
+            let url_path = blog.fsfun.path_combine url_dir name
+            // TODO check layout here instead of always using the default
+            let all = crunch template content url_path front_matter
+            File.WriteAllText(dest_path, all)
+        else
+            File.Copy(from, dest_path)
     else
-        let name = Path.GetFileName(from)
-        let dest_path = Path.Combine(dest_dir, name)
         File.Copy(from, dest_path)
 
 let rec do_dir (url_dir :string) (from :string) (dest_dir :string) template =
