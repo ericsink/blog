@@ -98,7 +98,7 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
                     pairs.Add("teaser", clean_teaser it.teaser)
                 if (File.Exists(data_path)) then
                     let data = File.ReadAllText(data_path)
-                    let d2 = blog.pre.crunch(old_index, id, data)
+                    let d2 = blog.pre.crunch(old_index, data)
                     write_with_front_matter pairs d2
                 else
                     // probably js

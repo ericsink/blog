@@ -118,7 +118,7 @@ let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) =
 
     content.ToString()
 
-let crunch (template :string) (content :string) (my_path :string) (pairs: Dictionary<string,string>) =
+let crunch (template :string) (content :string) (pairs: Dictionary<string,string>) =
     let mutable t = template
 
     t <- t.Replace("{{{page.content}}}", content)
@@ -135,19 +135,6 @@ let crunch (template :string) (content :string) (my_path :string) (pairs: Dictio
 
     t <- t.Replace("{{{site.copyright}}}", "Copyright 2001-2017 Eric Sink. All Rights Reserved")
 
-    // TODO remove all these
-    t <- (t.Replace("{{{link:id='1205'}}}", (blog.fsfun.make_link my_path "/laws/Immutable_Laws_Marketing.html")))
-    t <- (t.Replace("{{{link:id='1150'}}}", (blog.fsfun.make_link my_path "/tocs/Software_Development.html")))
-    t <- (t.Replace("{{{link:id='1616'}}}", (blog.fsfun.make_link my_path "/tocs/Laughs.html")))
-    t <- (t.Replace("{{{link:id='1055'}}}", (blog.fsfun.make_link my_path "/rss.xml")))
-    t <- (t.Replace("{{{link:id='1207'}}}", (blog.fsfun.make_link my_path "/Marketing_for_Geeks.html")))
-    t <- (t.Replace("{{{link:id='1159'}}}", (blog.fsfun.make_link my_path "/bos/Business_of_Software.html")))
-    t <- (t.Replace("{{{link:id='1182'}}}", (blog.fsfun.make_link my_path "/index.html")))
-    t <- (t.Replace("{{{link:id='3052'}}}", (blog.fsfun.make_link my_path "/mssql_mobile/index.html")))
-    t <- (t.Replace("{{{link:id='3022'}}}", (blog.fsfun.make_link my_path "/images/princeton.jpg")))
-    t <- (t.Replace("{{{link:id='1152'}}}", (blog.fsfun.make_link my_path "/about_author.html")))
-    t <- (t.Replace("{{{link:id='1802'}}}", (blog.fsfun.make_link my_path "/vcbe/index.html")))
-
     t
 
 let do_file (url_dir :string) (from :string) (dest_dir :string) (template :string) (items: Dictionary<string,Dictionary<string,string>>) =
@@ -159,7 +146,7 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (template :strin
         if front_matter <> null then
             let url_path = blog.fsfun.path_combine url_dir name
             // TODO check layout here instead of always using the default
-            let all = crunch template content url_path front_matter
+            let all = crunch template content front_matter
             File.WriteAllText(dest_path, all)
             items.Add(url_path, front_matter)
         else

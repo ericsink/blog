@@ -1,9 +1,6 @@
 
 switch to just two braces like jekyll/liquid?
 
-fix rss generation.  how to get list of
-articles?  use datefiled and tags, like before?
-
 once everything with h is clean, commit c1
 to the repo and deploy to s3
 
@@ -13,6 +10,13 @@ causing every file to have minor changes.  basically,
 just remove make_link, replacing it with the abs
 path passed into it.  path of the source of the link
 doesn't matter.
+
+for the items harvested only from blog_live (missing
+from the esbma.json), the links do not get pre-crunched
+to be path-absolute.  which is fine for the actual
+file in its original path, but the links break when
+they go in the rss.  example:  the sqlite android n
+item has a link to the multiple sqlite problem item.
 
 --
 
