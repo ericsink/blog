@@ -1,4 +1,8 @@
 
+front matter parser will need to be less strict.
+what if those lines involve crlf because they
+were done with a text editor?
+
 switch to just two braces like jekyll/liquid?
 
 does everything have a datefiled?
@@ -22,6 +26,9 @@ force it all onto one line.
 .ehtml suffix?  or just always look inside .html?
 or .html.e ?
 
+do we need the usetemplate flag?  if we don't use
+file suffix, yes?
+
 once everything with h is clean, commit c1
 to the repo and deploy to s3
 
@@ -33,6 +40,9 @@ path passed into it.  path of the source of the link
 doesn't matter.
 
 --
+
+link to blog repo on github, issues, pull requests,
+etc
 
 redo front page.  no more complete copies of
 recent items.  each item appears on its own page.

@@ -61,6 +61,23 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
             let dest = Path.Combine(dest_dir, filename_ehtml)
             File.WriteAllText(dest, front + s)
 
+        let clean_teaser (s :string) =
+            s
+                .Replace("\r", " ")
+                .Replace("\n", " ")
+                .Replace("&nbsp;", " ")
+                .Replace("<i>", " ")
+                .Replace("</i>", " ")
+                .Replace("<b>", " ")
+                .Replace("</b>", " ")
+                .Replace("<em>", " ")
+                .Replace("</em>", " ")
+                .Replace("<strong>", " ")
+                .Replace("</strong>", " ")
+                // TODO one item has a hyper link <a> tag in it
+                // TODO consecutive spaces?
+                // TODO colons, smiley
+
         if (id_by_path.ContainsKey(url_path)) then
             let id = id_by_path.[url_path]
             let it = old_index.[id]
@@ -74,6 +91,8 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
                     pairs.Add("datefiled", it.datefiled)
                 if it.keywords <> null then
                     pairs.Add("keywords", it.keywords)
+                if it.teaser <> null then
+                    pairs.Add("teaser", clean_teaser it.teaser)
                 if (File.Exists(data_path)) then
                     let data = File.ReadAllText(data_path)
                     let d2 = blog.pre.crunch(old_index, id, data)
