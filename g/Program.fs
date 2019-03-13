@@ -3,7 +3,59 @@ open System
 open System.IO
 open System.Linq
 open System.Collections.Generic
-open Newtonsoft.Json
+open System.Text
+
+type item = 
+    { 
+        path: string
+        title: string
+        datefiled: string
+    }
+
+let make_rss dir_data items =
+    let add (sb :StringBuilder) (s :string) =
+        sb.Append(s) |> ignore
+
+    let content = StringBuilder()
+
+    add content "<?xml version=\"1.0\" encoding=\"iso-8859-1\" ?>"
+    add content "<rss version=\"2.0\">"
+    add content "<channel>"
+    add content "<title>{{{site.title}}}</title>"
+    add content "<link>http://www.ericsink.com/</link>"
+    add content "<description>{{{site.tagline}}}</description>"
+    add content "<copyright>{{{site.copyright}}}</copyright>"
+    add content "<generator>mine</generator>"
+
+    for it in items do
+        let my_content = "TODO ReadAllLines"
+        let local_link = "http://www.ericsink.com/" + it.path
+
+        add content "<item>"
+        add content "<title>"
+        add content it.title
+        add content "</title>"
+        add content "<guid>"
+        add content local_link
+        add content "</guid>"
+        add content "<link>"
+        add content local_link
+        add content "</link>"
+        add content "<pubDate>"
+        add content (blog.fsfun.format_date_rss(it.datefiled))
+        //<pubDate>{{{loop.datefiled:format="ddd, dd MMM yyyy HH:mm:ss CST"}}}</pubDate>
+        add content "</pubDate>"
+        add content "<description>"
+        add content "<![CDATA["
+        add content my_content
+        add content "]]>"
+        add content "</description>"
+        add content "</item>"
+
+    add content "</channel>"
+    add content "</rss>"
+
+    content.ToString()
 
 let crunch (template :string) (content :string) (my_path :string) (pairs: Dictionary<string,string>) =
     let mutable t = template
@@ -106,7 +158,7 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (template :strin
         File.Copy(from, dest_path)
 
 let rec do_dir (url_dir :string) (from :string) (dest_dir :string) template =
-    Directory.CreateDirectory(dest_dir)
+    Directory.CreateDirectory(dest_dir) |> ignore
     for f in (Directory.GetFiles(from)) do
         do_file url_dir f dest_dir template
 

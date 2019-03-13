@@ -9,10 +9,6 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    </ItemGroup>
-
 <ItemGroup>
 	<ProjectReference Include="..\fslib\fslib.fsproj" />
 </ItemGroup>
