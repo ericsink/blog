@@ -5,9 +5,63 @@ open System.Linq
 open System.Collections.Generic
 open System.Text
 
+let get_front_matter (s :string) =
+    let marker_lf = "---\n"
+    let marker_crlf = "---\r\n"
+    if (s.StartsWith(marker_lf)) || (s.StartsWith(marker_crlf)) then
+        // first remove that first line
+        let s2 = 
+            // whether it was lf or crlf, we can just find the lf and chop there
+            let n = s.IndexOf("\n") // TODO could assert, must be > 0
+            s.Substring(n + 1)
+
+        // now find the other marker
+
+        // TODO should we be looking for the second marker only at
+        // the beginning of a line?  in other words, matching with the
+        // lf just before the ---
+
+        let n = 
+            let n_lf = s2.IndexOf(marker_lf)
+            let n_crlf = s2.IndexOf(marker_crlf)
+            if n_lf > 0 then
+                if n_crlf > 0 then
+                    // found 2nd marker in BOTH lf and crlf forms?
+                    // take the first one
+                    if n_lf < n_crlf then
+                        n_lf
+                    else
+                        n_crlf
+                else
+                    n_lf
+            elif n_crlf > 0 then
+                n_crlf
+            else
+                raise (Exception("second front matter marker not found"))
+
+        let s3 = s2.Substring(0, n)
+        let remain = s2.Substring(n + marker_lf.Length)
+
+        let a = s3.Split("\n")
+        let d = Dictionary<string,string>()
+        for pair in a do
+            // the final pair line is empty
+            if pair.Length > 0 then
+                let n_colon = pair.IndexOf(":")
+                let k = pair.Substring(0, n_colon).Trim()
+                let v = pair.Substring(n_colon + 1).Trim()
+                // TODO we may want to allow v to be empty string or null
+                if (k.Length > 0) && (v.Length > 0) then
+                    d.Add(k, v)
+        (d, remain)
+    else
+        (null, s)
+
 let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) = 
     let add (sb :StringBuilder) (s :string) =
         sb.Append(s) |> ignore
+
+    // TODO maybe we should use XmlWriter for this
 
     let content = StringBuilder()
 
@@ -20,20 +74,23 @@ let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) =
     add content "<copyright>{{{site.copyright}}}</copyright>"
     add content "<generator>mine</generator>"
 
-    // TODO sort and filter and limit the items
+    let a = items.OrderByDescending(fun kv -> kv.Value.["datefiled"]).Take(10).ToList()
 
-    for kv in items do
+    for kv in a do
         let path = kv.Key
         let title = if kv.Value.ContainsKey("title") then kv.Value.["title"] else null
         let datefiled = kv.Value.["datefiled"]
 
         printfn "path: %s" path
+        // TODO windows-specific code below
         let path_fixed = path.Substring(1).Replace("/", "\\")
         printfn "path_fixed: %s" path_fixed
         let path_content = Path.Combine(dir_content, path_fixed)
         printfn "path_content: %s" path_content
-        let my_content = File.ReadAllText(path_content)
-        let local_link = "https://ericsink.com/" + path
+        let html = File.ReadAllText(path_content)
+        let (front_matter, my_content) = get_front_matter html
+        // TODO need to crunch?
+        let local_link = "https://ericsink.com" + path
 
         add content "<item>"
         add content "<title>"
@@ -92,58 +149,6 @@ let crunch (template :string) (content :string) (my_path :string) (pairs: Dictio
     t <- (t.Replace("{{{link:id='1802'}}}", (blog.fsfun.make_link my_path "/vcbe/index.html")))
 
     t
-
-let get_front_matter (s :string) =
-    let marker_lf = "---\n"
-    let marker_crlf = "---\r\n"
-    if (s.StartsWith(marker_lf)) || (s.StartsWith(marker_crlf)) then
-        // first remove that first line
-        let s2 = 
-            // whether it was lf or crlf, we can just find the lf and chop there
-            let n = s.IndexOf("\n") // TODO could assert, must be > 0
-            s.Substring(n + 1)
-
-        // now find the other marker
-
-        // TODO should we be looking for the second marker only at
-        // the beginning of a line?  in other words, matching with the
-        // lf just before the ---
-
-        let n = 
-            let n_lf = s2.IndexOf(marker_lf)
-            let n_crlf = s2.IndexOf(marker_crlf)
-            if n_lf > 0 then
-                if n_crlf > 0 then
-                    // found 2nd marker in BOTH lf and crlf forms?
-                    // take the first one
-                    if n_lf < n_crlf then
-                        n_lf
-                    else
-                        n_crlf
-                else
-                    n_lf
-            elif n_crlf > 0 then
-                n_crlf
-            else
-                raise (Exception("second front matter marker not found"))
-
-        let s3 = s2.Substring(0, n)
-        let remain = s2.Substring(n + marker_lf.Length)
-
-        let a = s3.Split("\n")
-        let d = Dictionary<string,string>()
-        for pair in a do
-            // the final pair line is empty
-            if pair.Length > 0 then
-                let n_colon = pair.IndexOf(":")
-                let k = pair.Substring(0, n_colon).Trim()
-                let v = pair.Substring(n_colon + 1).Trim()
-                // TODO we may want to allow v to be empty string or null
-                if (k.Length > 0) && (v.Length > 0) then
-                    d.Add(k, v)
-        (d, remain)
-    else
-        (null, s)
 
 let do_file (url_dir :string) (from :string) (dest_dir :string) (template :string) (items: Dictionary<string,Dictionary<string,string>>) =
     let name = Path.GetFileName(from)
