@@ -15,7 +15,7 @@ let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) =
     add content "<rss version=\"2.0\">"
     add content "<channel>"
     add content "<title>{{{site.title}}}</title>"
-    add content "<link>http://www.ericsink.com/</link>"
+    add content "<link>https://ericsink.com/</link>"
     add content "<description>{{{site.tagline}}}</description>"
     add content "<copyright>{{{site.copyright}}}</copyright>"
     add content "<generator>mine</generator>"
@@ -27,8 +27,13 @@ let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) =
         let title = if kv.Value.ContainsKey("title") then kv.Value.["title"] else null
         let datefiled = kv.Value.["datefiled"]
 
-        let my_content = "TODO ReadAllLines"
-        let local_link = "http://www.ericsink.com/" + path
+        printfn "path: %s" path
+        let path_fixed = path.Substring(1).Replace("/", "\\")
+        printfn "path_fixed: %s" path_fixed
+        let path_content = Path.Combine(dir_content, path_fixed)
+        printfn "path_content: %s" path_content
+        let my_content = File.ReadAllText(path_content)
+        let local_link = "https://ericsink.com/" + path
 
         add content "<item>"
         add content "<title>"
@@ -183,7 +188,11 @@ let main argv =
     let items = Dictionary<string,Dictionary<string,string>>()
     do_dir "/" dir_content dir_dest default_template items
 
-    let rss = make_rss dir_content items
-    printfn "%s" rss
+    let full_path_content = Path.GetFullPath(dir_content)
+    printfn "full_path: %s" full_path_content
+    let rss = make_rss full_path_content items
+    let path_rss = Path.Combine(dir_dest, "rss.xml")
+    File.WriteAllText(path_rss, rss)
+    //printfn "%s" rss
     0 // return an integer exit code
 
