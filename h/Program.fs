@@ -72,9 +72,13 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
                 .Replace("</em>", " ")
                 .Replace("<strong>", " ")
                 .Replace("</strong>", " ")
-                // TODO one item has a hyper link <a> tag in it
-                // TODO consecutive spaces?
+                .Replace("<br>", " ")
+                .Replace("<br/>", " ")
+                .Replace("<br />", " ")
+                .Replace("<a href=\"http://dictionary.reference.com/search?q=dragnet\">", "")
+                .Replace("</a>", " ")
                 // TODO colons, smiley
+                // TODO consecutive spaces?
 
         if (id_by_path.ContainsKey(url_path)) then
             let id = id_by_path.[url_path]
