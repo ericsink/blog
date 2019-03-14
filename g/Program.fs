@@ -58,49 +58,24 @@ let get_front_matter (s :string) =
     else
         (null, s)
 
-let crunch2 (template :string) (pairs: Dictionary<string,string>) =
-    let t = template
+let crunch (html :string) (pairs: Dictionary<string,string>) =
+    let mutable t = html
+
     let expr = """{{(?<v>[^{}]+)}}"""
     let regx = Regex(expr)
-    let links = regx.Matches(t);
-    if links <> null then
-        for m in links do
-            let v = m.Groups.["v"].Value.Trim()
-            printfn "%s -- %s" m.Value v
-
-let crunch (template :string) (pairs: Dictionary<string,string>) =
-    // TODO instead of passing in the template here, this should
-    // check pairs for the template, find it, and use that.  so
-    // pass in a dictionary of templates or an interface to get them.
-
-    // TODO this should probably work more like jekyll seems to work,
-    // find all {{ whatever }} and look them up.  maybe throw an error
-    // if somebody references a "variable" that can't be found.
-    // note also that liquid probably allows spaces inside {{ and }}
-
-    let mutable t = template
-
-    if pairs.ContainsKey("content") then
-        let content = pairs.["content"]
-        t <- t.Replace("{{ content }}", content)
-
-    if pairs.ContainsKey("title") then
-        let title = pairs.["title"]
-        t <- t.Replace("{{page.title}}", title)
-        let datefiled = pairs.["datefiled"]
-        // TODO this is dorky.  the markup should go in the template, just replace the date
-        // current implementation means that if there is no title, the markup around it is omitted.
-        let s = "<p class=\"ArticleDate\" align=right>" + datefiled + "</p><h1>" + title + "</h1>";
-        t <- t.Replace("{{article.title}}", s)
-    else
-        t <- t.Replace("{{page.title}}", "Eric Sink")
-        t <- t.Replace("{{article.title}}", "")
-
-    t <- t.Replace("{{site.title}}", "Eric Sink")
-    t <- t.Replace("{{site.tagline}}", "SourceGear Founder")
-    t <- t.Replace("{{site.copyright}}", "Copyright 2001-2019 Eric Sink. All Rights Reserved")
+    let a = regx.Matches(t);
+    if a <> null then
+        for m in a do
+            let v = m.Groups.["v"].Value.Trim().ToLower()
+            let replacement = pairs.[v]
+            t <- t.Replace(m.Value, replacement)
 
     t
+
+let add_defaults (d: Dictionary<string,string>) =
+    d.Add("site.title", "Eric Sink")
+    d.Add("site.tagline", "SourceGear Founder")
+    d.Add("site.copyright", "Copyright 2001-2019 Eric Sink. All Rights Reserved")
 
 let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) = 
     let add (sb :StringBuilder) (s :string) =
@@ -163,6 +138,7 @@ let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) =
 
     let s = content.ToString()
     let pairs = Dictionary<string,string>()
+    add_defaults pairs
     let result = crunch s pairs
     result
 
@@ -173,9 +149,26 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (template :strin
         let html = File.ReadAllText(from)
         let (front_matter, content) = get_front_matter html
         if front_matter <> null then
+            add_defaults front_matter
             let url_path = blog.fsfun.path_combine url_dir name
-            // TODO check layout here instead of always using the default
             front_matter.Add("content", content)
+
+            // TODO instead of passing in the template here, this should
+            // check pairs for the template, find it, and use that.  so
+            // pass in a dictionary of templates or an interface to get them.
+
+            if front_matter.ContainsKey("title") then
+                let title = front_matter.["title"]
+                front_matter.Add("page.title", title)
+                let datefiled = front_matter.["datefiled"]
+                // TODO this is dorky.  the markup should go in the template, just replace the date
+                // current implementation means that if there is no title, the markup around it is omitted.
+                let s = "<p class=\"ArticleDate\" align=right>" + datefiled + "</p><h1>" + title + "</h1>";
+                front_matter.Add("article.title", s)
+            else
+                front_matter.Add("page.title", "Eric Sink")
+                front_matter.Add("article.title", "")
+
             let all = crunch template front_matter
             File.WriteAllText(dest_path, all)
             items.Add(url_path, front_matter)
