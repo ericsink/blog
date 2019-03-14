@@ -4,6 +4,7 @@ open System.IO;
 open System.Linq;
 open System.Collections.Generic
 open System.Text
+open System.Text.RegularExpressions;
 
 open Newtonsoft.Json
 
@@ -77,7 +78,15 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
                 .Replace("<br />", " ")
                 .Replace("<a href=\"http://dictionary.reference.com/search?q=dragnet\">", "")
                 .Replace("</a>", " ")
-                // TODO consecutive spaces?
+
+        let consolidate_spaces (s :string) =
+            let mutable t = s
+            let regx = Regex("  +")
+            let a = regx.Matches(t);
+            if a <> null then
+                for m in a do
+                    t <- t.Replace(m.Value, " ")
+            t
 
         if (id_by_path.ContainsKey(url_path)) then
             let id = id_by_path.[url_path]
@@ -96,7 +105,7 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
                 if it.keywords <> null then
                     pairs.Add("keywords", it.keywords)
                 if it.teaser <> null then
-                    pairs.Add("teaser", clean_teaser it.teaser)
+                    pairs.Add("teaser", it.teaser |> clean_teaser |> consolidate_spaces)
                 if (File.Exists(data_path)) then
                     let data = File.ReadAllText(data_path)
                     let d2 = blog.pre.crunch(old_index, data)
