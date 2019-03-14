@@ -1,4 +1,11 @@
 
+twitter url should be https ?
+
+review all TODO in the code
+
+we should be pretty close to being ready to rm csgen.
+not even sure it works anymore.
+
 switch to just two braces like jekyll/liquid?
 
 once everything with h is clean, commit c1

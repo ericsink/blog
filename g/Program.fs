@@ -65,12 +65,13 @@ let crunch (template :string) (pairs: Dictionary<string,string>) =
     // TODO this should probably work more like jekyll seems to work,
     // find all {{ whatever }} and look them up.  maybe throw an error
     // if somebody references a "variable" that can't be found.
+    // note also that liquid probably allows spaces inside {{ and }}
 
     let mutable t = template
 
     if pairs.ContainsKey("content") then
         let content = pairs.["content"]
-        t <- t.Replace("{{{page.content}}}", content)
+        t <- t.Replace("{{ content }}", content)
 
     if pairs.ContainsKey("title") then
         let title = pairs.["title"]
