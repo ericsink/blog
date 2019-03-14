@@ -1,4 +1,9 @@
 
+jekyll title inheritance ?
+
+need serve, path absolute links don't work when
+viewing on the file system
+
 are the front matter variable names finalized?
     datefiled
 
