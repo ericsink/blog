@@ -87,7 +87,7 @@ let crunch (template :string) (pairs: Dictionary<string,string>) =
 
     t <- t.Replace("{{{site.title}}}", "Eric Sink")
     t <- t.Replace("{{{site.tagline}}}", "SourceGear Founder")
-    t <- t.Replace("{{{site.copyright}}}", "Copyright 2001-2017 Eric Sink. All Rights Reserved")
+    t <- t.Replace("{{{site.copyright}}}", "Copyright 2001-2019 Eric Sink. All Rights Reserved")
 
     t
 

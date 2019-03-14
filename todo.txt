@@ -36,9 +36,6 @@ just to make sure they actually go somewhere
 
 investigate fornax
 
-update copyright dates.  will ruin diffs, causing every
-file to have a change.
-
 --
 
 autogen dsl
