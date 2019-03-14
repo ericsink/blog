@@ -57,6 +57,34 @@ let get_front_matter (s :string) =
     else
         (null, s)
 
+let crunch (template :string) (pairs: Dictionary<string,string>) =
+    // TODO instead of passing in the template here, this should
+    // check pairs for the template, find it, and use that.  so
+    // pass in a dictionary of templates or an interface to get them.
+
+    let mutable t = template
+
+    if pairs.ContainsKey("content") then
+        let content = pairs.["content"]
+        t <- t.Replace("{{{page.content}}}", content)
+
+    if pairs.ContainsKey("title") then
+        let title = pairs.["title"]
+        t <- t.Replace("{{{page.title}}}", title)
+        let datefiled = pairs.["datefiled"]
+        // TODO this is dorky.  the markup should go in the template, just replace the date
+        let s = "<p class=\"ArticleDate\" align=right>" + datefiled + "</p><h1>" + title + "</h1>";
+        t <- t.Replace("{{{article.title}}}", s)
+    else
+        t <- t.Replace("{{{page.title}}}", "Eric Sink")
+        t <- t.Replace("{{{article.title}}}", "")
+
+    t <- t.Replace("{{{site.title}}}", "Eric Sink")
+    t <- t.Replace("{{{site.tagline}}}", "SourceGear Founder")
+    t <- t.Replace("{{{site.copyright}}}", "Copyright 2001-2017 Eric Sink. All Rights Reserved")
+
+    t
+
 let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) = 
     let add (sb :StringBuilder) (s :string) =
         sb.Append(s) |> ignore
@@ -69,7 +97,8 @@ let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) =
     add content "<rss version=\"2.0\">"
     add content "<channel>"
     add content "<title>{{{site.title}}}</title>"
-    add content "<link>https://ericsink.com/</link>"
+    // TODO https, no www
+    add content "<link>http://www.ericsink.com/</link>"
     add content "<description>{{{site.tagline}}}</description>"
     add content "<copyright>{{{site.copyright}}}</copyright>"
     add content "<generator>mine</generator>"
@@ -81,16 +110,16 @@ let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) =
         let title = if kv.Value.ContainsKey("title") then kv.Value.["title"] else null
         let datefiled = kv.Value.["datefiled"]
 
-        printfn "path: %s" path
+        //printfn "path: %s" path
         // TODO windows-specific code below
         let path_fixed = path.Substring(1).Replace("/", "\\")
-        printfn "path_fixed: %s" path_fixed
+        //printfn "path_fixed: %s" path_fixed
         let path_content = Path.Combine(dir_content, path_fixed)
-        printfn "path_content: %s" path_content
+        //printfn "path_content: %s" path_content
         let html = File.ReadAllText(path_content)
         let (front_matter, my_content) = get_front_matter html
-        // TODO need to crunch?
-        let local_link = "https://ericsink.com" + path
+        // TODO https, no www
+        let local_link = "http://www.ericsink.com" + path
 
         add content "<item>"
         add content "<title>"
@@ -116,26 +145,10 @@ let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) =
     add content "</channel>"
     add content "</rss>"
 
-    content.ToString()
-
-let crunch (template :string) (content :string) (pairs: Dictionary<string,string>) =
-    let mutable t = template
-
-    t <- t.Replace("{{{page.content}}}", content)
-
-    if pairs.ContainsKey("title") then
-        let title = pairs.["title"]
-        t <- t.Replace("{{{page.title}}}", title)
-        let datefiled = pairs.["datefiled"]
-        let s = "<p class=\"ArticleDate\" align=right>" + datefiled + "</p><h1>" + title + "</h1>";
-        t <- t.Replace("{{{article.title}}}", s)
-    else
-        t <- t.Replace("{{{page.title}}}", "Eric Sink")
-        t <- t.Replace("{{{article.title}}}", "")
-
-    t <- t.Replace("{{{site.copyright}}}", "Copyright 2001-2017 Eric Sink. All Rights Reserved")
-
-    t
+    let s = content.ToString()
+    let pairs = Dictionary<string,string>()
+    let result = crunch s pairs
+    result
 
 let do_file (url_dir :string) (from :string) (dest_dir :string) (template :string) (items: Dictionary<string,Dictionary<string,string>>) =
     let name = Path.GetFileName(from)
@@ -146,7 +159,8 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (template :strin
         if front_matter <> null then
             let url_path = blog.fsfun.path_combine url_dir name
             // TODO check layout here instead of always using the default
-            let all = crunch template content front_matter
+            front_matter.Add("content", content)
+            let all = crunch template front_matter
             File.WriteAllText(dest_path, all)
             items.Add(url_path, front_matter)
         else
@@ -181,7 +195,7 @@ let main argv =
     do_dir "/" dir_content dir_dest default_template items
 
     let full_path_content = Path.GetFullPath(dir_content)
-    printfn "full_path: %s" full_path_content
+    //printfn "full_path: %s" full_path_content
     let rss = make_rss full_path_content items
     let path_rss = Path.Combine(dir_dest, "rss.xml")
     File.WriteAllText(path_rss, rss)
