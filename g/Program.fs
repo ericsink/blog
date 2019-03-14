@@ -89,8 +89,7 @@ let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) =
     add content "<rss version=\"2.0\">"
     add content "<channel>"
     add content "<title>{{site.title}}</title>"
-    // TODO https, no www
-    add content "<link>http://www.ericsink.com/</link>"
+    add content "<link>https://ericsink.com/</link>"
     add content "<description>{{site.tagline}}</description>"
     add content "<copyright>{{site.copyright}}</copyright>"
     add content "<generator>mine</generator>"
@@ -110,8 +109,7 @@ let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) =
         //printfn "path_content: %s" path_content
         let html = File.ReadAllText(path_content)
         let (front_matter, my_content) = get_front_matter html
-        // TODO https, no www
-        let local_link = "http://www.ericsink.com" + path
+        let local_link = "https://ericsink.com" + path
 
         add content "<item>"
         add content "<title>"
