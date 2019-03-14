@@ -6,9 +6,9 @@ open System.Collections.Generic
 open System.Text
 
 let get_front_matter (s :string) =
-    let marker_lf = "---\n"
-    let marker_crlf = "---\r\n"
-    if (s.StartsWith(marker_lf)) || (s.StartsWith(marker_crlf)) then
+    let marker_front_lf = "---\n"
+    let marker_front_crlf = "---\r\n"
+    if (s.StartsWith(marker_front_lf)) || (s.StartsWith(marker_front_crlf)) then
         // first remove that first line
         let s2 = 
             // whether it was lf or crlf, we can just find the lf and chop there
@@ -17,35 +17,35 @@ let get_front_matter (s :string) =
 
         // now find the other marker
 
-        // TODO should we be looking for the second marker only at
-        // the beginning of a line?  in other words, matching with the
-        // lf just before the ---
-
-        let n = 
-            let n_lf = s2.IndexOf(marker_lf)
-            let n_crlf = s2.IndexOf(marker_crlf)
+        let (n, len) = 
+            // the second marker should match \n--- for either EOL
+            let marker_back_lf = "\n---\n"
+            let marker_back_crlf = "\n---\r\n"
+            let n_lf = s2.IndexOf(marker_back_lf)
+            let n_crlf = s2.IndexOf(marker_back_crlf)
             if n_lf > 0 then
                 if n_crlf > 0 then
                     // found 2nd marker in BOTH lf and crlf forms?
                     // take the first one
                     if n_lf < n_crlf then
-                        n_lf
+                        (n_lf, marker_back_lf.Length)
                     else
-                        n_crlf
+                        (n_crlf, marker_back_crlf.Length)
                 else
-                    n_lf
+                    (n_lf, marker_back_lf.Length)
             elif n_crlf > 0 then
-                n_crlf
+                (n_crlf, marker_back_crlf.Length)
             else
                 raise (Exception("second front matter marker not found"))
 
         let s3 = s2.Substring(0, n)
-        let remain = s2.Substring(n + marker_lf.Length)
+        let remain = s2.Substring(n + len)
 
+        // split on lf should work for either eol here.
+        // the cr will remain, but it gets trimmed out.
         let a = s3.Split("\n")
         let d = Dictionary<string,string>()
         for pair in a do
-            // the final pair line is empty
             if pair.Length > 0 then
                 let n_colon = pair.IndexOf(":")
                 let k = pair.Substring(0, n_colon).Trim()
