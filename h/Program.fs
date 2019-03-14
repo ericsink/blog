@@ -119,7 +119,7 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
                     let a = remove_template_text text
                     write_with_front_matter pairs a
             else
-                // TODO write front matter with layout null?
+                // probably a print- item
                 let dest_path = Path.Combine(dest_dir, name)
                 File.Copy(from, dest_path)
         else
