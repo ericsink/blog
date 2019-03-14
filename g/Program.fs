@@ -62,6 +62,10 @@ let crunch (template :string) (pairs: Dictionary<string,string>) =
     // check pairs for the template, find it, and use that.  so
     // pass in a dictionary of templates or an interface to get them.
 
+    // TODO this should probably work more like jekyll seems to work,
+    // find all {{ whatever }} and look them up.  maybe throw an error
+    // if somebody references a "variable" that can't be found.
+
     let mutable t = template
 
     if pairs.ContainsKey("content") then
@@ -73,6 +77,7 @@ let crunch (template :string) (pairs: Dictionary<string,string>) =
         t <- t.Replace("{{{page.title}}}", title)
         let datefiled = pairs.["datefiled"]
         // TODO this is dorky.  the markup should go in the template, just replace the date
+        // current implementation means that if there is no title, the markup around it is omitted.
         let s = "<p class=\"ArticleDate\" align=right>" + datefiled + "</p><h1>" + title + "</h1>";
         t <- t.Replace("{{{article.title}}}", s)
     else

@@ -4,13 +4,6 @@ switch to just two braces like jekyll/liquid?
 once everything with h is clean, commit c1
 to the repo and deploy to s3
 
-switch everything to path-absolute links,
-beginning with a slash.  this will ruin the diffs,
-causing every file to have minor changes.  basically,
-just remove make_link, replacing it with the abs
-path passed into it.  path of the source of the link
-doesn't matter.
-
 for the items harvested only from blog_live (missing
 from the esbma.json), the links do not get pre-crunched
 to be path-absolute.  which is fine for the actual
