@@ -1,4 +1,6 @@
 
+scm/index.html has {{{include
+
 review all TODO in the code
 
 we should be pretty close to being ready to rm csgen.

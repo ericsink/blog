@@ -75,19 +75,19 @@ let crunch (template :string) (pairs: Dictionary<string,string>) =
 
     if pairs.ContainsKey("title") then
         let title = pairs.["title"]
-        t <- t.Replace("{{{page.title}}}", title)
+        t <- t.Replace("{{page.title}}", title)
         let datefiled = pairs.["datefiled"]
         // TODO this is dorky.  the markup should go in the template, just replace the date
         // current implementation means that if there is no title, the markup around it is omitted.
         let s = "<p class=\"ArticleDate\" align=right>" + datefiled + "</p><h1>" + title + "</h1>";
-        t <- t.Replace("{{{article.title}}}", s)
+        t <- t.Replace("{{article.title}}", s)
     else
-        t <- t.Replace("{{{page.title}}}", "Eric Sink")
-        t <- t.Replace("{{{article.title}}}", "")
+        t <- t.Replace("{{page.title}}", "Eric Sink")
+        t <- t.Replace("{{article.title}}", "")
 
-    t <- t.Replace("{{{site.title}}}", "Eric Sink")
-    t <- t.Replace("{{{site.tagline}}}", "SourceGear Founder")
-    t <- t.Replace("{{{site.copyright}}}", "Copyright 2001-2019 Eric Sink. All Rights Reserved")
+    t <- t.Replace("{{site.title}}", "Eric Sink")
+    t <- t.Replace("{{site.tagline}}", "SourceGear Founder")
+    t <- t.Replace("{{site.copyright}}", "Copyright 2001-2019 Eric Sink. All Rights Reserved")
 
     t
 
@@ -102,11 +102,11 @@ let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) =
     add content "<?xml version=\"1.0\" encoding=\"iso-8859-1\" ?>"
     add content "<rss version=\"2.0\">"
     add content "<channel>"
-    add content "<title>{{{site.title}}}</title>"
+    add content "<title>{{site.title}}</title>"
     // TODO https, no www
     add content "<link>http://www.ericsink.com/</link>"
-    add content "<description>{{{site.tagline}}}</description>"
-    add content "<copyright>{{{site.copyright}}}</copyright>"
+    add content "<description>{{site.tagline}}</description>"
+    add content "<copyright>{{site.copyright}}</copyright>"
     add content "<generator>mine</generator>"
 
     let a = items.OrderByDescending(fun kv -> kv.Value.["datefiled"]).Take(10).ToList()
@@ -139,7 +139,6 @@ let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) =
         add content "</link>"
         add content "<pubDate>"
         add content (blog.fsfun.format_date_rss(datefiled))
-        //<pubDate>{{{loop.datefiled:format="ddd, dd MMM yyyy HH:mm:ss CST"}}}</pubDate>
         add content "</pubDate>"
         add content "<description>"
         add content "<![CDATA["
