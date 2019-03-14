@@ -1,6 +1,4 @@
 
-twitter url should be https ?
-
 review all TODO in the code
 
 we should be pretty close to being ready to rm csgen.
