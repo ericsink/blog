@@ -1,4 +1,7 @@
 
+are the front matter variable names finalized?
+    datefiled
+
 scm/index.html has {{{include
 
 review all TODO in the code
@@ -7,7 +10,16 @@ we should be pretty close to being ready to rm csgen.
 not even sure it works anymore.
 
 article.title is dorky because its value includes
-markup
+markup.  it should either have the markup in the
+template, or the title/date should go in the content.
+nice thing about having it in the template is it
+standardizes the title and date at the top of every
+entry.
+
+maybe things without a title should just have a different
+template?
+
+shouldn't things without a title still show the date?
 
 once everything with h is clean, commit c1
 to the repo and deploy to s3
