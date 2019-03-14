@@ -4,6 +4,7 @@ open System.IO
 open System.Linq
 open System.Collections.Generic
 open System.Text
+open System.Text.RegularExpressions;
 
 let get_front_matter (s :string) =
     let marker_front_lf = "---\n"
@@ -56,6 +57,16 @@ let get_front_matter (s :string) =
         (d, remain)
     else
         (null, s)
+
+let crunch2 (template :string) (pairs: Dictionary<string,string>) =
+    let t = template
+    let expr = """{{(?<v>[^{}]+)}}"""
+    let regx = Regex(expr)
+    let links = regx.Matches(t);
+    if links <> null then
+        for m in links do
+            let v = m.Groups.["v"].Value.Trim()
+            printfn "%s -- %s" m.Value v
 
 let crunch (template :string) (pairs: Dictionary<string,string>) =
     // TODO instead of passing in the template here, this should

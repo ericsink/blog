@@ -6,9 +6,6 @@ review all TODO in the code
 we should be pretty close to being ready to rm csgen.
 not even sure it works anymore.
 
-switch to just two braces like jekyll/liquid?
-page.content done, sort of, not sure yet.
-
 article.title is dorky because its value includes
 markup
 
