@@ -77,17 +77,18 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
                 .Replace("<br />", " ")
                 .Replace("<a href=\"http://dictionary.reference.com/search?q=dragnet\">", "")
                 .Replace("</a>", " ")
-                // TODO colons, smiley
                 // TODO consecutive spaces?
 
         if (id_by_path.ContainsKey(url_path)) then
             let id = id_by_path.[url_path]
             let it = old_index.[id]
             if it.usetemplate then
-                let data_name = sprintf "%s.html" id
-                let data_path = Path.Combine(dir_data, data_name)
+                let data_path = 
+                    let data_name = sprintf "%s.html" id
+                    Path.Combine(dir_data, data_name)
                 let pairs = Dictionary<string,string>()
                 pairs.Add("layout", "default")
+                pairs.Add("esbma_id", id)
                 if it.title <> null then
                     pairs.Add("title", it.title)
                 if it.datefiled <> null then
@@ -101,8 +102,9 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
                     let d2 = blog.pre.crunch(old_index, data)
                     write_with_front_matter pairs d2
                 else
-                    // probably js
-                    // TODO Add something to pairs to indicate it was a script?
+                    let js_name = sprintf "%s.js" id
+                    if (File.Exists(Path.Combine(dir_data, js_name))) then
+                        pairs.Add("esbma_type", "js")
 
                     let text = File.ReadAllText(from)
                     let a = remove_template_text text
@@ -114,10 +116,12 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
         else
             let text = File.ReadAllLines(from)
             if has_template text then
-                let dnew = Dictionary<string, string>()
+                let pairs = Dictionary<string, string>()
+
+                pairs.Add("esbma_id", "unknown")
 
                 let title = text.[2].Replace("<title>", "").Replace("</title>", "")
-                dnew.Add("title", title)
+                pairs.Add("title", title)
 
                 let date_begin = "<p class=\"ArticleDate\" align=right>"
                 let matchFunc (s : string) = (s.StartsWith(date_begin))
@@ -126,15 +130,12 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
                     let s = v.Replace(date_begin, "")
                     let i = s.IndexOf("</p>")
                     let q = if i > 0 then (s.Substring(0, i)) else s
-                    dnew.Add("datefiled", q)
+                    pairs.Add("datefiled", q)
                 | None -> ()
-
-                // TODO teaser ?
-                // TODO keywords ?
 
                 let text = File.ReadAllText(from)
                 let a = remove_template_text text
-                write_with_front_matter dnew a
+                write_with_front_matter pairs a
             else
                 let dest_path = Path.Combine(dest_dir, name)
                 File.Copy(from, dest_path)
