@@ -1,7 +1,8 @@
 
 cd h
-dotnet run ..\..\blog_live c1
+dotnet run ..\..\blog_live ..\src
 cd ..
 cd g
-dotnet run ..\h\c1 q1
+dotnet run ..\src ..\wwwroot
+cd ..
 
