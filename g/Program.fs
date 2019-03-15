@@ -77,6 +77,51 @@ let add_defaults (d: Dictionary<string,string>) =
     d.Add("site.tagline", "SourceGear Founder")
     d.Add("site.copyright", "Copyright 2001-2019 Eric Sink. All Rights Reserved")
 
+let make_front_page template dir_content (items: Dictionary<string,Dictionary<string,string>>) = 
+    let add (sb :StringBuilder) (s :string) =
+        sb.Append(s) |> ignore
+
+    let content = StringBuilder()
+
+    add content "</td></tr>"
+
+    let a = items.OrderByDescending(fun kv -> kv.Value.["datefiled"]).Take(10).ToList()
+
+    for kv in a do
+        let path = kv.Key
+        let title = if kv.Value.ContainsKey("title") then kv.Value.["title"] else null
+        let datefiled = kv.Value.["datefiled"]
+
+        //printfn "path: %s" path
+        // TODO windows-specific code below
+        let path_fixed = path.Substring(1).Replace("/", "\\")
+        //printfn "path_fixed: %s" path_fixed
+        let path_content = Path.Combine(dir_content, path_fixed)
+        //printfn "path_content: %s" path_content
+        let html = File.ReadAllText(path_content)
+        let (front_matter, my_content) = get_front_matter html
+
+        add content "<tr><td><span align=\"right\" class=ArticleDate>"
+        add content (blog.fsfun.format_date(datefiled))
+        add content "</span><br><a class=\"ArticleTitleGreen\" href=\""
+        add content path
+        add content "\">"
+        add content title
+        add content "</a><br><br></td></tr><tr><td>"
+        add content my_content
+        add content "<P> </td></tr> <tr><td>&nbsp;</td></tr>"
+
+    add content "<tr><td bgcolor=\"white\">"
+
+    let s = content.ToString()
+    let pairs = Dictionary<string,string>()
+    add_defaults pairs
+    pairs.Add("content", s)
+    pairs.Add("page.title", "Eric Sink")
+    pairs.Add("article.title", "")
+    let result = crunch template pairs
+    result
+
 let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) = 
     let add (sb :StringBuilder) (s :string) =
         sb.Append(s) |> ignore
@@ -202,10 +247,14 @@ let main argv =
     do_dir "/" dir_content dir_dest default_template items
 
     let full_path_content = Path.GetFullPath(dir_content)
-    //printfn "full_path: %s" full_path_content
+
     let rss = make_rss full_path_content items
     let path_rss = Path.Combine(dir_dest, "rss.xml")
     File.WriteAllText(path_rss, rss)
-    //printfn "%s" rss
+
+    let front_page = make_front_page default_template full_path_content items
+    let path_front_page = Path.Combine(dir_dest, "index.html")
+    File.WriteAllText(path_front_page, front_page)
+
     0 // return an integer exit code
 
