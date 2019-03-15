@@ -68,6 +68,8 @@ module fsfun =
         else
             it.pubname
 
+    // TODO this is probably too strict
+    // just use DateTime.Parse?
     let parse_date (s :string) =
         let twoparts = s.Split(' ')
         let dateparts = twoparts.[0].Split('-')
@@ -82,11 +84,13 @@ module fsfun =
         let d = new System.DateTime(year, month, day, hour, min, sec, 0)
         d
 
+    // TODO move to g
     let format_date_rss s =
         //<pubDate>{{{loop.datefiled:format='ddd, dd MMM yyyy HH:mm:ss CST'}}}</pubDate>
         let d = parse_date(s)
         d.ToString("ddd, dd MMM yyyy HH:mm:ss CST")
 
+    // TODO move to g
     let format_date s =
         let d = parse_date(s)
         d.ToString("dddd, d MMMM yyyy")

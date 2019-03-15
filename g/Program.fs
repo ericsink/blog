@@ -54,6 +54,13 @@ let get_front_matter (s :string) =
                 // TODO we may want to allow v to be empty string or null
                 if (k.Length > 0) && (v.Length > 0) then
                     d.Add(k, v)
+        (*
+        if d.ContainsKey("date") then
+            let s = d.["date"]
+            let dt = DateTime.Parse(s)
+            let normalized = dt.ToString("yyyy-MMM-dd HH:mm:ss")
+            d.["date"] <- normalized
+        *)
         (d, remain)
     else
         (null, s)
