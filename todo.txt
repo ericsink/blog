@@ -1,11 +1,7 @@
 
 jekyll layout inheritance ?
 
-are the front matter variable names finalized?
-
 scm/index.html has {{{include
-
-review all TODO in the code
 
 we should be pretty close to being ready to rm csgen.
 not even sure it works anymore.
