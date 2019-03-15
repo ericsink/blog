@@ -1,0 +1,176 @@
+---
+esbma_id: unknown
+title: SQLite and Android N
+date: 2016-06-15 12:00:00
+---
+
+<h2>TLDR</h2>
+
+<p>The upcoming release of Android N is going to cause 
+problems for many apps that use SQLite.  In some cases,
+these problems include an increased risk of data corruption.
+</p>
+
+<h2>History</h2>
+
+<p>SQLite is an awesome and massively popular database library.  It is
+used every day by billions of people.  If you are keeping a list of
+the Top Ten Coolest Software Projects Ever, SQLite should be on the
+list.</p>
+
+<p>Many mobile apps use SQLite in one fashion or another.  Maybe the developers
+of the app used the SQLite library directly.  Or maybe they used another component
+or library that builds on SQLite.</p>
+
+<p>SQLite is a library, 
+so the traditional way to use it is to just link it into your application.  
+For example, on a platform like Windows Phone 8.1, the app developer
+simply bundles the SQLite library as part of their app.</p>
+
+<p>But iOS and Android have a SQLite library built-in to the platform.
+This is convenient, because developers do not need to bundle
+a SQLite library with their software.</p>
+
+<h2>However</h2>
+
+<p>The SQLite library that comes with Android is actually not intended to
+be used except through the <tt>android.database.sqlite</tt> Java classes.
+If you are accessing this library directly, you are actually breaking the rules.
+</p>
+
+<h2>And the problem is</h2>
+
+<p>Beginning with Android N, these rules are going to be enforced.</p>
+
+<p>If your app is using the system SQLite library without using
+the Java wrapper, it will not be compatible with Android N.</p>
+
+<h2>Does your app have this problem?</h2>
+
+<p>If your app is breaking the rules, you *probably* know it.
+But you might not.</p>
+
+<p>I suppose most Android developers use Java.  
+Any app which is only using <tt>android.database.sqlite</tt> should be fine.
+</p>
+
+<p>But if you are using Xamarin, it is rather more likely that
+your app is breaking the rules.  Many folks in the
+Xamarin community tend to assume that "SQLite is part of the platform, so
+you can just call it".</p>
+
+<p>Xamarin.Android 6.1 includes a fix for this problem for <tt>Mono.Data.Sqlite</tt> (see their <a href="https://developer.xamarin.com/releases/android/xamarin.android_6/xamarin.android_6.1/">release notes</a>).</p>
+
+<p>However, that is not the only way of accessing SQLite in the
+.NET/Xamarin world.  In fact, I daresay it is one of the less common ways.</p>
+
+<p>Perhaps the most popular SQLite wrapper is sqlite-net (<a href="https://github.com/praeclarum/sqlite-net">GitHub</a>).
+If you are using this library on Android and not taking the extra steps to bundle a SQLite library, your
+app will break on Android N.</p>
+
+<p>Are you using Akavache?  Or Couchbase Lite?  Both of these libraries use SQLite under the hood (by way of SQLitePCL.raw, which <a href="https://github.com/ericsink/SQLitePCL.raw">I maintain</a>), so your app will need to be updated to work on Android N.</p>
+
+<p>There are probably dozens of other examples.  GitHub says the sqlite-net
+library has 857 forks.  Are you using one of those?  Do you use the MvvmCross
+SQLite plugin?  Do any of the components or libraries in your app make use of SQLite without you being aware of it?  
+</p>
+
+<p>And the Xamarin community is obviously not the whole story.  There are dozens of other ways to
+build mobile apps.  I can think of PhoneGap/Cordova, Alpha Anywhere, Telerik NativeScript,
+and Corona, just off the top of my head.  How many of these environments (or their surrounding ecosystems) provide (perhaps accidentally) a rule-breaking way
+to access the Android system SQLite?  I don't know.</p>
+
+<p>What I *do* know is that even Java developers might have a problem.</p>
+
+<h2>It's even worse than that</h2>
+
+<p>Above, I said: 
+"Any app which is only using <tt>android.database.sqlite</tt> should be fine."
+The key word here is "only".  If you are using the Java classes but also
+have other code (perhaps some other library) that accesses the system SQLite, then
+you have the problems described above.  But you also have another problem.</p>
+
+<p>To fix this, you are going to have to modify that "other code" to
+stop accessing the system SQLite library directly.  One way to do
+this is to change the other code to call through
+<tt>android.database.sqlite</tt>.  But that might be a lot of work.  Or that
+other code might be a 3rd party library that you do not maintain.  So you
+are probably interested in an easier solution.</p>
+
+<p>Why not just bundle another instance of the SQLite library into your app?
+This is what people who use sqlite-net on Xamarin will need to do, so it
+should make sense in this case too, right?  Unfortunately, no.</p>
+
+<p>What will happen here is that your <tt>android.database.sqlite</tt> code will
+continue using the system SQLite library, and your "other code" will use the
+second instance of the SQLite library that you bundled with your app.
+So your app will have two instances of the SQLite library.  And this is Very Bad.</p>
+
+<h2>The Multiple SQLite Problem</h2>
+
+<p>Basically, having multiple copies of SQLite linked into the same
+appliication can cause data corruption.  For more info, see <a
+    href="https://www.sqlite.org/howtocorrupt.html">this page</a> on 
+sqlite.org.  And also the related <a href="multiple_sqlite_problem.html">blog entry</a> I wrote back in
+2014.</p>
+
+<p>You really, really do not want to have two instances of the SQLite
+library in your app.</p>
+
+<h2>Zumero</h2>
+
+<p>One example of a library which is going to have this problem is
+our own Zumero Client SDK.  The early versions of our sync library bundled
+a copy of the SQLite library, to follow the rules.  But later,
+to avoid possible data corruption from The Multiple SQLite Problem,
+we changed it to call the system SQLite directly.  So, although I
+might like to claim we did it for a decent reason, our library
+breaks the rules, and we did it knowingly.  All Android apps using Zumero will need to be
+updated for Android N.  A new release of the Zumero Client SDK, containing a solution to this problem, 
+is under development and will be released soon-ish.
+</p>
+
+<h2>Informed consent?</h2>
+
+<p>I really cannot recommend that you have two instances of the SQLite
+library in your app.  The possibility of corruption is quite real.
+One of our developers created an <a href="https://github.com/jeremysheeley/Android_N_SQLite_Corruption">example project</a> to demonstrate this.</p>
+
+<p>But for the sake of completeness, I will mention that it might be possible
+to prevent the corruption by ensuring that only one instance of the SQLite
+library is accessing a SQLite file at any given time.  In other words,
+you could build your own layer of locking on top of any code that uses SQLite.</p>
+
+<p>Only you can decide if this risk is worth it.  I cannot feel good
+about sending anyone down that path.</p>
+
+<h2>Stop using <tt>android.database.sqlite</tt>?</h2>
+
+<p>It also makes this blog entry somewhat more complete for me to mention
+that changing your "other code" to go through <tt>android.database.sqlite</tt> is not your only option.  
+You might prefer to leave your "other code" unchanged
+and rewrite the stuff that uses <tt>android.database.sqlite</tt>,
+ending up with both sets of code using one single instance of SQLite
+that is bundled with your app.</p>
+
+<h2>A Lament</h2>
+
+<p>Life was better when there were two kinds of platforms, those that include
+SQLite, and those that do not.  Instead, we now have this third category of
+platforms that "previously included SQLite, but now they don't, but they kinda
+still do, but not really".</p>
+
+<h2>An open letter to somebody at Google</h2>
+
+<p>It is so tempting to blame you for this, but that that would be unfair.  
+I fully admit that those of us who broke the rules have no moral high ground at all.</p>
+
+<p>But it also true that because of the multiple SQLite problem, and the sheer quantity
+of apps that use the Android system SQLite directly, enforcing the rules
+now is the best way to maximize the possibility of Android
+apps that break or experience data corruption.</p>
+
+<p>Would it really be so bad to include libsqlite in the NDK?</p>
+
+<p>&nbsp;</p>
+

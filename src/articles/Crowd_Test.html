@@ -1,0 +1,297 @@
+---
+layout: default
+esbma_id: 1561
+title: Scalability Story
+date: 2005-10-15 19:13:00
+keywords: (dev)
+---
+<p>Here at SourceGear, I wear several different hats.&nbsp; One of
+my roles is that I'm "the guy who talks to the prospective Vault customers with
+large teams".&nbsp; If you've got a team of 25 people, you can simply come to our
+online store and buy the product.&nbsp; But if you want to use Vault for a team of
+300 people, I want to have a conversation with you. </p>
+
+<p>Don't call me a <a
+href="/bos/Closing_the_Gap_Part_1.html">Sales Guy</a> or any other
+vulgar names.&nbsp; I don't make cold calls.&nbsp; I don't pester anyone.&nbsp; I just make
+myself available to talk with larger customers who are trying to make a
+decision about Vault.&nbsp; I like to understand the customer's situation, make sure
+Vault is the right choice, and help ensure a smooth transition.</p>
+
+<p>&nbsp;</p>
+
+<p><b><span style='font-size:10.0pt;font-family:"Courier New"'>#ifdef
+marketing_digression</span></b></p>
+
+<p>Sometimes I say "no".&nbsp; Earlier this year, I had a
+conversation with a prospective Vault customer who wanted to put several <i>thousand</i>
+users on a single Vault server.&nbsp; In this case, saying "no" was the right
+decision.&nbsp; That was a perfect example of a customer we don't want.</p>
+
+<p>Right now you might be thinking how ridiculous that sounds. &nbsp;Don't
+we want every customer we can get?</p>
+
+<p>Actually, good marketing usually results in a clear
+understanding of which customers you want and which customers you don't.&nbsp; It's
+very difficult to be the best product for your target niche if you are not
+genuinely prepared to say "no" to everybody who is outside that niche.&nbsp; If you cannot
+easily identify the customers that you don't want, then you probably need to
+give your strategy more thought.</p>
+
+<p>Consider McDonald's.&nbsp; They know what they do, and they do it
+very well.&nbsp; </p>
+
+<p>Suppose a customer comes in to McDonald's and says, "I'd
+like a burger and fries and a pint of Guinness and I want to be seated at a
+table in the smoking section with a big-screen TV so I can watch the game."&nbsp;
+Does the manager worry about turning away a customer?&nbsp; Perhaps he goes back to
+his office and wonders if the entire McDonalds strategy is all wrong?</p>
+
+<p>Certainly not.&nbsp; He simply tells the customer no:&nbsp; "That's
+not what we do here."</p>
+
+<p>And so it is with SourceGear as well.&nbsp; Our products are
+designed to meet the needs of the software teams in the professional segment,
+extending up somewhat into the small enterprise.&nbsp; Most of our sites have less
+than 100 developers.&nbsp; Our larger sites have teams numbering in the hundreds,
+not in the thousands.&nbsp; Customers with 5,000 developers tend to have a very
+different class of needs.&nbsp; That's not what we do here.</p>
+
+<p><b><span style='font-size:10.0pt;font-family:"Courier New"'>#endif</span></b></p>
+
+<p>&nbsp;</p>
+
+<p>Anyway, since I am often talking to our bigger customers, I
+am often thinking about Vault's level of <i>scalability</i>.</p>
+
+<h2>Scalability</h2>
+
+<p>I define "scalability" as "the ability of a software system
+to cope as the size of the problem increases".&nbsp; </p>
+
+<p>Note that scalability and performance are related, but
+different.&nbsp; Explaining these terms in the language of calculus, if performance
+is a function, scalability is about the first derivative of that function.&nbsp; A
+piece of software can be very scalable, even if its performance is poor for
+small values of n.&nbsp; For example, I've heard people describe Exchange that way.&nbsp;
+Apparently an Exchange server with 5 users is kind of slow, but an Exchange
+server with 5,000 users is no slower.&nbsp; (I've never used Exchange so I can't
+really say if that's true.)</p>
+
+<p>When I say "the size of the problem", I am speaking very
+generally.&nbsp; Continuing my notion of a mathematical curve, scalability can
+involve different variables on the X axis.&nbsp; A product might scale very well for
+large numbers of users but very poorly for large quantities of data.&nbsp; A
+database might scale very well for large numbers of rows but very poorly when
+the individual rows are large.</p>
+
+<p>Finally, let's not confine scalability to things which can
+be measured with a stopwatch.&nbsp; Sometimes scalability problems are a bit more
+qualitative.&nbsp; For example, the Vault Admin tool presents the list of users in a
+regular Windows listbox control.&nbsp; That's fine with 100 users, but it's not
+exactly the right UI for a system with 5,000 users.</p>
+
+<h2>Scalability Issues for Version Control Tools</h2>
+
+<p>Thousands of teams are using Vault, and the vast majority of
+them are very happy.&nbsp; However, we've had a few customers over the years who
+have struggled with Vault, and scalability has been a common theme.&nbsp; It turns
+out that for a version control system, scalability can bring some very
+challenging problems.</p>
+
+<p>Simple things become grotesque.&nbsp; For example, one of the
+fundamental things a version control system must do is figure out if the user
+has made any modifications to their local copies of the files.&nbsp; Sounds simple,
+right?&nbsp; It mostly is.&nbsp; But if you implement a simple solution and test it on a
+tree with 100 files, you will probably find later that it doesn't work quite so
+well when somebody tries it on their tree with 25,000 files.</p>
+
+<p>Back in the days of Vault 1.0, we were courting a certain
+banner name customer who was interested in migrating from SourceSafe to Vault.&nbsp;
+We spent a lot of time and effort, including trips to their location.&nbsp; In the
+end, we lost the deal, largely because our product just didn't work very well
+for a team their size.&nbsp; This team had 75 developers working on a tree with
+around 70,000 files.&nbsp; Today, Vault 3.1 can usually handle problems like that
+without breaking a sweat.</p>
+
+<p>The thing about source control is that there are so many
+different scalability factors to consider.&nbsp; Some people have lots of users.&nbsp;
+Some have lots of files.&nbsp; Some have really big files.&nbsp; Some teams lock
+thousands of files even if they don't plan to edit them.&nbsp; The variable on the X
+axis varies from customer to customer.&nbsp; </p>
+
+<p>We have worked to make our product more scalable with every
+release.&nbsp; In fact, Vault 3.1 was a major step forward from Vault 3.0.&nbsp; Since I
+played a part in this, I would like to tell the story of how it happened.&nbsp; I'm
+mostly just a marketing guy these days, so on the all-too-rare occasion that I
+break out Visual Studio for some development work, I want to talk about it.&nbsp; <b>:-)</b></p>
+
+<h2>We love automated testing</h2>
+
+<p>We are big believers in automated testing.&nbsp; We've got unit
+tests and "smoke tests" that run on every build.&nbsp; We've got a test repository
+with 500,000 files in it. &nbsp;We've got tests that randomly retrieve old versions
+to make sure they're still okay.&nbsp; We have a "Combinatorial Test" which randomly
+performs weird operations and finds ridiculously arcane edge cases.&nbsp; We like
+automated test apps.&nbsp; Every so often we write another one.</p>
+
+<p>During the 3.1 development cycle, I was feeling bored and a
+little ornery.&nbsp; I didn't have much involvement in the 3.1 code, and I was
+itching to use a compiler, so I took some time and wrote a test application we
+call "Crowd Test".&nbsp; My goal was to exercise the Vault server under seriously
+heavy load from many simultaneous users.&nbsp; I wanted Crowd Test to be sadistic
+and cruel and unfair.</p>
+
+<h2>How it Works</h2>
+
+<p>Crowd Test is a Vault client which runs in an infinite loop that
+looks something like this:</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >Randomly choose an action to perform.</li>
+ <li >Sleep for a random amount of time.</li>
+ <li >Go back to step 1.</li>
+</ol>
+
+<p>The list of known actions includes most everything that can
+be done to a Vault server.&nbsp; For example, there are actions to add files, create
+folders, delete things, run history queries, and apply labels.</p>
+
+<p>The algorithm which randomly selects an action uses weights
+so that some actions are more likely to happen than others.&nbsp; The weights are
+tuned to roughly simulate the usage pattern of real users.&nbsp; For example, modifying
+a file is more likely to happen than deleting a folder or creating a branch.</p>
+
+<p>We usually set the sleep time fairly low, averaging around
+30 seconds between actions.&nbsp; , Real users don't perform a source control
+operation that often.&nbsp; However, with a low idle time between actions, when we run
+a simple test with say 10 Crowd Test clients simultaneously, we are actually
+burdening the server with a load that is higher than that which would be caused
+by 10 human users.</p>
+
+<p>The actions are also tuned to ensure that the size of the
+repository is always increasing.&nbsp; The longer Crowd Test runs, the larger the
+repository gets.</p>
+
+<p>Each Crowd Test client records the elapsed time for every
+action and plots the resulting data with simple line graphs.&nbsp; In this way, we
+can get a visual depiction of just how the performance of each operation
+changes as the repository grows.&nbsp; (BTW, for the plotting I used <a
+href="http://zedgraph.sourceforge.net/">ZedGraph</a>, which is very cool.)</p>
+
+<p>Here's a screen shot of a Crowd Test client:</p>
+
+<p><img border=0 width=616 height=463
+src="/scm/1561_image001.jpg"></p>
+
+<p>&nbsp;</p>
+
+<p>I spent a couple of weeks writing the initial version of Crowd
+Test.&nbsp; All of my early test runs took place on my main development machine.&nbsp; I
+remember running one Crowd Test client overnight, returning the next morning to
+find 14 hours of results, nicely graphed.&nbsp; Everything was going exactly as
+planned, so I was ready to try a test with multiple clients hitting a real
+server.&nbsp; For my test server machine, I grabbed a dual-P3 with a gig of RAM, not
+too beefy, not too wimpy.</p>
+
+<p>I had high expectations.&nbsp; Nobody had ever tortured a Vault
+server this badly before!&nbsp; I started a bunch of Crowd Test clients and went to
+lunch.&nbsp; After lunch, I would start examining the graphs and beginning
+identifying all the tweaks which could be made to improve scalability.</p>
+
+<p>The actual results were not at all what we expected.&nbsp; When I
+designed Crowd Test to be sadistic, I succeeded.</p>
+
+<h2>Nightmare on Farber Street</h2>
+
+<p>The Vault server died before I ever got my chicken
+sandwich.&nbsp; When I returned from lunch, I discovered that the server was <a
+href="http://www.answers.com/fubar&amp;r=67">FUBAR</a> not long after starting
+the test.&nbsp; From that point on, it was still listening to requests but it was
+immediately returning failure codes for every action.&nbsp; </p>
+
+<p>I stopped the test and started looking for some kind of
+configuration problem.&nbsp; At first, I didn't really consider the possibility that
+I had found a bug in the server.&nbsp; But the more I investigated, the more
+horrified I became.&nbsp; Within a couple days, the truth was painfully clear:&nbsp;
+Vault 3.0 had a terrible problem.</p>
+
+<p>I recruited some help from Jeff (a Vault server developer)
+and we got that bug fixed in reasonably short order.&nbsp; Embarrassingly, it was an
+issue of thread safety.&nbsp; During the development of Vault 3.0, we did several
+things to increase concurrency from 2.0.&nbsp; Apparently we left a couple of places
+where the server wasn't thread-safe.&nbsp; Under typical usage, the problem rarely
+if ever appeared, but Crowd Test created conditions which made this bug appear
+in minutes.&nbsp; (This problem was fixed for 3.0 users with the 3.0.7 maintenance
+release.)</p>
+
+<p>We returned to the Crowd Test effort, assuming that we were
+now ready to proceed with the fine tuning and optimization work.&nbsp; Once again,
+things didn't work out the way we expected.</p>
+
+<p>I'll spare you the play calling and give you the box score:&nbsp;
+We dragged Ian (another Vault server developer) into our little team, and the
+three of us spent most of April, May and June working with Crowd Test.&nbsp; Mostly
+I stayed on the client side and let the other two guys do all the server work,
+but I still ended up learning a whole lot more about SQL Server than I ever
+wanted to know.&nbsp; We found and fixed a whole bunch of problems, including the Big
+Ugly Thread Concurrency Bug and a Huge Memory Leak and a Bunch of Deadlocks in
+the SQL Layer and a Big Performance Problem with Folder Security Checks and
+more.</p>
+
+<p>I don't know if this experience really fits the definition
+of "Test Driven Development", but we were definitely feeling "driven" by Crowd
+Test.&nbsp; <b>:-)</b></p>
+
+<p>It was bittersweet experience.&nbsp; On the one hand, we were
+horrified each time we discovered another hideous scalability problem in our
+shipping product.&nbsp; On the other hand, the improvement we were making in the
+quality of Vault was incredible.</p>
+
+<h2>The Bottom Line</h2>
+
+<p>Fortunately, the actual negative impact of all the problems we
+found was rather small.&nbsp; None of our customers abuse their Vault server as
+badly as Crowd Test does.&nbsp; Our product was taxing the patience of some
+customers, but nobody lost any data or anything like that.&nbsp; Most users were
+completely unaffected.&nbsp; </p>
+
+<p>On the positive side, as our larger sites upgrade to 3.1,
+they are getting <i>much</i> happier.</p>
+
+<p>The efforts we started here will continue.&nbsp; In fact, as I
+was proofreading a final draft of this article, Ian walked in and asked for
+more hardware for Crowd testing.&nbsp; <b>:-)</b></p>
+
+<p>That's good, because we will probably always have more work
+to do.&nbsp; For example, in Vault 4.0 we really need to speed up the branch
+command.&nbsp; It's not a problem for most users, but we've got one medium-sized customer
+whose development process has them creating branches extremely often, like <i>every
+day</i>.&nbsp; Our branching design is sound, but the implementation was done with
+the assumption of it being a rather infrequent operation.&nbsp; A bit of localized
+surgery on the branch command will help a lot.</p>
+
+<p>Today Vault scalability is very good, better than it has
+ever been.&nbsp; When I talk with prospective customers, I've got more confidence
+than ever, but the journey is a little bumpy sometimes.</p>
+
+<p>These experiences allow me to feel a certain measure of identification
+with the developers working on Team Foundation Server at Microsoft.&nbsp; They've
+accomplished a <a
+href="http://blogs.msdn.com/bharry/archive/2005/10/08/Microsoft_VS_Team_Foundation_Server_dogfood_statistics_10_03_05.aspx">lot</a>
+already, but to some extent they are just now embarking on this journey, especially
+because their scalability goals aim much higher.&nbsp; Unlike SourceGear, the Team
+System folks actually <i>do</i> want to create a product which is well suited
+to teams with 5,000 developers.&nbsp; Perhaps more importantly, I daresay they want their
+product to eventually be used throughout Microsoft itself, especially on the
+massive teams which develop Office and Windows.&nbsp; With their 1.0 release
+apparently only a few months away, they have some very interesting times ahead
+of them. &nbsp;Best wishes and a pleasant journey to <a
+href="http://blogs.msdn.com/bharry/default.aspx">Brian Harry</a> and his team.</p>
+
+<h2>So Eric, are you trying to make a point here?</h2>
+
+<p>Nah, not really.&nbsp; I'm just telling stories.&nbsp; I believe in <a
+href="/bos/Transparency.html">transparency</a>.</p>
+
+<p>&nbsp;</p>

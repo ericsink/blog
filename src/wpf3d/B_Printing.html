@@ -1,0 +1,176 @@
+---
+layout: default
+esbma_id: 1696
+title: 11: Printing
+date: 2007-07-23 14:42:47
+---
+<p>This entry is part 11 of a <a
+href="/wpf3d/index.html">12-part series</a> on WPF
+3D.</p>
+
+<h3>Simple Printing</h3>
+
+<p>I've said it before and I'll say it again now:&nbsp; It's just
+incredibly cool that WPF's integration of 3D is so thorough that printing is supported.</p>
+
+<p>Hardware accelerated 3D graphics APIs (like OpenGL and
+Direct3D) are all about screens, not paper.&nbsp; If you're building a 3D graphics
+app, these APIs are great.&nbsp; They not only make things a bit easier, but they offer
+a big performance boost as well.&nbsp; But then if you want your app to be able to
+print, the API disappears and you're left all alone.</p>
+
+<p>In contrast, WPF makes this relatively simple.&nbsp; Printing a
+Viewport3D in WPF looks like this:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:teal'>PrintDialog</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> dlg = <span
+style='color:blue'>new</span> <span style='color:teal'>PrintDialog</span>();<br>
+<span style='color:blue'>if</span> ((<span style='color:blue'>bool</span>)dlg.ShowDialog().GetValueOrDefault())<br>
+{<br>
+&nbsp;&nbsp;&nbsp; dlg.PrintVisual(myViewport3D, <span style='color:maroon'>&quot;Sawdust&quot;</span>);<br>
+}</span></p>
+
+<p>Five lines.&nbsp; Were it not for my pathological need to use
+braces on every if statement, it would be three lines.</p>
+
+<h3>XPS</h3>
+
+<p>As cool as it is to be able to print so easily, the code
+above is rather simplistic.&nbsp; Most applications will want to offer their users
+more.</p>
+
+<p>My current printing code for Sawdust is focused on <a
+href="http://en.wikipedia.org/wiki/XML_Paper_Specification">XPS</a>, which is printer-friendly
+document file format, conceptually similar to PDF.&nbsp; After constructing an XPS
+file, I can spool it to the printer or save it to disk so the user may view,
+print or archive it like a PDF file.&nbsp; More people use PDF, but for a WPF 3D
+app, XPS is much easier to generate.&nbsp; Start by creating a FixedDocument.</p>
+
+<h3>FixedDocument</h3>
+
+<p>In the August 2007 issue of MSDN Magazine, <a
+href="http://www.markusegger.com/">Markus Egger</a> has a nice overview of
+WPF's FlowDocument class.&nbsp; FlowDocument is designed for viewing
+document-oriented content on a screen.&nbsp; Its sister class is FixedDocument,
+which is designed for putting document-oriented content on paper.</p>
+
+<p>As you might expect, a FixedDocument is simply a collection
+of pages:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:blue'>public</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> <span style='color:blue'>static</span>
+<span style='color:blue'>void</span> CreateFixedDocument()<br>
+{<br>
+&nbsp;&nbsp;&nbsp; <span style='color:teal'>FixedDocument</span> doc = <span style='color:
+blue'>new</span> <span style='color:teal'>FixedDocument</span>();<br>
+&nbsp;&nbsp;&nbsp; doc.DocumentPaginator.PageSize = <span style='color:blue'>new</span> <span
+style='color:teal'>Size</span>(96 * 8.5, 96 * 11);<br>
+<br>
+&nbsp;&nbsp;&nbsp; <span style='color:blue'>foreach</span> (page that I want)<br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style='color:teal'>PageContent</span> page = <span
+style='color:blue'>new</span> <span style='color:teal'>PageContent</span>();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style='color:teal'>FixedPage</span> fixedPage =
+CreateOneFixedPage();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ((<span style='color:teal'>IAddChild</span>)page).AddChild(fixedPage);<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; doc.Pages.Add(page);<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; <span style='color:blue'>return</span> doc;<br>
+}</span></p>
+
+<p>The IAddChild cast is rather funky.&nbsp; Microsoft's own sample
+code shows this technique, but their documentation for IAddChild says: "This
+member supports the Microsoft .NET Framework version 3.0 infrastructure and is
+not intended to be used directly from your code."&nbsp; Hmmph.</p>
+
+<p>The real work of creating aFixedDocument is in creating each
+page.&nbsp; A FixedPage is a UIElement that acts somewhat like a Canvas.&nbsp; To layout
+your page, you simply add a bunch of things to it, each with a specific size
+and position.</p>
+
+<p>First, create a FixedPage:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:teal'>FixedPage</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> page = <span
+style='color:blue'>new</span> <span style='color:teal'>FixedPage</span>();<br>
+page.Background = <span style='color:teal'>Brushes</span>.White;<br>
+page.Width = 96 * 8.5;<br>
+page.Height = 96 * 11;</span></p>
+
+<p>Now let's add a big title at the top of the page:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:teal'>TextBlock</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> tbTitle = <span
+style='color:blue'>new</span> <span style='color:teal'>TextBlock</span>();<br>
+tbTitle.Text = <span style='color:maroon'>&quot;My Page Title&quot;</span>;<br>
+tbTitle.FontSize = 24;<br>
+tbTitle.FontFamily = <span style='color:blue'>new</span> <span
+style='color:teal'>FontFamily</span>(<span style='color:maroon'>&quot;Arial&quot;</span>);<br>
+<span style='color:teal'>FixedPage</span>.SetLeft(tbTitle, 96 * 0.75); <span
+style='color:green'>// left margin<br>
+</span><span style='color:teal'>FixedPage</span>.SetTop(tbTitle, 96 * 0.75); <span
+style='color:green'>// top margin<br>
+</span>page.Children.Add((<span style='color:teal'>UIElement</span>)tbTitle);</span></p>
+
+<p>Now we add our Viewport3D to the page.&nbsp; We want it to be 2
+inches from the top of the sheet and 2 inches from the left side.&nbsp; We'll assume
+we have already prepared a Viewport3D which is the proper size to fit.&nbsp; I think
+I'll draw a thin black border around it as well.</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:teal'>Border</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> b = <span style='color:
+blue'>new</span> <span style='color:teal'>Border</span>();<br>
+b.BorderThickness = <span style='color:blue'>new</span> <span style='color:
+teal'>Thickness</span>(1);<br>
+b.BorderBrush = <span style='color:teal'>Brushes</span>.Black;<br>
+b.Child = myViewport3D;<br>
+<span style='color:teal'>FixedPage</span>.SetLeft(b, 96 * 2);<br>
+<span style='color:teal'>FixedPage</span>.SetTop(b, 96 * 2);<br>
+page.Children.Add((<span style='color:teal'>UIElement</span>)b);</span></p>
+
+<p>Once you've constructed all the elements on your page, you
+need to call Measure(), Arrange() and UpdateLayout() to get it ready for
+drawing:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:teal'>Size</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> sz = <span
+style='color:blue'>new</span> <span style='color:teal'>Size</span>(96 * 8.5, 96
+* 11);<br>
+page.Measure(sz);<br>
+page.Arrange(<span style='color:blue'>new</span> <span style='color:teal'>Rect</span>(<span
+style='color:blue'>new</span> <span style='color:teal'>Point</span>(), sz));<br>
+page.UpdateLayout();</span></p>
+
+<h3>From FixedDocument to XPS</h3>
+
+<p>Once we have constructed a FixedDocument object in memory, what
+do we do with it?&nbsp; Writing it out to an XPS file is pretty simple:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:teal'>FixedDocument</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> doc =
+CreateFixedDocument();<br>
+<span style='color:teal'>XpsDocument</span> xpsd = <span style='color:blue'>new</span>
+<span style='color:teal'>XpsDocument</span>(filename, <span style='color:teal'>FileAccess</span>.ReadWrite);<br>
+<span style='color:teal'>XpsDocumentWriter</span> xw = <span style='color:teal'>XpsDocument</span>.CreateXpsDocumentWriter(xpsd);<br>
+xw.Write(doc);<br>
+xpsd.Close();</span></p>
+
+<h3>Viewing an XPS Document</h3>
+
+<p>For viewing XPS files, I recommend you download the <a
+href="http://www.microsoft.com/downloads/details.aspx?FamilyID=b8dcffdd-e3a5-44cc-8021-7649fd37ffee&amp;displaylang=en">XPS
+Essentials Pack</a> from Microsoft.&nbsp; It contains a nice viewer application.</p>
+
+<p>For WPF applications, XPS is the way to implement any
+serious printing capabilities.&nbsp; I'm no expert with XPS yet, but so far I'm
+quite pleased with the results I'm getting.</p>
+
+<p></p>

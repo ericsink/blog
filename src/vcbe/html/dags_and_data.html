@@ -1,0 +1,726 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Veracity: DAGs and Data</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="internals.html" title="Chapter 12. DVCS Internals"><link rel="prev" href="repository_structure.html" title="Mercurial: Repository Structure"><link rel="next" href="best_practices.html" title="Chapter 13. Best Practices"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Veracity: DAGs and Data</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="repository_structure.html">Prev</a> </td><th width="60%" align="center">Chapter 12. DVCS Internals</th><td width="20%" align="right"> <a accesskey="n" href="best_practices.html">Next</a></td></tr></table><hr></div><div class="section" title="Veracity: DAGs and Data"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp2992944"></a>Veracity: DAGs and Data</h2></div></div></div>
+    
+
+    <p>Veracity<a class="indexterm" name="idp2994320"></a> is
+        written in
+        C (the core libraries) and JavaScript (the web applications).  
+        It is primarily a command-line application (vv) but also contains a
+        built-in web server and web-based user interface.</p>
+
+<p>I am using Veracity for version control as I write this book.  So
+in the following examples, I’m just going to crawl through the guts of my book repository.
+A little information up-front:</p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+        <p>
+            The Veracity scripting interpreter is called
+            <span class="command"><strong>vscript</strong></span>.  The scripting language is JavaScript<a class="indexterm" name="idp2997360"></a>,
+            extended with a bunch of hooks into the Veracity libraries.
+        </p>
+    </li><li class="listitem">
+        <p>
+            The name of my repository instance is book2.
+        </p>
+    </li><li class="listitem">
+        <p>
+            In general, Veracity stores everything in JSON<a class="indexterm" name="idp2999664"></a>.
+        </p>
+    </li></ul></div>
+
+<div class="section" title="DAGs and Blobs"><div class="titlepage"><div><div><h3 class="title"><a name="idp3000688"></a>DAGs and Blobs</h3></div></div></div>
+    
+
+    <p>A Veracity repository stores two kinds of things: <a class="indexterm" name="idp3002224"></a>DAGs and blobs<a class="indexterm" name="idp3002896"></a>.
+        First let’s talk about DAGs.</p>
+
+    <p>A DAG is used to represent the version
+        history of something.  Each node of the DAG represents one version,
+        with one or more arrows pointing to the version(s) from which that node
+        was derived.  A DAG has one root node.<sup>[<a name="idp3004128" href="#ftn.idp3004128" class="footnote">49</a>]</sup>  If a DAG has just one leaf
+        node, then we know without ambiguity which version is the
+        latest.</p>
+
+    <p>Veracity supports two kinds of DAGs:</p>
+
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+            <p>
+                A <em class="firstterm">tree</em> DAG
+    keeps the version history of a directory structure from a filesystem.  Each node
+    of the DAG represents one version of the whole tree.</p>  
+    </li><li class="listitem">
+    <p>A <em class="firstterm">database</em> (or “db”) DAG keeps the version history of a database, or a
+    list of records.  Each node of the DAG represents one state of the complete
+    database.</p>
+    </li></ul></div>
+
+    <p>
+    A repository can have many database DAGs, each with a different purpose,
+    distinguished by a numeric ID we call a dagnum.
+</p>
+
+<p>  Here’s a vscript snippet which 
+    lists all the DAGs in a repository:</p>
+
+<pre class="screen">var r = sg.open_repo("book2");
+var a = r.list_dags();
+r.close();
+print(sg.to_json__pretty_print(a));
+</pre>
+
+<p>When I run this script, I get:</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:~ eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vscript list_dags.js</span>
+[
+    "0000000010101042",
+    "0000000010101052",
+    "0000000010102062",
+    "0000000010102072",
+    "0000000010201001",
+    "0000000010201011",
+    "00000000102021c2",
+    "00000000102021d2",
+    "00000000102031c2",
+    "00000000102031d2",
+    "00000000102040c2",
+    "00000000102040d2",
+    "00000000102051c2",
+    "00000000102051d2",
+    "00000000102071c2",
+    "00000000102071d2",
+    "0000000010301002",
+    "0000000010301012",
+    "0000000010302002",
+    "0000000010302012"
+]
+</pre>
+
+<p>Well, that’s not very friendly, is it?  All those hex numbers!  And how
+can there be 20 DAGs in this repository, anyway?</p>
+
+<p>Actually, there are only 10.  Sort of.  What we’ve got here are 10
+    “real” DAGs, each of which has an audit DAG.</p>
+
+    <p>For every changeset in every
+        non-audit DAG, an audit record is added (to its audit DAG) containing
+        the UTC timestamp (on the local machine) and the userid of who committed
+        it.</p>
+
+<p>If you look closely, the audit DAGs are evident here
+    because they’re the ones where the second digit (from the right) is an odd
+    number.</p>
+
+<p>The purpose of each DAG can be found by looking at the bits in the dagnum
+    while reading a particularly tedious section of the Veracity source code.
+    I’ll spare you the trouble.  Here is a description of all 10 DAGs:</p>
+
+<div class="informaltable">
+    <table border="1"><colgroup><col align="center" class="col1"><col align="center" class="col2"></colgroup><thead><tr><th align="center">dagnum</th><th align="center">Description</th></tr></thead><tbody><tr><td align="center"><code class="code">0000000010101042</code></td><td align="center">Areas (db)</td></tr><tr><td align="center"><code class="code">0000000010102062</code></td><td align="center">Users (db)</td></tr><tr><td align="center"><code class="code">0000000010201001</code></td><td align="center">Version control (tree)</td></tr><tr><td align="center"><code class="code">00000000102021c2</code></td><td align="center">VC Comments (db)</td></tr><tr><td align="center"><code class="code">00000000102031c2</code></td><td align="center">VC Stamps (db)</td></tr><tr><td align="center"><code class="code">00000000102040c2</code></td><td align="center">VC Tags (db)</td></tr><tr><td align="center"><code class="code">00000000102051c2</code></td><td align="center">VC Named branches (db)</td></tr><tr><td align="center"><code class="code">00000000102071c2</code></td><td align="center">VC Hooks (db)</td></tr><tr><td align="center"><code class="code">0000000010301002</code></td><td align="center">Work items (db)</td></tr><tr><td align="center"><code class="code">0000000010302002</code></td><td align="center">Builds (db)</td></tr></tbody></table>
+
+</div>
+
+<p>As you can see, the db DAGs have the tree DAG outnumbered, 9 to 1.  In
+    fact, those 10 audit DAGs are db DAGs as well.  So we’ve got 19 db DAGs and 1 tree DAG.  This is fairly typical
+for a Veracity repository.  The source tree itself is filesystem-oriented data,
+but most other data fits better into a record-with-fields design.  Veracity
+uses db DAGs to track lots of different stuff.</p>
+
+<p>Six of the DAGs in this list are related to version control.
+    There is the tree itself, and then we have one DAG each to keep track of
+    comments, stamps, tags, named branches, and hooks.</p>
+
+<p>The users DAG is used to keep track of user accounts.  The areas DAG can
+    be used to keep track of which DAGs logically go together.  All six of the
+    version control (VC) DAGs are in one area.  Work items and builds are another area.</p>
+
+<p>Before we go on, we should tidy up a bit.  We’ve got enough big long hex numbers
+    around, so let’s get rid of the ones for the dagnums.  The scripting API
+    has defined constants for all the primary dagnums.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:~ eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vscript</span>
+vscript&gt; print(sg.dagnum.VERSION_CONTROL)
+0000000010201001
+vscript&gt; ^D
+</pre>
+
+<p>Now let’s dive into the version control DAG itself.  The way a DAG works is
+    that the most recent information is in the leaves.
+
+Here’s a little script to list all the leaf nodes for the version control tree DAG:</p>
+
+<pre class="screen">var r = sg.open_repo("book2");
+var leaves = r.fetch_dag_leaves(sg.dagnum.VERSION_CONTROL);
+r.close();
+print(sg.to_json__pretty_print(leaves));
+</pre>
+
+<p>Running the script, I get one result, indicating that my repository has no branching going on:</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:~ eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vscript fetch_dag_leaves.js</span>
+[
+    "f10628e5792251dc886f600a6ae8610a38ac2204"
+]
+</pre>
+
+<p>The ID of a dagnode is also the ID of its changeset blob.  Which reminds
+    me, let’s talk about blobs.</p>
+
+<p>A blob<a class="indexterm" name="idp3039456"></a> is just a sequence of bytes.  It can be empty, or it can have
+        many gigabytes in it.  The length of a blob is represented as a
+        64-bit integer, so Veracity can handle any size blob you’ve got.</p>
+
+    <p>A repository provides key-value storage for blobs.  The key for
+        each blob is the cryptographic hash of its contents.  
+        The repository in this example is configured to use SHA-1, the
+        same hash function used by Mercurial<a class="indexterm" name="idp3040912"></a> and Git<a class="indexterm" name="idp3041424"></a>.
+        </p>
+
+        <p>In the Veracity code, we use the word <em class="firstterm">HID</em>, short for “hash ID”, to refer to the hash of a blob.</p>
+
+        <p>Whenever you retrieve a blob (in full), the HID is verified.</p>
+
+        <p>There are two kinds of blobs.</p>
+        <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>User data.  Every file you store under
+            version control becomes a blob.  Actually each version of that file
+            becomes a blob.</p></li><li class="listitem"><p>Program data.  Program data is used to store things
+                that Veracity needs to remember, such as the contents of a directory, or database records, or changeset objects.  All program data is stored as JSON.  
+        </p></li></ul></div>
+
+    <p>When creating a new changeset in a DAG, we create a serialized changeset
+        record.  The HID of that record becomes the ID of the new
+        dagnode.</p>
+
+</div>
+
+<div class="section" title="Changesets"><div class="titlepage"><div><div><h3 class="title"><a name="idp3046528"></a>Changesets</h3></div></div></div>
+    
+
+    <p>So, when we ask for the dagnode IDs for the leaf nodes, the resulting
+        IDs can be used to retrieve the changeset blob.  Here is what that
+        changeset blob looks like:</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:book2 eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vv dump_json f10628e5792251dc886f600a6ae8610a38ac2204</span>
+{
+  "dagnum" : "0000000010201001",
+  "generation" : 91,
+  "parents" : 
+  [
+    "c821cfbc8964db9958d1278a5e4e2947462730e9"
+  ],
+  <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">"tree"</span> : 
+  {
+    "changes" : 
+    {
+      "c821cfbc8964db9958d1278a5e4e2947462730e9" : 
+      {
+        "g3a3b61269bea4392951a785dcf7efbde40e5331a56db11e0a84b60fb42f09aca" : 
+        {
+          "hid" : "40c1af01a8c0cea66ecb99529befbd8e7a004c42"
+        },
+        "g8a7471f886864c04a836d0c4621df781a2e67bbe572611e08f5d60fb42f09aca" : 
+        {
+          "hid" : "a3656282d8c467f00b21d83317d2de0374af761c"
+        }
+      }
+    },
+    "root" : "c86c077f1f0c165f90ca7715b4a41d8281fc5feb"
+  },
+  "ver" : 1
+}
+</pre>
+
+<p>As I mentioned before, there are two kinds of DAGs, db and tree.  The
+    version control DAG is, of course, a tree DAG, so its changeset records
+    have a “tree” section.  The db changesets look a little different as
+you’ll see later.</p>
+
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p><code class="code">dagnum</code> identifies the DAG to which this changeset belongs.</p></li><li class="listitem"><p><code class="code">generation</code> <a class="indexterm" name="idp3052912"></a>is an integer which indicates the distance from this dagnode to the root.  The root dagnode has a generation of 1.  All other nodes have a generation which is 1 + the maximum generation of its parents.</p></li><li class="listitem"><p><code class="code">ver</code> defines the version number of the format of the changeset record.</p></li><li class="listitem"><p><code class="code">parents</code> is an array of references to the parents<a class="indexterm" name="idp3055584"></a> of this dagnode.</p></li><li class="listitem"><p><code class="code">tree.changes</code> contains one entry for each parent.  Each such entry contains a list of everything in this dagnode which has changed with respect to that parent.</p></li><li class="listitem"><p><code class="code">tree.root</code> contains the HID of the treenode for the root of the tree.</p></li></ul></div>
+
+<p>So, what’s a treenode?</p>
+
+</div>
+<div class="section" title="Treenodes"><div class="titlepage"><div><div><h3 class="title"><a name="idp3058464"></a>Treenodes</h3></div></div></div>
+    
+
+    <p>In a version control tree, each of the user’s files is stored as a
+        blob.  But each directory is a treenode.  Here’s one:</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:book2 eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vv dump_json c86c077f1f0c165f90ca7715b4a41d8281fc5feb | expand -t 2</span>
+{
+  "tne" : 
+  {
+    "g3a3b61269bea4392951a785dcf7efbde40e5331a56db11e0a84b60fb42f09aca" : 
+    {
+      "hid" : "40c1af01a8c0cea66ecb99529befbd8e7a004c42",
+      "name" : "@",
+      "type" : 2
+    }
+  },
+  "ver" : 1
+}
+</pre>
+
+<p>This treenode is actually what we call the “super-root”.  It’s an extra level of
+    tree hierarchy that the user never sees, so that we can record metadata about
+    the user’s root.  So let’s dive one level deeper.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:book2 eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vv dump_json 40c1af01a8c0cea66ecb99529befbd8e7a004c42 | expand -t 2</span>
+{
+  "tne" : 
+  {
+    "g0ae054064de54d4b88db6d8b26ad4d79688421e0595811e0804960fb42f09aca" : 
+    {
+      "bits" : 1,
+      "hid" : "56eedb1343e12183875d14a1ec3d1a4098d49a25",
+      "name" : "g",
+      "type" : 1
+    },
+    "g8a7471f886864c04a836d0c4621df781a2e67bbe572611e08f5d60fb42f09aca" : 
+    {
+      "hid" : "a3656282d8c467f00b21d83317d2de0374af761c",
+      "name" : "version_control_howto.xml",
+      "type" : 1
+    },
+    "g8e481f4af9d5450a83fc77cca7f0bc07a70fdfa466e511e0837160fb42f09aca" : 
+    {
+      "hid" : "9e65873dbc6d7c8579392a6acc9a856d25bb0c46",
+      "name" : "docbook-xsl-1.76.1",
+      "type" : 2
+    },
+    "gb45372a549bb4044b65b788212d0828af338a140580311e08ced60fb42f09aca" : 
+    {
+      "hid" : "85e06e062d72def73dce1897bdcef9531ec87526",
+      "name" : "images",
+      "type" : 2
+    },
+    "ge502a109a22e44c099d66014fb5ecd1d9477f9025d3b11e0b7a360fb42f09aca" : 
+    {
+      "hid" : "19ba6f1d215bfad27181c4113ce80985dae7fdeb",
+      "name" : "custom_fo.xsl",
+      "type" : 1
+    }
+  },
+  "ver" : 1
+}
+</pre>
+
+<p>This is a more illustrative treenode.  Basically its <code class="code">tne</code> object (short for tree node entry) contains a list of entries, one for each item in the directory.</p>
+
+<p>This directory has five entries in it:</p>
+
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+        <p>
+            <code class="filename">g</code> is a bash script I use to generate a PDF.
+        </p>
+    </li><li class="listitem">
+        <p>
+            <code class="filename">version_control_howto.xml</code> is the DocBook file
+            containing all my content.
+        </p>
+    </li><li class="listitem">
+        <p>
+            <code class="filename">docbook-xsl-1.76.1</code> is a copy of the DocBook XSL stylesheets.
+        </p>
+    </li><li class="listitem">
+        <p>
+            <code class="filename">images</code> is a subdirectory containing all the artwork for the book.
+        </p>
+    </li><li class="listitem">
+        <p>
+            <code class="filename">custom_fo.xsl</code> is my XSL customization layer.
+        </p>
+    </li></ul></div>
+
+<p>For each entry, the treenode knows the HID of the blob containing the
+    contents of that item.  In the case of a file, such as <code class="filename">custom_fo.xsl</code>, the
+    HID refers to the blob that contains the actual contents of the file.  In the case of a subdirectory like
+    <code class="filename">images</code>, the HID refers to another treenode.</p>
+
+<p>The blob a3656282d8c467f00b21d83317d2de0374af761c contains (one version
+    of) the DocBook
+    content of this book.</p>
+
+</div>
+
+<div class="section" title="DB Records"><div class="titlepage"><div><div><h3 class="title"><a name="idp3058720"></a>DB Records</h3></div></div></div>
+    
+
+    <p>So where’s the log message on this commit?  For that we have to look
+        in a different DAG.  Using the same technique as above, we find that
+        the leaf for the version control comments DAG is
+        053da8cbbd986b14dc06b3d8dab08be3388266ff.  Let’s dump that changeset
+    and see what it looks like.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:book2 eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vv dump_json 053da8cbbd986b14dc06b3d8dab08be3388266ff | expand -t 2</span>
+{
+  "dagnum" : "00000000102021c2",
+  "db" : 
+  {
+    "changes" : 
+    {
+      "9ff7c857361d30d6a51b9fcf9f5ddbff9940d4e1" : 
+      {
+        "add" : 
+        {
+          <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">"fb96b2c70dcca6a82e6b8ee222c26395cccf4d42"</span> : 0
+        }
+      }
+    }
+  },
+  "generation" : 91,
+  "parents" : 
+  [
+    "9ff7c857361d30d6a51b9fcf9f5ddbff9940d4e1"
+  ],
+  "ver" : 1
+}
+</pre>
+
+<p>This is a db<a class="indexterm" name="idp3079200"></a> changeset instead of a tree changeset.  It contains a
+    “db” section, which, again, contains one delta against each parent<a class="indexterm" name="idp3079856"></a>.  That delta indicates that one new record was added.  Let’s dump the blob for the new record and see what it looks like.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:book2 eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vv dump_json fb96b2c70dcca6a82e6b8ee222c26395cccf4d42 | expand -t 2</span>
+{
+  "csid" : "f10628e5792251dc886f600a6ae8610a38ac2204",
+  "text" : "committing my changes before I continue writing"<sup>[<a name="idp3080880" href="#ftn.idp3080880" class="footnote">50</a>]</sup>
+}
+</pre>
+
+<p>And there’s the db record for the comment.  Note that the csid field matches the
+    changeset ID from the version control DAG.</p>
+
+<p>What about the who and when?  Once again, we need to check another DAG,
+    the audit DAG for the version control DAG.  Its dagnum is 0000000010201011.
+    I grab its only leaf and dump the corresponding changeset record:</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:book2 eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vv dump_json 15bc2d16081d6ad6baeb4c790821d8aeee864d34 | expand -t 2</span>
+{
+  "dagnum" : "0000000010201011",
+  "db" : 
+  {
+    "changes" : 
+    {
+      "3a4b6f6222d5ae761ad375eb1c7aa8a5f9ba0390" : 
+      {
+        "add" : 
+        {
+          "<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">c52ff03833aeb8f180583ce2fc7ea7bbf7e392bf</span>" : 0
+        }
+      }
+    }
+  },
+  "generation" : 92,
+  "parents" : 
+  [
+    "3a4b6f6222d5ae761ad375eb1c7aa8a5f9ba0390"
+  ],
+  "ver" : 1
+}
+</pre>
+
+<p>Here is the new record:</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:book2 eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vv dump_json c52ff03833aeb8f180583ce2fc7ea7bbf7e392bf | expand -t 2</span>
+{
+  "csid" : "f10628e5792251dc886f600a6ae8610a38ac2204",
+  "timestamp" : "1304457549322",
+  "userid" : "gc580073ae5164a61bd92c3241bf3d9f457b0b01056db11e0995060fb42f09aca"
+}
+</pre>
+
+<p>The value for <code class="code">userid</code> isn’t very intuitive, is it?  That is actually the record ID for the user record, located over in a separate DAG.</p>
+
+<p>Here is a script to dump all user records:</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:~ eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">cat u.js</span>
+var repo = sg.open_repo("book2");
+var zs = new zingdb(repo, sg.dagnum.USERS);
+var recs = zs.query('user', ['*']);
+repo.close();
+print(sg.to_json__pretty_print(recs));
+</pre>
+
+<p>Running the script produces the following output:</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:~ eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vscript u.js | expand -t 2</span>
+[
+  {
+    "name" : "eric",
+    "prefix" : "X",
+    "recid" : "gc580073ae5164a61bd92c3241bf3d9f457b0b01056db11e0995060fb42f09aca"
+  }
+]
+</pre>
+
+<p>So at last you can see that it was me who did the commit shown above.</p>
+
+</div>
+
+<div class="section" title="Templates"><div class="titlepage"><div><div><h3 class="title"><a name="idp3074640"></a>Templates</h3></div></div></div>
+    
+
+    <p>Now let’s dive a bit deeper.  A db DAG contains a
+        “database”, or a set of records.  These records must follow a template.
+        That template is basically like a schema for the database.  It describes
+        one or more record types, specifying the fields for each record type.</p>
+
+    <p>Here is the template for the version control comments DAG:</p>
+
+<pre class="screen">{
+    "version" : 1,
+    "rectypes" :
+    {
+        "item" :
+        {
+            "fields" : 
+            {
+                "csid" :
+                {
+                    "datatype" : "string",
+                    "constraints" :
+                    {
+                        "required" : true,
+                        "index" : true
+                    }
+                },
+                "text" :
+                {
+                    "datatype" : "string",
+                    "constraints" :
+                    {
+                        "required" : true,
+                        "maxlength" : 16384,
+                        "full_text_search" : true
+                    }
+                }
+            }
+        }
+    }
+}
+</pre>
+
+<p>It is illegal to have a template where merge can fail.  The template
+above satisfies that rule because it has no record ID, which means that records cannot be modified and that unique constraints are not allowed.  This template is a rather simplistic example.</p>
+
+<p> Here’s a
+slightly more complicated example, the template for version control tags:</p>
+
+<pre class="screen">{
+    "version" : 1,
+    "rectypes" :
+    {
+        "item" :
+        {
+        "merge" :
+            {
+                "merge_type" : "field",
+                "auto" : 
+                [
+                    {
+                        "op" : "most_recent"
+                    }
+                ]
+            },
+            "fields" : 
+            {
+                "csid" :
+                {
+                    "datatype" : "string",
+                    "constraints" :
+                    {
+                        "required" : true,
+                        "index" : true
+                    }
+                },
+                "tag" :
+                {
+                    "datatype" : "string",
+                    "constraints" :
+                    {
+                        "required" : true,
+                        "index" : true,
+                        "unique" : true,
+                        "maxlength" : 256
+                    },
+                    "merge" :
+                    {
+                        <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">"uniqify"</span> : 
+                        {
+                            "op" : "append_userprefix_unique",
+                            "num_digits" : 2,
+                            "which" : "least_impact"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+</pre>
+
+<p>Like a comment, a tag has just two fields: The changeset ID to which it
+applies and a string.  But for a tag, that string is required to be unique, which introduces the possibility that the unique constraint could be violated on a merge.
+So Veracity requires us to provide a way to <em class="firstterm">uniqify</em><a class="indexterm" name="idp3101216"></a>, to resolve
+the violation of the unique constraint automatically as the merge is happening.</p>
+
+</div>
+
+<div class="section" title="Repository Storage"><div class="titlepage"><div><div><h3 class="title"><a name="idp3101936"></a>Repository Storage</h3></div></div></div>
+    
+
+<p>Now let’s look at how all this stuff is actually stored.</p>
+
+    <p>The repository API presents an abstraction of a repository instance.
+        Callers of the API remain unaware of certain details of exactly how
+        dagnodes and blobs are being stored.  These details are left to
+        the storage implementation, thus allowing different tradeoffs to be used for 
+        different situations.</p>
+
+    <p>In Veracity 1.0, the only shipping implementation of this repository API
+        is called FS3<a class="indexterm" name="idp3104352"></a>.  The
+        “FS” stands for “filesystem”, representing the fact that blobs are
+        simply stored in files (although not one blob per file).  The “3”
+        simply means that it is the third incarnation—FS1 and FS2 did not survive the development process.</p>
+
+    <p>FS3 stores repositories in the “closet”, which by default is a
+        directory in your home directory named <code class="filename">.sgcloset</code>.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:book2 eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">cd ~/.sgcloset/</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:.sgcloset eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">ls -l</span>
+total 496
+-rw-r--r--  1 eric  staff   60416 May  3 18:02 descriptors.jsondb
+drwxr-xr-x  4 eric  staff     136 May  3 18:02 repo
+-rw-r--r--  1 eric  staff  190464 Apr 24 19:35 settings.jsondb
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:.sgcloset eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">cd repo</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:repo eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">ls -l</span>
+total 0
+drwxr-xr-x  22 eric  staff  748 May  3 15:04 alpo_858b
+drwxr-xr-x  16 eric  staff  544 May  3 18:00 book2_d2a1
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:repo eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">cd book2_d2a1/</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:book2_d2a1 eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">ls -l</span>
+total 771928
+-rw-r--r--   1 eric  staff      20480 Mar 25 07:28 0000000010101042.dbndx
+-rw-r--r--   1 eric  staff      28672 Mar 25 07:28 0000000010102062.dbndx
+-rw-r--r--   1 eric  staff    3390464 May  3 16:19 0000000010201001.treendx
+-rw-r--r--   1 eric  staff      58368 May  3 16:19 0000000010201011.dbndx
+-rw-r--r--   1 eric  staff     118784 May  3 16:19 00000000102021c2.dbndx
+-rw-r--r--   1 eric  staff      19456 Mar 25 07:28 00000000102031c2.dbndx
+-rw-r--r--   1 eric  staff      21504 Mar 25 07:28 00000000102040c2.dbndx
+-rw-r--r--   1 eric  staff      75776 May  3 16:19 00000000102051c2.dbndx
+-rw-r--r--   1 eric  staff      18432 Mar 25 07:28 00000000102071c2.dbndx
+-rw-r--r--   1 eric  staff      99328 Mar 25 07:28 0000000010301002.dbndx
+-rw-r--r--   1 eric  staff      58368 Mar 25 07:28 0000000010302002.dbndx
+-rw-r--r--   1 eric  staff  390010297 May  3 16:19 <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">000001</span>
+drwxr-xr-x  62 eric  staff       2108 May  3 16:19 f
+-rw-r--r--   1 eric  staff    1283072 May  3 16:19 <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">fs3.sqlite3</span>
+</pre>
+
+<p>These files are my book repository.  Actually, two of them matter more
+    than the others.</p>
+
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+<p>All the blobs are stored in the file called <code class="filename">000001</code>.  FS3 stores
+    blobs by appending them to this file.  When the file gets to be a gigabyte,
+    it starts a new file called <code class="filename">000002</code>.</p>
+
+    <p>Reflecting a strong bias toward reliability, the FS3 data file is
+append-only.  Once a blob has been appended, it is never altered.
+    Furthermore, Veracity’s repository API has no way to remove a blob or a dagnode.</p>
+
+    </li><li class="listitem">
+    <p>The other important file is <code class="filename">fs3.sqlite3</code>.  As its
+        name suggests, this is a SQLite<sup>[<a name="idp3121488" href="#ftn.idp3121488" class="footnote">51</a>]</sup> database.  It contains two
+        things:</p>
+
+    <div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem">
+            <p>
+                The list of blobs, and for each blob, the offset/length of where to find it in the data file.
+            </p>
+        </li><li class="listitem">
+            <p>
+                The list of dagnodes.
+            </p>
+        </li></ul></div>
+
+    </li></ul></div>
+
+    <p>All of the other files in the repository directory are somewhat secondary.</p>
+
+    <p>Most of them are repository indexes, with file names ending in <code class="filename">ndx</code>.  We can think of these in the same way that we think about indexes in a SQL database.  They do not contain actual data;  they exist simply to make
+        certain operations faster.
+        It is possible to delete 
+        all the repository indexes and reconstruct them using nothing more than the data
+        file(s) and the <code class="filename">fs3.sqlite3</code> file.</p>
+
+    <p>Note that in some situations it is legal
+        for a Veracity repository instance to have no indexes at all.  This capability
+        is helpful for setting up a very scalable central server.</p>
+
+    <p>For Veracity 1.0, repository indexes are not transferred by clone<a class="indexterm" name="idp3127712"></a>,
+        push<a class="indexterm" name="idp3128400"></a>, or pull<a class="indexterm" name="idp3128992"></a>.  Each repository
+        instance is responsible for maintaining its own indexes.</p>
+
+</div>
+
+<div class="section" title="Blob Encodings"><div class="titlepage"><div><div><h3 class="title"><a name="idp3102192"></a>Blob Encodings</h3></div></div></div>
+    
+
+    <p>The Veracity repository API allows a blob to be stored in one of three “encodings”.</p>
+
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+            <p>
+                full — the exact bytes of the blob are all stored
+            </p>
+        </li><li class="listitem">
+            <p>
+                zlib — the blob is stored compressed
+            </p>
+        </li><li class="listitem">
+            <p>
+                vcdiff — the blob is stored as a vcdiff<a class="indexterm" name="idp3133520"></a> delta relative to another blob
+            </p>
+        </li></ul></div>
+
+    <p>For performance, FS3 stores all incoming new blobs in the zlib encoding.
+    </p>
+
+    <p>Once the blob is stored in a given repository instance,
+        its encoding cannot be changed.  But its encoding <span class="bold"><strong>can</strong></span> be altered
+        in the course of a clone operation.  While the clone command copies the blob
+        from one instance of the repository to another, it can re-encode the
+        blob as it passes through.  For example, the following Veracity command
+produces a deltified copy of a repository by using the --pack option with the clone command.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">~ harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed"><span class="screen_emphasis">vv clone</span> <span class="screen_emphasis">--pack</span> lottery lottery_deltified</span>
+</pre>
+
+    <p>And that reminds me that I should say a word or two about Veracity’s
+        implementation of the communication between repository instances.</p>
+
+<p>Similar to the repository API, another API is used to hide the details for
+clone, push, and pull.  Veracity currently includes two implementations of this
+API, one for local operations and one which works over HTTP.
+</p>
+
+<p>By default, clone, push, and pull always transfer blobs without changing
+the encoding.  This means that if a blob is in deltified (vcdiff) form, it will be
+transferred over the network in that form, thus saving network traffic.</p>
+
+</div>
+
+<div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a id="ftn.idp3004128" href="#idp3004128" class="para">49</a>] </sup>Git allows the DAG to have multiple root nodes.  Veracity does not.</p></div><div class="footnote"><p><sup>[<a id="ftn.idp3080880" href="#idp3080880" class="para">50</a>] </sup>This brief, content-free log message was not a shining example of best practices.</p></div><div class="footnote"><p><sup>[<a id="ftn.idp3121488" href="#idp3121488" class="para">51</a>] </sup><a xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" href="http://www.sqlite.org/">http://www.sqlite.org/</a></p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="repository_structure.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="internals.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="best_practices.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Mercurial: Repository Structure </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Chapter 13. Best Practices</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

@@ -1,0 +1,581 @@
+---
+esbma_id: unknown
+title: An F# newbie using SQLite
+date: 2014-09-08 12:00:00
+---
+
+<p>Like I said in a tweet on Friday, I'm guessing everybody's first 10,000
+lines of F# are crap.  That's a lot of bad code I need to write, so I figure
+maybe I better get started.</p>
+
+<p>This blog entry is a journal of my first attempts at using F# to do some
+SQLite stuff.  I'm using <a
+href="https://github.com/ericsink/SQLitePCL.raw">SQLitePCL.raw</a>, which is a Portable Class Library wrapper (written in C#) allowing .NET developers to call the native SQLite library.
+</p>
+
+<p>My program has five "stanzas":</p>
+
+<ul>
+
+<li>
+<p>ONE: Open a SQLite database and create a table with two integer columns called a and b.</p>
+</li>
+
+<li>
+<p>TWO: Insert 16 rows with a going from 1 through 16.</p>
+</li>
+
+<li>
+<p>THREE: Set column b equal to a squared, and lookup the value of b for a=7.</p>
+</li>
+
+<li>
+<p>FOUR: Loop over all the rows where b&lt;120 and sum the a values.</p>
+</li>
+
+<li>
+<p>FIVE: Close the database and print the two results.</p>
+</li>
+
+</ul>
+
+<p>I've got three implementations of this program to show you -- one in C# and two in F#.</p>
+
+<h2>C#</h2>
+
+<p>Here's the C# version I started with:</p>
+
+<pre class="screen">
+using System;
+using System.IO;
+
+using SQLitePCL;
+
+public class foo
+{
+    // helper functions to check SQLite result codes and throw
+
+    private static bool is_error(int rc)
+    {
+        return (
+                (rc != raw.SQLITE_OK)
+                &amp;&amp; (rc != raw.SQLITE_ROW)
+                &amp;&amp; (rc != raw.SQLITE_DONE)
+           );
+    }
+
+    private static void check(int rc)
+    {
+        if (is_error(rc))
+        {
+            throw new Exception(string.Format("{0}", rc));
+        }
+    }
+
+    private static void check(sqlite3 conn, int rc)
+    {
+        if (is_error(rc))
+        {
+            throw new Exception(raw.sqlite3_errmsg(conn));
+        }
+    }
+
+    private static int checkthru(sqlite3 conn, int rc)
+    {
+        if (is_error(rc))
+        {
+            throw new Exception(raw.sqlite3_errmsg(conn));
+        }
+        else
+        {
+            return rc;
+        }
+    }
+
+    // MAIN program
+
+    public static void Main()
+    {
+        sqlite3 conn = null;
+
+        // ONE: open the db and create the table
+
+        check(raw.sqlite3_open(":memory:", out conn));
+
+        check(conn, raw.sqlite3_exec(conn, "CREATE TABLE foo (a int, b int)"));
+
+        // TWO: insert 16 rows
+
+        for (int i=1; i&lt;=16; i++)
+        {
+            string sql = string.Format("INSERT INTO foo (a) VALUES ({0})", i);
+            check(conn, raw.sqlite3_exec(conn, sql));
+        }
+
+        // THREE: set b = a squared and find b for a=7
+
+        check(conn, raw.sqlite3_exec(conn, "UPDATE foo SET b = a * a"));
+
+        sqlite3_stmt stmt = null;
+        check(conn, raw.sqlite3_prepare_v2(conn, "SELECT b FROM foo WHERE a=?", out stmt));
+
+        check(conn, raw.sqlite3_bind_int(stmt, 1, 7));
+        check(conn, raw.sqlite3_step(stmt));
+        int vsq = raw.sqlite3_column_int(stmt, 0);
+        check(conn, raw.sqlite3_finalize(stmt));
+        stmt = null;
+
+        // FOUR: fetch sum(a) for all rows where b &lt; 120
+
+        check(conn, raw.sqlite3_prepare_v2(conn, "SELECT a FROM foo WHERE b&lt;120", out stmt));
+
+        int vsum = 0;
+
+        while (raw.SQLITE_ROW == (checkthru(conn, raw.sqlite3_step(stmt))))
+        {
+            vsum += raw.sqlite3_column_int(stmt, 0);
+        }
+        
+        check(conn, raw.sqlite3_finalize(stmt));
+        stmt = null;
+
+        // FIVE: close and print the results
+
+        check(raw.sqlite3_close(conn));
+        conn = null;
+
+        Console.WriteLine("val: {0}", vsq);
+        Console.WriteLine("sum: {0}", vsum);
+    }
+}
+</pre>
+
+<p>Notes:</p>
+
+<ul>
+
+<li>
+<p>I'm coding against the 'raw' SQLite API, which returns integer error codes
+rather than throwing exceptions.  So I've written some little check functions
+which throw on any result code that signifies an error condition.</p>
+</li>
+
+<li>
+<p>In the first stanza, I'm opening ":memory:" rather than an actual file on
+disk so that I can be sure the db starts clean.</p>
+</li>
+
+<li>
+<p>In the second stanza, I'm constructing the SQL string rather than using
+parameter substitution.  This is a bad idea for two reasons.  First, parameter
+substitution eliminates SQL injection attacks.  Second, forcing SQLite to
+compile a SQL statement inside a loop is going to cause poor performance.</p>
+</li>
+
+<li>
+<p>In the third stanza, I'm going out of my way to do this more properly, using
+prepare/bind/step/finalize.  Ironically, this is the case where it doesn't
+matter as much, since I'm not looping.</p>
+</li>
+
+<li>
+<p>In the fourth stanza, I specifically want to loop over the rows in C#
+even though I could easily just do the sum in SQL.</p>
+</li>
+
+</ul>
+
+<h2>F#, first attempt</h2>
+
+<p>OK, now here's a painfully direct translation of this code to F#:</p>
+
+<pre class="screen">
+open SQLitePCL
+
+// helper functions to check SQLite result codes and throw
+
+let is_error rc = 
+    (rc &lt;&gt; raw.SQLITE_OK) 
+    &amp;&amp; (rc &lt;&gt; raw.SQLITE_ROW) 
+    &amp;&amp; (rc &lt;&gt; raw.SQLITE_DONE)
+
+let check1 rc = 
+    if (is_error rc) 
+    then failwith (sprintf "%d" rc) 
+    else ()
+
+let check2 conn rc = 
+    if (is_error rc) 
+    then failwith (raw.sqlite3_errmsg(conn)) 
+    else ()
+
+let checkthru conn rc = 
+    if (is_error rc) 
+    then failwith (raw.sqlite3_errmsg(conn)) 
+    else rc
+
+// MAIN program
+
+// ONE: open the db and create the table
+
+let (rc,conn) = raw.sqlite3_open(":memory:") 
+check1 rc
+
+check2 conn (raw.sqlite3_exec (conn, "CREATE TABLE foo (a int, b int)"))
+
+// TWO: insert 16 rows
+
+for i = 1 to 16 do 
+    let sql = (sprintf "INSERT INTO foo (a) VALUES (%d)" i)
+    check2 conn (raw.sqlite3_exec (conn, sql ))
+
+// THREE: set b = a squared and find b for a=7
+
+check2 conn (raw.sqlite3_exec (conn, "UPDATE foo SET b = a * a"))
+
+let rc2,stmt = raw.sqlite3_prepare_v2(conn, "SELECT b FROM foo WHERE a=?")
+check2 conn rc2
+
+check2 conn (raw.sqlite3_bind_int(stmt, 1, 7))
+check2 conn (raw.sqlite3_step(stmt))
+let vsq = raw.sqlite3_column_int(stmt, 0)
+check2 conn (raw.sqlite3_finalize(stmt))
+
+// FOUR: fetch sum(a) for all rows where b &lt; 120
+
+let rc3,stmt2 = raw.sqlite3_prepare_v2(conn, "SELECT a FROM foo WHERE b&lt;120")
+check2 conn rc3
+
+let mutable vsum = 0
+
+while raw.SQLITE_ROW = ( checkthru conn (raw.sqlite3_step(stmt2)) ) do 
+    vsum &lt;- vsum + (raw.sqlite3_column_int(stmt2, 0))
+
+check2 conn (raw.sqlite3_finalize(stmt2))
+
+// FIVE: close and print the results
+
+check1 (raw.sqlite3_close(conn))
+
+printfn "val: %d" vsq
+printfn "sum: %d" vsum
+</pre>
+
+<p>Notes:</p>
+
+<ul>
+
+<li>
+<p>The is_error function actually looks kind of elegant to me in this form.  Note
+that != is spelled &lt;&gt;.  Also there is no return keyword, as the value of
+the last expression just becomes the return value of the function.</p>
+</li>
+
+<li>
+<p>The F# way is to use type inference.  For example, in the is_error function, the rc parameter is strongly typed as an integer even though I haven't declared it that way.  The F# compiler looks at the function and sees that I am comparing the parameter against raw.SQLITE_OK, which is an integer, therefore rc must be an integer as well.  F# does have a syntax for declaring the type explicitly, but this is considered bad practice.</p>
+</li>
+
+<li>
+<p>The check2 and checkthru functions are identical except that one returns the
+unit type (which is kind of like void) and
+the other passes the integer argument through.  In C# this wouldn't matter and
+I could have just had the check functions return their argument when they don't
+throw.  But F# gives warnings ("This expression should have type 'unit', but has type...") for any expression whose values is not used.
+</p>
+</li>
+
+<li>
+<p>In C#, I overloaded check() so that I could sometimes call it with the sqlite3 connection handle and sometimes without.  F# doesn't do function overloading, so I did two versions of the function called check1 and check2.</p>
+</li>
+
+<li>
+<p>Since raw.sqlite3_open() has an out parameter, F# automatically converts
+this to return a tuple with two items (the actual return value is first, and
+the value in the out parameter is second).  It took me a little while to figure
+out the right syntax to get the two parts into separate variables.</p>
+</li>
+
+<li>
+<p>It took me even longer to figure out that calling a .NET method in F# uses a
+different syntax than calling a regular F# function.  I was just getting used to
+the idea that F# wants functions to be called without parens and with the
+parameters separated by spaces instead of commas.  But .NET methods are not F#
+functions.  The syntax
+for calling a .NET method is, well, just like in C#.  Parens and commas.</p> 
+</li>
+
+<li>
+<p>Here's another way that method calls are different in F#:  When a method call is a
+parameter to a regular F# function, you have to enclose it in parens.  That's
+why the call to sqlite3_exec() in the first stanza is parenthesized when I pass
+it to check2.</p>
+</li>
+
+<li>
+<p>BTW, one of the first things I did was try to call raw.sqlite3_Open(), just
+to verify that F# is case-sensitive.  It is.</p>
+</li>
+
+<li>
+<p>F# programmers seem to pride themselves on how much they can do in a single line of code, regardless of how long it is.
+I originally wrote the second stanza in a single
+line.  I only split it up so it would look better here in my blog article.</p>
+</li>
+
+<li>
+<p>In the third stanza, F# wouldn't let me reuse rc ("Duplicate definition of
+value 'rc'") so I had to introduce rc2.</p>
+</li>
+
+<li>
+<p>In the fourth stanza, I have tried to exactly mimic the behavior of the C#
+code, and I think I've succeeded so thoroughly that any real F# programmer will
+be tempted to gouge their eyes out when they see it.  I've used mutable and
+while/do, both of which are considered a very un-functional way of doing
+things.</p>
+</li>
+
+<li>
+<p>Bottom line:  This code works and it does exactly what the original C# does.
+But I named the file fsharp_dreadful.fs because I think that in terms of what is
+considered best practices in the F# world, it's probably about as
+bad as it can be while still being correct.</p>
+</li>
+
+</ul>
+
+<h2>F#, somewhat less csharpy</h2>
+
+<p>Here's an F# version I called fsharp_less_bad.fs.  It's still not very good,
+but I've made an attempt to do some things in a more F#-ish way.</p>
+
+<pre class="screen">
+open SQLitePCL
+
+// helper functions to check SQLite result codes and throw
+
+let is_error rc = 
+    match rc with
+    | raw.SQLITE_OK -&gt; false
+    | raw.SQLITE_ROW -&gt; false
+    | raw.SQLITE_DONE -&gt; false
+    | _ -&gt; true
+
+let check1 rc = 
+    if (is_error rc) 
+    then failwith (sprintf "%d" rc) 
+    else ()
+
+let check2 conn rc = 
+    if (is_error rc) 
+    then failwith (raw.sqlite3_errmsg(conn)) 
+    else rc
+
+let checkpair1 pair =
+    let rc,result = pair
+    check1 rc |&gt; ignore
+    result
+
+let checkpair2 conn pair =
+    let rc,result = pair
+    check2 conn rc |&gt; ignore
+    result
+
+// helper functions to wrap method calls in F# functions
+
+let sqlite3_open name = checkpair1 (raw.sqlite3_open(name))
+let sqlite3_exec conn sql = check2 conn (raw.sqlite3_exec (conn, sql)) |&gt; ignore
+let sqlite3_prepare_v2 conn sql = checkpair2 conn (raw.sqlite3_prepare_v2(conn, sql))
+let sqlite3_bind_int conn stmt ndx v = check2 conn (raw.sqlite3_bind_int(stmt, ndx, v)) |&gt; ignore
+let sqlite3_step conn stmt = check2 conn (raw.sqlite3_step(stmt)) |&gt; ignore
+let sqlite3_finalize conn stmt = check2 conn (raw.sqlite3_finalize(stmt)) |&gt; ignore
+let sqlite3_close conn = check1 (raw.sqlite3_close(conn))
+let sqlite3_column_int stmt ndx = raw.sqlite3_column_int(stmt, ndx)
+
+// MAIN program
+
+// ONE: open the db and create the table
+
+let conn = sqlite3_open(":memory:")
+
+// use partial application to create an exec function that already 
+// has the conn parameter baked in
+
+let exec = sqlite3_exec conn
+
+exec "CREATE TABLE foo (a int, b int)"
+
+// TWO: insert 16 rows
+
+let ins x = 
+    exec (sprintf "INSERT INTO foo (a) VALUES (%d)" x)
+
+[1 .. 16] |&gt; List.iter ins
+
+// THREE: set b = a squared and find b for a=7
+
+exec "UPDATE foo SET b = a * a"
+
+let stmt = sqlite3_prepare_v2 conn "SELECT b FROM foo WHERE a=?"
+sqlite3_bind_int conn stmt 1 7
+sqlite3_step conn stmt
+let vsq = sqlite3_column_int stmt 0
+sqlite3_finalize conn stmt
+
+// FOUR: fetch sum(a) for all rows where b &lt; 120
+
+let stmt2 = sqlite3_prepare_v2 conn "SELECT a FROM foo WHERE b&lt;120"
+
+let vsum = List.sum [ while 
+    raw.SQLITE_ROW = ( check2 conn (raw.sqlite3_step(stmt2)) ) do 
+        yield sqlite3_column_int stmt2 0 
+    ]
+
+sqlite3_finalize conn stmt2
+
+// FIVE: close and print the results
+
+sqlite3_close conn
+
+printfn "val: %d" vsq
+printfn "sum: %d" vsum
+</pre>
+
+<p>Notes:</p>
+
+<ul>
+
+<li>
+<p>I changed is_error to use pattern matching.  For this very simple situation,
+I'm not sure this is an improvement over the simple boolean expression I had
+before.</p>
+</li>
+
+<li>
+<p>I get the impression that typical doctrine in functional programming church is to not use
+exceptions, but I'm not tackling that problem here.</p>
+</li>
+
+<li>
+<p>I got rid of checkthru and just made check2 return its rc paraemter when it doesn't
+throw.  This means most of the times I call check2 I have to ignore the result
+or else I get a warning.</p>
+</li>
+
+<li>
+<p>I added a couple of checkpair functions.  These are designed to take a
+tuple, such as the one that comes from a .NET method with an out parameter, like sqlite3_open() or sqlite3_prepare_v2().
+The checkpair function does the appropriate check function on the first part of
+the tuple (the integer return code) and then returns the second part.  The
+sort-of clever thing here is that checkpair does not care what type the second
+part of the tuple is.  I get the impression that this sort of "things are
+generic by default" philosophy is a pillar of functuonal programming.</p>
+</li>
+
+<li>
+<p>I added several functions which wrap raw.sqlite3_whatever() as a more F#-like function that looks less cluttered.
+</p>
+</li>
+
+<li>
+<p>In the first stanza, after I get the connection open, I define an exec function
+using the F# partial application feature.  The exec function is basically just
+the sqlite3_exec function except that the conn parameter has already been
+baked in.  This allows me to use very readable syntax like <tt>exec "whatever"</tt>.  I considered doing this for all the functions, but I'm
+not really sure this design is a good idea.  I just found this hammer called "partial
+application" so I was looking for a nail.</p>
+</li>
+
+<li>
+<p>In the second stanza, I've eliminated the for loop in favor of a list
+operation.  I defined a function called ins which inserts one row.  The [1 .. 16] syntax produces a range, which is piped into List.iter.</p>
+</li>
+
+<li>
+<p>The third stanza looks a lot cleaner with all the .NET method calls hidden
+away.</p>
+</li>
+
+<li>
+<p>In the fourth stanza, I still have a while loop, but I was able to get rid
+of mutable.  The syntax I'm using here is (I think) something called a computation
+expression.  Basically, the stuff inside the square brackets is constructing a
+list with a while loop.  Then List.sum is called on that list, resulting in the
+number I want.
+</li>
+
+</ul>
+
+<h2>Other notes</h2>
+
+<p>I did all this using the command-line F# tools and Mono on a Mac.
+I've got a command called fsharpc on my system.
+I'm not sure how it got there, but it probably happened when I installed Xamarin.</p>
+
+<p>Since I'm not using msbuild or NuGet, I just harvested SQLitePCL.raw.dll from the SQLitePCL.raw NuGet
+package.  The net45 version is compatible with Mono,
+and on a Mac, it will simply P/Invoke from the
+SQLite library that comes preinstalled with MacOS X.</p>
+
+<p>So the bash commands to setup my environment for this blog entry looked
+something like this:</p>
+
+<pre class="screen">
+mkdir fs_sqlite
+cd fs_sqlite
+mkdir unzipped
+cd unzipped
+unzip ~/Downloads/sqlitepcl.raw_needy.0.5.0.nupkg 
+cd ..
+cp unzipped/lib/net45/SQLitePCL.raw.dll .
+</pre>
+
+<p>Here are the build commands I used:</p>
+
+<pre class="screen">
+fs_sqlite eric$ gmcs -r:SQLitePCL.raw.dll -sdk:4.5 csharp.cs
+
+fs_sqlite eric$ fsharpc -r:SQLitePCL.raw.dll fsharp_dreadful.fs
+F# Compiler for F# 3.1 (Open Source Edition)
+Freely distributed under the Apache 2.0 Open Source License
+
+fs_sqlite eric$ fsharpc -r:SQLitePCL.raw.dll fsharp_less_bad.fs
+F# Compiler for F# 3.1 (Open Source Edition)
+Freely distributed under the Apache 2.0 Open Source License
+
+fs_sqlite eric$ ls -l *.exe
+-rwxr-xr-x  1 eric  staff   4608 Sep  8 15:30 csharp.exe
+-rwxr-xr-x  1 eric  staff   8192 Sep  8 15:30 fsharp_dreadful.exe
+-rwxr-xr-x  1 eric  staff  11776 Sep  8 15:31 fsharp_less_bad.exe
+
+fs_sqlite eric$ mono csharp.exe
+val: 49
+sum: 55
+
+fs_sqlite eric$ mono fsharp_dreadful.exe 
+val: 49
+sum: 55
+
+fs_sqlite eric$ mono fsharp_less_bad.exe 
+val: 49
+sum: 55
+</pre>
+
+<p>BTW, I noticed that compiling F# (fsharpc) is a LOT slower than compiling C#
+(gmcs).</p>
+
+<p>Note that the command-line flag to reference (-r:) an assembly is the same
+for F# as it is for C#.</p>
+
+<p>Note that fsharp_dreadful.exe is bigger than csharp.exe, and the
+"less_bad" exe is even bigger.  I suspect that generalizing these
+observations would be extrapolating from too little data.</p>
+
+<p>C# fans may notice that I [attempted to] put more effort into the F# code.
+This was intentional.  Making the C# version beautiful was not the point of
+this blog entry.</p>
+
+<p>So far, my favorite site for learning F# has been <a href="http://fsharpforfunandprofit.com/">http://fsharpforfunandprofit.com/</a></p>
+
+<p>&nbsp;</p>
+

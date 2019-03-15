@@ -1,0 +1,284 @@
+---
+esbma_id: unknown
+title: Xamarin.Forms with Zumero
+date: 2014-08-20 09:00:00
+---
+
+<p>I am a Xamarin fanboy, so my excitement about Xamarin.Forms is perhaps unsurprising.
+But I see an awful lot of potential for this technology.  I want to show you some of
+the stuff we've been doing with Xamarin.Forms here at Zumero.</p>
+
+<h2>Andrew Jackson in Two Minutes</h2>
+
+<p>First I am going to race through this demo very quickly.  Then I'll circle back around
+and explain things.</p>
+
+<h3>STEP ONE:  Download ZAG and run it</h3>
+
+<p>Visit <a
+    href="http://zumero.com/dev-center/zss/#zag">http://zumero.com/dev-center/zss/#zag</a>
+and download the ZAG application.  For this demo, I'm using ZAG on Mac OS X
+(but you could choose Windows or Linux) and I am targetting iOS (but you could
+choose Android or Windows Phone).</p>
+
+<p align="center"><img src="xfzag_download.png"/></p>
+
+<p>When you run the app, you should see something like this:</p>
+
+<p align="center"><img src="xfzag_start.png"/></p>
+
+<h3>STEP TWO:  New Database</h3>
+
+<p>Under the "File" menu, choose "New Database...".
+You should see this dialog:</p>
+
+<p align="center"><img src="xfzag_new.png"/></p>
+
+<p>Fill in the Server URL and DBFile exactly as shown in the screen shot (Server URL: "http://demo.zumero.com:8080".  DBFile: "demo").  Click the OK button.
+You should see a dialog asking you where to save the local copy of the database:</p>
+
+<p align="center"><img src="xfzag_save.png"/></p>
+
+<p>Click OK.  You should see "Syncing with the ZSS Server":</p>
+
+<p align="center"><img src="xfzag_sync.png"/></p>
+
+<p>And when the sync is complete, at the bottom of the ZAG window, you should see "Sync result: 0 (success)".</p>
+
+<!-- <p align="center"><img src="xfzag_result.png"/></p> -->
+
+<h3>STEP THREE:  Generate</h3>
+
+<p>Under the "Generate" menu, find and choose the item labeled "Xamarin.Forms C#":</p>
+
+<p align="center"><img src="xfzag_xfcs.png"/></p>
+
+<p>You will be asked three questions, and you should be able to just click OK on all
+three.</p>
+
+<h3>STEP FOUR:  Open the sln file</h3>
+
+<p>You can quit the ZAG application now.  It should have generated a folder somewhere like
+<tt>/Users/eric/Documents/demo.zssdemo/</tt>.  Under that folder you should find a
+Xamarin solution tree that looks something like this:<p>
+
+<p align="center"><img src="xfzag_finder.png"/></p>
+
+<p>Double-click the demo.sln file to open it in Xamarin Studio.  You should see
+four C# projects: a Portable Class Library called "demo.Shared", plus one app
+target each for iOS, Android, and Windows Phone 8:</p>
+
+<p align="center"><img src="xfzag_sln.png"/></p>
+
+<h3>STEP FIVE:  Build and run the app</h3>
+
+<p>If you build and run the demo.iOS app in the iPhone simulator, you should
+see something like this:</p>
+
+<p align="center"><img src="xfzag_welcome.png"/></p>
+
+<h3>STEP SIX:  Sync</h3>
+
+<p>Click the "Sync" button in the upper right.  You should see:</p>
+
+<p align="center"><img src="xfzag_appsync.png"/></p>
+
+<p>The defaults should be fine.  Just tap the "Sync Now" button.  When the
+sync is completed, you should see a list of tables:</p>
+
+<p align="center"><img src="xfzag_tables.png"/></p>
+
+<h3>STEP SEVEN:  Andrew Jackson</h3>
+
+<p>Tap the "presidents" table.  In an iPad instance of the simulator, you would see this:</p>
+
+<p align="center"><img src="xfzag_presidents.png"/></p>
+
+<p>And tap the seventh item.  You should see Andrew Jackson, the only U.S.
+president ever to kill someone in a duel:</p>
+
+<p align="center"><img src="xfzag_aj.png"/></p>
+
+<h2>What is ZAG?</h2>
+
+<p>ZAG is short for "ZSS App Generator".  It's a desktop app
+which generates ready-to-build source code and build scripts
+for mobile apps that sync using ZSS.</p>
+
+<p>We think of ZAG as a way for getting people started faster.
+Many people come to our product without much experience in
+mobile app development.  ZAG can be used to give them
+a starting point, sort of like sample code that is customized
+for their data.</p>
+
+<h2>What is Zumero for SQL Server?</h2>
+
+<p>Zumero for SQL Server (ZSS) is a solution for
+data sync between SQL Server and mobile devices.</p>
+
+<p>More info from Dan Bricklin about offline in mobile apps: <a href="http://bricklin.com/offline.htm">http://bricklin.com/offline.htm</a></p>
+
+<p>More info about Zumero on our website: <a href="http://zumero.com">zumero.com</a></p>
+
+<p>More info about Zumero from my previous blog entry: <a href="zss1.html">here</a></p>
+
+<h2>What is demo.zumero.com:8080?</h2>
+
+<p>This is a publicly accessible ZSS server provided so that
+folks can play with Zumero clients more easily.  It contains
+some basic sample data such as U.S. presidents and the
+periodic table of the elements.</p>
+
+<p>In real-world scenarios, a customer would use ZAG to generate
+their starter app after they have completed setup of their ZSS
+server.</p>
+
+<h2>What is Xamarin?</h2>
+
+<p>Xamarin is (IMHO) a <b>great</b> solution for building mobile apps.</p>
+
+<p>One of the main benefits of the Xamarin platform is the ability to
+write the non-UI parts of your iOS/Android/WP8 apps in cross-platform 
+code while implementing a native user interface for each mobile environment.</p>
+
+<p>But I would use Xamarin even for a single-platform app, simply to get
+the benefits of working in .NET/C#.</p>
+
+<p>More info on the Xamarin website: <a href="http://xamarin.com/">http://xamarin.com/</a></p>
+
+<h2>What is Xamarin.Forms?</h2>
+
+<p>Xamarin.Forms is Xamarin's solution for making [most of] your
+UI code cross-platform as well, while retaining fully native
+performance and feel.</p>
+
+<p>In a nutshell, the coolness of Xamarin.Forms lies in the fact
+that in the solution generated by ZAG above, the demo.Shared project is a Portable Class Library
+even though it contains the entire user interface for the app.</p>
+
+<p>More info on the Xamarin website: <a href="http://xamarin.com/forms">http://xamarin.com/forms</a></p>
+
+<h2>What is a Portable Class Library (PCL)?</h2>
+
+<p>A PCL is a .NET class library that is annotated with information
+about which platforms it should support.  This metadata allows the
+tooling to enforce portability rules in both the development and the
+consumption of the library.</p>
+
+<p>More info on Scott Hanselman's blog: <a href="http://www.hanselman.com/blog/CrossPlatformPortableClassLibrariesWithNETAreHappening.aspx">http://www.hanselman.com/blog/CrossPlatformPortableClassLibrariesWithNETAreHappening.aspx</a></p>
+
+<p>More info on the Xamarin website: <a href="http://developer.xamarin.com/guides/cross-platform/application_fundamentals/pcl/introduction_to_portable_class_libraries/">http://developer.xamarin.com/guides/cross-platform/application_fundamentals/pcl/introduction_to_portable_class_libraries/</a></p>
+
+<h2>Why does ZAG generate separate projects for iOS, Android, and WinPhone?</h2>
+
+<p>Xamarin.Forms can make <b>most</b> of your UI code portable, but not all of it.
+The actual building of the mobile app is specific to each platform.  But
+if you look in the code for each of those platform-specific projects,
+you'll see that there isn't much there.</p>
+
+<h2>What dependencies does the ZAG-generated app have?</h2>
+
+<p>The following NuGet packages will need to be retrieved:</p>
+
+<ul>
+    <li><p>Xamarin.Forms</p></li>
+    <li><p>SQLite-net PCL</p></li>
+    <li><p>SQLitePCL.raw_basic</p></li>
+    <li><p>Zumero</p></li>
+</ul>
+
+<h2>What is the "SQLite-net PCL" NuGet package?</h2>
+
+<p>This is the Portable Class Library (PCL) version of SQLite-net,
+the popular lightweight SQLite ORM by Frank Krueger (@praeclarum).</p>
+
+<p>More info on GitHub: <a href="https://github.com/praeclarum/sqlite-net">https://github.com/praeclarum/sqlite-net</a></p>
+
+<p>More info on the NuGet website: <a href="https://www.nuget.org/packages/sqlite-net-pcl/">https://www.nuget.org/packages/sqlite-net-pcl/</a></p>
+
+<h2>What is the "SQLitePCL.raw_basic" NuGet package?</h2>
+
+<p>SQLitePCL.raw is my Portable Class Library for accessing
+SQLite from C#.</p>
+
+<p>More info on Github: <a href="https://github.com/ericsink/SQLitePCL.raw">https://github.com/ericsink/SQLitePCL.raw</a></p>
+
+<p>More info on the NuGet website: <a href="https://www.nuget.org/packages/SQLitePCL.raw_basic/">https://www.nuget.org/packages/SQLitePCL.raw_basic/</a></p>
+
+<h2>What is SQLite?</h2>
+
+<p>SQLite is the most popular SQLite database for mobile devices.</p>
+
+<p>More info on the SQLite website: <a href="http://sqlite.org/">sqlite.org</a></p>
+
+<h2>What is the "Zumero" NuGet package?</h2>
+
+<p>This is the Zumero Client SDK in the form of a Portable Class Library in a NuGet package.</p>
+
+<p>More info on the Zumero website: <a href="http://zumero.com/dev-center/zss/">http://zumero.com/dev-center/zss/</a></p>
+
+<p>More info on the NuGet website: <a href="https://www.nuget.org/packages/Zumero/">https://www.nuget.org/packages/Zumero/</a></p>
+
+<h2>What do Zumero's client-side SQLite files look like?</h2>
+
+<p>As much as possible, they look exactly like they looked in
+SQL Server.</p>
+
+<ul>
+    <li><p>Table and column names are the same.</p></li>
+    <li><p>All data values are the same (whenever possible).</p></li>
+    <li><p>Foreign keys in SQL Server are reconstructed as foreign keys in SQLite.</p></li>
+    <li><p>Since SQLite does not perform type checking, Zumero adds constraints to do so.</p></li>
+</ul>
+
+<p>And so on...</p>
+
+<h2>What's happening in step two?</h2>
+
+<p>ZAG is acting as a Zumero client and synchronizing the data on the server
+into a local SQLite file.  This file is used to obtain information about the
+tables and columns necessary to generate the mobile app.</p>
+
+<p>The same sync is happening in step six, except then it is the
+mobile app performing the sync instead of ZAG.</p>
+
+<h2>What were those three questions in step three?</h2>
+
+<p>The first one is the project name:</p>
+
+<p align="center"><img src="xfzag_name.png"/></p>
+
+<p>Then ZAG wants to know the settings for your sync server.  These should
+already be filled in with the ones you entered earlier:</p>
+
+<p align="center"><img src="xfzag_settings.png"/></p>
+
+<p>Finally, ZAG is asking you where to save the source code and project files
+for the app to be generated:</p>
+
+<p align="center"><img src="xfzag_dir.png"/></p>
+
+<h2>Does a ZAG-generated app allow modifications to the data?</h2>
+
+<p>For the Xamarin.Forms C# target, yes.  On the item detail page, 
+you should be able to enter new values in text fields and 'Save' the
+changes.</p>
+
+<p>But you should get a permission denied error if you try to sync
+those changes to our public demo server.  <tt><b>:-)</b></tt></p>
+
+<h2>Is ZAG generating UI stuff as XAML or as C# code?</h2>
+
+<p>Currently, it's XAML.  You'll find the files in the 'xaml' folder
+in the demo.Shared project.</p>
+
+<h2>Does ZAG generate polished ready-to-use apps?</h2>
+
+<p>Oh definitely not.  <tt><b>:-)</b></tt></p>
+
+<p>The output of ZAG should build and run with no
+errors (if it doesn't, it's a bug, and please let us know), but
+it's just a starting point for further development.</p>
+
+<p>&nbsp;</p>
+

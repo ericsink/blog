@@ -1,0 +1,60 @@
+---
+layout: default
+esbma_id: 1484
+title: Secret Feature: RSS Feeds from Vault
+date: 2003-10-13 14:44:59
+keywords: (cornsharp) (sourcegear)
+teaser: This feature is currently very unofficial. A few weeks ago  I wanted to dust off my compiler, and this feature is what happened. 
+---
+
+<p>I've got a secret I've been dying to share, and my weblog seems like a good 
+place to spill the beans:&nbsp; <a href="http://www.sourcegear.com/vault/">SourceGear Vault 1.2</a> can generate 
+RSS feeds.&nbsp;<img src="smiley.gif" /> </p>
+<p>Basically we provide an aspx page which generates an RSS feed containing 
+information about recent checkins.&nbsp; For a sample of how this works, try <a href="http://vaultpub.sourcegear.com/VaultService/VaultWeb/rss2.aspx?login=guest&amp;password=guest&amp;repository=Build_Tool_Integration&amp;days=60">this 
+feed</a>, which shows the last 60 days of checkins done by the folks who did the 
+integration of Vault with <a href="http://nant.sourceforge.net/">NAnt</a>.</p>
+<p>We consider these RSS feeds to be an <em>unofficial</em> feature.&nbsp; Until 
+this blog posting, we haven't really told anybody about it.&nbsp; One reason for 
+the secrecy is because this feature is currently somewhat user-hostile.&nbsp; If 
+you want to see RSS feeds from your Vault server, you need to construct a 
+special URL and manually place it in your aggregator.&nbsp; This blog posting is 
+the only documentation that exists.</p>
+<p>The URL for the sample feed above looks like this:</p>
+<p><font face="Courier New,Courier,monospace" size="2"><strong>http://vaultpub.sourcegear.com/VaultService/VaultWeb/rss2.aspx<br />
+?login=guest&amp;password=guest&amp;<br />
+repository=Build_Tool_Integration&amp;days=60</strong></font></p>
+<p>Things to notice:</p>
+<ul>
+  <li>vaultpub.sourcegear.com is simply a Vault server we host here at 
+  SourceGear for people working on things we want to host.<br /><br />
+</li>
+<li>The base URL for the RSS feature on your Vault server is 
+  /VaultService/VaultWeb/rss2.aspx<br /><br />
+</li>
+<li>Unfortunately, you have to provide your login and password right there as 
+  parameters in the URL.&nbsp; This isn't a big problem on VaultPub since we've 
+  got a guest account there, but if you use this for real stuff, keep the URL 
+  private.<br /><br />
+</li>
+<li>Vault servers can host multiple repositories.&nbsp; You need to specify 
+  which one you want to see.<br /><br />
+</li>
+<li>The <em>days</em> parameter is used to specify how many days of history 
+  information you want to retrieve.&nbsp; The default is just one day.&nbsp; 
+  I've specified 60 days here, but that's just for the purpose of 
+  illustration.
+</li>
+</ul>
+<p>There is one other important reason why we haven't hyped this feature:&nbsp; 
+We've done very little testing on it.&nbsp; It may work for you, or it may 
+not.&nbsp; For example, Vault's RSS feeds seem to work just fine in SharpReader 
+and NewsGator, but they've never been tested in any other aggregator.&nbsp; The 
+feed is apparently <a href="http://feedvalidator.org/">valid</a>, although in my 
+experience that doesn't guarantee interop.</p>
+<p>Like I said, this feature is currently very unofficial.&nbsp; A few weeks ago 
+I wanted to dust off my compiler, and this feature is what happened.&nbsp; If it 
+doesn't work for you, we'd like to hear any bug reports, but for now we're 
+setting low expectations.&nbsp; In other words, we would prefer that you be 
+pleasantly surprised&nbsp;if this feature does work rather than frustrated if it 
+does not.&nbsp;<img src="smiley.gif" /> </p>

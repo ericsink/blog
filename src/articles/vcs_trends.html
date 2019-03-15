@@ -1,0 +1,83 @@
+---
+layout: default
+esbma_id: 1775
+title: Obstacles to an enterprise DVCS
+date: 2010-01-29 13:00:00
+---
+<p>On 26 January 2010 I gave a presentation to <a
+href="http://softwaregr.org/">Software GR</a>.&nbsp; The talk was an overview of
+several trends that we have seen in the version control tools market over the
+last 40 years.&nbsp; I often like to follow a talk like this by publishing the same
+content here on my blog in the form of a complete article.&nbsp; This time I think
+I'll just eliminate a lot of the <a
+href="http://www.urbandictionary.com/define.php?term=tl%3Bdr">tldr</a> problem
+and summarize the highlights:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li  style='margin-bottom:6.0pt'>The two big trends in version
+     control today are Integration and Decentralization.</li>
+ <li  style='margin-bottom:6.0pt'>Integration is driven by ALM.&nbsp;
+     It is the desire to have all tools used by a development team fully
+     integrated together.</li>
+ <li  style='margin-bottom:6.0pt'>Decentralization is driven by
+     the recent wave of DVCS tools like Git and Mercurial.&nbsp; They offer
+     compelling benefits such as performance, a different kind of scalability,
+     and more flexible workflows.</li>
+ <li  style='margin-bottom:6.0pt'>The ALM trend is happening in
+     the enterprise market.&nbsp; Enterprises want everything integrated with
+     everything else, and they want everything to support their ability to
+     enforce process.</li>
+ <li  style='margin-bottom:6.0pt'>The DVCS trend is happening in
+     the open source community.&nbsp; Born of the legendary cat fight between
+     BitKeeper and the Linux kernel developers, Git and Mercurial are maturing
+     and gathering momentum at a remarkable rate.</li>
+ <li  style='margin-bottom:6.0pt'>These two trends are going to
+     clash in a big way.&nbsp; SourceGear's graphic designer drew me a nice diagram
+     to depict this.<br>
+     <img border=0 width=576 height=439 src="/scm/1775_image001.jpg"></li>
+ <li  style='margin-bottom:6.0pt'>The two trends cannot stay
+     separate.&nbsp; Each one has advantages which are too important for the other community
+     to ignore.</li>
+ <li  style='margin-bottom:6.0pt'>But the two trends and their
+     respective communities are a bit like oil and water.</li>
+ <li  style='margin-bottom:6.0pt'>Enterprises want tools that
+     constrain.&nbsp; The open source community wants tools that empower.</li>
+ <li  style='margin-bottom:6.0pt'>The benefits of a DVCS would
+     be diluted by integrating it with a bunch of other tools that are highly
+     centralized.</li>
+ <li  style='margin-bottom:6.0pt'>Enterprises need a least a
+     little centralization for things like user administration.&nbsp; In their eyes,
+     complete decentralization without accountability and auditing features is
+     a bug.</li>
+ <li  style='margin-bottom:6.0pt'>Even as enterprise attitudes
+     about open source are changing, that change is happening slowly, and the
+     GPL (used by both Git and Mercurial) is still considered the scariest
+     license.</li>
+ <li  style='margin-bottom:6.0pt'>So Git and Mercurial are not even
+     close to being enterprise-ready.&nbsp; Similarly, none of the leading
+     enterprise ALM tools are even close to being a DVCS.</li>
+ <li  style='margin-bottom:6.0pt'>I believe that the main enterprise
+     ALM providers (IBM/Rational, Microsoft, Serena and Borland) will all
+     attempt to add DVCS features to their products.&nbsp; At least two of these
+     companies (IBM/Rational, in a talk by Jean-Michel Lemieux at the Rational
+     Conference in 2009, and <a
+     href="http://blogs.msdn.com/bharry/archive/2010/01/27/codeplex-now-supports-mercurial.aspx">Microsoft</a>)
+     have already made public remarks about a desire to move in that direction.</li>
+ <li  style='margin-bottom:6.0pt'>And I predict that they will
+     all fail.&nbsp; It is impossible to turn any of these systems into a true DVCS
+     without a nearly complete rewrite.&nbsp; The D in DVCS is not a feature which
+     can be added.</li>
+ <li  style='margin-bottom:6.0pt'>But all of them will do it
+     anyway, by making compromises.&nbsp; They will try to add "just enough"
+     Decentralization.&nbsp; Some of their customers will find the results to be
+     sufficient.</li>
+ <li  style='margin-bottom:6.0pt'>Meanwhile, the true DVCS tools
+     will continue to move forward, but their progress toward credible ALM will
+     be slow.&nbsp; Enterprise-level integration is grunge work, not the kind of coding
+     that hackers do as a labor of love.&nbsp; Nobody does this stuff without
+     getting paid.</li>
+ <li  style='margin-bottom:6.0pt'>So these two trends will
+     continue to be distinct for a while, but the pressure and tension between
+     them will remain, and the areas of overlap are going to continue getting
+     messier.</li>
+</ul>

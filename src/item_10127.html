@@ -1,0 +1,42 @@
+---
+layout: default
+esbma_id: 1483
+date: 2004-07-23 14:44:59
+keywords: (cornsharp)
+---
+<p><span class="ArticleTitle">Crabby is as crabby does</span><br><span class="ArticleDate">10 Oct 2003</span></p>
+<P>As long as I'm being crabby today about email clients, let's talk about 
+Criminally Stupid Bugs.&nbsp; I'm not talking about basic programmer 
+errors.&nbsp; We all make mistakes.&nbsp; No, I'm talking about things for which 
+some programmer deserves to be tarred and feathered.&nbsp; Here are a couple of 
+examples:</P>
+<UL>
+  <LI>For the last several weeks, development builds of Vault have been 
+  beeping.&nbsp; Nobody knew why, but every so often the app would just emit a 
+  beep.&nbsp; It was driving people crazy.&nbsp; It turns out that we had a 
+  silly bug which occasionally caused the app to try and append an empty string 
+  into the user messages pane.&nbsp; This should be harmless, right?&nbsp; 
+  Nope.&nbsp; It turns out that in the .NET Framework,&nbsp;if you call 
+  AppendText() with an empty string on a&nbsp;RichTextBox, sometimes it 
+  beeps.&nbsp; Apparently somebody at Microsoft thought&nbsp;this would be 
+  cute.&nbsp; If I ever find out who it is, I'm going to invoice him for 
+  the&nbsp;cost of the&nbsp;psychiatrist&nbsp;we hired to help those employees 
+  here who went&nbsp;insane listening to that #^%!^% beep.<BR><BR>
+  <LI>One of the third-party tools we use in our automated build system has an 
+  unforgivably bad habit.&nbsp; It's a command-line tool which is being used in 
+  an entirely automated fashion.&nbsp; We even pass it a special flag which 
+  supposedly makes it "quiet".&nbsp; Nonetheless, every so often this tool pops 
+  up a dialog box to let us know that a new version of the tool is available at 
+  the vendor's website.&nbsp; This brings the entire automated build to a stop 
+  until we visit the build machine and click the cancel button.&nbsp; In other 
+  words, we can't do automated builds unless we're here at the office 
+  to&nbsp;babysit the build machine.&nbsp; I'm not going to name the vendor 
+  here, but&nbsp;I'd like to&nbsp;say a&nbsp;word to the CEO of that 
+  company:&nbsp; You know who you are.&nbsp; You need to find the programmer who 
+  thought this would be cute.&nbsp; Do not fire them over this, because then it 
+  would be more difficult for you to torture them on an ongoing basis.&nbsp; You 
+  need to keep this employee on your staff and make it a part of your corporate 
+  mission to continually find new ways of making him miserable for the remainder 
+  of his days.</LI></UL>
+<P>I'm sure I'll be less crabby after the weekend.&nbsp;<img src="smiley.gif"> 
+</P>

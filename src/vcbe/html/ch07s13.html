@@ -1,0 +1,153 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Merge (repeated, no conflicts)</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="mercurial_example.html" title="Chapter 7. Basics with Mercurial"><link rel="prev" href="ch07s12.html" title="Merge (no conflicts)"><link rel="next" href="ch07s14.html" title="Merge (conflicts)"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Merge (repeated, no conflicts)</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch07s12.html">Prev</a> </td><th width="60%" align="center">Chapter 7. Basics with Mercurial</th><td width="20%" align="right"> <a accesskey="n" href="ch07s14.html">Next</a></td></tr></table><hr></div><div class="section" title="Merge (repeated, no conflicts)"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp1496592"></a>Merge (repeated, no conflicts)</h2></div></div></div>
+    
+
+<p>Simultaneously, both Harry and Sally have a crisis of conscience and realize
+that their code has no comments at all.</p>
+
+<p>Harry:</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg diff</span>
+diff -r 922ff5acda79 src/pb.c
+--- a/src/pb.c  Tue May 17 14:31:41 2011 -0500
++++ b/src/pb.c  Tue May 17 14:39:21 2011 -0500
+@@ -47,6 +47,7 @@
+         return -1;
+     }
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // lottery ball numbers are always shown sorted</span>
+     qsort(white_balls, 5, sizeof(int), my_sort_func);
+ 
+     return 0;
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg commit -m comments</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg push</span>
+pushing to http://server.futilisoft.com:8000/
+searching for changes
+remote: adding changesets
+remote: adding manifests
+remote: adding file changes
+remote: added 1 changesets with 1 changes to 1 files
+</pre>
+
+<p>And Sally:</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg diff</span>
+diff -r 836e4df60a27 src/pb.c
+--- a/src/pb.c  Tue May 17 14:24:14 2011 -0500
++++ b/src/pb.c  Tue May 17 14:40:27 2011 -0500
+@@ -35,7 +35,7 @@
+ {
+     int balls[6];
+     int count_balls = 0;
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-    int favorite = 0;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    int favorite = 0;  // this should be a bool</span>
+ 
+     for (int i=1; i&lt;argc; i++)
+     {
+@@ -69,10 +69,13 @@
+         goto usage_error;
+     }
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // the power ball is always the last one given</span>
+     int power_ball = balls[5];
+ 
+     int result = calculate_result(balls, power_ball);
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // calculate result can return -1 if the ball numbers</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // are out of range</span>
+     if (result &lt; 0)
+     {
+         goto usage_error;
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg commit -m comments</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg push</span>
+pushing to http://server.futilisoft.com:8000/
+searching for changes
+remote: adding changesets
+remote: adding manifests
+remote: adding file changes
+remote: added 1 changesets with 1 changes to 1 files (+1 heads)
+</pre>
+
+<p>Harry decides to try again to merge the changes from Sally’s branch.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg heads</span>
+changeset:   21:76fcfc4170dc
+branch:      no_boys_allowed
+tag:         tip
+parent:      17:836e4df60a27
+user:        Sally &lt;sally@futilisoft.com&gt;
+date:        Tue May 17 14:44:56 2011 -0500
+summary:     comments
+
+changeset:   20:6ae39c9ee2e8
+user:        Harry &lt;harry@futilisoft.com&gt;
+date:        Tue May 17 14:45:04 2011 -0500
+summary:     comments
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg merge -r 21</span>
+merging src/pb.c
+0 files updated, 1 files merged, 0 files removed, 0 files unresolved
+(branch merge, don't forget to commit)
+</pre>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg diff</span>
+diff -r 6ae39c9ee2e8 src/pb.c
+--- a/src/pb.c  Tue May 17 14:45:04 2011 -0500
++++ b/src/pb.c  Tue May 17 14:47:52 2011 -0500
+@@ -57,7 +57,7 @@
+ {
+     int balls[6];
+     int count_balls = 0;
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-    int favorite = 0;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    int favorite = 0;  // this should be a bool</span>
+ 
+     for (int i=1; i&lt;argc; i++)
+     {
+@@ -91,10 +91,13 @@
+         goto usage_error;
+     }
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // the power ball is always the last one given</span>
+     int power_ball = balls[5];
+ 
+     int result = calculate_result(balls, power_ball);
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // calculate result can return -1 if the ball numbers</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // are out of range</span>
+     if (result &lt; 0)
+     {
+         goto usage_error;
+</pre>
+
+<p>No worries on the merge then.  Harry checks to see if everything compiles, and commits the merge.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">make</span>
+gcc -std=c99 -Wall -Wextra -Werror pb.c -o pb
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg commit -m "merge changes from sally"</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg push</span>
+pushing to http://server.futilisoft.com:8000/
+searching for changes
+remote: adding changesets
+remote: adding manifests
+remote: adding file changes
+remote: added 1 changesets with 1 changes to 1 files (-1 heads)
+</pre>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch07s12.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="mercurial_example.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch07s14.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Merge (no conflicts) </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Merge (conflicts)</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

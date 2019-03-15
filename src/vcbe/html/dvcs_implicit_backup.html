@@ -1,0 +1,35 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Implicit Backup</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="dvcs_advantages.html" title="Chapter 5. Advantages"><link rel="prev" href="dvcs_easier_merging.html" title="Easier Merging"><link rel="next" href="dvcs_scalability.html" title="Scale out, not just up"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Implicit Backup</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="dvcs_easier_merging.html">Prev</a> </td><th width="60%" align="center">Chapter 5. Advantages</th><td width="20%" align="right"> <a accesskey="n" href="dvcs_scalability.html">Next</a></td></tr></table><hr></div><div class="section" title="Implicit Backup"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="implicit_backup"></a>Implicit Backup<a class="indexterm" name="idp1056768"></a></h2></div></div></div>
+    
+
+<div xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="figure-float" style="float: right; width:3in">
+    <div class="mediaobject"><img src="images/bookshelf.jpg"></div>
+</div>
+
+    <p>Perhaps I shouldn’t use the word “backup” here.  I certainly do not
+        mean to imply that using a DVCS means you don’t need to have a backup
+        strategy.</p>
+
+    <p>But the central principle of any backup strategy is that your chances
+        of losing data go down when you have more copies of it.  Some folks
+        (including me) do feel better about their version control data when
+        using a DVCS because there are multiple instances of the repository<a class="indexterm" name="idp1061232"></a>.  At <span class="no_line_breaks">SourceGear</span> we have a central server<a class="indexterm" name="idp1062512"></a> with RAID
+        and ECC RAM and redundant power supplies and regular backups with
+        offsite storage and stuff like
+        that.  But we get a little extra security knowing that there are dozens
+        more live copies of the whole repository regularly being used on other machines.
+        Any of them could become the central repository on
+        short notice.</p>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="dvcs_easier_merging.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="dvcs_advantages.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="dvcs_scalability.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Easier Merging </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Scale out, not just up</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

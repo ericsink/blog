@@ -1,0 +1,114 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Merge (no conflicts)</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="mercurial_example.html" title="Chapter 7. Basics with Mercurial"><link rel="prev" href="ch07s11.html" title="Branch"><link rel="next" href="ch07s13.html" title="Merge (repeated, no conflicts)"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Merge (no conflicts)</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch07s11.html">Prev</a> </td><th width="60%" align="center">Chapter 7. Basics with Mercurial</th><td width="20%" align="right"> <a accesskey="n" href="ch07s13.html">Next</a></td></tr></table><hr></div><div class="section" title="Merge (no conflicts)"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp1481776"></a>Merge (no conflicts)</h2></div></div></div>
+    
+
+<p>Meanwhile, over in the default branch, Harry decides the white balls should be sorted before analysing them, 
+because that’s how they are on the box.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg diff</span>
+diff -r f282002d72ee src/pb.c
+--- a/src/pb.c  Tue May 17 14:14:44 2011 -0500
++++ b/src/pb.c  Tue May 17 14:26:36 2011 -0500
+@@ -6,6 +6,25 @@
+ #define MAX_WHITE_BALL 59
+ #define MAX_POWER_BALL 39
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+static int my_sort_func(const void* p1, const void* p2)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+{</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    int v1 = *((int *) p1);</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    int v2 = *((int *) p2);</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    if (v1 &lt; v2)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    {</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        return -1;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    }</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    else if (v1 &gt; v2)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    {</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        return 1;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    }</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    else</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    {</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        return 0;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    }</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+}</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+</span>
+ int calculate_result(int white_balls[5], int power_ball)
+ {
+     for (int i=0; i&lt;5; i++)
+@@ -27,6 +46,8 @@
+         return -1;
+     }
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    qsort(white_balls, 5, sizeof(int), my_sort_func);</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+</span>
+     return 0;
+ }
+</pre>
+
+<p>And he commits the change.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg commit -m "sort the white balls"</span>
+</pre>
+
+<p>But now he’s curious about what Sally has been doing.  She said he
+    wasn’t allowed to commit to her branch but she didn’t say anything about
+    <span class="bold"><strong>looking</strong></span> at it.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg log</span>
+changeset:   18:3e1b620bb7ad
+tag:         tip
+parent:      16:f282002d72ee
+user:        Harry &lt;harry@futilisoft.com&gt;
+date:        Tue May 17 14:27:37 2011 -0500
+summary:     sort the white balls
+
+changeset:   17:836e4df60a27
+branch:      no_boys_allowed
+user:        Sally &lt;sally@futilisoft.com&gt;
+date:        Tue May 17 14:24:14 2011 -0500
+summary:     add -favorite and cleanup some other stuff
+</pre>
+
+<p>Interesting.  She added the “favorite” feature.  Harry decides he wants
+    that.  So he asks Mercurial to merge<a class="indexterm" name="idp1519488"></a> stuff from Sally’s branch into
+the default branch.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg merge -r 836e4df60a27</span>
+merging src/pb.c
+0 files updated, 1 files merged, 0 files removed, 0 files unresolved
+(branch merge, don't forget to commit)
+</pre>
+
+<p>Brilliant!  Harry examines <code class="filename">pb.c</code> and discovers that it was merged correctly.
+    Sally’s “favorite” changes are there and his <code class="code">qsort</code> changes are as well.  So he
+compiles the code, runs a quick test, and commits the merge.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">make</span>
+gcc -std=c99 -Wall -Wextra -Werror pb.c -o pb
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">./pb -favorite 5 3 33 22 7 31</span>
+0 percent chance of winning
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg commit -m "merge changes from sally"</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg push</span>
+pushing to http://server.futilisoft.com:8000/
+searching for changes
+remote: adding changesets
+remote: adding manifests
+remote: adding file changes
+remote: added 2 changesets with 2 changes to 1 files
+</pre>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch07s11.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="mercurial_example.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch07s13.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Branch </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Merge (repeated, no conflicts)</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

@@ -1,0 +1,64 @@
+---
+layout: default
+esbma_id: 1617
+title: Serving WPF browser apps from Apache on Linux
+date: 2006-07-27 15:56:04
+keywords: (wpf)
+teaser: It turns out that serving WPF apps from a Linux server is pretty simple.
+---
+<p>I've been wondering if it's possible to serve a WPF browser
+application from my Linux box.&nbsp; I found the <a
+href="http://laurenlavoie.com/avalon/111">answer</a> on Lauren Lavoie's blog,
+but I just had to try it for myself.</p>
+
+<p>So I added the following five lines to the appropriate
+VirtualHost section of my httpd.conf file:</p>
+
+<p style='margin-left:.5in'><span style='font-size:9.0pt;
+font-family:"Courier New"'>AddType application/manifest .manifest<br>
+AddType application/xaml+xml .xaml<br>
+AddType application/x-ms-application .application<br>
+AddType application/x-ms-xbap .xbap<br>
+AddType application/octet-stream .deploy</span></p>
+
+<p>Then I created a simple WPF browser and copied the resulting
+files up to my web server.&nbsp; It worked!</p>
+
+<p>Click <a href="http://sawdust.com/test/test.xbap">here</a>
+to try it out.&nbsp; This is being served by Apache from my Linux server.&nbsp; You'll
+need to have your desktop machine properly configured for running WPF
+applications.&nbsp; This app was built with beta 2.</p>
+
+<h3>For those who want more details...</h3>
+
+<p>The source code for this simple xbap is <a
+href="http://sawdust.com/test/ericsink_xbap_src.zip">here</a>.&nbsp; Here is how I
+created it:</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >First I told Visual Studio to create a new "WinFX Web
+     Browser Application".&nbsp; (I'm still on beta 2, so I haven't made the name
+     change to .NET 3.0 yet)</li>
+ <li >Then I made several additions to Page1.xaml</li>
+ <ol style='margin-top:0in' start=1 type=a>
+  <li >I added a label at the top so I would have a place to let
+      the user know that the mouse does something.</li>
+  <li >I added a toolbar so I would have a place to add a Print
+      button.</li>
+  <li >The ViewPort3D stuff is mostly copied from one of the WPF
+      samples in the Windows SDK.</li>
+  <li >The MeshGeometry3D data was the tricky part.&nbsp; I hacked
+      the solid modeling code in my woodworking app to output triangles in XAML
+      and pasted the result in here.</li>
+ </ol>
+ <li >Finally, I made some additions to Page1.cs</li>
+ <ol style='margin-top:0in' start=1 type=a>
+  <li >I added a handler for the Print button.</li>
+  <li >I pasted in the trackball code from <a
+      href="http://blogs.msdn.com/danlehen/default.aspx">Daniel Lehenbauer</a>.</li>
+  <li >I added code to create a trackball and hook it up to the
+      camera and the light.</li>
+ </ol>
+</ol>
+
+<p></p>

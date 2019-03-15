@@ -1,0 +1,76 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Private Workspace</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="dvcs_advantages.html" title="Chapter 5. Advantages"><link rel="prev" href="dvcs_advantages.html" title="Chapter 5. Advantages"><link rel="next" href="dvcs_performance.html" title="Fast"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Private Workspace</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="dvcs_advantages.html">Prev</a> </td><th width="60%" align="center">Chapter 5. Advantages</th><td width="20%" align="right"> <a accesskey="n" href="dvcs_performance.html">Next</a></td></tr></table><hr></div><div class="section" title="Private Workspace"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp968160"></a>Private Workspace</h2></div></div></div>
+    
+
+    <p>
+        The concept of a private workspace<a class="indexterm" name="idp969344"></a> is central to
+        <span class="bold"><strong>all</strong></span> version control
+        tools.  Centralized version control systems
+        provide developers with a private
+        place to work
+        by giving them a working copy<a class="indexterm" name="idp970096"></a>.  A DVCS takes this one step further by
+        giving them a private copy of the whole repository.</p>
+
+    <p>Why is the notion of a private workspace so important?</p>
+
+<div class="table"><a name="team_complexity"></a><p class="title"><b>Table 5.1. Lines of Communication</b></p><div class="table-contents">
+    
+
+    <table summary="Lines of Communication" border="1"><colgroup><col align="center" class="col1"><col align="center" class="col2"><col align="center" class="col3"><col align="center" class="col4"></colgroup><tbody><tr><td align="center">People</td><td align="center">1</td><td align="center">4</td><td align="center">10</td></tr><tr><td align="center"> </td><td align="center">
+                <div class="mediaobject"><img src="images/team_complexity_1.jpg"></div>
+            </td><td align="center">
+                <div class="mediaobject"><img src="images/team_complexity_5.jpg"></div>
+            </td><td align="center">
+                <div class="mediaobject"><img src="images/team_complexity_10.jpg"></div>
+            </td></tr><tr><td align="center">Lines</td><td align="center">None</td><td align="center">6</td><td align="center">45</td></tr></tbody></table>
+</div></div><br class="table-break">
+
+    <p>The most productive developer is alone.  A solitary developer never has
+        to worry about coordinating with anyone else.  But as soon as the project
+        goes plural, there is overhead.<sup>[<a name="idp992576" href="#ftn.idp992576" class="footnote">15</a>]</sup><a class="indexterm" name="idp993104"></a> 
+        And for every developer added to the
+        team, the overhead gets worse.<sup>[<a name="idp993616" href="#ftn.idp993616" class="footnote">16</a>]</sup> </p>
+
+    <p>It is the job of the VCS to help manage
+        this overhead and minimize the effects.  The primary way it achieves
+        this goal is to give the developer the ability to pretend, for a little
+        while, that he
+        is the only member of the team.  The VCS provides a private
+        workspace.
+    </p>
+
+    <p>
+    Once again, this concept is similar to 
+    multi-threaded programming, where we get maximum performance when we 
+    avoid thread synchronization as much as possible.  A thread can get
+    a lot of work done during the times when it doesn’t have to wait on other
+    threads.  The
+    thread can pretend, for a little while, that it is the only thread in its
+    process.
+    </p>
+
+    <p>By giving developers a private copy of the entire repository,
+        the DVCS opens up much more flexibility for the kind of things they
+        can do in their private workspace.  Instead of just
+        editing files in the working copy, developers can use all 18 of the
+        basic verbs (see <a class="xref" href="basics.html" title="Chapter 2. Basics">Chapter 2, <i>Basics</i></a>).</p>
+
+    <p>For example, a developer using a DVCS can commit as often she wants.
+        The act of committing a change to a repository instance is distinct
+        from the act of publishing that change to the rest of the team.
+        The developer can pretend, for a little while, that she is the only person
+        on the team, deferring the overhead of coordination with others until she
+        is ready to push her work to the central server<a class="indexterm" name="idp996432"></a>.</p>
+
+<div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a id="ftn.idp992576" href="#idp992576" class="para">15</a>] </sup>It seems wrong to discuss this concept without mentioning “The Mythical Man-Month”, a classic book on software engineering by Fred Brooks.</p></div><div class="footnote"><p><sup>[<a id="ftn.idp993616" href="#idp993616" class="para">16</a>] </sup>The function is n*(n-1)/2.</p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="dvcs_advantages.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="dvcs_advantages.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="dvcs_performance.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 5. Advantages </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Fast</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

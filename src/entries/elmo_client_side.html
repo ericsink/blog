@@ -1,0 +1,109 @@
+---
+esbma_id: unknown
+title: What Mongo-ish API would mobile developers want?
+date: 2015-04-27 12:00:00
+---
+
+<p>A couple weeks ago I <a href="mobile_sync_for_mongo.html">blogged</a> about mobile sync for MongoDB.</p>
+
+<h2>Updated Status of Elmo</h2>
+
+<p><a href="https://github.com/zumero/Elmo">Embeddable Lite Mongo</a> continues to move forward nicely:</p>
+
+<ul>
+    <li>
+        <p>Progress on indexes:</p>
+        <ul>
+            <li>Compound and multikey indexes are supported.</li>
+            <li>Sparse indexes are not done yet.</li>
+            <li>Index key encoding is different from the KeyString stuff that Mongo itself does.  For encoding numerics, I did an ugly-but-workable F# port of the encoding used by SQLite4.</li>
+            <li>Hint is supported, but is poorly tested so far.</li>
+            <li>Explain is supported, partially, and only for version 3 of the wire protocol.  More work to do there.</li>
+            <li>The query planner (which has delusions of grandeur for even referring to itself by that term) isn't very smart.</li>
+            <li>Indexes cannot yet be used for sorting.</li>
+            <li>Indexes are currently never used to cover a query.</li>
+            <li>When grabbing index bounds from the query, $elemMatch is ignored.  Because of this, and because of the way Mongo multikey indexes work, most index scans are bounded at only one end.</li>
+            <li>The $min and $max query modifiers are supported.</li>
+            <li>The query planner doesn't know how to deal with $or at all.</li>
+        </ul>
+    </li>
+    <li>
+        <p>Progress on full-text search:</p>
+        <ul>
+            <li>This feature is working for some very basic cases.</li>
+            <li>Phrase search is not implemented yet.</li>
+            <li>Language is currently ignored.</li>
+            <li>The matcher step for $text is not implemented yet at all.  Everything within the index bounds will get returned.</li>
+            <li>The tokenizer is nothing more than string.split.  No stemming.  No stop words.</li>
+            <li>Negations are not implemented yet.</li>
+            <li>Weights are stored in the index entries, but textScore is not calculated yet.</li>
+        </ul>
+    </li>
+</ul>
+
+<p>I also refactored to get better separation between the CRUD logic and the storage of bson blobs and indexes (making it easier to plug-in different storage layers).</p>
+
+<h2>Questions about client-side APIs</h2>
+
+<p>So, let's assume you are building a mobile app which communicates with your
+Mongo server in the cloud using a "replicate and sync" approach.  In other
+words, your app is not doing its CRUD operations by making networking/REST calls back to
+the server.  Instead, your app is working directly with a partial clone of the Mongo 
+database that is right there on the mobile device.  (And periodically, that partial 
+clone is magically synchronized with the main database on the server.)</p>
+
+<p>What should the API for that "embedded lite mongo" look like?</p>
+
+<p>Obviously, for each development environment, the form of the API should be
+designed to feel natural or native in that environment.  This is the approach
+taken by Mongo's own client drivers.  In fact, as far as I can tell, these
+drivers don't even share much (or any?) code.  For example, the drivers for C# and Java
+and Ruby are all different, and (unless I'm mistaken) none of them are mere
+wrappers around something lower level like the C driver.  Each one is built
+and maintained to provide the most pleasant experience to developers in
+a specific ecosystem.</p>
+
+<p>My knee-jerk reaction here is to say that mobile developers might want
+the exact same API as presented by their nearest driver.  For example, if
+I am building a mobile app in C# (using the Xamarin tools), there is a good
+chance my previous Mongo experience is also in C#, so I am familiar with
+the C# driver, so that's the API I want.</p>
+
+<p>Intuitive as this sounds, it may not be true.  Continuing with the C#
+example, that driver is quite large.  Is its size appropriate for use on
+a mobile device?  Is it even compatible with iOS, which requires AOT
+compilation?  (FWIW, I tried compiling this driver as a PCL (Portable
+Class Library), and it didn't Just Work.)</p>
+
+<p>For Android, the same kinds of questions would need to be asked about
+the Mongo Java driver.</p>
+
+<p>And then there are Objective-C and Swift (the primary developer platform for iOS), for which there is no official Mongo driver.  But there are a couple of them listed on the Community Supported Drivers page: <a href="http://docs.mongodb.org/ecosystem/drivers/community-supported-drivers/">http://docs.mongodb.org/ecosystem/drivers/community-supported-drivers/</a>.</p>
+
+<p>And we need to consider Phonegap/Cordova as well.  Is the Node.js driver a starting point?</p>
+
+<p>And in all of these cases, if we assume that the mobile API should be the
+same as the driver's API, how should that be achieved?  Fork the driver code
+and rip out all the networking and replace it with calls to the embedded
+library?</p>
+
+<p>Or should each mobile platform get a newly-designed API which is
+specifically for mobile use cases?</p>
+
+<p>Believe it or not, some days I wonder:  Suppose I got Elmo running
+as a server on an Android device, listening on localhost port 27017.  Could an Android app talk to it with the Mongo Java driver
+unchanged?  Even if this would work, it would be more like a proof-of-concept than a production solution.
+Still, when looking for solutions to a problem, the mind goes places...</p>
+
+<p>So anyway, I've got more questions than answers here, and I would welcome thoughts or opinions.</p>
+
+<ul>
+    <li><p>Feel free to post an issue on GitHub: <a href="https://github.com/zumero/Elmo/issues">https://github.com/zumero/Elmo/issues</a></p></li>
+    <li><p>Or email me: eric@zumero.com</p></li>
+    <li><p>Or Tweet: @eric_sink</p></li>
+    <li><p>Or find me at MongoDB World in NYC at the beginning of June.</p></li>
+</ul>
+
+<p>&nbsp;</p>
+
+

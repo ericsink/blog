@@ -1,0 +1,32 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Commit</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="basics.html" title="Chapter 2. Basics"><link rel="prev" href="basics_checkout.html" title="Checkout"><link rel="next" href="basics_update.html" title="Update"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Commit</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="basics_checkout.html">Prev</a> </td><th width="60%" align="center">Chapter 2. Basics</th><td width="20%" align="right"> <a accesskey="n" href="basics_update.html">Next</a></td></tr></table><hr></div><div class="section" title="Commit"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp216400"></a>Commit</h2></div></div></div>
+
+
+<p class="verb_concise"><a class="indexterm" name="idp217760"></a>Apply the modifications in the working copy to the repository as a new changeset.</p>
+
+<div class="mediaobject" align="center"><img src="images/op_commit.jpg" align="middle"></div>
+
+<p>This is the operation that actually modifies the repository.  Several
+    others modify the working copy and add an operation to a list we call the <em class="firstterm">pending
+        changeset</em><a class="indexterm" name="idp221648"></a>, a place where changes wait to be committed.  The <span class="sg-operation">commit</span> operation takes the pending
+    changeset and uses it to create a new version of the tree in the
+    repository.</p>
+
+<p>All modern version control tools perform this operation atomically<a class="indexterm" name="idp223632"></a>.  In other words, no matter how many individual modifications are in your pending changeset, the repository will either end up with all of them (if the operation is successful), or none of them (if the operation fails).
+    It is impossible for the repository to end up in a state with only half of
+    the operations done.  The integrity of the repository is assured.</p>
+
+<p>It is typical to provide a log message<a class="indexterm" name="idp224784"></a> (or comment) when you commit, explaining the changes you have made.  This log message becomes part of the history of the repository.</p>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="basics_checkout.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="basics.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="basics_update.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Checkout </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Update</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

@@ -1,0 +1,138 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Rename</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="mercurial_example.html" title="Chapter 7. Basics with Mercurial"><link rel="prev" href="ch07s06.html" title="Move"><link rel="next" href="ch07s08.html" title="Delete"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Rename</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch07s06.html">Prev</a> </td><th width="60%" align="center">Chapter 7. Basics with Mercurial</th><td width="20%" align="right"> <a accesskey="n" href="ch07s08.html">Next</a></td></tr></table><hr></div><div class="section" title="Rename"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp1376176"></a>Rename</h2></div></div></div>
+    
+
+    <p>Harry decides the time has come to create a proper
+<code class="filename">Makefile</code>.  And also to gratuitously rename<a class="indexterm" name="idp1377776"></a> 
+<code class="filename">lottery.c</code>.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg add Makefile</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg rename src/lottery.c src/pb.c</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg st</span>
+A Makefile
+A src/pb.c
+R src/lottery.c
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg commit -m "Makefile. and lottery.c was too long to type."</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg push</span>
+pushing to http://server.futilisoft.com:8000/
+searching for changes
+remote: adding changesets
+remote: adding manifests
+remote: adding file changes
+remote: added 1 changesets with 2 changes to 2 files
+</pre>
+
+<p>Sally maintains her momentum with <code class="code">#define</code> and adds names for the ball ranges.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg diff</span>
+diff -r c3e40a7996f0 src/lottery.c
+--- a/src/lottery.c Tue May 17 11:36:12 2011 -0500
++++ b/src/lottery.c Tue May 17 11:50:23 2011 -0500
+@@ -3,6 +3,8 @@
+ #include &lt;stdlib.h&gt;
+ 
+ #define LUCKY_NUMBER 7
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+#define MAX_WHITE_BALL 59</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+#define MAX_POWER_BALL 39</span>
+ 
+ int calculate_result(int white_balls[5], int power_ball)
+ {
+@@ -10,7 +12,7 @@
+     {
+         if (
+              (white_balls[i] &lt; 1)
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-             || (white_balls[i] &gt; 59)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+             || (white_balls[i] &gt; MAX_WHITE_BALL)</span>
+            )
+         {
+             return -1;
+@@ -19,7 +21,7 @@
+ 
+     if (
+          (power_ball &lt; 1)
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-         || (power_ball &gt; 39)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+         || (power_ball &gt; MAX_POWER_BALL)</span>
+        )
+     {
+         return -1;
+</pre>
+
+<p>And commits her changes.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg commit -m "more #defines"</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg push</span>
+pushing to http://server.futilisoft.com:8000/
+searching for changes
+abort: push creates new remote heads on branch 'default'!
+(you should pull and merge or use push -f to force)
+</pre>
+
+<p>Grrr.  That Harry is dumber than a sack full of hammers.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg pull</span>
+pulling from http://server.futilisoft.com:8000/
+searching for changes
+adding changesets
+adding manifests
+adding file changes
+added 1 changesets with 2 changes to 2 files (+1 heads)
+(run 'hg heads' to see heads, 'hg merge' to merge)
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg heads</span>
+changeset:   11:346dd1ab5474
+tag:         tip
+parent:      9:c3e40a7996f0
+user:        Harry &lt;harry@futilisoft.com&gt;
+date:        Tue May 17 11:48:57 2011 -0500
+summary:     Makefile. and lottery.c was too long to type.
+
+changeset:   10:51a8540dbb7e
+user:        Sally &lt;sally@futilisoft.com&gt;
+date:        Tue May 17 11:51:24 2011 -0500
+summary:     more #defines
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg merge</span>
+merging src/lottery.c and src/pb.c to src/pb.c
+1 files updated, 1 files merged, 0 files removed, 0 files unresolved
+(branch merge, don't forget to commit)
+</pre>
+
+<table xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" align="center" border="0" style="width:350px"><tr><td background="images/eric_aside_03.jpg" style="font-style:italic; padding-left:0.375in; padding-right:0.375in; padding-top:0.25in; padding-bottom:0.25in">
+    <p>  
+Note that Mercurial correctly handled this merge, even though the same
+file had been modified in one branch and renamed in the other.
+         </p></td></tr></table>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">cd ..</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">make</span>
+gcc -std=c99 -Wall -Wextra -Werror src/pb.c -o pb
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg commit -m "merge"</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg push</span>
+pushing to http://server.futilisoft.com:8000/
+searching for changes
+remote: adding changesets
+remote: adding manifests
+remote: adding file changes
+remote: added 2 changesets with 2 changes to 2 files
+</pre>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch07s06.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="mercurial_example.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch07s08.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Move </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Delete</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

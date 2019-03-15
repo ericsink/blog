@@ -1,0 +1,49 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Create</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="basics.html" title="Chapter 2. Basics"><link rel="prev" href="basics.html" title="Chapter 2. Basics"><link rel="next" href="basics_checkout.html" title="Checkout"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Create</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="basics.html">Prev</a> </td><th width="60%" align="center">Chapter 2. Basics</th><td width="20%" align="right"> <a accesskey="n" href="basics_checkout.html">Next</a></td></tr></table><hr></div><div class="section" title="Create"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp184576"></a>Create</h2></div></div></div>
+
+<div xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="figure-float" style="float: right; width:3in">
+    <div class="mediaobject"><img src="images/cylinder.jpg"></div>
+</div>
+<p class="verb_concise"><a class="indexterm" name="idp188880"></a>Create a new, empty repository.</p>
+
+<p>A repository<a class="indexterm" name="idp189776"></a> is the official place where you store all your work. 
+    It keeps track of your <em class="firstterm">tree</em>, by which I mean all
+    your files, as well as the layout of the directories
+    in which they are stored.
+    </p>
+
+<p>But there has to be more.  If the definition in the previous paragraph
+    were the whole story, then a version control repository would be no more than a
+    network filesystem.  A repository is much more than that.  A repository
+    contains history.</p>
+
+<pre class="screen">
+    repository = filesystem * time
+
+</pre>
+
+<p>A filesystem is two-dimensional:  Its space is defined by directories
+    and files.  In contrast, a repository is three-dimensional:  It exists in a
+    continuum defined by directories, files, and time.  A version control repository
+    contains every version of your source code that has ever existed.  </p>
+
+<p>A consequence of this idea is that 
+    nothing is ever really destroyed.  Every time you make some kind of change to your
+    repository, even if that change is to delete something, the repository gets larger because the history is longer.
+Each change adds to the history of the repository.  We never subtract
+    anything from that history.</p>
+
+<p>The <span class="sg-operation">create</span> operation is used to create a new repository.  This is one of the first operations you will use, and after that, it gets used a lot less often.</p>
+<p>When you create a new repository, your VCS will expect you to say something to identify it, such as where you want it to be created, or what its name should be.</p>
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="basics.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="basics.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="basics_checkout.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 2. Basics </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Checkout</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

@@ -1,0 +1,132 @@
+---
+layout: default
+esbma_id: 1765
+title: Why is Git so Fast?
+date: 2009-03-30 15:48:17
+---
+<p>In the DVCS world, Git has a reputation for being really
+fast.&nbsp; I am curious about how Git got this way.</p>
+
+<p>When I started thinking about this question, seven different
+answers came to my mind.&nbsp; Some of those answers seem more interesting or
+correct than others.</p>
+
+<h3>One:&nbsp; Maybe Git is fast simply because it's a DVCS.</h3>
+
+<p>There's probably some truth here.&nbsp; One of the main benefits
+touted by the DVCS fanatics is the extra performance you get when everything is
+"local".</p>
+
+<p>But this answer isn't enough.&nbsp; Maybe it explains why Git is
+faster than Subversion, but it doesn't explain why Git is so often described as
+being faster than the other DVCSs.</p>
+
+<h3>Two:&nbsp; Maybe Git is fast because Linus Torvalds is so smart.</h3>
+
+<p>This might very well be correct.&nbsp; But it's not interesting.</p>
+
+<p>Fine.&nbsp; So Linus is smarter than all of us.&nbsp; But how did he
+use those smarts to make Git so fast?&nbsp; What are the details?</p>
+
+<h3>Three:&nbsp; Maybe Git is fast because it's written in C instead of one of those
+newfangled higher-level languages.</h3>
+
+<p>Nah, probably not.&nbsp; Lots of people have written fast
+software in C#, Java or Python.</p>
+
+<p>And lots of people have written really slow software in
+traditional native languages like C/C++.&nbsp; Adobe writes most of their stuff in
+C++, and they don't have any trouble making sure that release N+1 is slower
+than release N.</p>
+
+<h3>Four:&nbsp; Maybe Git is fast because being fast is the primary goal for Git.</h3>
+
+<p>This is another one of those high-level answers that is probably
+correct but doesn't have the kind of details about which I am curious.</p>
+
+<p>Still.&nbsp; Take some time to read through the <a
+href="http://kerneltrap.org/mailarchive/git">archives</a> of the Git developers
+mailing list.&nbsp; These people spend a LOT of time talking about performance
+issues.</p>
+
+<h3>Five:&nbsp; Maybe Git is fast because it does less.</h3>
+
+<p>One of my favorite recent blog entries is <a
+href="http://asserttrue.blogspot.com/2009/03/how-to-write-fast-code.html">this
+piece</a> which claims that the way to make code faster is to have it do less.</p>
+
+<p>Predictably, people came out of the woodwork to say how
+wrong this guy was.&nbsp; That's what happens to almost any blog entry about
+performance tuning or optimization.&nbsp; Readers ignore anything correct in the
+article and quibble about little stuff.</p>
+
+<p>But this guy was essentially correct.&nbsp; One way to make
+software faster is to make it do less.</p>
+
+<p>For example, the way you get something in the Git index is
+you use the "git add" command.&nbsp; Git doesn't scan your working copy for changed
+files unless you explicitly tell it to.&nbsp; This can be a pretty big performance
+win for huge trees.&nbsp; Even when you use the "remember the timestamp" trick,
+detecting modified files in a really big tree can take a noticeable amount of
+time.</p>
+
+<p>Or maybe Git's shortcut for handling renames is faster than
+doing them <a href="http://www.markshuttleworth.com/archives/123">more
+correctly</a> like Bazaar does.</p>
+
+<h3>Six:&nbsp; Maybe Git is fast because it doesn't use much external code.</h3>
+
+<p>Very often, when you are facing a decision to use somebody
+else's code or write it yourself, there is a performance tradeoff.&nbsp; Not always,
+but often.&nbsp; Maybe the third party code is just slower than the code you could
+write yourself if you had time to do it.&nbsp; Or maybe there is an impedance
+mismatch between the API of the external library and your own architecture. </p>
+
+<p>This can happen even when the library is very high quality.&nbsp;
+For example, consider <a href="http://curl.haxx.se/libcurl/">libcurl</a>.&nbsp; This
+is a <i>great</i> library.&nbsp; Tons of people use it.&nbsp; But it does have one
+problem that will cause performance problems for some users:&nbsp; When using
+libcurl to fetch an object, it wants to own the buffer.&nbsp; In some situations,
+this can end up forcing you to use extra memcpys or temporary files.&nbsp; The
+reason all the low level calls like send() and recv() allow the caller to own
+the loop and the buffer is because this is the best way to avoid the need to
+make extra copies of the data on disk or in memory.</p>
+
+<p>People make fun of those with <a
+href="http://en.wikipedia.org/wiki/Not_Invented_Here">NIH Syndrome</a>, but my
+observation is that folks who suffer from this disorder tend to create faster
+software, even if they also tend to ship everything late.&nbsp; <b>:-)</b></p>
+
+<p>Maybe Git is fast because every time they faced one of these
+"buy vs. build" choices, they decided to just write it themselves.</p>
+
+<h3>Seven:&nbsp; Maybe Git isn't really that fast.</h3>
+
+<p>If there is one thing I've learned about version control
+it's that everybody's situation is different.&nbsp; It is quite likely that Git is a
+lot faster for some scenarios than it is for others.</p>
+
+<p>How does Git handle really large trees?&nbsp; Git was designed
+primary to support the efforts of the Linux kernel developers.&nbsp; A lot of people
+think the Linux kernel is a large tree, but it's really not.&nbsp; Many enterprise
+configuration management repositories are FAR bigger than the Linux kernel.</p>
+
+<h3>Final thoughts</h3>
+
+<p>This week's version control blog entry raises more questions
+than answers.&nbsp; I'm not a Git user, nor have I looked much at its code, so I
+don't really know why it's so fast.&nbsp; I'm just curious.&nbsp; If you have better
+answers than mine (and I admit that's a low hurdle), feel free to send them to
+me or post them in my comments.</p>
+
+<p>But FWIW, I have decided it is time for me to become a Git
+user.&nbsp; When I was writing about Git a few weeks ago, a lot of Git users kept
+telling me I just don't get it.&nbsp; I've spent more time thinking about version
+control implementation and design than most folks, so I tend to think I
+actually do "get it".&nbsp; But my curiosity is piqued, and I hate to pass up an
+opportunity to learn something, so I'm going to give it a try.&nbsp; I've got a
+small project here at SourceGear that I work on part-time with a couple other
+people.&nbsp; We've decided to switch to Git and see how it goes.&nbsp; I'll let you know
+what I find out.</p>
+
+<p></p>

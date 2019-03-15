@@ -1,0 +1,173 @@
+---
+esbma_id: unknown
+title: Mobile Sync for Mongo
+date: 2015-04-13 12:00:00
+---
+
+<p>We here at <a href="http://zumero.com/">Zumero</a> have been exploring the possibility of a mobile sync solution for MongoDB.</p> 
+
+<p>We first released our Zumero for SQL Server product almost 18 months ago, and today
+there are bunches of people using mobile apps which sync using our solution.</p>
+
+<p>But not everyone uses SQL Server, so we often wonder
+what other database backends we should consider supporting.  In this blog entry, I want to
+talk about some progress we've made toward a "Zumero for Mongo" solution and "think out loud" about the 
+possibilities.</p>
+
+<h2>Background: Mobile Sync</h2>
+
+<p>The basic idea of mobile sync is to keep a partial copy of the database on the mobile device so
+the app doesn't have to go back to the network for every single CRUD operation.  The
+benefit is an app that is faster, more reliable, and works offline.  The flip side of
+that coin is the need to keep the mobile copy of the database synchronized with the data
+on the server.</p>
+
+<p>Sync is tricky, but as mobile continues its explosive growth, this approach is gaining momentum:</p>
+
+<ul>
+    <li><p>Legendary developer Dan Bricklin:  <a href="http://www.bricklin.com/offline.htm">http://www.bricklin.com/offline.htm</a></p></li>
+    <li><p>Forrester analyst Michael Facemire:  <a href="http://sdtimes.com/analyst-watch-tackling-mobile-apps-important-difficult-feature/">http://sdtimes.com/analyst-watch-tackling-mobile-apps-important-difficult-feature/</a></p></li>
+</ul>
+
+<p>If the folks at Mongo are already working on something in this area,
+we haven't seen any sign of it.  So we decided to investigate some ideas.</p>
+
+<h2>Pieces of the puzzle</h2>
+
+<p>In addition to the main database (like SQL Server or MongoDB or whatever), a
+mobile sync solution has three basic components:
+</p>
+
+<table border="1">
+    <tr>
+        <td>Mobile database</td>
+        <td>
+            <ul>
+            <li><p>Runs on the mobile device as part of the app</p></li>
+            <li><p>Probably an embedded database library</p></li>
+            <li><p>Keeps a partial replica of the main database</p></li>
+            <li><p>Wants to be as similar as possible to the main database</p></li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td>Sync server</td>
+        <td>
+            <ul>
+            <li><p>Monitors changes made by others to the main database</p></li>
+            <li><p>Sends incremental changes back and forth between clients and the main database</p></li>
+            <li><p>Resolves conflicts, such as when two participants want to change the same data</p></li>
+            <li><p>Manages authentication and permissions for mobile clients</p></li>
+            <li><p>Filters data so that each client only gets what it needs</p></li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td>Sync client</td>
+        <td>
+            <ul>
+            <li><p>Monitors changes made by the app to the mobile database</p></li>
+            <li><p>Talks over the network to the sync server</p></li>
+            <li><p>Pushes and pulls incremental changes to keep the mobile database synchronized</p></li>
+        </td>
+    </tr>
+</table>
+
+<p>For this blog entry, I want to talk mostly about the mobile database.  In
+our Zumero for SQL Server solution, this role is played by SQLite.  There are
+certainly differences between SQL Server and SQLite, but on the whole, SQLite
+does a pretty good job pretending to be SQL Server.</p>
+
+<p>What embedded database could play this role for Mongo?</p>
+
+<p>This question has no clear answer, so we've been building a 
+a lightweight Mongo-compatible database.  Right now
+it's just a prototype, but its development serves the purpose of helping us
+explore mobile sync for Mongo.</p>
+
+<h2>Embeddable Lite Mongo</h2>
+
+<p>Or "Elmo", for short.</p>
+
+<p>Elmo is a database that is designed to be as Mongo-compatible as it can be within the constraints of mobile devices.</p>
+
+<p>In terms of the status of our efforts, let me begin with stuff that does NOT work:</p>
+
+<ul>
+    <li><p>Sharding is an example of a Mongo feature that Elmo does not support and probably never will.</p></li>
+    <li><p>Elmo also has no plans to support any feature which requires embedding a JavaScript engine, since that would violate Apple's rules for the App Store.</p></li>
+    <li><p>We do hope to support full text search ($text, $meta, etc), but this is not yet implemented.</p></li>
+    <li><p>Similarly, we have not yet implemented any of the geo features, but we consider them to be within the scope of the project.</p></li>
+    <li><p>Elmo does not support capped collections, and we are not yet sure if it should.</p></li>
+</ul>
+   
+<p>Broadly speaking, except for the above, everything works.  Mostly:</p>
+
+<ul>
+    <li><p>All documents are stored in BSON</p></li>
+    <li><p>Except for JS code, all BSON types are supported</p></li>
+    <li><p>Comparison and sorting of BSON values (including different types) works</p></li>
+    <li><p>All basic CRUD operations are implemented</p></li>
+    <li><p>The update command supports all the update operators except $isolated</p></li>
+    <li><p>The update command supports upsert as well</p></li>
+    <li><p>The findAndModify command includes full support for its various options</p></li>
+    <li><p>Basic queries are fully functional, including query operators, projection, and sorting</p></li>
+    <li><p>The matcher supports Mongo's notion of query predicates matching any element of an array</p></li>
+    <li><p>CRUD operations support resolution of paths into array subobjects, like x.y to {x:[{y:2}]}</p></li>
+    <li><p>Regex works, with support for the i, s, and m options</p></li>
+    <li><p>The positional operator $ works in update and projection</p></li>
+    <li><p>Cursors and batchSize are supported</p></li>
+    <li><p>The aggregation pipeline is supported, including all expression elements and all stages (except geo)</p></li>
+</ul>
+
+<p>More caveats:</p>
+
+<ul>
+    <li><p>Support for indexes is being implemented, but they don't actually speed anything up yet.</p></li>
+    <li><p>The dbref format is tolerated, but is not [yet] resolved.</p></li>
+    <li><p>The $explain feature is not implemented yet.</p></li>
+    <li><p>For the purpose of storing BSON blobs, Elmo is currently using SQLite.  Changing this later will be straightforward, as we're basically just using SQLite as a key-value store, so the API between all of Elmo's CRUD logic and the storage layer is not very wide.</p></li>
+</ul>
+
+<p>Notes on testing:</p>
+
+<ul>
+    <li><p>Although mobile-focused Elmo does not need an actual server, it has one, simply so that we can run the <a href="https://github.com/mongodb/mongo/tree/master/jstests">jstests</a> suite against it.</p></li>
+    <li><p>The only test suite sections we have worked on are jstests/core and jstests/aggregation.</p></li>
+    <li><p>Right now, Elmo can pass 311 of the test cases from jstests.</p></li>
+    <li><p>We have never tried contacting Elmo with any client driver except the mongo shell.  So this probably doesn't work yet.</p></li>
+    <li><p>Elmo's server only supports the new style protocol, including OP_QUERY, OP_GET_MORE, OP_KILL_CURSORS, and OP_REPLY.  None of the old "fire and forget" messages are implemented.</p></li>
+    <li><p>Where necessary to make a test case pass, Elmo tries to return the same error numbers as Mongo itself.</p></li>
+    <li><p>All effort thus far has been focused on making Elmo functional, with no effort spent on performance.</p></li>
+</ul>
+
+<p>How Elmo should work:</p>
+
+<ul>
+    <li><p>In general, our spec for Elmo's behavior is the MongoDB documentation plus the jstests suite.</p></li>
+    <li><p>In cases where the Mongo docs seem to differ from the actual behavior of Mongo, we try to make Elmo behave like Mongo does.</p></li>
+    <li><p>In cases where the Mongo docs are silent, we often stick a proxy in front of the Mongo server and dump all the messages so we can see exactly what is going on.</p></li>
+    <li><p>We occasionally consult the Mongo server source code for reference purposes, but no Mongo code has been copied into Elmo.</p></li>
+</ul>
+
+<p>Notes on the code:</p>
+
+<ul>
+    <li><p>Elmo is written in F#, which was chosen because it's an insanely productive environment and we want to move quickly.</p></li>
+    <li><p>But while F# is a great language for this exploratory prototype, it may not be the right choice for production, simply because it would confine Elmo use cases to Xamarin, and <a href="https://twitter.com/migueldeicaza">Miguel</a>'s world domination plan is not quite complete yet.  <tt><b>:-)</b></tt></p></li>
+    <li><p>The Elmo code is now available on GitHub at <a href="https://github.com/zumero/Elmo">https://github.com/zumero/Elmo</a>.  Currently the license is GPLv3, which makes it incompatible with production use on mobile platforms, which is okay for now, since Elmo isn't ready for production use anyway.  We'll revisit licensing issues later.</p></li>
+</ul>
+
+<p>Next steps:</p>
+
+<ul>
+    <li><p>Our purpose in this blog entry is to start conversations with others who may be interested in mobile sync solutions for Mongo.</p></li>
+    <li><p>Feel free to post a question or comment or whatever as an issue on GitHub: <a href="https://github.com/zumero/Elmo/issues">https://github.com/zumero/Elmo/issues</a></p></li>
+    <li><p>Or email me: eric@zumero.com</p></li>
+    <li><p>Or Tweet: @eric_sink</p></li>
+    <li><p>If you're interested in a face-to-face conversation or a demo, we'll be at MongoDB World in NYC at the beginning of June.</p></li>
+</ul>
+
+<p>&nbsp;</p>
+
+

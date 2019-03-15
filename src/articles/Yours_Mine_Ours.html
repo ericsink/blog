@@ -1,0 +1,667 @@
+---
+layout: default
+esbma_id: 1576
+title: Yours, Mine and Ours
+date: 2006-02-02 14:09:36
+keywords: (dev)
+---
+<p>For the last couple of years, I have been managing my weblog
+with a desktop content management tool called <a
+href="http://www.fogcreek.com/CityDesk/">CityDesk</a>, made by Fog Creek
+Software.&nbsp; This fine product has suited me very well.&nbsp; Most blogs serve their
+content with a scripting language, dynamically generating pages from a database,
+with all article editing taking place in a web browser. &nbsp;That approach doesn't
+work so well for me.&nbsp; First of all, I prefer to serve my content as static
+HTML.&nbsp; More importantly, I tend to write full-length articles, so I prefer to
+write my content in something stronger than an HTML textarea.</p>
+
+<p>So for me, CityDesk is a good piece of software.&nbsp; It has
+templates and a basic scripting language and a simple built-in word processor
+and tools to manage my links.</p>
+
+<p>However, I stopped using CityDesk a couple of months ago
+(Sorry Joel!).&nbsp; Sometime later in this article I intend to make some sort of a
+point, but for now I want to tell the story of the tool I now use to manage my
+weblog.</p>
+
+<h2>ESBMA</h2>
+
+<p>Like I said, CityDesk is great, but a few things about it
+kept bugging me:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >CityDesk's built-in text editing facilities aren't quite strong
+     enough for me.&nbsp; I want to write my articles in a full-featured word
+     processor.</li>
+ <li >CityDesk stores all content in a Jet database.&nbsp; I work at
+     SourceGear, a vendor of version control tools.&nbsp; I want my content stored
+     in a version control system.</li>
+</ul>
+
+<p>So I decided to write my own content management tool.&nbsp; I
+call it ESBMA, which stands for "Eric Sink's Blog Management App".&nbsp; (The astute
+reader will realize now that this is not an article about how to choose cool
+names for products.)</p>
+
+<p>&nbsp;</p>
+
+<p><img border=0 width=576 height=337
+src="/scm/1576_image001.gif"></p>
+
+<p>&nbsp;</p>
+
+<p>ESBMA is 8,469 lines of C# code designed to manage a weblog
+exactly the way I want, including the following features:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li ><b>Static HTML output</b>:&nbsp; When publishing my site, ESBMA
+     generates static HTML pages.&nbsp; Templates (based on the old "pages with
+     holes" concept) make it easy to change the general layout of the site.</li>
+ <li ><b>Integration with Microsoft Word</b>:&nbsp; ESBMA has no
+     built-in facilities for editing articles.&nbsp; Instead, all my writing takes
+     place in Microsoft Word.&nbsp; When I double-click an article for editing, it
+     launches Word with the proper document open.&nbsp; When I publish my site, it
+     uses the scriptability features of Word to save each article as HTML.&nbsp;
+     Then it cleans that resulting HTML and processes it as necessary to
+     generate the pages of my weblog.</li>
+ <li ><b>Integration with SourceGear Vault</b>:&nbsp; ESBMA stores
+     all my content under version control.&nbsp; Naturally, I used my own product.&nbsp;
+     Since the Vault client libraries are in C#, this was pretty simple.</li>
+ <li ><b>Management and pseudo-scripting</b>:&nbsp; Like CityDesk,
+     ESBMA the ability to manage links (even when things move).&nbsp; It also has
+     very basic facilities for variables, loops and conditionals.</li>
+ <li ><b>Integration with Amazon</b>:&nbsp; When I want to recommend
+     a book, ESBMA can use web services calls to retrieve information from
+     Amazon.&nbsp; It can automatically insert my Amazon Affiliate ID into product
+     links.</li>
+ <li ><b>Integration with Haloscan</b>:&nbsp; For articles where I
+     want to allow comments, I can easily tell ESBMA to add Haloscan links at
+     the bottom of an item.</li>
+ <li ><b>CityDesk import</b>:&nbsp; A utility program was used to
+     read all the content from my CityDesk file and convert everything to
+     ESBMA's formats, keeping all the paths the same.</li>
+ <li ><b>Easy publish</b>:&nbsp; I click one button and type a
+     password and ESBMA uploads all new content to my web server.&nbsp; The
+     connection is tunneled through ssh for security.</li>
+</ul>
+
+<p>For me, this is the best blogging tool in the world.</p>
+
+<h2>A different perspective</h2>
+
+<p>For anybody other than me, ESBMA is one of the worst pieces
+of software ever written:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >ESBMA has no installer.&nbsp; It has never been run by anyone
+     but me.&nbsp; It has never been run outside the Visual Studio debugger.&nbsp; Every
+     time I want to work on my blog, I open ESBMA.sln and hit F5.</li>
+ <li >ESBMA has no documentation.&nbsp; When I forget how to do
+     something, I look up the answer in the source code.</li>
+ <li >Until quite recently, the only way to change the title of
+     an article was to exit the app and manually edit an XML file.&nbsp; One day I
+     got tired of doing that so I added a dialog box with a text field.</li>
+ <li >The CityDesk importer isn't even close to being usable for
+     other people.&nbsp; It handles only the CityScript features that I needed and
+     ignores the rest.&nbsp; It has hard-coded stuff that doctors the imported
+     content in ways that make sense only for me.</li>
+ <li >ESBMA publishes to my web server by invoking rsync
+     tunneled through ssh.&nbsp; Cygwin (with the rsync and ssh packages, of course)
+     must be installed, and it must be installed in a specific path, because
+     that path is hard-coded somewhere in the ESBMA source code.</li>
+ <li >ESBMA communicates with Microsoft Office (just Word,
+     actually) in a couple of different ways.&nbsp; It requires Office 2003.&nbsp; It
+     will not work with any other word processor.&nbsp; It will not work with any
+     previous version of Microsoft Office.&nbsp; It will [almost certainly] not work
+     with any future version of Microsoft Office unless I change the code.&nbsp; Oh
+     yeah, and ESBMA crashes if the Primary Interop Assemblies for Word are not
+     installed.</li>
+ <li >The same basic story applies for integration with Vault.&nbsp;
+     ESBMA works with Vault 3.1.&nbsp; It won't work with Vault 3.0 and it's not
+     gonna work with Vault 4.0 without extra effort.&nbsp; It doesn't work with any
+     other source control tool.</li>
+ <li >ESBMA sometimes crashes when I delete an article.&nbsp; I'm not
+     sure why.&nbsp; I just don't worry about it.</li>
+ <li >ESBMA supports HTML templates, but there is no built-in facility
+     for managing or editing them.&nbsp; When I want to tweak the template for my
+     site, I usually do something like this:</li>
+ <ul style='margin-top:0in' type=circle>
+  <li >Open a Cygwin bash shell</li>
+  <li >cd /cygdrive/c/Documents and Settings/Eric Sink/Local
+      Settings/Application Data/ESBMA/working/wf_0</li>
+  <li >vi template.html</li>
+ </ul>
+ <li >Oh, and ESBMA doesn't create a default template.&nbsp; When I
+     create a new site, I have to manually create template.html in the right
+     place.&nbsp; If I don't, ESBMA will crash.</li>
+ <li >When ESBMA is performing a long operation, it doesn't show
+     a progress bar.&nbsp; Or a wait cursor.&nbsp; It doesn't even repaint the window.&nbsp;
+     Until the operation is done, the app looks like it is hung.</li>
+</ul>
+
+<p>So ESBMA has lots of problems, but they don't really bother
+me very much.&nbsp; Every once in a while I fix a bug.&nbsp; Mostly I just avoid them,
+since I know where they all are.</p>
+
+<p>Actually, this is my third attempt to write my own blogging
+tool.&nbsp; The first two attempts failed because I took the time to consider the
+needs of other people.&nbsp; Instead of building the perfect tool just for ME, I got
+distracted thinking about how I could turn my blogging tool into a business
+venture.</p>
+
+<p>This time I succeeded.&nbsp; I built a blogging tool which works
+perfectly for me.&nbsp; It won't work for anybody else.&nbsp; For other people, it is not
+merely "user unfriendly", it is "user hostile".</p>
+
+<p>My blogging tool is an example of "MeWare".</p>
+
+<h2>Yours, Mine and Ours</h2>
+
+<p>I claim here that there are three categories of software:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li ><b>MeWare</b>:&nbsp; The developer creates software.&nbsp; The
+     developer uses it.&nbsp; Nobody else does.</li>
+ <li ><b>ThemWare</b>:&nbsp; The developer creates software.&nbsp; Other
+     people use it.&nbsp; The developer does not.</li>
+ <li ><b>UsWare</b>:&nbsp; The developer creates software.&nbsp; Other
+     people use it.&nbsp; The developer uses it too.</li>
+</ul>
+
+<p>For completeness, I suppose I should probably mention the
+obvious fourth category:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li ><b>NobodyWare</b>:&nbsp; The developer creates software.&nbsp;
+     Nobody uses it.</li>
+</ul>
+
+<p>Coming up with examples of NobodyWare will be left as an
+exercise for the reader.&nbsp; <b>:-)</b></p>
+
+<h2>Observations about ESBMA and CityDesk</h2>
+
+<p>As I said, ESBMA is an example of MeWare.&nbsp; I wrote it "just
+for me".&nbsp; I have no other users, therefore I have none of the challenges which
+arise when developing software for other people.</p>
+
+<p>I consider the concept of MeWare to be somewhat new.&nbsp; Simply
+put, MeWare happens today because today's developer tools are so amazing. I
+would never have written ESBMA if I had to do it in C against the Win32 API.</p>
+
+<p>Software development is really expensive.&nbsp; Typically, the
+costs of developing software are recovered by convincing lots of people to use
+it and collecting money from [or through] those users [directly or indirectly].&nbsp;
+When software is developed for a single user, the opportunities to recover the
+development costs are dramatically reduced.</p>
+
+<p>So MeWare only makes sense when the development costs are
+very low.&nbsp; I was able to create ESBMA for myself because coding with C# and
+Visual Studio is an extremely productive experience.</p>
+
+<p>In contrast to ESBMA, its predecessor CityDesk is an example
+of UsWare.&nbsp; CityDesk is a shrinkwrap product of Fog Creek.&nbsp; It was developed by
+Joel Spolsky.&nbsp; He uses it to maintain his website.&nbsp; Other people use it too.</p>
+
+<p>To any objective eye, the difference between CityDesk and
+ESBMA is obvious.&nbsp; CityDesk is polished and easy to use.&nbsp; ESBMA is user
+hostile, sometimes gratuitously so.</p>
+
+<p>At this point some reader who is familiar with CityDesk is
+screaming, "Wait!&nbsp; You can't use CityDesk as an example of a <i>good</i>
+product.&nbsp; CityDesk is a <i>failed</i> product.&nbsp; Joel hasn't released a new
+version in 42 years and he never responds to questions about it anymore!"</p>
+
+<p>OK, fine.&nbsp; Joel himself seems to admit that CityDesk hasn't
+been the big seller he hoped it might be.&nbsp; However, the success or failure of
+CityDesk isn't relevant to my point.</p>
+
+<p>Which reminds me, I promised you I would make a point,
+didn't I?&nbsp; OK, here it is:</p>
+
+<p>&nbsp;</p>
+
+<p style='margin-left:.5in'><b><span style='font-family:Arial'>The
+gap between developer and user can be enormous.<br>
+It's a canyon, and it takes serious effort to cross it.</span></b></p>
+
+<p>&nbsp;</p>
+
+<p>If in fact CityDesk is to be considered an unsuccessful
+product, I claim that its failure is an issue of marketing, not an issue of
+product quality.&nbsp; People who use CityDesk love it.&nbsp; It is elegant and extremely
+easy to use.&nbsp; I daresay it is the leading application in its market niche.&nbsp; The
+problem is that there just aren't very many people in that niche.&nbsp; In the world
+of content management, the war between Web-based solutions and thick clients is
+over -- the Web apps won.&nbsp; There just aren't many people like me who want a
+single user desktop content management system that generates static HTML.</p>
+
+<p>In other words, CityDesk did a great job crossing the
+canyon, only to find out that there weren't very many people standing over
+there.</p>
+
+<p>Consider what would happen if I decided to take ESBMA up to
+the next level, across the canyon, from MeWare to UsWare.&nbsp; I would have to make
+it work as well for other people as it works for me.&nbsp; I would have to fix all
+the problems described above, plus dozens more I didn't even mention.&nbsp; Off the
+cuff, I estimate that an UsWare version of my blogging app would be ten times
+more effort than the MeWare version I have now.</p>
+
+<p>And of course, it would be marketing suicide, since I would
+be competing with the well established CityDesk for the affections of the six
+remaining people on earth who care about apps like this.</p>
+
+<h2>It's All about the Users</h2>
+
+<p>So let's face it -- MeWare isn't actually very interesting.&nbsp;
+Aside from the occasional outlier like myself, nobody is developing MeWare.&nbsp;
+All of us are developing software on behalf of other people.&nbsp; Whether your
+software is commercial or open source, it's all about the users.</p>
+
+<p>Why do we develop software for other people?&nbsp; Because they
+need software, and they are not developing it for themselves, for only two
+reasons I can think of:</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >They don't develop their own software because they simply
+     don't know how.</li>
+ <li >They don't develop their own software because they are too
+     busy doing other things.</li>
+</ol>
+
+<p>In either case, the users are expecting us to create
+software on their behalf.&nbsp; They expect us to see things from their perspective,
+to value the things that they think are important.</p>
+
+<p>This is hard.</p>
+
+<h2>The Challenges of ThemWare</h2>
+
+<p>The detachment between developer and user is greatest in the
+case of ThemWare.&nbsp; I create software.&nbsp; Somebody else uses it.&nbsp; I do not.&nbsp; </p>
+
+<p>This creates three challenges that I want to highlight:</p>
+
+<h3>1.&nbsp; Maybe I don't even know how to use my software.</h3>
+
+<p>In this situation, I work all day creating dialog boxes and
+toolbars, but I don't actually know what to do with them.</p>
+
+<p>Several years ago I worked as a developer of data
+visualization tools for scientists.&nbsp; Our software could take data and create
+pretty pictures like contour plots and line graphs and colorized grids.&nbsp; I took
+physics and chemistry in college, but that doesn't make me a scientist.&nbsp; I
+really never knew how to use the software I was developing.&nbsp; I could tell you
+the arcane details of how our macro language worked, but I couldn't tell you
+what a Fast Fourier Transform is.&nbsp; I still can't.&nbsp; So I could never make our
+software do anything interesting, but our customers could make amazing pictures
+with it.</p>
+
+<h3>2.&nbsp; Maybe I don't understand the people who use my software.</h3>
+
+<p>The people who use my software are not like me.&nbsp; They're in
+another field.&nbsp; I'm a software programmer, but those people were trained in
+auto mechanics or interior decorating or dentistry.&nbsp; I don't know how they see
+the world.&nbsp; Understanding their perspective doesn't come naturally for me at
+all.</p>
+
+<p>I can illustrate this situation with a real-life example
+that I face quite regularly.&nbsp; The SourceGear web site has a "store" which
+allows our customers to purchase licenses for our products.&nbsp; This store is a
+piece of software, and I am the developer responsible for it.&nbsp; However, I never
+actually use it.&nbsp; Obviously I never buy a copy of my own software.&nbsp; (I was
+tempted to once.&nbsp; It was the last day of the month and our sales were about a
+hundred bucks shy of our monthly goal.&nbsp; I was <i>so</i> tempted to whip out my
+credit card and place an order for one copy of Vault.)</p>
+
+<p>Anyway, this store is ThemWare, and I don't think I
+understand <i>Them</i>.&nbsp; We sell our products to developers, and I understand
+developers just fine.&nbsp; But many companies funnel all purchasing through a
+department which is dedicated to that purpose.&nbsp; Apparently there is some sort
+of impedance mismatch between me and the folks in those purchasing departments,
+because people keep coming to our store and buying the wrong thing.</p>
+
+<p>One of our products is called SourceOffSite.&nbsp; The current
+version is 4.1, but we do still continue to sell the 3.5 version for people who
+prefer not to upgrade.&nbsp; (Starting with version 4.0, the SourceOffSite requires
+the .NET Framework, and not everybody wants to install it.)&nbsp; Anyway, version
+4.1 and version 3.5 require different kind of serial numbers.&nbsp; When you come to
+our store, it's important that you buy the correct version.</p>
+
+<p>So the store tries very hard explain the situation.&nbsp; The
+information is at the top of the order form.&nbsp; In red.&nbsp; After you fill out the
+order form, you are reminded again, just to be sure.</p>
+
+<p>But so far, the canyon between me and Them still looks big.&nbsp;
+We get email basically every day from somebody who just bought SourceOffSite
+and then discovered that their newly purchased 4.1 serial number will not work
+with their 3.5 server.&nbsp; It is only a slight exaggeration to say that <i>everybody</i>
+who comes to buy 3.5 licenses does it wrong.</p>
+
+<p>My next version of the SourceGear store needs to have an
+additional verification step for people in purchasing departments who are
+trying to buy SourceOffSite.&nbsp; When the purchaser places an order for
+SourceOffSite, they will see a message like this:</p>
+
+<p>&nbsp;</p>
+
+<p style='margin-left:.5in'><span style='font-family:Arial'>Please
+go ask the developer to confirm which version they want.</span></p>
+
+<p style='margin-left:.5in'><span style='font-family:Arial'>To
+prove that you actually spoke with a developer, ask them for the answer to the
+following question:</span></p>
+
+<p style='margin-left:1.0in;text-indent:-.25in'>•<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span style='font-family:Arial'>"Virtual memory" is:</span></p>
+
+<p style='margin-left:1.25in;text-indent:-.25in'><span
+style='font-family:Arial'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-family:Arial'>An upcoming technology for
+recording TV shows</span></p>
+
+<p style='margin-left:1.25in;text-indent:-.25in'><span
+style='font-family:Arial'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span style='font-family:Arial'>A feature of your computer</span></p>
+
+<p style='margin-left:1.25in;text-indent:-.25in'>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+style='font-family:Arial'>A piece of jargon from Star Trek</span></p>
+
+<h3>3.&nbsp; Maybe I don't even <i>like</i> the people who use my software.</h3>
+
+<p>There are six billion people on the planet.&nbsp; I can't be
+expected to be fond of <i>all</i> of them.</p>
+
+<p>I am one of the few software developers in central Illinois who does not work for State Farm Insurance.&nbsp; State Farm is one of the largest
+insurance companies in the world.&nbsp; Their headquarters is in Bloomington, just
+an hour or so down the road from us here in Champaign.</p>
+
+<p>The sheer size of State Farm is simply amazing.&nbsp; This
+company is monstrous, like the Borg from Star Trek, assimilating every IT
+resource in the area.&nbsp; They employ thousands upon thousands of programmers, all
+of whom are busily working on software which will be distributed to countless
+insurance agent drones scattered all over the nation.&nbsp; </p>
+
+<p>Even though Bloomington is a small city of perhaps 100,000
+people, Microsoft has an office in Bloomington because State Farm is their largest
+non-government customer.</p>
+
+<p>I can't imagine working at State Farm.&nbsp; I don't even <i>like</i>
+insurance agents.&nbsp; Every day I would go to the office and build software to
+help insurance agents be more efficient in their ongoing efforts to annoy me.&nbsp; </p>
+
+<p>The temptation for sabotage would be overwhelming.</p>
+
+<h3>The Consequences of ThemWare</h3>
+
+<p>In terms of the size of the canyon, ThemWare is probably the
+worst possible scenario. &nbsp;If I am building software that I don't use and don't
+know <i>how</i> to use for people I don't understand or even like, how good is
+my software going to be?</p>
+
+<p>I probably see every feature in terms of how difficult it
+will be to implement, rather than how valuable it will be for my users.</p>
+
+<p>I probably find myself wanting to label or document the
+features using my jargon instead of theirs.</p>
+
+<p>I probably create features that are tedious or unintuitive
+for my users.&nbsp; I can't imagine why the user interface I designed doesn't make
+sense to them.</p>
+
+<p>ThemWare is hard.</p>
+
+<h2>The Challenges of UsWare</h2>
+
+<p>The situation with UsWare isn't quite as bad.&nbsp; I create
+software.&nbsp; Other people use it.&nbsp; So do I.</p>
+
+<p>Unlike the situation with ThemWare, I as a developer
+actually have at least one thing in common with my users:&nbsp; We both use my
+software.&nbsp; This suggests that we probably have even more things in common.&nbsp;
+Perhaps we can even understand each other.</p>
+
+<h3>The Best Dogfooding Story Ever</h3>
+
+<p>The common expression for using your own software is "eating
+your own dogfood".&nbsp; Sometimes this term gets verbed by simply calling it
+"dogfooding".</p>
+
+<p>If you'll indulge me briefly, I'd like to tell you what I
+think is the best dogfooding story ever.&nbsp; However, it's not a software story.&nbsp;
+It's a woodworking story.</p>
+
+<p>The primary machine tool in any well-equipped woodshop is a
+table saw.&nbsp; Basically, it's a polished cast iron table with a slot through
+which protrudes a circular saw blade, ten inches in diameter.&nbsp; Wood is cut by
+sliding it across the table into the spinning blade.</p>
+
+<p>A table saw is an extremely dangerous tool.&nbsp; My saw can cut
+a 2-inch thick piece of hard maple with no effort at all.&nbsp; Frankly, it's a tool
+which should only be used by someone who is a little bit afraid of it.&nbsp; It
+should be obvious what would happen if a finger ever came in contact with the
+spinning blade.&nbsp; Over 3,000 people each year lose a finger in an accident with
+a table saw.&nbsp; </p>
+
+<p>A guy named Stephen Gass has come up with an amazing
+solution to this problem.&nbsp; He is a woodworker, but he also has a PhD in
+physics.&nbsp; His technology is called <a href="http://www.sawstop.com/">Sawstop</a>.&nbsp;
+It consists of two basic inventions:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >He has a sensor which can detect the difference in
+     capacitance between a finger and a piece of wood.</li>
+ <li >He has a way to stop a spinning table saw blade within
+     1/100 of a second, less than a quarter turn of rotation.</li>
+</ul>
+
+<p>The videos of this product are amazing.&nbsp; Slide a piece of
+wood into the spinning blade, and it cuts the board just like it should.&nbsp; Slide
+a hot dog into the spinning blade, and it stops instantly, leaving the
+frankfurter with nothing more than a nick.</p>
+
+<p>Here's the spooky part:&nbsp; Stephen Gass tested his product on
+his own finger!&nbsp; This is a guy who really wanted to close the distance between
+him and his customers.&nbsp; No matter how much I believed in my product, I think I
+would find it incredibly difficult to stick my finger in a spinning table saw
+blade.&nbsp; Unbelievable!</p>
+
+<h3>Back to the problems with UsWare...</h3>
+
+<p>I think dogfooding is one of the most important things a
+developer can do.&nbsp; Nothing gets you closer to the perspective of your users
+than becoming one of them.&nbsp; But UsWare still has challenges.&nbsp; Your users are
+still probably not exactly like you.</p>
+
+<p>Recently, this very issue has been <a
+href="http://blogs.msdn.com/robcaron/archive/2006/01/23/516505.aspx">discussed</a>
+with respect to Microsoft's dogfooding of Team System.&nbsp; People wonder if Microsoft
+is going to end up creating a set of developer tools that are useful only for
+software companies.&nbsp; This is a valid concern.&nbsp; There are far more companies out
+there that produce software simply as a means toward producing something else,
+like jets or laundry detergent.&nbsp; Those companies probably don't work exactly
+the way software companies do.</p>
+
+<h3>SourceGear DiffMerge</h3>
+
+<p>With UsWare, there is a tendency to get stuck in the
+following path of logic:</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >I use the software.</li>
+ <li >I understand it.</li>
+ <li >So everyone else understands it too, right?</li>
+</ol>
+
+<p>I have this problem with the SourceGear DiffMerge tool that
+comes bundled with Vault.&nbsp; This app can be used to help perform a three-way merge.&nbsp;
+The basic operation is fairly complex, so the tool needs to do a great job
+presenting a user interface which is easy to understand.&nbsp; Apparently, it does
+not.</p>
+
+<p>I helped designed the tool, so it always makes perfect sense
+to me.&nbsp; So, when users have trouble understanding it, I have a tendency to
+suddenly become <a href="http://www.fawltysite.net/">Basil Fawlty</a>, the rude
+English hotel manager played by John Cleese:</p>
+
+<p style='text-indent:.5in'><b>User:</b><i>&nbsp; I don't get it.</i></p>
+
+<p style='margin-left:.5in'><b>Basil Fawlty:</b>&nbsp; <i>It's
+perfectly simple.&nbsp; There are three files being displayed on your screen and we
+shouldn't have to label which one is which because it seems perfectly obvious
+to us and so it is not the software which is defective here but rather, its
+user.&nbsp; Thank you so much, good day.</i></p>
+
+<p>Unfortunately, very shortly after this happened the first
+time, one of SourceGear's developers walked into my office:</p>
+
+<p style='margin-left:.5in'><b>SourceGear Developer</b>:&nbsp; Hey
+Eric, you know that DiffMerge tool we ship?&nbsp; I don't get it.</p>
+
+<p style='margin-left:.5in'><b>Basil Fawlty</b>:&nbsp; Right!&nbsp; Apparently
+I'm the one who is defective here then.&nbsp; Manuel!</p>
+
+<p>It is more or less impossible for me to design a user
+interface that I don't understand, but it is all too simple for me to design
+one that other people don't understand.</p>
+
+<h3>Rant:&nbsp; Flagged messages in Mozilla Thunderbird</h3>
+
+<p>Another problem with UsWare is the case where I the
+developer design and optimize features for the way I use them, forgetting the
+my users might be using them differently.&nbsp; For an example of this, I'm going to
+switch places and cite a case where I am the user.</p>
+
+<p>My favorite email client is Mozilla Thunderbird.&nbsp; I like it
+very much, except I wish that flagged messages would work the way they do in
+Outlook.&nbsp; Every time I see a new release, I have high hopes that flagged
+messages will finally work the way I expect.&nbsp; Last week I upgraded to the new 1.5
+release, and once again, I was disappointed.&nbsp; Thunderbird supports flags, but
+it cannot search for flagged messages or filter views with flag as one of the
+criteria.</p>
+
+<p>Bottom line:&nbsp; Thunderbird has flags, but they seem to be
+mostly for show.&nbsp; They look nice, but they aren't very useful.</p>
+
+<p>I assume that Thunderbird is UsWare.&nbsp; In other words, I
+assume that all Thunderbird developers actually use Thunderbird as their mail
+client.&nbsp; I am forced to conclude that the Thunderbird developers just don't use
+flags the way I do.</p>
+
+<h3>My Blindspot about Visual Studio integration with Vault</h3>
+
+<p>Let me tell you about another UsWare problem we've
+experienced at SourceGear.&nbsp; First, a little background:</p>
+
+<p>Oversimplifying, there are basically two ways to use a
+version control system.&nbsp; You can use a standalone application, or, you can
+integrate the features directly into the Visual Studio IDE.</p>
+
+<p>Here's the problem:</p>
+
+<p><span style='position:absolute;z-index:1;margin-left:0px;
+margin-top:0px;width:621px;height:475px'><img width=621 height=475
+src="/scm/1576_image002.gif"></span><img border=0 width=621 height=475
+src="/scm/1576_image003.gif"></p>
+
+<p>You see, I <i>hate</i> using source control integration
+within Visual Studio.&nbsp; Our product does include this feature, but I never use
+it.&nbsp; In fact, right now most of the people at SourceGear don't use it.&nbsp;
+However, a clear majority of our customers do.&nbsp; This little canyon causes
+problems.</p>
+
+<p>Sometime in the last year or so, the painfully obvious truth
+hit me like a ton of bricks:&nbsp; Our users want integration.&nbsp; We have always
+explained things to our customers somewhat like this:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Our standalone client application is the primary way to
+     access the Vault server.&nbsp; </li>
+ <li >Our Visual Studio integration client is available, but it offers
+     fewer features and somewhat lower performance.&nbsp; </li>
+</ul>
+
+<p>But this is exactly the opposite of what they want.&nbsp; Most
+people don't want a standalone source control application.&nbsp; Some of our
+customers have never even launched it.&nbsp; They just want source control features
+to show up in all the right places in their IDE.&nbsp; The key thing to notice is
+that IDE stands for <i>Integrated</i> Development Environment.</p>
+
+<p>If you are reading this and wondering how I could miss
+something so obvious, then perhaps I have convinced you how easy it is to find
+a canyon between you and your users.</p>
+
+<p>Here at SourceGear, most of us are software developers, and
+we use Visual Studio.&nbsp; We build version control tools for software developers,
+most of whom are using Visual Studio.&nbsp; Obviously, we eat our own dogfood by
+using our own product as our version control system for the entire team.&nbsp; Nobody
+could possibly be more similar to their customers than we are, right?&nbsp; <b>:-)</b></p>
+
+<p>I have known all along that most of our users want
+integration.&nbsp; But I guess I never let it really sink in.&nbsp; Sometimes my thoughts
+about our product strategy have been better aligned with the way I use the
+product, rather than with the way our customers use it.</p>
+
+<p>Anyway, integration is getting a lot more air time among the
+developers at SourceGear.&nbsp; On several occasions, we have changed our plans to
+allow us to give a higher priority to integration.&nbsp; We are trying to cross the
+canyon between us and people who only use our product within Visual Studio, and
+other IDEs as well:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Several months ago we released a very early preview of an
+     Eclipse plugin for Vault.&nbsp; Work on this project is continuing and will be
+     available later this year.</li>
+ <li >On January 30<sup>th</sup>, we released the first preview
+     of support for integration with Dreamweaver.</li>
+ <li >Vault 4.0 will include an all new Visual Studio
+     integration client for use with Visual Studio 2005.</li>
+</ul>
+
+<p>We get it.&nbsp; A lot of our attention right now is being spent
+trying to make sure that people can enjoyably use Vault in the IDE they prefer.</p>
+
+<p>And by the way, once we get the new Visual Studio
+integration client working, I will be using it.&nbsp; <b>:-)</b></p>
+
+<h2>Meeting these Challenges</h2>
+
+<p>So ThemWare is hard is because our users are nothing like
+us.&nbsp; </p>
+
+<p>And UsWare is hard because we keep assuming our users are
+exactly like us when they're not.</p>
+
+<p>This is the point in the article when you are expecting me
+to suddenly reveal a pearl of great wisdom on how to solve these canyon
+problems.</p>
+
+<p>Sorry, but our time is up. &nbsp;<b>:-)</b></p>
+
+<p>You see, this article is the essay version of a talk I am
+presenting to the <a href="http://www.jaxdug.com/">Jacksonville .NET User Group</a>.&nbsp;
+Right about now is the point where I will be out of time.&nbsp; If I had left time
+for a really good answer to this problem then I wouldn't have had time to for
+my John Cleese imitation, which I can assure you was far more effective in
+person than it was in print.</p>
+
+<p>However, although I can't offer give a <i>good</i> answer to
+this problem, I have just enough time for something flippant and trite:</p>
+
+<p style='text-indent:.5in'><b>Listen to your users</b></p>
+
+<p>And be <a
+href="http://software.ericsink.com/bos/Transparency.html">transparent</a>.&nbsp; Let
+yourself be accountable for listening to your users.&nbsp; The main reason
+SourceGear did a Dreamweaver plugin is because we have a public support forum
+where dozens of people <a
+href="http://support.sourcegear.com/viewtopic.php?t=226&amp;highlight=dreamweaver">asked</a>
+us to do one.&nbsp; This is one of our most common feature requests.&nbsp; How could we
+ignore them?</p>
+
+<p>Your users have things to say.&nbsp; Stop telling them how great
+your software is and listen to them tell you how to make it better.</p>
+
+<p></p>

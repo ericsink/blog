@@ -1,0 +1,289 @@
+---
+esbma_id: unknown
+title: On F# and Object Oriented Guilt
+date: 2014-10-10 20:00:00
+---
+
+<p>I'm writing a key-value database in F#.  Because clearly the world needs
+another key-value database, right?</p>
+
+<p>Actually, I'm doing this to learn F#.  I wanted a non-trivial piece of
+code to write.  Something I already know a little bit about.</p>
+
+<p>(My design is a log structured merge tree, conceptually similar to LevelDB or the
+storage layer of SQLite4.  The code is <a href="https://github.com/ericsink/LSM">on GitHub</a>.)</p>
+
+<p>As a starting point, I wrote the whole thing in C# first.  Then
+I ported it to F#, in a mostly line-by-line port.  My intention was
+(and still is) to use that port as a starting point, evolving the
+F# version toward a more functional design.</p>
+
+<p>The final result may not become useful, but I should end up knowing
+a lot more about F# than I knew when I started.</p>
+
+<h2>Learning</h2>
+
+<p>Preceding all this code was a lot of reading.  I spent plenty of time
+scouring <a href="http://fsharpforfunandprofit.com/">fsharpforfunandprofit.com</a> and <a
+href="http://fsharp.org/">fsharp.org</a> and the F# stuff
+on <a href="http://msdn.microsoft.com/en-us/library/dd233181.aspx">MSDN</a> and <a href="http://stackoverflow.com/tags/f%23/info">Stack Overflow</a>.</p>
+
+<p>I learned that F# is closely related to OCaml, about which I knew
+nothing.  But then I learned that OCaml is a descendant of ML, which I
+vaguely remember from when I took CS 325 as an undergrad with Dr. Campbell.
+This actually increased my interest, as it tied F# back to a positive
+experience of mine.  (OTOH, if I run across something called L# and
+find that it has roots in Prolog, my interest shall proceed no further.)
+</p>
+
+<p>I learned that there is an F# community, and that
+community is related to (or is a subset of) the functional programming
+community.</p>
+
+<p>And I picked up on a faint whiff of tension within that community,
+centered on questions about whether something is purely functional or not.
+There are purists.  And there are pragmatists.
+</p>
+
+<p>I saw nothing ugly.  But
+I definitely got the impression that I had choices to make, and that I might
+encounter differing opinions about how I should make those choices.</p>
+
+<p>I decided to just ignore all that and write code.  This path has
+usually served me well.</p>
+
+<p>So I started writing my LSM tree in C#.</p>
+
+<h2>Digression:  What is a log structured merge tree?</h2>
+
+<p>The basic idea of an LSM tree is that a database is implemented as
+list of lists.  Each list is usually called a "sorted run" or a "segment".</p>
+
+<p>The first segment is kept in memory, and is the only
+one where inserts, updates, and deletes happen.</p>
+
+<p>When the memory segment gets too large, it is flushed out to disk.
+Once a segment is on disk, it is immutable.</p>
+
+<p>Searching or walking the database requires checking all of the segments. 
+In the proper order -- for a given key, newer segments override later segments.  </p>
+
+<p>The more segments there are, the trickier and
+slower this will be.  So we can improve things by merging two disk
+segments together to form a new one.</p>
+
+<p>The memory segment can be implemented with whatever data structure
+makes sense.  The disk segment is usually something like a B+tree,
+except it doesn't need to support insert/update/delete, so it's
+much simpler.</p>
+
+<h2>The C# version:  OO Everywhere</h2>
+
+<p>It's all about ICursor.</p>
+
+<pre class="screen">
+public interface ICursor
+{
+    void Seek(byte[] k, SeekOp sop);
+    void First();
+    void Last();
+    void Next();
+    void Prev();
+    bool IsValid();
+    byte[] Key();
+    Stream Value();
+    int ValueLength();
+    int KeyCompare(byte[] k);
+}
+</pre>
+
+<p>(Credit to D. Richard Hipp and the SQLite developers.  ICursor is more or less what
+you would get if you perused the API for the SQLite4 storage engine and
+translated it to C#.)</p>
+
+<p>This interface defines the methods which can be used to search or iterate
+over one segment.  It's an interface.  It doesn't care about how that
+segment is stored.  It could be a memory segment.  It could be a disk
+segment.  It could be something else, as long as it plays nicely and
+follows the rules.</p>
+
+<p>I have three objects which implementat ICursor.</p>
+
+<p>First, there is MemorySegment, which is little more than a wrapper 
+around a System.Collections.Generic.Dictionary&lt;byte[],Stream&gt;.  
+It has a method called OpenCursor() which returns an ICursor.  Nothing
+too interesting here.</p>
+
+<p>The bulk of my code is in dealing with segments on "disk", which
+are represented as B+trees.
+To construct a disk segment, call BTreeSegment.Create.  Its parameters
+are a System.IO.Stream (into which the B+tree will be written) and an ICursor
+(from which the keys and values will be obtained).</p>
+
+<p>To get the ICursor for that BTreeSegment, call BTreeSegment.OpenCursor().</p>
+
+<p>The object that makes it all work is MultiCursor.  This is an ICursor
+that has one or more subcursors.  You can search or iterate over
+a MultiCursor just like any other.  Under the hood, it will deal
+with all the subcursors and present the illusion that they are one
+segment.</p>
+
+<p>And mostly that's it.</p>
+
+<ul>
+<li><p>To search the database, open a MultiCursor on all the segments
+and call Seek().</p></li>
+
+<li><p>To flush a memory segment to disk, pass its cursor
+to BTreeSegment.Create.</p></li>
+
+<li><p>To combine any two (or more) segments into one, create a 
+MultiCursor on them and pass it to BTreeSegment.Create.</p></li>
+</ul>
+
+<p>As I said above, this is not a complete implementation.  If this
+were "LevelDB in F#", there would need
+to be, for example, something that owns all these segments
+and makes smart decisions about when to flush the memory segment
+and when to merge disk segments together.  That piece of code is
+currently absent here.</p>
+
+<h2>Porting to F#</h2>
+
+<p>Before I started the F# port, I did some soul searching
+about the overall design.  ICursor and its implementations
+are very elegant.  Would I have to give them up in favor of
+something more functional?</p>
+
+<p>I decided to just ignore all that and write code.  This path has
+usually served me well.</p>
+
+<p>So I proceed to do the line-by-line port to F#:</p>
+
+<ul>
+<li><p>I made a copy of the C# code, which I'll refer to as CsFading.</p></li>
+<li><p>Then I started a new F# library project, which we might call FsGrowing.</p></li>
+<li><p>I changed my xUnit test to reference CsFading instead of my actual C# version.</p></li>
+<li><p>I added a reference from CsFading to [the initially empty] FsGrowing.</p></li>
+</ul>
+
+<p>Then I executed the following loop:</p>
+
+<pre class="screen">
+while (!CsFading.IsEmpty())
+{
+    var piece = ChooseSomethingFromCFade();
+    FsGrowing.AddImplementation(piece);
+    CsFading.Remove(piece);
+    GetTheTestsPassingAgain();
+}
+</pre>
+
+<p>I started with this:</p>
+
+<pre class="screen">
+type ICursor =
+    abstract member Seek : k:byte[] * sop:SeekOp -> unit
+    abstract member First : unit -> unit
+    abstract member Last : unit -> unit
+    abstract member Next : unit -> unit
+    abstract member Prev : unit -> unit
+    abstract member IsValid : unit -> bool
+    abstract member Key : unit -> byte[]
+    abstract member Value : unit -> Stream
+    abstract member ValueLength : unit -> int
+    abstract member KeyCompare : k:byte[] -> int
+</pre>
+
+<p>And little by little, CsFading got smaller as FsGrowing got
+bigger.</p>
+
+<p>It was very gratifying when I reached the point where the F# version was
+passing my test suite.</p>
+
+<p>But I didn't celebrate long.
+The F# code was a mess.  Lots of mutables.  Plenty of
+if-then-else.  Nulls.  Mutable collections.  While loops.</p>
+
+<p>Basically, I had written C# using F# syntax.  Even the pseudocode for
+my approach was imperative.
+</p>
+
+<p>But there were plenty of positives as well.  Porting the C#
+code to F# actually made the C# code better.  It was like a
+very intensive code review.</p>
+
+<p>And the xUnit tests got very cool when I configured them to run every test four times:
+</p>
+
+<ul>
+    <li>Use the C# version</li>
+    <li>Use the F# version</li>
+    <li>Use the C# version to write B+trees and the F# version to read them.</li>
+    <li>Use the F# version to write B+trees and the C# version to read them.</li>
+</ul>
+
+<p>If nothing else, I had convinced myself that full interop between F# and C#
+was actually quite smooth.</p>
+
+<p>Also, I didn't completely punt on functional stuff during
+the port.  There were a few places where I changed things toward
+a more F#-ish approach.  Here's a function that turned out kinda nicely:</p>
+
+<pre class="screen">
+let rec searchLeaf k min max sop le ge = 
+    if max < min then
+        if sop = SeekOp.SEEK_EQ then -1
+        else if sop = SeekOp.SEEK_LE then le
+        else ge
+    else
+        let mid = (max + min) / 2
+        let kmid = keyInLeaf(mid)
+        let cmp = compareKeyInLeaf mid k
+        if 0 = cmp then mid
+        else if cmp&lt;0  then searchLeaf k (mid+1) max sop mid ge
+        else searchLeaf k min (mid-1) sop le mid
+</pre>
+
+<p>It's a binary search of the sorted key list within a single leaf page
+of the B+tree.  The SeekOp can be used to specify that if the sought key
+does not exist, the one just before it or after it should be returned.</p>
+
+<p>And yes, searchLeaf would be more idiomatic if it were using pattern
+matching instead of if-then-else.  But at least I got rid of the mutables and the loop and made it recursive!
+<tt><b>:-)</b></tt></p>
+
+<p>Anyway, I expected to reach this point with a clear understanding
+of what to do next.  And I didn't have that.</p>
+
+<h2>Gleaning from the experience of others</h2>
+
+<p>In terms of timing, all of this happened just before and during
+the Xamarin Evolve conference (which, as I write this, ended today).
+The C# version was mostly written the week before the conference.
+The F# port was done during the conference.
+</p>
+
+<p>And that moment where the F# version passed the test suite,
+leaving me clueless about how to proceed?  That happened Wednesday.</p>
+
+<p>On Thursday, <a href="http://rachelree.se/">Rachel Reese</a> gave a fantastic session on F#.
+I left with the impression that maybe a little OO in my F# wasn't so bad.</p>
+
+<p>On Friday, <a href="http://knowing.net.">Larry O'Brien</a> gave another fantastic session on F#.  And I left
+with the even stronger impression that even though learning cool functional
+stuff is great, I don't have to be a functional pursit to benefit from F#.
+</p>
+
+<p>I also found a fair amount of "Don't feel guilty about OO in F#" in a document called
+<a href="http://fsharp.org/specs/component-design-guidelines/">The F# Component Design Guidelines</a> on fsharp.org.</p>
+
+<p>Anyway, for now, ICursor will remain.  Maybe there's a more functional
+way, but right now I don't know what that would look like.</p>
+
+<p>So I'm going to just ignore all that and write code.  This path has
+usually served me well.</p>
+
+<p>&nbsp;</p>
+
+

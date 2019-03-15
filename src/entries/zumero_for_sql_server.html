@@ -1,0 +1,80 @@
+---
+layout: default
+esbma_id: 3036
+title: Zumero for SQL Server
+date: 2013-10-15 12:00:00
+---
+
+<p>It has been seven months (to the day) since our initial launch of <a href="http://zumero.com/">Zumero</a>.</p>
+
+<p>We believe in launching early and iterating
+quickly, guided by customer feedback.  This week, as a result of that feedback,
+we are releasing a preview of our second product, Zumero for SQL Server.</p>
+
+<h3>Background</h3>
+
+<p>Our initial <a href="http://en.wikipedia.org/wiki/Lean_Startup">MVP</a> 
+(now called Zumero Cloud) was (and still is) cloud-hosted.  Since its launch in March, the
+number-one request we have received (by far) has been for an on-prem server.
+Amidst all the buzz around "cloud" and "Backend as a Service", we are hearing from an
+awful lot of people who want "Backend as a Product", provided to them as software
+they can install and manage for themselves.  Go figure.  <b><tt>:-)</tt></b></p>
+
+<p>Furthermore, these customers want an incremental solution.  They're not
+starting from scratch and looking for a new platform.  They already have data sitting 
+in a SQL database.  
+They already have web apps and other stuff which deal with that data.  They
+don't want to change any of that.  They just want to add "mobile" as a new
+ingredient in their soup.</p>
+
+<p>Finally, 90% of this feedback (so far) is coming from people using Microsoft
+SQL Server.</p>
+
+<p>So...</p>
+
+<h3>Zumero for SQL Server</h3>
+
+<p>ZSS is, well, exactly what those folks have been asking us for.  It's an on-prem
+installable server which provides synchronization between SQL Server databases 
+and mobile devices.</p>
+
+<p>And ZSS is designed to cause no disruption to existing stuff.  
+It plays nicely with others and does not assume that it has exclusive control
+over the data.</p>
+
+<p>Our preview
+release is available for download now at <a href="http://zumero.com/dev-center/zss/">http://zumero.com/dev-center/zss/</a>.</p>
+
+<h3>Server and Manager</h3>
+
+<p>ZSS consists of two parts:</p>
+
+<ul>
+    <li>ZSS Server</li>
+    <li>ZSS Manager</li>
+</ul>
+
+<p>The ZSS Server is a module for Internet Information Services (IIS).
+Simply point it at your SQL Server
+database (which need not be on the same machine) using an ODBC connection
+string.  We include an easy-to-use installer as well as instructions for
+people who prefer to do the installation manually.</p>
+
+<p>ZSS Manager is a desktop application used to setup your data for sync.  You can specify which tables
+you want your mobile devices to see and/or modify.  You can configure authentication
+and permissions for your mobile users.</p>
+
+<p>ZSS does not require you to make any changes to your existing database
+schema, but it does need to install some new triggers and views.  The ZSS Manager
+application generates the T-SQL for these items and displays it so that you
+can review everything before any changes to your database are made.</p>
+
+<h3>Availability and Pricing</h3>
+
+<p>The 1.0 release of ZSS is just a few weeks away.</p>
+
+<p>Once we finalize pricing, we will be publishing it on our website.  For now,
+email <a href="mailto:sales@zumero.com">sales@zumero.com</a> and ask for more info.</p>
+
+<p>&nbsp;</p>
+

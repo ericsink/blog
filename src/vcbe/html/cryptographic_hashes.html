@@ -1,0 +1,249 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Git: Cryptographic Hashes</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="internals.html" title="Chapter 12. DVCS Internals"><link rel="prev" href="deltas.html" title="Deltas"><link rel="next" href="repository_structure.html" title="Mercurial: Repository Structure"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Git: Cryptographic Hashes</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="deltas.html">Prev</a> </td><th width="60%" align="center">Chapter 12. DVCS Internals</th><td width="20%" align="right"> <a accesskey="n" href="repository_structure.html">Next</a></td></tr></table><hr></div><div class="section" title="Git: Cryptographic Hashes"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp2878912"></a>Git: Cryptographic Hashes</h2></div></div></div>
+    
+
+<a class="indexterm" name="ndx_begin_cryptographic_hash"></a>
+
+    <p>Most DVCS tools, including Git, Mercurial, and Veracity, use
+        cryptographic hashes.</p>
+
+    <p>A cryptographic hash is an algorithm which constructs a short
+        <em class="firstterm">digest</em> from a 
+        sequence of bytes of any length.  There are many such hash
+        algorithms<sup>[<a name="idp2894144" href="#ftn.idp2894144" class="footnote">40</a>]</sup>.
+        For
+        the SHA-1<sup>[<a name="idp2894864" href="#ftn.idp2894864" class="footnote">41</a>]</sup><a class="indexterm" name="idp2895472"></a> algorithm, the output digest is
+        always 160 bits in length.  Some hash algorithms, including SHA-2<sup>[<a name="idp2896096" href="#ftn.idp2896096" class="footnote">42</a>]</sup><a class="indexterm" name="idp2896688"></a> and Skein<sup>[<a name="idp2897200" href="#ftn.idp2897200" class="footnote">43</a>]</sup><a class="indexterm" name="idp2897792"></a>,
+        are capable of generating longer digests, at lengths of 256, 512, or even
+        1024 bits.</p>
+
+    <div class="section" title="Example with SHA-1"><div class="titlepage"><div><div><h3 class="title"><a name="idp2898416"></a>Example with SHA-1</h3></div></div></div>
+        
+
+    <p>Let’s take a closer look at how a DVCS makes use of cryptographic
+        hashes.  I will be using Git<a class="indexterm" name="idp2899744"></a> for my examples in this section, but it
+applies to Veracity as well.  Mercurial, on the other hand, does things a bit differently.</p>
+
+<p>In this example, we want to use our VCS to store four text files.  For the sake
+of keeping things simple, each
+file is just a few bytes long.  (The example would be more realistic if the files
+were a lot bigger, but you get the idea.)</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:hashes_example eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">echo Eric &gt; file1.txt</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:hashes_example eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">echo Erik &gt; file2.txt</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:hashes_example eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">echo eric &gt; file3.txt</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:hashes_example eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">echo Eirc &gt; file4.txt</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:hashes_example eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">ls -l</span>
+total 32
+-rw-r--r--  1 eric  staff  5 Jun 20 10:29 file1.txt
+-rw-r--r--  1 eric  staff  5 Jun 20 10:29 file2.txt
+-rw-r--r--  1 eric  staff  5 Jun 20 10:29 file3.txt
+-rw-r--r--  1 eric  staff  5 Jun 20 10:29 file4.txt
+</pre>
+
+<p>Each of these files contains my first name or a slight misspelling
+    thereof.  Now I use Git to show me the SHA-1 hash for each of these
+    files.<sup>[<a name="idp2908992" href="#ftn.idp2908992" class="footnote">44</a>]</sup></p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:hashes_example eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git hash-object file1.txt</span>
+44bf09d0a2c36585aed1c34ba2e5d958a9379718
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:hashes_example eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git hash-object file2.txt</span>
+63ae94dae6067d9683cc3a9cea87f8fb388c0e80
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:hashes_example eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git hash-object file3.txt</span>
+782d09e3fbfd8cf1b5c13f3eb9621362f9089ed5
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:hashes_example eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git hash-object file4.txt</span>
+a627820d67e455a4f0dfa49c912fbddb88fca483
+</pre>
+
+<p>Note that even though all four of the input strings are similar, the
+resulting hash values are very different.  As you’ll see later, this is important.</p>
+
+    <p>Git uses hashes in two important ways.</p>
+
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>When you commit
+        a file into your repository, Git calculates and remembers the hash
+        of the contents of the file.  When you later retrieve the file, Git can
+        verify that the hash of the data being retrieved exactly matches the
+hash that was computed when it was stored.  In this fashion, the hash
+        serves as an integrity checksum, ensuring that the data has not been corrupted
+        or altered.</p>
+
+        <p>For example, if somebody were to hack the DVCS repository such that
+           the contents of <code class="filename">file2.txt</code> were changed to “Fred”, retrieval of that
+           file would cause an error because the software would detect that
+           the SHA-1 digest for “Fred” is not 63ae94dae606…
+</p>
+</li><li class="listitem">
+    <p>Git also uses hash digests as database keys for looking
+        up files and data.
+    </p>
+
+    <p>If you ask Git for the contents of <code class="filename">file2.txt</code>, it
+        will first look up its previously computed digest for the contents of that file<sup>[<a name="idp2920432" href="#ftn.idp2920432" class="footnote">45</a>]</sup>, which 
+         is 63ae94dae606…  Then it looks in the
+         repository for the data associated with that value and returns “Erik”
+         as the result.  (For the moment, you should try to ignore the fact that
+         we just used a 40 character hex string as the database key for four characters
+         of data.)
+    </p>
+
+</li></ul></div>
+
+    <p>Let’s assume that we now want to add another file,
+        <code class="filename">file5.txt</code>, which happens to contain exactly the same string
+        as <code class="filename">file2.txt</code>.  So the hash of the
+        file contents will be exactly the same.  </p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:hashes_example eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">echo Erik &gt; file5.txt</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">eric:hashes_example eric$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git hash-object file5.txt</span>
+63ae94dae6067d9683cc3a9cea87f8fb388c0e80
+</pre>
+
+<p>When Git stores the contents of <code class="filename">file5.txt</code>,
+it will realize that it already has a copy of that data.  There
+is no need to store it again.  Hooray!  Git just saved us four
+bytes of storage space!  (Keep in mind that instead of “Erik”, these
+two files could contain a gigabyte of video, which would imply a somewhat
+more motivating space savings.)  This process is called
+<em class="firstterm">deduplication</em><a class="indexterm" name="idp2927344"></a>.</p>
+
+<p>This is deeply neato, but what would have happened if <code class="filename">file5.txt</code>
+did not contain “Erik” but somehow happened to still have a SHA-1 hash of
+63ae94dae606…?
+According to the pigeonhole principle<sup>[<a name="idp2928928" href="#ftn.idp2928928" class="footnote">46</a>]</sup>, this is theoretically possible.  When a cryptographic hash algorithm generates the same digest for two different pieces of data, we call that a <em class="firstterm">collision</em>.</p>  
+
+<p>If a collision were to happen in this situation, we would have some pretty
+big problems.  When the DVCS is asked to store the contents of
+<code class="filename">file5.txt</code> (which does not contain “Erik” but which somehow <span class="bold"><strong>does</strong></span> have a SHA-1 hash of 63ae94dae606…), it would
+incorrectly
+conclude that it already has a copy of that data.  So the real contents of
+<code class="filename">file5.txt</code> would be discarded.  Future attempts to
+retrieve the contents of that file would erroneously return “Erik”.</p>
+
+    <p>Because of this, it is rather important that the DVCS never encounter
+        two different pieces of data which have the same digest.  Fortunately,
+        good cryptographic hash functions are designed to make such
+        collisions <span class="bold"><strong>extremely</strong></span> unlikely.</p>  
+
+    <p>And just how unlikely is that?</p>
+</div>
+
+<div class="section" title="Collisions"><div class="titlepage"><div><div><h3 class="title"><a name="idp2898672"></a>Collisions</h3></div></div></div>
+    
+
+    <p>
+        Your chances of winning the Powerball lottery are
+        <span class="bold"><strong>far</strong></span> better than finding a hash
+        collision.  After all, lotteries often have actual winners.
+        The probability of a hash collision<a class="indexterm" name="idp2936512"></a> is more like a
+        lottery that has been running since prehistoric times and has never had
+        a winner and will probably not have a winner for
+        billions of years.</p>
+
+<p>It is no accident that “Eric”, “Erik”, “eric”, and “Eirc” have
+    hash values that are so different.
+    Cryptographic hash algorithms
+    are intentionally designed 
+    to ensure that two similar pieces of data have digests which are not
+    similar.</p>
+
+<p>The likelihood of accidentally finding a collision is related to the bit
+    length of the
+    hash.  Specifically, the average number of evaluations necessary to
+    find a collision is 
+    <span class="no_line_breaks">2<sup>(bit_length/2)</sup></span>.<sup>[<a name="idp2938544" href="#ftn.idp2938544" class="footnote">47</a>]</sup>  So,
+    if we are trying to find two pieces of data which have the same SHA-1 hash,
+    we could expect to be searching through 2<sup>80</sup> pieces of
+    data.  If we check one
+    million hashes per second, we’ll probably find a collision in about 38
+    billion years.</p>
+
+<p>Unsurprisingly, no one has ever found a SHA-1 collision.</p>
+
+<p>Note that these probabilities apply to the situation where a hash
+    collision is found accidentally, roughly equivalent to the notion of
+    somebody who is just checking random combinations to see if a collision
+    happens to
+    show up.
+    But what if somebody is being a bit more intentional, searching for a collision
+    using a better method than just being random?  Surely this search won’t take
+    as long if we’re being smart about it, right?</p>
+
+<p>Well, no.  That’s part of the definition of a good cryptographic hash algorithm:  
+    There <span class="bold"><strong>is</strong></span> no better method.  If there
+    were, then the hash would be considered “broken”.</p>
+
+<p>This is fairly important for a DVCS.  For example, consider
+    the situation where somebody has access to a repository containing source
+    code for a payroll system.  Their goal is to alter the source code such
+    that they will get extra money on payday.</p>
+
+<p>If they can take a source file and then find an altered version of that
+    file which has the same SHA-1 hash, they might be able to
+    achieve their goal.  Because the SHA-1 hash matches, it is
+    quite likely that they could store their altered version in the
+    repository without anyone noticing.
+</p>
+
+<p>But with a strong cryptographic hash function, it is virtually
+    impossible to find <span class="bold"><strong>any</strong></span> string of bytes which
+    have the same SHA-1 hash as the original file.  And it
+    is even less likely that they could find an altered version which
+    accomplishes the goal of giving them more money, or even 
+    compiles without errors.</p>
+
+<p>Incidentally, SHA-1 is actually considered broken.  For security-oriented applications, it is
+    obsolete and should generally not be used anymore.  
+    However, let me explain
+    a bit more about what cryptographers mean when they say that SHA-1 is broken.</p>
+
+<p>SHA-1 is considered broken because somebody found a smarter way to search for
+    a collision, a method which is more effective than just trying random
+    combinations over and over as fast as you can.  But that doesn’t mean that
+    finding a collision is easy.  It simply means that the search for a 
+    collision in SHA-1 should take less time than
+    it is theoretically supposed to take.  Instead of the full 80 bits of
+    strength that we would expect SHA-1 to have, it actually has about 51 bits of
+    strength.  That means that instead of 38 billion years, we should expect to
+    find a collision in about 70 years.
+</p>
+
+<p>But still, 70 years is
+    a long time.  It remains the case that nobody has ever found a collision in
+    SHA-1.</p>
+
+<p>Nonetheless, there are some who will feel safer using a stronger hash
+    algorithm.  
+    This is why we decided
+    to give Veracity<a class="indexterm" name="idp2948864"></a> support for SHA-2<a class="indexterm" name="idp2949376"></a> and Skein<a class="indexterm" name="idp2949968"></a>, both of which allow
+    for 256 bits or more and neither of which has been broken.
+    At 256 bits, the search for a collision is going to take a <span class="bold"><strong>long</strong></span> time.
+    Instead of one million attempts per second, let’s do a trillion.
+    And let’s assume that there are 6 billion people on Earth and every one of
+    them has a computer and each of us are doing a trillion checks per second.
+    At that rate, it should take us around 2 trillion years to find a collision.</p>
+
+</div>
+
+<a class="indexterm" name="idp2934688"></a>
+
+<div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a id="ftn.idp2894144" href="#idp2894144" class="para">40</a>] </sup><a xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" href="http://en.wikipedia.org/wiki/Cryptographic_hash_function">http://en.wikipedia.org/wiki/Cryptographic_hash_function</a></p></div><div class="footnote"><p><sup>[<a id="ftn.idp2894864" href="#idp2894864" class="para">41</a>] </sup><a xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" href="http://en.wikipedia.org/wiki/SHA-1">http://en.wikipedia.org/wiki/SHA-1</a></p></div><div class="footnote"><p><sup>[<a id="ftn.idp2896096" href="#idp2896096" class="para">42</a>] </sup><a xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" href="http://en.wikipedia.org/wiki/SHA-2">http://en.wikipedia.org/wiki/SHA-2</a></p></div><div class="footnote"><p><sup>[<a id="ftn.idp2897200" href="#idp2897200" class="para">43</a>] </sup><a xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" href="http://en.wikipedia.org/wiki/Skein_(hash_function)">http://en.wikipedia.org/wiki/Skein_(hash_function)</a></p></div><div class="footnote"><p><sup>[<a id="ftn.idp2908992" href="#idp2908992" class="para">44</a>] </sup>Actually, Git prepends a short header (blob &lt;filesize&gt;\0) when it calculates SHA-1 values.</p></div><div class="footnote"><p><sup>[<a id="ftn.idp2920432" href="#idp2920432" class="para">45</a>] </sup>Git stores this information in a structure called a “tree” object.</p></div><div class="footnote"><p><sup>[<a id="ftn.idp2928928" href="#idp2928928" class="para">46</a>] </sup><a xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" href="http://en.wikipedia.org/wiki/Pigeonhole_principle">http://en.wikipedia.org/wiki/Pigeonhole_principle</a></p></div><div class="footnote"><p><sup>[<a id="ftn.idp2938544" href="#idp2938544" class="para">47</a>] </sup><a xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" href="http://en.wikipedia.org/wiki/Birthday_problem">http://en.wikipedia.org/wiki/Birthday_problem</a></p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="deltas.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="internals.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="repository_structure.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Deltas </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Mercurial: Repository Structure</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

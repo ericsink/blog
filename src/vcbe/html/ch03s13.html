@@ -1,0 +1,143 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Merge (repeated, no conflicts)</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="subversion_example.html" title="Chapter 3. Basics with Subversion"><link rel="prev" href="ch03s12.html" title="Merge (no conflicts)"><link rel="next" href="ch03s14.html" title="Merge (conflicts)"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Merge (repeated, no conflicts)</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch03s12.html">Prev</a> </td><th width="60%" align="center">Chapter 3. Basics with Subversion</th><td width="20%" align="right"> <a accesskey="n" href="ch03s14.html">Next</a></td></tr></table><hr></div><div class="section" title="Merge (repeated, no conflicts)"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp701760"></a>Merge (repeated, no conflicts)</h2></div></div></div>
+    
+
+<p>Simultaneously, both Harry and Sally realize that their code has no comments.</p>
+
+<p>Harry:</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">trunk harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">svn diff</span>
+Index: pb.c
+===================================================================
+--- pb.c    (revision 17)
++++ pb.c    (working copy)
+@@ -47,6 +47,7 @@
+         return -1;
+     }
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // lottery ball numbers are always shown sorted</span>
+     qsort(white_balls, 5, sizeof(int), my_sort_func);
+ 
+     return 0;
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">trunk harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">svn commit -m "just a comment"</span>
+Sending        trunk/pb.c
+Transmitting file data .
+Committed revision 18.
+</pre>
+
+<p>And Sally:</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">no_boys_allowed sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">svn diff</span>
+Index: pb.c
+===================================================================
+--- pb.c    (revision 15)
++++ pb.c    (working copy)
+@@ -35,7 +35,7 @@
+ {
+     int balls[6];
+     int count_balls = 0;
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-    int favorite = 0;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    int favorite = 0;  // this should be a bool</span>
+ 
+     for (int i=1; i&lt;argc; i++)
+     {
+@@ -69,10 +69,13 @@
+         goto usage_error;
+     }
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // the power ball is always the last one given</span>
+     int power_ball = balls[5];
+ 
+     int result = calculate_result(balls, power_ball);
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // calculate result can return -1 if the ball numbers</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // are out of range</span>
+     if (result &lt; 0)
+     {
+         goto usage_error;
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">no_boys_allowed sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">svn commit -m "a few comments"</span>
+Sending        no_boys_allowed/pb.c
+Transmitting file data .
+Committed revision 19.
+</pre>
+
+<p>Harry decides to try again to merge the changes from Sally’s branch.</p>
+
+<table xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" align="center" border="0" style="width:350px"><tr><td background="images/eric_aside_04.jpg" style="font-style:italic; padding-left:0.375in; padding-right:0.375in; padding-top:0.25in; padding-bottom:0.25in">
+    <p>Subversion does a nice job with the repeated merge here.  On the
+        first merge, it gets r14 through r16.  On this second merge, it gets
+        r17 through r19, because it remembered the previous
+        merge. </p></td></tr></table>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">svn update</span>
+U    branches/no_boys_allowed/pb.c
+Updated to revision 19.
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">cd trunk</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">trunk harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">svn merge ../branches/no_boys_allowed/</span>
+--- Merging r17 through r19 into '.':
+U    pb.c
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">trunk harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">svn diff</span>
+
+Property changes on: .
+___________________________________________________________________
+Modified: svn:mergeinfo
+   Merged /branches/no_boys_allowed:r17-19
+
+Index: pb.c
+===================================================================
+--- pb.c    (revision 19)
++++ pb.c    (working copy)
+@@ -57,7 +57,7 @@
+ {
+     int balls[6];
+     int count_balls = 0;
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-    int favorite = 0;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    int favorite = 0;  // this should be a bool</span>
+ 
+     for (int i=1; i&lt;argc; i++)
+     {
+@@ -91,10 +91,13 @@
+         goto usage_error;
+     }
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // the power ball is always the last one given</span>
+     int power_ball = balls[5];
+ 
+     int result = calculate_result(balls, power_ball);
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // calculate result can return -1 if the ball numbers</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // are out of range</span>
+     if (result &lt; 0)
+     {
+         goto usage_error;
+</pre>
+
+<p>No worries on the merge then.  Harry checks to see if everything compiles, and commits the merge.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">trunk harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">make</span>
+gcc -std=c99 -Wall -Wextra -Werror pb.c -o pb
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">trunk harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">svn commit -m "merge changes from sally"</span>
+Sending        trunk
+Sending        trunk/pb.c
+Transmitting file data .
+Committed revision 20.
+</pre>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch03s12.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="subversion_example.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch03s14.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Merge (no conflicts) </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Merge (conflicts)</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

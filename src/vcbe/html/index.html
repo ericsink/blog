@@ -1,0 +1,211 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Version Control by Example</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="next" href="intro.html" title="Chapter 1. Introduction"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Version Control by Example</th></tr><tr><td width="20%" align="left"> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="intro.html">Next</a></td></tr></table><hr></div><div class="book" title="Version Control by Example"><div class="titlepage"><div><div><h1 class="title"><a name="idp5824"></a>Version Control by Example</h1></div><div><div class="author"><h3 class="author"><span class="firstname">Eric</span> <span class="surname">Sink</span></h3><div class="affiliation">
+        <span class="orgname">SourceGear<br></span>
+      </div></div></div><div><p class="copyright">Copyright © 2011 Eric Sink</p></div></div><hr></div><div class="acknowledgements" title="Acknowledgments"><div class="titlepage"><div><div><h2 class="title"><a name="idm592"></a>Acknowledgments</h2></div></div></div>
+      
+
+      <p>
+          I appreciate and want to acknowledge the efforts of
+          those who helped me during the production of this book.
+      </p>
+
+      <p>
+          Two of my coworkers at SourceGear have been involved
+          in this project in very substantial ways.
+      </p>
+
+      <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+              <p>
+                  Everything about this book that <span class="italic">looks</span> good is a credit to
+                  John Woolley.  And if there is anything about this book that
+                  does not look good, that was probably an area where I got
+                  in his way.
+              </p>
+
+              <p>
+                  John did the design, the layout, the illustrations,
+                  the cover, the font choices, everything.
+              </p>
+
+              <p>
+                  Personally, I think the book looks fantastic.  My thanks to
+                  John Woolley.
+              </p>
+          </li><li class="listitem">
+              <p>
+                  The back of the title page lists Brody Finney as the “Editor”
+                  of this book, but that does not fully describe his contributions.
+              </p>
+
+              <p>While it is true that Brody’s pedantry and red ink were
+                  critical, he and I also spent much time talking
+                  through issues of structure and content.  He has been my
+                  sounding board on everything from British slang to the
+                  explanations of version control concepts.
+              </p>
+
+              <p>
+                  My thanks to Brody Finney for the many and varied ways that
+                  he made the content of this book better.
+              </p>
+          </li></ul></div>
+
+      <p>I received all kinds of helpful comments and constructive feedback
+          from folks who read early drafts of this book.</p>
+
+      <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+              <p>
+                  My thanks to the following reviewers:
+<span class="no_line_breaks">Tom Alderman,</span>
+<span class="no_line_breaks">Linda Bauer,</span>
+<span class="no_line_breaks">Jonathan Blocksom,</span>
+<span class="no_line_breaks">Rick Borup,</span>
+<span class="no_line_breaks">Anthony Bova,</span>
+<span class="no_line_breaks">Chris Bradley,</span>
+<span class="no_line_breaks">Mark Brents,</span>
+<span class="no_line_breaks">Brian Brewder,</span>
+<span class="no_line_breaks">Andy Brice,</span>
+<span class="no_line_breaks">Eli Carter,</span>
+<span class="no_line_breaks">Fletcher Chambers,</span>
+<span class="no_line_breaks">Michael Chermside,</span>
+<span class="no_line_breaks">Steven Cherry,</span>
+<span class="no_line_breaks">Zian Choy,</span>
+<span class="no_line_breaks">Jeff Clausius,</span>
+<span class="no_line_breaks">Jason Cohen,</span>
+<span class="no_line_breaks">Ben Collins-Sussman,</span>
+<span class="no_line_breaks">John Cook,</span>
+<span class="no_line_breaks">Pascal Cuoq,</span>
+<span class="no_line_breaks">Justin Davis,</span>
+<span class="no_line_breaks">Sybren Dijkstra,</span>
+<span class="no_line_breaks">Augie Fackler,</span>
+<span class="no_line_breaks">Emeric Fermas,</span>
+<span class="no_line_breaks">Wez Furlong,</span>
+<span class="no_line_breaks">Reggie Gardner,</span>
+<span class="no_line_breaks">Rafał Grembowski,</span>
+<span class="no_line_breaks">Fawad Halim,</span>
+<span class="no_line_breaks">Michael Haren,</span>
+<span class="no_line_breaks">Guy Harwood,</span>
+<span class="no_line_breaks">Mark Heath,</span>
+<span class="no_line_breaks">Kevin Horn,</span>
+<span class="no_line_breaks">Jeff Hostetler,</span>
+<span class="no_line_breaks">Kerry Jenkins,</span>
+<span class="no_line_breaks">Joel Jirak,</span>
+<span class="no_line_breaks">Zafiris Keramidas,</span>
+<span class="no_line_breaks">Beth Kieler,</span>
+<span class="no_line_breaks">Anthony Kirwan,</span>
+<span class="no_line_breaks">Kristian Kristensen,</span>
+<span class="no_line_breaks">Robert Lauer,</span>
+<span class="no_line_breaks">Sasha Matijasic,</span>
+<span class="no_line_breaks">Pierre Mengal,</span>
+<span class="no_line_breaks">Gordon J Milne,</span>
+<span class="no_line_breaks">Eamonn Murray,</span>
+<span class="no_line_breaks">Dirkjan Ochtman,</span>
+<span class="no_line_breaks">Ian Olsen,</span>
+<span class="no_line_breaks">John O’Neill,</span>
+<span class="no_line_breaks">Alex Papadimoulis,</span>
+<span class="no_line_breaks">Dobrica Pavlinušić,</span>
+<span class="no_line_breaks">Eric Peterson,</span>
+<span class="no_line_breaks">Mike Pettypiece,</span>
+<span class="no_line_breaks">C. Michael Pilato,</span>
+<span class="no_line_breaks">Pavel Puchkarev,</span>
+<span class="no_line_breaks">Sunil Puri,</span>
+<span class="no_line_breaks">Joe Ream,</span>
+<span class="no_line_breaks">Mike Reedell,</span>
+<span class="no_line_breaks">Alvaro Rodriguez,</span>
+<span class="no_line_breaks">Paul Roub,</span>
+<span class="no_line_breaks">Michael Schoneman,</span>
+<span class="no_line_breaks">Matt Schouten,</span>
+<span class="no_line_breaks">J. Maximilian Spurk,</span>
+<span class="no_line_breaks">Corey Steffen,</span>
+<span class="no_line_breaks">Greg Stein,</span>
+<span class="no_line_breaks">Scott Stocker,</span>
+<span class="no_line_breaks">Jared Stofflett,</span>
+<span class="no_line_breaks">Michael Third,</span>
+<span class="no_line_breaks">Dixie Thornhill,</span>
+<span class="no_line_breaks">Andy Tidball,</span>
+<span class="no_line_breaks">Ben Tsai,</span>
+<span class="no_line_breaks">Chuck Tuffli,</span>
+<span class="no_line_breaks">Greg Vaughn,</span>
+<span class="no_line_breaks">Wilbert van Dolleweerd,</span>
+<span class="no_line_breaks">Stephen Ward,</span>
+<span class="no_line_breaks">Rob Warner,</span>
+<span class="no_line_breaks">Cullen Waters,</span>
+<span class="no_line_breaks">Jason Webb,</span>
+<span class="no_line_breaks">Robin Wilson</span>
+              </p>
+          </li><li class="listitem">
+              <p>
+                  My original plan was to keep this section of the
+                  acknowledgments very simple, like the alphabetical list
+                  above, with no attempt to
+                  describe how much feedback each person provided me.
+              </p>
+
+              <p>
+                  This plan was utterly ruined by Jakub Narębski, whose
+                  feedback during the editing process was extraordinary.  He found
+                  errors no one else found.  He gave me pages of background commentary.
+                  He wrote drafts of content
+                  he felt was too important not to cover.
+              </p>
+
+              <p>
+                  I appreciate the comments I received from <span class="bold"><strong>every</strong></span> person who reviewed
+                  my book, but trust me on this one—Jakub’s feedback was
+                  in a class by itself.
+              </p>
+          </li></ul></div>
+
+      <p>It takes a lot of focus to write a book.
+          Several people supported me in the writing of this book
+          by covering for my absence and offering me their patience.
+          My thanks to:</p>
+
+      <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+              <p>
+                  Ian Olsen, leader of the Veracity development team.
+              </p>
+          </li><li class="listitem">
+              <p>
+                  Corey Steffen, my business partner.
+              </p>
+          </li><li class="listitem">
+              <p>
+                  Lisa Sink, my wife; and Kellie and Lydia Sink, my daughters.
+              </p>
+          </li></ul></div>
+
+      <p>Finally, and above all, I express my gratitude to the Creator.  I have been blessed.  And I am thankful.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="intro.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top"> </td><td width="20%" align="center"> <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Chapter 1. Introduction</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

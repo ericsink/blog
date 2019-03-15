@@ -1,0 +1,177 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Push, Pull, Log, Diff</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="mercurial_example.html" title="Chapter 7. Basics with Mercurial"><link rel="prev" href="ch07s02.html" title="Clone, Add, Status, Commit"><link rel="next" href="ch07s04.html" title="Update, Commit (with a merge)"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Push, Pull, Log, Diff</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch07s02.html">Prev</a> </td><th width="60%" align="center">Chapter 7. Basics with Mercurial</th><td width="20%" align="right"> <a accesskey="n" href="ch07s04.html">Next</a></td></tr></table><hr></div><div class="section" title="Push, Pull, Log, Diff"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp1182752"></a>Push, Pull, Log, Diff</h2></div></div></div>
+    
+
+    <p>Since this is Sally’s first time using Mercurial on her desktop machine, she first sets up her <code class="filename">.hgrc</code> file.</p>
+
+<pre class="screen">[ui]
+username = Sally &lt;sally@futilisoft.com&gt;
+</pre>
+
+<p>Now Sally needs to set up her own repository instance<a class="indexterm" name="idp1186768"></a>.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">~ sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg clone http://server.futilisoft.com:8000/ ./lottery</span>
+no changes found
+updating to branch default
+0 files updated, 0 files merged, 0 files removed, 0 files unresolved
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">~ sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">cd lottery</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">ls -al</span>
+total 0
+drwxr-xr-x   3 sally  staff  102 May 17 08:00 .
+drwxr-xr-x  19 sally  staff  646 May 17 08:00 ..
+drwxr-xr-x   8 sally  staff  272 May 17 08:00 .hg
+</pre>
+
+<p>Hmmm.  Harry was supposed to commit the initial code, but there’s nothing
+here.</p>
+
+<p>But Harry did commit his changes!  Why aren’t they here?  Ah, he forgot to push<a class="indexterm" name="idp1193248"></a>.  Sally screams at Harry loudly enough to be heard six time zones away.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg push</span>
+pushing to http://server.futilisoft.com:8000/
+searching for changes
+remote: adding changesets
+remote: adding manifests
+remote: adding file changes
+remote: added 1 changesets with 1 changes to 1 files
+</pre>
+
+<p>Now Sally can pull<a class="indexterm" name="idp1196096"></a>.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg pull</span>
+pulling from http://server.futilisoft.com:8000/
+requesting all changes
+adding changesets
+adding manifests
+adding file changes
+added 1 changesets with 1 changes to 1 files
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">(run 'hg update' to get a working copy)</span>
+</pre>
+
+<table xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" align="center" border="0" style="width:350px"><tr><td background="images/eric_aside_04.jpg" style="font-style:italic; padding-left:0.375in; padding-right:0.375in; padding-top:0.25in; padding-bottom:0.25in">
+    <p>
+The developers of Mercurial have done a great job on ease of use,
+including little prompts like the one I highlighted above.
+Mercurial is the friendliest DVCS around.
+    </p>
+</td></tr></table>
+
+<p>Now that she has pulled, Sally should have the code, right?</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">ls -al</span>
+total 0
+drwxr-xr-x   3 sally  staff  102 May 17 08:00 .
+drwxr-xr-x  20 sally  staff  680 May 17 08:06 ..
+drwxr-xr-x  12 sally  staff  408 May 17 08:06 .hg
+</pre>
+
+<p>Hmmm.  Still not there.  Ah, maybe she needs to <span class="command"><strong>hg update</strong></span><a class="indexterm" name="idp1202976"></a> the working copy.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg update</span>
+1 files updated, 0 files merged, 0 files removed, 0 files unresolved
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">ls -al</span>
+total 8
+drwxr-xr-x   4 sally  staff  136 May 17 08:07 .
+drwxr-xr-x  20 sally  staff  680 May 17 08:06 ..
+drwxr-xr-x  12 sally  staff  408 May 17 08:07 .hg
+-rw-r--r--   1 sally  staff  555 May 17 08:07 lottery.c
+</pre>
+
+<p>Now that she has the initial code they had
+    previously discussed, Sally is happy as a dead pig in the sunshine.
+    She wants to check the log<a class="indexterm" name="idp1207328"></a> to see the details.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg log</span>
+changeset:   <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">0:1f8baa59f5a4</span>
+tag:         tip
+user:        Harry &lt;harry@futilisoft.com&gt;
+date:        Tue May 17 07:58:36 2011 -0500
+summary:     initial implementation
+</pre>
+
+<table xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" align="center" border="0" style="width:350px"><tr><td background="images/eric_aside_09.jpg" style="font-style:italic; padding-left:0.375in; padding-right:0.375in; padding-top:0.25in; padding-bottom:0.25in">
+    <p>
+Note the way Mercurial describes this commit: <code class="code">0:1f8baa59f5a4</code>.  At the
+lowest level, a Mercurial version ID is a SHA-1 hash, usually displayed in hex with
+only its first 12 characters.  This is the part after the colon.  Before the colon
+is a friendlier version number, one which starts at zero and increases by one
+with each new version.  This is more intuitive, but these version numbers are
+valid only in one repository instance.
+    </p>
+</td></tr></table>
+
+<p>When Sally decides to take a look at the code, she immediately finds
+    something that makes her nervous as a chicken on a conveyor belt.  The program expects the red ball number to
+    be the first argument, followed by the other five.  But in the actual
+    lottery, the five white numbers are always drawn and shown first.  She
+    worries this will be confusing for users so she decides to fix it.
+    Fortunately it is only necessary to modify a few lines of <code class="code">main()</code>.</p>
+
+<pre class="programlisting">    if (argc != 7)
+    {
+        fprintf(stderr, "Usage: %s (5 white balls) power_ball\n", argv[0]);
+        return -1;
+    }
+
+    int power_ball = atoi(argv[6]);
+
+    int white_balls[5];
+    for (int i=0; i&lt;5; i++)
+    {
+        white_balls[i] = atoi(argv[1+i]);
+    }
+</pre>
+
+<p>Now she uses the <span class="sg-operation">status</span> operation to see the pending changes.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg status</span>
+M lottery.c
+</pre>
+
+<p>No surprise there.  Mercurial knows that <code class="filename">lottery.c</code>
+    has been modified.  She wants to double-check by reviewing the actual
+    changes.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg diff</span>
+diff -r 1f8baa59f5a4 lottery.c
+--- a/lottery.c Tue May 17 07:58:36 2011 -0500
++++ b/lottery.c Tue May 17 08:09:58 2011 -0500
+@@ -11,16 +11,16 @@
+ {
+     if (argc != 7)
+     {
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-        fprintf(stderr, "Usage: %s power_ball (5 white balls)\n", argv[0]);</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        fprintf(stderr, "Usage: %s (5 white balls) power_ball\n", argv[0]);</span>
+         return -1;
+     }
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-    int power_ball = atoi(argv[1]);</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    int power_ball = atoi(argv[6]);</span>
+ 
+     int white_balls[5];
+     for (int i=0; i&lt;5; i++)
+     {
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-        white_balls[i] = atoi(argv[2+i]);</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        white_balls[i] = atoi(argv[1+i]);</span>
+     }
+ 
+     int result = calculate_result(white_balls, power_ball);
+</pre>
+
+<p>Ain’t that the bee’s knees!?!</p>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch07s02.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="mercurial_example.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch07s04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Clone, Add, Status, Commit </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Update, Commit (with a merge)</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

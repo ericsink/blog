@@ -1,0 +1,263 @@
+---
+layout: default
+esbma_id: 3102
+title: The Multiple SQLite Problem
+date: 2014-05-16 12:00:00
+---
+
+<h2>Eric, why the #$%! is your SQLite PCL taking so long?</h2>
+
+<p>It's Google's fault.  And Apple's fault.</p>
+
+<h2>Seriously?</h2>
+
+<p>No.  Yes.  Kinda.  Not really.</p>
+
+<h2>The Multiple SQLite Problem, In a Nutshell</h2>
+
+<p>If your app makes use of two separate instances of the SQLite library,
+you can end up with a corrupted SQLite data file.</p>
+
+<h2>From the horse's mouth</h2>
+
+<p>On the SQLite website, section 2.2.1 of <a href="http://sqlite.org/howtocorrupt.html">How to Corrupt an SQLite Database File</a> is entitled "Multiple copies of SQLite linked into the same application", and says:</p>
+
+<blockquote>
+    As pointed out in the previous paragraph, SQLite takes steps to work around
+    the quirks of POSIX advisory locking. Part of that work-around involves
+    keeping a global list (mutex protected) of open SQLite database files. But,
+    if multiple copies of SQLite are linked into the same application, then
+    there will be multiple instances of this global list. Database connections
+    opened using one copy of the SQLite library will be unaware of database
+    connections opened using the other copy, and will be unable to work around
+    the POSIX advisory locking quirks. A close() operation on one connection
+    might unknowingly clear the locks on a different database connection,
+    leading to database corruption.
+</blockquote>
+
+<blockquote>
+    The scenario above sounds far-fetched. But the SQLite developers are aware
+    of at least one commercial product that was released with exactly this bug.
+    The vendor came to the SQLite developers seeking help in tracking down some
+    infrequent database corruption issues they were seeing on Linux and Mac.
+    The problem was eventually traced to the fact that the application was
+    linking against two separate copies of SQLite. The solution was to change
+    the application build procedures to link against just one copy of SQLite
+    instead of two.
+</blockquote>
+
+<p>At its core, SQLite is written in C.  It is plain-old-fashioned
+native/umanaged code.  If you are accessing SQLite using C#, you are doing so
+through some kind of a wrapper.  That wrapper is loading the SQLite library
+from somewhere.  You may not know where.  You probably don't [want to] care.</p>
+
+<p>This is an abstraction.  And it can leak.  C# is putting some distance
+between you and the reality of what SQLite really is.  That distance can
+somewhat increase the likelihood of you accidentally having two instances
+of the SQLite library without even knowing it.</p>
+
+<h2>SQLite as part of the mobile OS</h2>
+
+<p>Both iOS and Android contain an instance of SQLite as part of the basic
+operating system.  This is a blessing.  And a curse.</p>
+
+<p>Built-in SQLite is nice because your app doesn't have to include it.
+This makes the size of your app smaller.  It avoids the need to compile
+SQLite as part of your build process.</p>
+
+<p>But the problem is that the OS has contributed one instance of the
+SQLite library that you can't eliminate.  It's always there.  The
+multiple SQLite problem cannot happen if only one SQLite is available
+to your app.  Anybody or anything which adds one is risking a plurality.</p>
+
+<h2>If SQLite is always in the OS, why not always use it?</h2>
+
+<p>Because Apple and Google do a terrible job of keeping it current.</p>
+
+<ul>
+    <li><p>iOS 7 ships with SQLite 3.7.13.  That shipped in June of 2012.</p></li>
+
+    <li><p>Android ships with SQLite 3.7.11.  That shipped in March of 2012.</p></li>
+
+    <li><p>Since Android users never update their devices, a large number of them
+    are still running SQLite 3.7.4, which shipped in December of 2010.  (Yes, I know
+    the sweeping generalization in the previous sentence is unfair.  I like Android a lot, but I think
+    Google's management of the Android world has been bad enough that I'm
+    entitled to a little crabbiness.)
+    </p></li>
+</ul>
+
+<p>If you are targeting Android or iOS and using the built-in SQLite library,
+you are missing out on at least TWO YEARS of excellent development work by
+DRH and his team.  Current versions of SQLite are significantly faster,
+with many bug fixes, and lots of insanely cool new features.  This is just one of the
+excellent reasons to bundle a current version of SQLite into your app
+instead of using the one in the OS.</p>
+
+<p>And as soon as you do that, there are two instances in play.  You
+and Apple/Google have collaborated to introduce the risk of database corruption.</p>
+
+<h2>Windows</h2>
+
+<p>AFAIK, no version of Windows includes a SQLite library.  This is a blessing.
+And a curse.  For all of the opposite reasons discussed above.</p>
+
+<p>In general, building a mobile app for Windows (Phone or RT or whatever) means
+you have to include SQLite as part of the app.  And when doing so, it certainly
+makes sense to just use the latest version.</p>
+
+<p>And that introduces another reason somebody might want to use an
+application-private version of SQLite instead of the one built-in to iOS or
+Android.  If you're building a cross-platform app, you probably want all
+your platforms using the same version of SQLite.  Have fun explaining to your
+QA people that your app is built on SQLite 3.8.4 on Windows and 3.7.11 on
+Android and 3.7.13 on iOS.</p>
+
+<p>BTW, it's not clear how or if Windows platforms suffer from the data corruption
+risk of the multiple SQLite problem.  Given that the DRH explanation talks about
+workarounds for quirks in POSIX file locking, it seems likely that the situation
+on Windows is different in significant ways.  Nonetheless, even if using multiple
+SQLite instances on Windows platforms is safe, it is still wasteful.  And sad.</p>
+
+<h2>SQLCipher or SEE</h2>
+
+<p>Mobile devices get lost or stolen.  
+A significant portion of mobile app developers want their data encrypted on
+the device.  And the SQLite instance built-in to iOS and Android is plain,
+with no support for encryption.</p>
+
+<p>The usual solution to this problem is to use SQLCipher (open source, from
+Zetetic) or SEE (proprietary, from the authors of SQLite).  Both of these
+are drop-in replacements for SQLite.</p>
+
+<p>In other words, this is yet another reason the OS-provided SQLite
+library might not be sufficient.</p>
+
+<h2>SQLite compilation options</h2>
+
+<p>SQLite can be compiled in a lot of different ways.  Do you want the full-text-search feature?
+Do you want foreign keys to be default on or off?  What do you want the default thread-safety mode to be?  Do you need the column metadata feature?
+Do you need ICU for full Unicode support in collations?  The list goes on and on.</p>
+
+<p>Did Apple or Google compile SQLite with the exact set of build options your app needs?  Maybe.  Or maybe your app just needs to have its own.</p>
+
+<h2>Adding a SQLite instance without knowing it</h2>
+
+<p>Another way to get two SQLite instances is to add a component or library
+which includes one.  Even if you don't know.</p>
+
+<p>For example, the client side of <a href="http://zumero.com/">Zumero</a> (our mobile SQL sync product) needs
+to call SQLite.  Should it bundle a SQLite library?  Or should it always call
+the one in the mobile OS (when available)?</p>
+
+<p>Some earlier versions of the Zumero client SDK included a SQLite instance
+in our Xamarin component builds.  Because, why on earth would we want our
+code running against the archaic version of SQLite provided by Apple and
+Google?</p>
+
+<p>And then we had a customer run into this exact problem.  They called
+Zumero for sync.  And they used Mono.Data.Sqlite for building their app.</p>
+
+<p>Now we ship builds which contain no SQLite library instance, because it
+minimizes the likelihood of this kind of accident happening.<p>
+
+<p>There are all kinds of libraries and components and SDKs out there which build
+on SQLite.  Are they calling the instance provided by the OS?  Or are
+they bundling one?  Do you even know?</p>
+
+<h2>So maybe app developers should just be more careful</h2>
+
+<p>Knee-jerk reaction:  Yes, absolutely.</p>
+
+<p>Better answer:  Certainly not.</p>
+
+<p>App developers don't want to think about this stuff.  It's a bit of
+esoterica that nobody cares about.  Most people who started reading this
+blog entry gave up several paragraphs ago.  The ones that are still here
+(both of you) are wondering why you are still reading when right now there are 
+seven cable channels showing a rerun of Law and Order.</p>
+
+<h2>An increasingly easy accident</h2>
+
+<p>The multiple SQLite scenario is sounding less far-fetched all the time.
+SQLite is now one of the most widely deployed pieces of software in history.
+It is incredibly ubiquitous, and still growing.  And people love to build
+abstractions on top of it.</p>
+
+<p>This problem is going to get more and more common.</p>
+
+<p>And it can have very significant consequences for end users.</p>
+
+<h2>Think of it this way</h2>
+
+<p>The following requirements are very typical:</p>
+
+<ul>
+    <li><p>
+    App developers want to be using a current version of SQLite (because DRH has actually been working for the last two years).
+    </p></li>
+
+    <li><p>
+    App developers want their SQLite data on the mobile device to be encrypted (because even grown-ups lose mobile devices).
+    </p></li>
+
+    <li><p>
+    App developers want to be using the same version of SQLite on all of their mobile app platforms (because it simplifies testing).
+    </p></li>
+
+    <li><p>
+    App developers want no risk of data corruption (because end users don't like that kind of thing).
+    </p></li>
+
+    <li><p>
+    App developers want to work with abstractions, also-known-as ORMs and sync tools, also-known-as things that makes their lives easier (because writing mobile apps is insanely expensive and it is important to reduce development costs).
+    </p></li>
+
+    <li><p>
+    App developers want to NOT have to think about anything in this blog entry (because they are paid to focus on their actual business, which is medicine or rental cars or construction, and it's 2014, so they shouldn't have to spend any time on the ramifications of quirky POSIX file locking).
+    </p></li>
+
+</ul>
+
+<p>Those requirements are not just typical, they are reasonable.  To ask app developers to give up any of these things would be absurd.</p>
+
+<p>And right now, there is NO WAY to satisfy all the requirements above.  In the terminology of high school math, this is a system of equations with no solution.</p>
+
+<h2>To be fair</h2>
+
+<p>The last several weeks of "the NuGet package is almost ready" are also due to some reasons I can't blame Apple or Google or POSIX for.</p>
+
+<p>When I started working on <a href="https://github.com/ericsink/SQLitePCL.raw">SQLitePCL.raw</a>, I didn't know nearly enough about MSBuild or NuGet.  Anything involving native code with NuGet is pretty tricky.  I've spent time climbing the learning curve.  My particular way of learning new technologies is to write the code three times.  The commit history on GitHub contains the whole story.</p>
+
+<h2>Ramifications for SQLitePCL.raw</h2>
+
+<p>I want users of my SQLite PCL to have a great experience, so I'm spending
+[perhaps too much] time trying to find the sweetest subsets of the requirements
+above.</p>
+
+<p>For example:  C++/CX is actually pretty cool.  I can build a single WP8 component DLL
+which is visible to C# while statically building SQLite itself inside.
+Fewer pieces.  Fewer dependencies.  Nice.  But if anything else in
+the app needs direct access to SQLite, they'll have to include
+another instance of the library.  Yuck.</p>
+
+<p>Another example:  I see [at least] three reasonable choices for iOS:</p>
+
+<ul>
+    <li><p>Use the SQLite provided by iOS.  It's a shared library.  Access it with P/Invoke, DllImport("sqlite3").</p></li>
+    <li><p>Bundle the latest SQLite.  DllImport("__Internal"), and embed a sqlite3.a as a resource and use the MonoTouch LinkWith attribute.</p></li>
+    <li><p>Use the Xamarin SQLCipher component.  DllImport("__Internal"), but don't bundle anything, relying on the presence of the SQLCipher component to make the link succeed.</p></li>
+</ul>
+
+<p>Which one should the NuGet package assume that people want?  How do people that prefer the others get a path that Just Works?</p>
+
+<h2>So, Eric, when will the SQLitePCL.raw NuGet package be ready</h2>
+
+<p>Soon.  <tt><b>;-)</b></tt></p>
+
+<h2>Bottom line</h2>
+
+<p>"I don't know the key to success, but the key to failure is trying to please everybody."  -- Bill Cosby</p>
+
+<p>&nbsp;</p>
+

@@ -1,0 +1,145 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Merge (repeated, no conflicts)</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="git_example.html" title="Chapter 8. Basics with Git"><link rel="prev" href="ch08s12.html" title="Merge (no conflicts)"><link rel="next" href="ch08s14.html" title="Merge (conflicts)"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Merge (repeated, no conflicts)</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch08s12.html">Prev</a> </td><th width="60%" align="center">Chapter 8. Basics with Git</th><td width="20%" align="right"> <a accesskey="n" href="ch08s14.html">Next</a></td></tr></table><hr></div><div class="section" title="Merge (repeated, no conflicts)"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp2027664"></a>Merge (repeated, no conflicts)</h2></div></div></div>
+    
+
+<p>Simultaneously, both Harry and Sally realize that their code has no comments.</p>
+
+<p>Harry:</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git diff</span>
+diff --git a/src/pb.c b/src/pb.c
+index 961c1f2..f7d0b61 100644
+--- a/src/pb.c
++++ b/src/pb.c
+@@ -47,6 +47,7 @@
+         return -1;
+     }
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // lottery ball numbers are always shown sorted</span>
+     qsort(white_balls, 5, sizeof(int), my_sort_func);
+ 
+     return 0;
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git commit -a -m comments</span>
+[master 571e482] comments
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git push</span>
+Counting objects: 7, done.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (4/4), 388 bytes, done.
+Total 4 (delta 1), reused 0 (delta 0)
+Unpacking objects: 100% (4/4), done.
+To http://server.futilisoft.com:8000/lottery
+   df43333..571e482  master -&gt; master
+</pre>
+
+<p>And Sally:</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git diff</span>
+diff --git a/src/pb.c b/src/pb.c
+index ad680c7..7881352 100644
+--- a/src/pb.c
++++ b/src/pb.c
+@@ -35,7 +35,7 @@
+ {
+     int balls[6];
+     int count_balls = 0;
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-    int favorite = 0;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    int favorite = 0;  // this should be a bool</span>
+ 
+     for (int i=1; i&lt;argc; i++)
+     {
+@@ -69,10 +69,13 @@
+         goto usage_error;
+     }
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // the power ball is always the last one given</span>
+     int power_ball = balls[5];
+ 
+     int result = calculate_result(balls, power_ball);
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // calculate result can return -1 if the ball numbers</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    // are out of range</span>
+     if (result &lt; 0)
+     {
+         goto usage_error;
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git commit -a -m comments</span>
+[no_boys_allowed 7570e84] comments
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git push</span>
+Counting objects: 7, done.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (4/4), 474 bytes, done.
+Total 4 (delta 1), reused 0 (delta 0)
+Unpacking objects: 100% (4/4), done.
+To http://server.futilisoft.com:8000/lottery
+   02f9797..7570e84  no_boys_allowed -&gt; no_boys_allowed
+ ! [rejected]        master -&gt; master (non-fast-forward)
+error: failed to push some refs to 'http://server.futilisoft.com:8000/lottery'
+To prevent you from losing history, non-fast-forward updates were rejected
+Merge the remote changes (e.g. 'git pull') before pushing again.  See the
+'Note about fast-forwards' section of 'git push --help' for details.
+</pre>
+
+<p>
+    Sally notices that the push of her private branch succeeded.
+    Git seems to be griping about something else, related to the
+    master branch.  She thinks it best that she just ignore it.
+</p>
+
+<table xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" align="center" border="0" style="width:350px"><tr><td background="images/eric_aside_02.jpg" style="font-style:italic; padding-left:0.375in; padding-right:0.375in; padding-top:0.25in; padding-bottom:0.25in">
+    <p>
+        That error message 
+        is Git’s way of saying the master branch in
+        Sally’s repository instance is out of date.
+    </p>
+</td></tr></table>
+
+<p>Harry decides to try again to merge the changes from Sally’s branch.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git pull</span>
+remote: Counting objects: 7, done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 4 (delta 1), reused 0 (delta 0)
+Unpacking objects: 100% (4/4), done.
+From http://server.futilisoft.com:8000/lottery
+   02f9797..7570e84  no_boys_allowed -&gt; origin/no_boys_allowed
+Already up-to-date.
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git merge origin/no_boys_allowed</span>
+Auto-merging src/pb.c
+Merge made by recursive.
+ src/pb.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+</pre>
+
+<p>No worries on the merge then.  Harry checks to see if everything compiles.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">make</span>
+gcc -std=c99 -Wall -Wextra -Werror pb.c -o pb
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git push</span>
+Counting objects: 10, done.
+Compressing objects: 100% (3/3), done.
+Unpacking objects: 100% (4/4), done.
+Writing objects: 100% (4/4), 541 bytes, done.
+Total 4 (delta 1), reused 0 (delta 0)
+To http://server.futilisoft.com:8000/lottery
+   571e482..31b9ef7  master -&gt; master
+</pre>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch08s12.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="git_example.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch08s14.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Merge (no conflicts) </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Merge (conflicts)</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

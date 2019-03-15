@@ -1,0 +1,250 @@
+---
+layout: default
+esbma_id: 1763
+title: DVCS and Bug Tracking
+date: 2009-03-16 13:00:00
+---
+<p><img width=350 height=350 src="/scm/1763_image001.jpg"
+align=right hspace=12>In last week's <a
+href="/entries/dvcs_dag_2.html">entry</a>, I mentioned my
+interest in <a href="http://www.fossil-scm.org/">Fossil</a>, a relatively new
+DVCS written by the author of SQLite.&nbsp; In the comments on that entry, a guy
+named <a href="http://bitquabit.com/">Benjamin Pollack</a> picked a fight with
+me about why I think Fossil is interesting.</p>
+
+<p>It turns out that this guy is actually one of <a
+href="http://www.joelonsoftware.com/">Joel</a>'s minions over at Fog Creek.&nbsp; In
+fact, he joined the company as one of the interns on <a
+href="http://www.imdb.com/title/tt0813987/">Project Aardvark</a> back in 2005.</p>
+
+<p>To Benjamin, I would like to say that "interesting !=
+good".&nbsp; Some things are interesting in spite of the fact that they are crap.&nbsp;
+And some things are interesting BECAUSE of the fact that they're crap.</p>
+
+<p>And to D. Richard Hipp, the author of Fossil, I would like
+to say that I am <i>not</i> saying Fossil is crap.&nbsp; In fact, I am currently
+taking no position on whether Fossil is good or bad.&nbsp; For now, I just think
+it's interesting, mostly because I think the issues of DVCS integration with
+the rest of the ALM tool suite are important.</p>
+
+<p>But before I talk more about that, I can't resist offering a
+few remarks about Fossil itself.</p>
+
+<h2>Comments about Fossil</h2>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >Benjamin Pollack complained that Fossil handles merge
+     conflicts poorly.&nbsp; And he's right.&nbsp; When it inserts markers around the
+     conflicting text, it should clearly indicate what came from which file.<br>
+     <br>
+ </li>
+ <li >Why does each instance of the repo have its own list of
+     users?&nbsp; I would have expected that this information would sync during a
+     push/pull operation.<br>
+     <br>
+ </li>
+ <li >The 'fossil ui' command is conceptually cool.&nbsp; It runs a
+     built-in web server and launches a browser pointing at it, providing a
+     web-based way to interact with all the features of Fossil.&nbsp; But Fossil's
+     web UI isn't going to win any awards for aesthetics.&nbsp; It's 2009, and the
+     world is getting less tolerant of ugly things in web browsers every year.&nbsp;
+     At some point, making Fossil pretty would probably be worthwhile.<br>
+     <br>
+ </li>
+ <li >Fossil is really easy to configure.&nbsp; It's just one
+     executable file.&nbsp; And setting it up as a server is simple, either using
+     its built-in server, or running as a CGI, or running through inetd.&nbsp; Very
+     nice.</li>
+</ol>
+
+<h2>Distributed Bug-Tracking</h2>
+
+<p>Industry-wide, there is a trend toward <i>more</i>
+integration between version control and other stuff like project tracking,
+wikis, discussion forums, build tracking, etc.&nbsp; Developers don't just checkin
+code.&nbsp; They use a whole bunch of other tools which help them collaborate with
+each other and with people in other functional areas.</p>
+
+<p>While DVCS is one of the more interesting things happening
+right now, it does represent a setback in this particular area.&nbsp; The benefits
+of a DVCS are somewhat diminished if all of the other tools a developer needs
+are still "centralized".</p>
+
+<p>Yes, it's cool that I can commit my code while I'm on a
+plane, but how do I update the FogBugz case to mark it fixed?&nbsp; So far, the
+answer is that I have to wait until the plane lands, hope the airport has
+Wi-Fi, login to my corporate VPN, bring up a web browser, remember the case ID,
+find the case, change its status, and try to remember my code changes so I can
+write something relevant in the comments.</p>
+
+<p>As long as this is the answer, then I assert that the story
+for DVCS is, well, incomplete.</p>
+
+<h2>Other relevant projects</h2>
+
+<p>As far as I know, Fossil is the only tool which is a DVCS
+with bug tracking built-in.&nbsp; But it is not the only project exploring this area
+of need.&nbsp; Others include:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li ><a href="http://bugseverywhere.org/be/show/HomePage">Bugs
+     Everywhere</a></li>
+ <li ><a href="http://www.distract.wellquite.org/">DisTract</a></li>
+ <li ><a href="http://www.ditrack.org/">DITrack</a></li>
+ <li ><a href="http://ditz.rubyforge.org/">Ditz</a></li>
+ <li ><a href="http://wiki.github.com/schacon/ticgit">TicGit</a></li>
+</ul>
+
+<p>I have spent some time looking at each of these, but not
+enough to make detailed comments.&nbsp; Let's just say that I consider all of them
+interesting in the same way that I think Fossil is interesting.</p>
+
+<h2>Things I think I think</h2>
+
+<p>After looking at everything I can find in the area of
+distributed bug-tracking, I found myself with more questions than answers.&nbsp; But
+I am starting to collect some things that I think are correct.&nbsp; I think.</p>
+
+<h3>I think bugs deserve their own DAG.</h3>
+
+<p>I think everybody's first thought about bug-tracking with
+DVCS is that the bugs should be stored in the version control tree as text
+files that can be merged.&nbsp; Whenever the tree branches, the bugs will
+automatically branch as well.&nbsp; A bug can be marked as fixed in the branch where
+it is fixed.</p>
+
+<p>But the more I think about this design, the more I think it
+would cause a lot of regrets later.&nbsp; I think bug tracking records probably need
+their own place, living in their own DAG.&nbsp; There are just too many scenarios
+where the bug-tracking info is being updated without changing anything in the
+tree.</p>
+
+<p>For example, consider the QA team.&nbsp; When they update a bug
+to mark it as "fix verified", you don't really want them doing this operation
+as a commit to the version control tree, do you?&nbsp; In fact, you probably want
+the bug-tracking and version control areas to be controlled by a completely
+different set of access permissions.</p>
+
+<p>Fossil got this right, sort of.&nbsp; Tickets are separate from
+the tree.</p>
+
+<p>But Fossil's design isn't perfect.&nbsp; Tickets are actually not
+managed with a DAG at all.&nbsp; Rather, the algorithm for resolving conflicting
+changes is <a href="http://www.fossil-scm.org/fossil/doc/tip/www/bugtheory.wiki">something
+like</a> "the version with the latest timestamp wins".&nbsp; Do we credit the author
+for not over-designing?&nbsp; After all, this guy did SQLite, so he knows a thing or
+two about how to implement "just enough to be incredibly useful".&nbsp; Or is this
+design likely to make users really angry when it causes an unpleasant surprise?</p>
+
+<h3>I think bugs deserve their own merge algorithm</h3>
+
+<p>Once again, the first thought here is probably not the right
+one.</p>
+
+<p>A DVCS knows how to deal with merging changes to text
+files.&nbsp; So if we want to store bugs, then obviously we should keep them in text
+files so we can re-use all that merge code, right?</p>
+
+<p>I don't think so.</p>
+
+<p>Stuff in a database is very highly structured.&nbsp; We have lots
+of information which can be used to implement really good merging.&nbsp; In theory,
+merging changes to a bug-tracking database should work much better than merging
+changes to code.&nbsp; </p>
+
+<p>(Yes, code is very highly structured as well, but the only
+way to get that information is to parse the code.&nbsp; I've seen some interesting
+research in the area of language-specific version control tools that manage
+code changes with a parse tree representation, but I don't think those things
+will be practical mainstream solutions anytime soon.)</p>
+
+<p>Anyway, if you take a bug record and throw it in a text file
+and then use regular old file merge to resolve changes, it seems like you're
+throwing away a lot of the information you could be using.</p>
+
+<p>Admittedly, writing a special merge algorithm for this case
+would be a TON of work.&nbsp; But the results might be worth it.&nbsp; It might be the
+difference between a distributed bug-tracking system that constantly annoys its
+users and one that Just Works.</p>
+
+<h3>I think bugs deserve their own sync patterns.</h3>
+
+<p>The use cases for distributed bug tracking are different
+than distributed version control.</p>
+
+<p>For example, it seems very likely that we want to sync our
+local instance of the bug-tracking database a lot more frequently than we want
+to sync our local instance of the version control tree.&nbsp; </p>
+
+<p>If I've got a live connection to the central server, then I
+want to be pulling down updates to the bug db all the time.</p>
+
+<p>If I add a comment to a bug, I probably want that comment
+pushed up to the central server as soon as my network connectivity allows.</p>
+
+<p>With version control, I want a private sandbox so I can work
+on a bunch of code changes and only push them up to the central server when I'm
+done fiddling with them.&nbsp; That kind of workflow strikes me as far less important
+for a bug-tracking application.</p>
+
+<h3>I think distributed version control needs distributed bug-tracking</h3>
+
+<p>I've just explained several ways that distributed bug
+tracking needs to be different from the way a DVCS works.&nbsp; But I still think
+that pairing a DVCS with a centralized bug-tracking solution makes very little
+sense.</p>
+
+<p>Consider the scenario where a company is doing development
+in two cities and wants each of them to have their own server.</p>
+
+<p><img border=0 width=550 height=326
+src="/scm/1763_image002.jpg"></p>
+
+<p>We actually get this request quite a bit from Vault
+customers.&nbsp; Somebody calls and says they have a team in New York City and another
+team in <a href="http://en.wikipedia.org/wiki/Strawn,_Illinois">Strawn</a>.&nbsp;
+They want each team to be doing work on their own central server.&nbsp; And they
+want the two central servers to synchronize with each other at some regular
+interval.</p>
+
+<p>These people are asking for a DVCS.&nbsp; They don't care about
+the "coding on a plane scenario".&nbsp; They don't really care so much about private
+workspaces or the performance benefits of having the entire repository on every
+developer's machine.&nbsp; They still want a central server.&nbsp; The only difference is
+that they want TWO central servers.&nbsp; And a DVCS can do that.</p>
+
+<p>And if they are using more than just version control, then
+what they really want is for ALL developer-related stuff to follow that same
+workflow.&nbsp; Every four hours when the two central servers do their sync-up, a
+bunch of changesets get pushed in each direction.&nbsp; Some of those changes are
+modifications to the version control tree.&nbsp; Others contain changes to the work
+items or the wiki pages or whatever.</p>
+
+<h3>I think DVCS will stay small until it becomes a "whole product".</h3>
+
+<p>My regular readers know that I am a fan of Geoffrey Moore's
+classic book, <a
+href="http://www.amazon.com/exec/obidos/ASIN/0060517123/sawdust08-20">Crossing
+the Chasm</a>.&nbsp; One of the ideas in that book is that new innovations don't go
+mainstream until they become a "whole product".&nbsp; Right now, most of the
+comments about DVCS that I am hearing out in the industry are negative.</p>
+
+<p>Some of them are saying that "DVCS will never be
+mainstream".&nbsp; More and more, I think those people are wrong.</p>
+
+<p>Others are saying that "this DVCS stuff just isn't ready
+yet".&nbsp; Right now, those people are right.&nbsp; For a large portion of the market,
+version control alone is not a complete solution.&nbsp; They want the whole product,
+and they want it to work together seamlessly.</p>
+
+<p>If DVCS wants to reach that part of the market, it needs to
+figure out what "distributed" means for bug-tracking and wiki and forums and
+change management and build tracking and test management and requirements.</p>
+
+<h3>I think Benjamin Pollack is an irritating kid who quibbles too much.</h3>
+
+<p>Or rather, I did until I saw his <a
+href="http://bitbucket.org/bpollack/">bitbucket page</a>.&nbsp; Anybody who writes a
+C implementation of an AVL tree FOR FUN has my complete respect.&nbsp; <b>:-)</b></p>
+
+<p></p>

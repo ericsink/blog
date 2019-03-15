@@ -1,0 +1,130 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Clone, Add, Status, Commit</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="mercurial_example.html" title="Chapter 7. Basics with Mercurial"><link rel="prev" href="ch07s01.html" title="Create"><link rel="next" href="ch07s03.html" title="Push, Pull, Log, Diff"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Clone, Add, Status, Commit</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch07s01.html">Prev</a> </td><th width="60%" align="center">Chapter 7. Basics with Mercurial</th><td width="20%" align="right"> <a accesskey="n" href="ch07s03.html">Next</a></td></tr></table><hr></div><div class="section" title="Clone, Add, Status, Commit"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp1153776"></a>Clone, Add, Status, Commit</h2></div></div></div>
+    
+
+    <p>By this time Harry is done dossing about and is ready to 
+    start coding.</p>
+
+<p>Since this is Harry’s first time using Mercurial, he first sets up his <code class="filename">.hgrc</code> file with a user string that will be used to identify his commits in the log.</p>
+
+<pre class="screen">[ui]
+username = Harry &lt;harry@futilisoft.com&gt;
+</pre>
+
+<p><a class="indexterm" name="idp1156656"></a>Now he needs to get his own repository instance.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">~ harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed"><span class="screen_emphasis">hg clone</span> http://server.futilisoft.com:8000/ ./lottery</span>
+no changes found
+updating to branch default
+0 files updated, 0 files merged, 0 files removed, 0 files unresolved
+</pre>
+
+<table xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" align="center" border="0" style="width:350px"><tr><td background="images/eric_aside_05.jpg" style="font-style:italic; padding-left:0.375in; padding-right:0.375in; padding-top:0.25in; padding-bottom:0.25in">
+    <p>Note that Mercurial doesn’t have a <span class="sg-operation">Checkout</span> command.  It keeps the
+        repository instance within the administrative area of the working copy.  
+        This means you 
+        can only have one working copy for each repository
+        instance.
+        </p>
+</td></tr></table>
+
+    <p>Harry wonders if Sally has already done anything in the new repository.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">~ harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">cd lottery</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">ls -al</span>
+total 0
+drwxr-xr-x   3 harry  staff  102 May 17 07:55 .
+drwxr-xr-x  21 harry  staff  714 May 17 07:55 ..
+drwxr-xr-x   8 harry  staff  272 May 17 07:55 <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">.hg</span>
+</pre>
+
+<p>Apparently not.  Nothing here but the <code class="filename">.hg</code>
+    administrative area. 
+Jolly good then.  It’s time to start coding.  He opens his text editor and
+    creates the starting point for their product.</p>
+
+<pre class="programlisting">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int calculate_result(int white_balls[5], int power_ball)
+{
+    return 0;
+}
+
+int main(int argc, char** argv)
+{
+    if (argc != 7)
+    {
+        fprintf(stderr, "Usage: %s power_ball (5 white balls)\n", argv[0]);
+        return -1;
+    }
+
+    int power_ball = atoi(argv[1]);
+
+    int white_balls[5];
+    for (int i=0; i&lt;5; i++)
+    {
+        white_balls[i] = atoi(argv[2+i]);
+    }
+
+    int result = calculate_result(white_balls, power_ball);
+
+    printf("%d percent chance of winning\n", result);
+
+    return 0;
+}
+</pre>
+
+<p>Typical of most initial implementations, this is missing a lot of
+    features.  But it’s a good place to begin.  Before committing his
+code, he wants to make sure it compiles and runs.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">gcc -std=c99 lottery.c </span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">ls -l</span>
+total 32
+-rwxr-xr-x  1 harry  staff  8904 May 17 07:56 a.out
+-rw-r--r--  1 harry  staff   555 May 17 07:56 lottery.c
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">./a.out</span>
+Usage: ./a.out power_ball (5 white balls)
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">./a.out 42 1 2 3 4 5</span>
+0 percent chance of winning
+</pre>
+
+<p>Righto.  Time to store this file in the repository.
+    First Harry needs to add<a class="indexterm" name="idp1174496"></a> the file to the pending changeset.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg add lottery.c</span>
+</pre>
+
+<p>Harry uses the status<a class="indexterm" name="idp1177136"></a> operation to make sure the pending changeset looks proper.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg status</span>
+A lottery.c
+? a.out
+</pre>
+
+<p>Mercurial is complaining because it doesn’t know what to do about
+    that <code class="filename">a.out</code> file.  Stiff upper lip and all that.  That’s a compiled
+    executable, which should not be stored in a version control repository.
+    He can just ignore that.<sup>[<a name="idp1180336" href="#ftn.idp1180336" class="footnote">23</a>]</sup>  Now
+    it’s time to commit<a class="indexterm" name="idp1181360"></a> the file.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg commit -m "initial implementation"</span>
+</pre>
+
+<div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a id="ftn.idp1180336" href="#idp1180336" class="para">23</a>] </sup>Or he could add <code class="filename">a.out</code> to his <code class="filename">.hgignore</code> file.</p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch07s01.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="mercurial_example.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch07s03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Create </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Push, Pull, Log, Diff</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

@@ -1,0 +1,255 @@
+---
+layout: default
+esbma_id: 3016
+title: Announcing something new: Zumero
+date: 2013-03-14 10:00:00
+---
+
+<p>I am so very excited to unveil our latest endeavor:</p>
+
+<p align="center"><a href="http://zumero.com/"><img width="60%" src="/entries/zumero.png"/></a></p>
+
+<h3>What is Zumero?</h3>
+
+<p>To describe Zumero, we first describe <a href="http://www.sqlite.org">SQLite</a>.</p>
+
+<p>SQLite is a lightweight (but
+surprisingly powerful) implementation of a SQL database.</p>
+
+<p>SQLite is the standard database software for iOS, Android, and Windows RT.
+It is installed on over a billion mobile devices.</p>
+
+<p>But like any other computer, and perhaps more so, a mobile device is not
+isolated.  It needs to share data with a server.  </p>
+
+<p>And SQLite has no synchronization capabilities.</p>
+
+<p>Zumero solves that problem.</p>
+
+<p>Zumero is "sync for SQLite".</p>
+
+<h3>No, really, what is Zumero?</h3>
+
+<p>It's a better database platform for mobile.</p>
+
+<p>Mobile apps need to talk to the cloud about data.</p>
+
+<p>A lot of people are building mobile apps that 
+use the "remote procedure call" model.  Every user operation requires a network
+request to the server.</p>
+
+<p>We think "replicate and sync" is a better model.  The app can interact
+with a local copy of the database instead of going through the
+network.  Synchronization can be handled entirely in the background.</p>
+
+<p>Putting network activity in the background brings two big wins:</p>
+
+<ul>
+    <li><p>The developer wins because networking issues are isolated in a small part of the app.
+    The real features of the app can be the focus of the developer's attention, and are easier
+    to code.</p></li>
+
+    <li><p>The user wins because the app is faster, more responsive, and works offline.</p></li>
+</ul>
+
+<p>Consider a typical situation where a mobile app responds to a user action by
+filling a list box with the results of a database query.  Neither the developer
+nor the user wants the network involved between the
+button tap and the refresh of the display.  Mobile networks are just not
+consistent enough.  Even a perfectly-working LTE connection usually has enough
+latency to make the app feel sluggish.</p>
+
+<h3>Oh good grief.  Eric, I thought you were a geek?  Tell us what Zumero is.</h3>
+
+<p>On the client, Zumero is a SQLite extension.  The server is built on
+node.js.</p>
+
+<p>The client tries very hard to be invisible to the developer.  We didn't want
+to introduce a whole new API for everybody to learn, so developing
+with Zumero isn't much different from SQLite.
+  Porting an existing SQLite
+app to use Zumero is usually straightforward.</p>
+
+<p>The SQLite extension uses SQLite's "virtual tables".  A Zumero table
+mostly works just like a regular table, except that it can be synced.</p>
+
+<p>The Zumero server manages the central, authoritative copy of the database and
+handles all the details of synchronization, merging changes, conflict
+resolution, caching,
+logging, authentication, and permissions.  </p>
+
+<h3>Why SQLite?</h3>
+
+<ol>
+    <li><p>Because it's an incredible piece of software.  If you're not familiar with
+SQLite, give it a serious look.  It has come so far that keeping the word
+"Lite" in the name seems inappropriate.  SQLite is fast, robust, and far more
+capable than most people know.</p></li>
+
+<li><p>Because it's everywhere.  Every smart phone and tablet has SQLite inside.
+Even Microsoft has given up the notion of shrinking SQL Server and decided to
+standardize on SQLite as its recommended database for Windows RT.</p></li>
+
+<li><p>Because it needs a sync feature.  The real question here is not "Why SQLite?" but rather, "Why NOT SQLite?"
+Why should people consider anything except SQLite for dealing with mobile data?
+The main answer is obvious:  SQLite doesn't sync.  Zumero was created to fill
+that need, not by introducing a new mobile database system, but rather, by
+adding painless synchronization features to the high quality database that is already
+there.</p></li>
+
+</ol>
+
+<h3>What platforms do you support?</h3>
+
+<p>Right now (March 2013), the Zumero Client SDK includes support for iOS and Android.
+WinRT is planned.  Blackberry is not, but that might change if
+there is evidence of customer demand.</p>
+
+<p>We will also be supporting two of the cross-platform mobile solutions:
+Apache Cordova (aka Phonegap) and Xamarin.  We've made significant progress
+on both of these, but neither of them was ready for the initial release.</p>
+
+<p>The client SDK also includes support for (regular) Windows and Mac OS.
+This may seem odd, since Zumero is all about mobile.
+But
+    very few so-called mobile apps are
+    accessed <b>exclusively</b> from mobile devices.
+    You may (and probably will) want the ability to also access your
+    data from web apps, desktop applications, or even other servers.
+    </p>
+
+<p>Even if you don't need any of these things, the SQLite
+    command-line shell is a handy way to perform administrative tasks
+    for your Zumero server, such as initial setup of your schema,
+    configuring permissions, or analyzing logs.</p>
+
+<h3>How does Zumero store data on the server?</h3>
+
+<p>The Zumero server has a plugin architecture designed to support a variety
+of SQL databases.  We currently have two implementations of the database
+backend: SQLite and PostgreSQL.</p>
+
+<p>At the present time (still March 2013), the Zumero server is available as a
+cloud-hosted service with the SQLite backend, but it will be made available
+in other flavors later.</p>
+
+<h3>What about server platforms?</h3>
+
+<p>From a strictly technical perspective, the Zumero server runs just fine on Linux,
+Mac, and Windows.</p>
+
+<p>The current cloud-hosted offering is Linux, running in the Amazon cloud.</p>
+
+<p>In the future, we will make the server available in three ways: in the cloud,
+on-premises, or as a desktop server for development purposes.  Not all combinations of
+platform and deployment are likely to be interesting.  Things will probably
+end up something like this:</p>
+
+<table border="1" cellpadding="8px">
+    <tr>
+        <th></th>
+        <th>Linux</th>
+        <th>Windows</th>
+        <th>Mac</th>
+        <th>Other</th>
+    </tr>
+    <tr>
+        <td align="center">Cloud</td>
+        <td align="center">Yes</td>
+        <td align="center">Yes<br/>(Azure, later)</td>
+        <td align="center">Where?</td>
+        <td align="center">What?</td>
+    </tr>
+    <tr>
+        <td align="center">On-premises</td>
+        <td align="center">Yes<br/>(later)</td>
+        <td align="center">Yes<br/>(later)</td>
+        <td align="center">Nobody wants this</td>
+        <td align="center">Maybe Solaris?</td>
+    </tr>
+    <tr>
+        <td align="center">Development</td>
+        <td align="center">Yes<br/>(later)</td>
+        <td align="center">Yes<br/>(later)</td>
+        <td align="center">Yes<br/>(later)</td>
+        <td align="center">We'll support Commodore 64 right after node.js does</td>
+    </tr>
+</table>
+
+<h3>Is Zumero open source?</h3>
+
+<p>No.</p>
+
+<h3>Who are Zumero's competitors?</h3>
+
+<p>As always, that depends on how narrowly you define "competitor".  :-)</p>
+
+<ul>
+    <li><p>At one extreme, we are not aware of anybody doing EXACTLY what we are doing.</p></li>
+
+    <li><p>At the other extreme, everybody doing anything with data and mobile is a competitor.</p></li>
+</ul>
+
+<p>If I had to name just one other player, it would be Couchbase Lite.  Couchbase founder J. Chris Anderson recently
+did a great blog entry called <a href="http://blog.couchbase.com/why-mobile-sync">Why Mobile Sync?</a>.
+His tune sounds a lot like the one we're singing about Zumero.</p>
+
+<p>So it wouldn't be outrageous to describe Zumero by saying, "It's like Couchbase Lite. Except it's SQL".</p>
+
+<h3>SQL?  I thought SQL was dead?</h3>
+
+<p>Hardly. The NoSQL offerings are gaining traction, but SQL still has far
+greater market share, especially in the enterprise.</p>
+
+<h3>How does Zumero compare to Parse/Kinvey/Stackmob and their ilk?</h3>
+
+<p>We don't really think of Zumero as a "Backend as a Service" (BaaS) company,
+since we're focused on the database part of the story.</p>
+<p>But if you ignore all
+the other mobile backend stuff (like push notifications), it would be reasonable to
+describe Zumero by saying, "It's like Parse/Kinvey/Stackmob.
+Except it's a replicate-and-sync model.  And it's SQL."
+</p>
+
+<h3>Is Zumero part of SourceGear?</h3>
+
+<p>No.  Yes.  Sort of.</p>
+
+<p>In terms of market positioning, Zumero is separate.  It does not
+share SourceGear branding.  It has no particular connection with
+SourceGear's products.</p>
+
+<p>But financially, Zumero is currently part of SourceGear.  (This approach is
+similar to what we did with Teamprise, which we sold to Microsoft in 2009.)</p>
+
+<p>Corey and I think of Zumero as our new startup, which is being incubated
+inside SourceGear.</p>
+
+<h3>Mobile data?  Really?  How is this related to version control?</h3>
+
+<p>It's not.</p>
+
+<p>But the genesis of Zumero happened when we did the iPad app for Veracity.
+We liked the "replicate and sync" model for mobile so much that we decided to
+take the databasey part of Veracity and productize it as a platform for building
+all kinds of mobile apps.
+Along the way, the technology evolved a lot, to the point where it doesn't
+look much like the original Veracity code, but that's what we started with.</p>
+
+<p>This is actually somewhat of a return to our roots for SourceGear.
+We spent a lot of our first three years doing mobile development as contract work for
+Motorola.  Of course, today's mobile devices are just a <b>little</b>  more powerful
+than that phone we worked on back in 1997.  :-)</p>
+
+<h3>What does this mean for SourceGear's other products, Vault and Veracity?</h3>
+
+<p>They are continuing to move forward.  Vault 7 is <a href="http://sourcegear.com/vault/documentation/Vault7featureoutline.html">underway</a> and aiming for a Q3 release.
+Veracity 2.5 is done and will be released sometime in the next two weeks.</p>
+
+<h3>How can I try Zumero or find out more about it?</h3>
+
+<p><a href="http://zumero.com/get-started">http://zumero.com/get-started</a></p>
+
+<p>&nbsp;</p>
+
+

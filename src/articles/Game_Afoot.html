@@ -1,0 +1,369 @@
+---
+layout: default
+esbma_id: 1091
+title: The Game is Afoot
+date: 2005-07-12 14:22:16
+keywords: (mfg_strategy)
+teaser: We can understand deep abstractions and object oriented programming. We have no problem grasping how virtual memory works. Some of us can even remember the keystrokes to do a search and replace in vi. But when geeks start talking about the issues of software product strategy in a competitive market, otherwise intelligent people suddenly sound like Paris Hilton. We just don't get it. Geeks understand market competition about as well as men understand women.
+---
+
+<p>My biases are obvious.&nbsp; I am a programmer (or rather, a <a href="/No_Programmers.html">developer</a>).&nbsp; I believe the best ISVs are the ones which are started and managed by someone who knows how to use a compiler, <a href="/bos/Geeks_Rule.html">not</a> by someone who was trained to run a business.</p>
+<p>But I do admit that a big problem happens when a geek becomes the founder of a software product company.&nbsp; Suddenly the geek must do a whole bunch of stuff they were never trained to do.&nbsp; Somebody has to keep track of the finances, make the coffee and devise clever ways for management to mistreat the employees.&nbsp;</p>
+<p>Luckily, a lot of this "non computer science stuff" is fairly intuitive.&nbsp; We've got no training on such matters, but if we can figure out how to write a multithreaded network server, we can probably rent some office space without screwing it up too badly.&nbsp; But one area consistently confounds us.&nbsp; In my opinion, nothing in a small ISV is more difficult for a geek than market competition.&nbsp;</p>
+<p>We can understand deep abstractions and object oriented programming.&nbsp; We have no problem grasping how virtual memory works.&nbsp;&nbsp;Some of us can even remember the keystrokes to do a search and replace in vi.&nbsp; But when geeks start talking about the issues of software product strategy in a competitive market, otherwise intelligent people suddenly sound like Paris Hilton.&nbsp; We just don't get it.&nbsp; Geeks understand market competition about as well as men understand women.</p>
+<p>To some extent, this deficiency arises from the tendency for computer programmers to think of things in "black and white" terms.&nbsp; We polarize every issue toward one extreme or the other.&nbsp; The basic element of a computer is a bit, and a bit is either on or off, never in between.&nbsp; This "binary mentality" infects our perspective at a very basic level, often causing us to be somewhat clumsy when dealing with any topic that is characterized by shades of grey.</p>
+<p>But my convictions remain unchanged, so I am always looking for ways to explain this topic in terms that geeks will find intuitive.&nbsp; Along those lines, this article proceeds from a single observation:&nbsp; Geeks don't understand marketing, but they <em>do</em> understand games.</p>
+<h2>#include &lt;You_Need_Competition.h&gt;</h2>
+<p>Before I get started, I want to remind the reader of something that I have said <a href="/Choose_Your_Competition.html">before</a>:&nbsp; You cannot avoid competition.</p>
+<p>You <em>think</em> you can.&nbsp; In fact, you think that you <em>must</em>.&nbsp; You believe that the only way your product idea can succeed is if it doesn't have to actually beat any competitors.</p>
+<p>So as you daydream about starting your own company, you search for product ideas, and you discard all of the ones which would already have a known competitor.&nbsp; Eventually, you find an idea which is completely unique.&nbsp; Nobody is selling anything like it.&nbsp; Finally, the path before you is clear!</p>
+<p>So you proceed to build your killer app.&nbsp; Of course, you are terrified that somebody else will discover your amazing idea, so you keep everything a secret.&nbsp; You setup a small office in the corner of your basement and paint the windows black.&nbsp; You tell your wife you are downstairs looking at porn so she won't get suspicious about what's really going on.&nbsp; Not a single human being on earth gets a glimpse of your product until you are finally ready to unveil your 1.0 release.&nbsp; You emerge from stealth mode and wait for the world to overload your web storefront with traffic.</p>
+<p>But the orders don't come in.&nbsp; Several months go by and eventually you realize the truth:&nbsp; The reason nobody else was selling this kind of product already is that nobody really needs it.&nbsp; If any substantial number of people were willing to pay for the solution you created, then somebody else would already be trying to relieve them of their money.</p>
+<p>So your company fails.&nbsp; You decide to take three months off to recover from all the stress.&nbsp; You sit at home all day, listening to soft music on your iPod, oblivious to the irony:&nbsp; Apple is the clear market leader in digital music, even though they brought their product to the market very late, after all of its competitors were well established.</p>
+<p>You cannot succeed by trying to avoid all competition.&nbsp;</p>
+<p>But you also can't succeed by simply pretending that the competition isn't there.&nbsp; Your intuition may be horrible, but it isn't actually <em>that</em> bad.&nbsp; Competition can kill you.&nbsp; Marching directly into territory occupied by strong competition is usually just as stupid as it sounds.</p>
+<p>So neither of these two extremes is very helpful.&nbsp; We really need to understand the subtleties in between.&nbsp; In this article, I'm going to surface a few principles of software product competition by drawing comparisons to games.</p>
+<h2>Ping Pong</h2>
+<p><em>The game</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Ping Pong is a game of two people using paddles to hit a small plastic ball back and forth across a table with a net in the middle.&nbsp; For obvious reasons, Ping Pong is also called "table tennis".&nbsp; The winner is the first person to score 21 points.</p>
+</blockquote>
+<p><em>The principle</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>The thing I find most interesting about Ping Pong is that you can often win without doing anything fancy or aggressive.&nbsp; A lot of players think the way to win is to slam the ball really hard.&nbsp; The problem with this strategy is that a slam is a high-risk/high-reward shot.&nbsp; If you do it right, you almost certainly score a point when your opponent fails to return the ball.&nbsp; If you do it wrong, you give your opponent a point.</p>
+<p>Modesty aside, I consider myself a "pretty good" Ping Pong player.&nbsp; I can slam the ball when necessary, but I hardly ever do.&nbsp; I can beat <em>most</em> other players by simply returning every shot with a little backspin.&nbsp; Hitting the ball hard simply isn't necessary.&nbsp;&nbsp;All I need to do is wait for the other player to make 21 mistakes.</p>
+</blockquote>
+<p><em>How software is similar</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>You can beat a <em>lot</em> of competitors by simply not beating yourself.&nbsp;&nbsp;Most companies go out of business because of their own stupid mistakes, not because of the brilliance or strength of their competitor.&nbsp; Stay conservative, and stay in business.&nbsp; Watch the years go by, and you'll be surprised how many of your competitors come and go.</p>
+<p>This lesson is hard to learn.&nbsp; Slamming the ball is fun.&nbsp; It's so satisfying when we score a point that way.&nbsp; But when our slam misses the table by 3 feet, we often avoid learning the lesson.&nbsp; We tend to want to blame failures on external factors instead of asking ourselves if the risks we took were reasonable.&nbsp; After the company fails and the Aeron chairs have been auctioned off to pay creditors 20 cents on the dollar, management blames everyone but themselves.&nbsp; "It's the VC's fault!&nbsp; We only needed maybe 12 more months and we would be taking revenue, but that @*&amp;#$%# refused to give us our seventh round of financing!"</p>
+<p>The lesson is actually quite simple:&nbsp; If you regularly take big risks, you will eventually get burned.
+</p>
+</blockquote>
+<p><em>Example</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Oh my.&nbsp; I need an example of a company that killed itself by taking too much risk.&nbsp; There are thousands upon thousands of such firms.&nbsp; Who should I choose?</p>
+<p>I guess I'll stay close to home and briefly summarize the story of <a href="http://www.argus-systems.com/">Argus Systems Group</a>, a security software company here in Champaign, Illinois.&nbsp; If you visit their website today, you'll find a company which is alive and well, but that's not the whole story.&nbsp; What you see now is the <em>new</em> Argus.&nbsp; The original Argus filed for bankruptcy in May 2003.&nbsp; The company's assets were sold in July 2003 for a little over $1.5 million to new management who have resurrected the failed venture.&nbsp;</p>
+<p>What went wrong?&nbsp; Clearly the company had value.&nbsp; A company selling advanced security software in the post 9/11 world should certainly be able to find customers, right?</p>
+<p>The problem with Argus was not in finding customers, but in finding enough customers to pay the enormous financial obligations to its investors and creditors.&nbsp; Argus was founded in 1993.&nbsp; They took money from outside investors in 1994, but I don't know if it was debt or equity or a mixture of both.&nbsp; More outside money came in 1996.&nbsp; And again in 1998.&nbsp; And a bunch more in 1999.&nbsp; And then another chunk in 2000.</p>
+<p>In 2001, they were working on getting another 35M in financing, but the deal <a href="http://www.news-gazette.com/localnews/story.cfm?Number=13520">fell through</a>, and the death spiral began.&nbsp; In March 2003 the local newspaper was writing about Argus <a href="http://www.news-gazette.com/localnews/story.cfm?Number=13414">missing payroll</a>.&nbsp; One of the company execs said, "We're still carrying a lot of debt."</p>
+<p>Argus had real products with real customers, but the company was crushed by all of the financial risks it had taken over the years.</p>
+</blockquote>
+<p><em>Don't take this too far</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Conservative or bold?&nbsp; Which one?&nbsp; This issue is not a checkbox, it's a slider.&nbsp; You have to take some risks if you want to be in business.&nbsp; The <a href="/bos/Make_More_Mistakes.html">trick</a> is to figure out what kind of risks to take.&nbsp; Learn how to take smaller risks, and then take as many of them as you can.</p>
+</blockquote>
+<h2>Sorry!</h2>
+<p><em>The game</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Sorry! is a family board game produced by Parker Brothers.&nbsp; Each player has four "pawns".&nbsp; The goal is to move all four of your pawns from a starting point to the finish.&nbsp; Each turn, you draw a card and move one pawn the number of spaces indicated on the card.&nbsp; (Sorry! is a registered trademark of Parker Brothers.)&nbsp;</p>
+</blockquote>
+<p><em>The principle</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>In order to move a pawn into the finishing area, you have to draw the exact number you need.&nbsp; If you are 3 spaces away and you draw a 5, then you can't move.&nbsp; The effect of this rule is that every game of Sorry! ends up being close.&nbsp; A player can get way ahead, but they almost always slow down at the end as it takes them several turns to draw the card they need to win.</p>
+</blockquote>
+<p><em>How software is similar</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>In software product competition, things are often set up favorably for the other players to catch up to the leader.&nbsp; By nature, the leader usually has more things slowing them down.</p>
+<ul>
+<li>Version 4.0 of a software product often happens more slowly than version 1.0.&nbsp;
+</li>
+<li>You have to implement special support for backward compatibility with your previous releases.&nbsp;
+</li>
+<li>You have to implement the features your customers want instead of the ones your prospective customers want.&nbsp;
+</li>
+<li>You have to be careful not to break things when you are making code changes.&nbsp; You never want version N to be worse than version N-1.&nbsp;
+</li>
+</ul>
+<p>The small ISV working on version 1.0 doesn't have all this baggage to carry around.</p>
+<p>In fact, I think I'll just over-generalize and say it like this:&nbsp; The older your product is, the slower your development is.</p>
+</blockquote>
+<p><em>Example</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>The most obvious example of this phenomenon is Microsoft Windows.&nbsp; How many times has Cairo/Longhorn been delayed?</p>
+<p>Remember, this is not a criticism -- it is merely a natural part of the aging process for software products.&nbsp; Each release of Windows takes a long time, and I bet that a big percentage of the effort is spent on backwards compatibility and regression testing.&nbsp; A huge number of applications rely on the Windows platform, and Microsoft needs to be sure that old apps work with its new releases.&nbsp; In other words, they are trying to improve Windows without changing it.&nbsp; That needs to be done with a lot of care.</p>
+</blockquote>
+<p><em>Don't take this too far</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>The day after I publish this article, some yoyo is going to send me email flaming me for saying that it's bad to be the market leader.&nbsp; Please don't bother.&nbsp; I'm not really saying that.&nbsp; Given a choice between being two years ahead of a competitor or two years behind, we all know which choice to make.</p>
+<p>I'm just saying that not every factor favors the leader.&nbsp; If you are out in front, be aware of the natural reasons why your development is slowing down.&nbsp; If you are trailing, don't despair.&nbsp; Realize that there are certain issues working in your favor.</p>
+</blockquote>
+<h2>The 100 meter dash</h2>
+<p><em>The game</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Wait at the starting line.&nbsp; When the gun fires, run toward the finish line, 100 meters away.</p>
+</blockquote>
+<p><em>The principle</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Strictly speaking, only one person actually wins this race.&nbsp; However, second and third place are honored with medals as well.&nbsp; The silver and bronze medalists are obviously among the fastest human beings on earth.&nbsp; They didn't "win" the race, and yet, they achieved something amazing.</p>
+</blockquote>
+<p><em>How software is similar</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>There is usually more than one winner.&nbsp; In fact, I'd say that most market segments work out to be very much like the Olympics:&nbsp; The top three players are all considered successful.&nbsp; The game of running an ISV is not a two-player affair with a winner and a loser.&nbsp; You can be quite successful without being the market leader.</p>
+</blockquote>
+<p><em>Example</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Lots of successful products are not #1 in their market:</p>
+<ul>
+<li><a href="http://www.microsoft.com/sql/">SQL Server</a>.&nbsp; Last time I checked, Microsoft is #3 in the database market, well behind IBM and Oracle.&nbsp; It would be real difficult to credibly argue that SQL Server is a failure.
+</li>
+<li><a href="http://www.opera.com/">Opera</a>.&nbsp; I can't cite a source, but it seems fairly obvious to me that these guys are #3, behind Internet Explorer and Firefox.&nbsp; It seems equally obvious to me that Opera is a successful company, but I can't prove that either.
+</li>
+<li><a href="http://www.automatedqa.com/">TestComplete</a>.&nbsp; I've got even less evidence here, but I admire AutomatedQA and what they have accomplished.&nbsp; Their GUI testing product is at least #3 in the market, maybe even further down than that.&nbsp; They came along years after companies like Mercury Interactive and Rational, but I definitely get the impression that this product is doing well for them.
+</li>
+</ul>
+</blockquote>
+<p><em>Don't take this too far</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Every rule has exceptions.&nbsp; The number three player in desktop operating systems is probably not considered very successful, whoever they are.</p>
+</blockquote>
+<h2>Golf: &nbsp;The Putting Green</h2>
+<p><em>The game</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Golf is played with a club and a ball.&nbsp; The object is to get the ball into a hole by hitting it as few times as possible.</p>
+<p>In the final step of playing a golf hole, we roll the ball along a surface of very short grass into the cup.&nbsp; This surface is called the "putting green".&nbsp; It is rarely flat or level.
+</p>
+</blockquote>
+<p><em>The principle</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>The tricky thing about putting is studying the green to figure out how the ball will roll.&nbsp; When putting across a slope, how much will the grade cause the path of the ball to curve?&nbsp; When putting down a slope, how hard should you strike the ball to avoid rolling too far if you miss?&nbsp; Using nothing more than visual inspection, it can be really tough to figure this stuff out.&nbsp; Professionals have spent countless hours learning how to "read the green".</p>
+<p>Making a putt is far simpler if you can watch somebody else attempt it first.&nbsp; This is completely legal within the rules of golf.&nbsp; The person whose ball is further away from the cup must attempt the putt first.&nbsp; The other player has the right to watch the ball roll.&nbsp; Putting second can be a big advantage.&nbsp; You can learn a great deal by watching your competitor go first.</p>
+</blockquote>
+<p><em>How software is similar</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Using nothing more than visual inspection (market research), it can be really tough to figure out just how a product is going to roll.&nbsp; Very few products get it right the first time.&nbsp;</p>
+<ul>
+<li>People want to use the product in ways you never expected.&nbsp;
+</li>
+<li>Everybody explains that you didn't provide integration with their favorite app.&nbsp;
+</li>
+<li>Customers want your product but the price is too high.&nbsp;
+</li>
+<li>Customers don't immediately realize that they have the problem your product is designed to solve.
+</li>
+</ul>
+<p>Hindsight makes all this stuff obvious.&nbsp; Releasing your product second can be a big advantage.&nbsp; You can learn a great deal by watching your competitor go first.&nbsp; We call this effect the "second mover advantage".</p>
+</blockquote>
+<p><em>Example</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>C# is probably the most perfect example of second mover advantage that I have ever seen.&nbsp; Microsoft is always very careful when they talk about C#.&nbsp; They don't want people thinking of C# as a clone of Java.&nbsp; But the truth is obvious:&nbsp; C# is Java done right.</p>
+</blockquote>
+<p><em>Don't take this too far</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>The reason we call this "second mover advantage" is because presenting it in contrast with the more commonly discussed "first mover advantage", which is very real.&nbsp; Being first has plenty of benefits too.&nbsp; It's just that the benefits of being first are <em>different</em> from the benefits of being second.</p>
+</blockquote>
+<h2>Bridge</h2>
+<p><em>The game</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Bridge is a card game played by four players with a traditional 52-card deck.&nbsp; In each deal there are 13 tricks.&nbsp; The goal is take lots of them.&nbsp;</p>
+</blockquote>
+<p><em>The principle</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>The basic rules of bridge are very simple, but competitive bridge is extremely complex.&nbsp; Bridge players use a "system", a methodology which provides strategy and tactics for play.&nbsp;&nbsp;The system is not part of the basic rules of the game.&nbsp; There are quite a few different methodologies for bridge, all of which are designed to help a player and his partner win.</p>
+<p>A friend of mine taught me to play bridge.&nbsp; Let's call him Bob (because that's his name).&nbsp; Bob is a <em>very</em> good bridge player.&nbsp; One might think that because I was taught by such a strong player that I might be rather good at the game.&nbsp; Nothing could be further from the truth.&nbsp; I am a terrible bridge player.&nbsp; There are many things about bridge which are not easily taught.&nbsp; You either "get it" or you don't.</p>
+<p>Bob gets it.&nbsp; He sees things at the bridge table that I just can't see.&nbsp; He always seems to know where the cards are.&nbsp; He and I will sit down for an evening and play 27 hands of bridge.&nbsp; After it's all done, he draws my attention to the 5th hand.&nbsp; I barely recall playing it, but he remembers all 13 of the cards I was holding and tells me exactly where I screwed up.</p>
+<p>There is one fact about the remainder of my lifetime that is extremely clear:&nbsp; I will <em>never</em> beat Bob at a game of bridge.&nbsp; I simply don't have the talent.&nbsp; Bob's mind can do things mine cannot.</p>
+<p>More to the point, there is no system or methodology which would allow me to beat Bob.&nbsp; I only know how to play one bridge system (it's called Standard American).&nbsp; Bob plays several different systems, depending on who his partner is.&nbsp; He usually wins, regardless of what system he is playing.&nbsp; In bridge, there is no methodology which is a substitute for talent.</p>
+</blockquote>
+<p><em>How software is similar</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>I used to work with a guy who was in love with the notion of a really good methodology.&nbsp; He was always talking about how great it is to have a system which is not dependent on the abilities of the people on the team.&nbsp; He liked to explain the concept using a sausage grinder as a metaphor.&nbsp; No matter how smart or dumb the developers are, you always get sausage as the result.</p>
+<p>Methodology of software development is a popular topic, but count me as a skeptic.&nbsp; In software, there is no methodology which is a substitute for talent.</p>
+<p>Choosing the right development methodology is not going to help you beat your competitors.&nbsp; None of your competitors are going to beat you just because of the methodology they chose.</p>
+</blockquote>
+<p><em>Example</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">I can't find an example to give here, except to offer the following observations as weak evidence of my claims:&nbsp; I've spoken with folks at lots and lots of ISVs.&nbsp; I tend to see smart people following excellent development practices.&nbsp; But I don't know of a single shrinkwrap software company which follows one of the strict development methodologies, much less one that gains competitive advantage by doing so.
+</blockquote>
+<p><em>Don't take this too far</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>I'm not saying that methodology is a completely uninteresting topic.&nbsp; I'm saying is that talent will beat methodology every time, but methodology and talent don't have to be mutually exclusive.&nbsp; <a href="http://agilemanifesto.org/">Some</a> <a href="http://www.extremeprogramming.org/">methodologies</a> <a href="http://www.controlchaos.com/">seem</a> to be specifically designed to let smart people be smart.</p>
+</blockquote>
+<h2>Gymnastics</h2>
+<p><em>The game</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Gymnastics is a sport in which athletes demonstrate strength, agility and balance in several different events using several different kinds of equipment.</p>
+</blockquote>
+<p><em>The principle</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Most people watch gymnastics every four years when the Olympics come on TV.&nbsp; Both women and men participate in the sport (separately), but the women's competition seems to be generally more popular.</p>
+<p>Women's gymnastics involves four different events:</p>
+<ul>
+<li>Floor exercise
+</li>
+<li>Balance beam
+</li>
+<li>Vault
+</li>
+<li>Uneven bars
+</li>
+</ul>
+<p>Participants must compete in all four stages of the competition, and each stage is very different from the others.&nbsp; A gymnast might be truly gifted on the balance beam, but that doesn't mean she's any good on the uneven bars -- the two events require entirely different sets of skills.&nbsp; Each of the four events requires a different approach and different training.</p>
+</blockquote>
+<p><em>How software is similar</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Marketing teaches us that the life cycle of a product has <a href="/Act_Your_Age.html">four stages</a>, each of which corresponds to one group of people in the market:<!--StartFragment --></p>
+<ul>
+<li><strong>Early Adopters</strong> are risk takers who actually <em>like</em> to try new things.
+</li>
+<li><strong>Pragmatists</strong> <em>might</em>&nbsp;be willing to use new technology, if it's the only way to get their problem solved.
+</li>
+<li><strong>Conservatives</strong> dislike new technology and try to <em>avoid</em> it.
+</li>
+<li><strong>Laggards</strong> pride themselves on the fact that they are the last to try anything new.
+</li>
+</ul>
+<p dir="ltr">Each stage is very different from the others.&nbsp; Your ISV might be very successful selling products to Early Adopters, but that doesn't mean you will have any success at all selling stuff to the Pragmatists.&nbsp; These are two entirely different groups of customers and reaching them requires entirely different skills.</p>
+</blockquote>
+<p><em>Example</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Linux is perhaps the most obvious example today of a product which is very popular with certain Early Adopters and almost completely irrelevant to the Pragmatists.&nbsp; That is not to say that Linux is a failure.&nbsp; I like Linux very much and I use it regularly.&nbsp; But the fact remains:&nbsp; Linux doesn't have much market penetration in the mainstrain markets like the corporate desktop or the home PC.&nbsp; Those buyers are Pragmatists, or Conservatives or even Laggards.&nbsp; Being successful with the Early Adopters is one thing.&nbsp; Selling products to the later stages is a completely different problem.</p>
+</blockquote>
+<p><em>Don't take this too far</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Unlike gymnastics, an ISV is not absolutely required to participate in all four stages.&nbsp; Some companies cater exclusively to Early Adopters, never bothering to even try and sell stuff to the Pragmatists.&nbsp; An even more common strategy is to only sell stuff to the Pragmatists and Conservatives, sparing yourself from exposure to the bizarre buying patterns of the Early Adopters.</p>
+</blockquote>
+<h2>Football</h2>
+<p><em>The game</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Here in the United States, the sport we call "football" is played on a grass field 100 yards long.&nbsp; Each team has 11 people.&nbsp; At any given moment, one team is trying to move the ball to the end of the field while the other team is trying to stop them.&nbsp; A complex set of rules attempts to regulate the amount of violence and keep it at just the right level.</p>
+</blockquote>
+<p><em>The principle</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Football is a game of strategy.&nbsp; You can't just grab the ball and throw it down the field.&nbsp; Each team develops "plays" where every player on the field is given very specific instructions.&nbsp; During the week, they practice these plays over and over until the team knows how to do it right.</p>
+<p>Then the weekend comes, and it's time to actually play the game.&nbsp; In every football game, there is a play where the coach chose the right strategy but the players just didn't get it done.&nbsp; Somebody was supposed to run to the left and instead they ran to the right.&nbsp; This is the moment where the TV cameras zoom in on the coach as he throws up his hands in frustration and screams a word I won't repeat but which can be roughly translated to say: "That is NOT how we practiced that play!!!"</p>
+<p>Football is a game of strategy, but even more, it is a game of execution.&nbsp; The best strategy won't help you a bit if you can't execute it well.</p>
+</blockquote>
+<p><em>How software is similar</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>The challenge of building and selling a software product is a game of strategy, but even more, it is a game of execution.</p>
+<p>Most people get this balance exactly backwards.&nbsp; They believe the essence of success is to come up with a really great business plan built on a really great product idea.</p>
+<p>Those things are important, but a great idea and a great plan won't help a bit if you can't execute it well.&nbsp; Experienced people know that execution is more important than idea.&nbsp; In fact, the more jaded and cynical folks in our industry would say that software product ideas are worthless.&nbsp; Without a doubt, great execution on a good idea is far better than poor execution on a great idea.</p>
+<p>If you want to beat your competitors in the market, focus on being a team that can get things done.</p>
+</blockquote>
+<p><em>Example</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Back in 1997, folks were&nbsp;<a href="http://news.com.com/2100-1001-279370.html?legacy=cnet">anticipating</a> the upcoming release of the Motorola MAP phone, a "smart phone" which incorporated web browsing and a graphical user interface.&nbsp; By today's standards, I suppose the MAP phone would be rather ordinary, but it was a cool idea for its time.</p>
+<p>Or rather, it would have been a cool idea if they had ever delivered it.&nbsp; Some Motorola exec killed the project, in early 1999 if I recall correctly.&nbsp; The phone was years late, and its feature set was no longer worth delivering.&nbsp; Competitors already had products on the market with the same or greater functionality.&nbsp;</p>
+<p>What went wrong?&nbsp; In a nutshell, there was a lot of questionable execution, including some major changes to the architecture and feature set, very late in the game.</p>
+<p>My company was one of the subcontractors building apps for the phone.&nbsp; Our billings to Motorola were a significant amount of money, so I can only imagine the total sunk cost in this disastrous project was at least an 8-figure number.&nbsp; Too bad.&nbsp; It was a great idea.&nbsp;</p>
+</blockquote>
+<p><em>Don't take this too far</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Here's a football play I've never seen:&nbsp; Give the ball to one player and have the other ten stand around and watch as he slowly walks down the field.&nbsp;</p>
+<p>Perfect execution on a terrible idea will get you exactly the results you should expect.</p>
+</blockquote>
+<h2>The Oscars</h2>
+<p><em>The game</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>The <a href="http://www.oscar.com/">Academy Awards</a> (aka the "Oscars") are generally considered to be the most prestigious honor in filmmaking.</p>
+</blockquote>
+<p><em>The principle</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Every year, immediately after the Oscar winners are announced, people begin the debate:&nbsp; Who <em>should</em> have won?</p>
+<p>The Academy Awards aren't like horse racing or chess where the winner is usually quite clear and undisputed.&nbsp; The decisions about Oscar winners are entirely subjective.&nbsp; Reasonable people disagree.&nbsp; With all due respect to Ben Kingsley and his performance in Gandhi, I still wish Dustin Hoffman had won.</p>
+<p>But that's just the way the Oscars work.&nbsp; The Academy voters hold the only opinion that matters.&nbsp;&nbsp;The rest of us can argue over which movie or performance we think was the "best", but our opinions don't make a bit of difference in who actually wins.&nbsp;</p>
+</blockquote>
+<p><em>How software is similar</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>The "best" product doesn't always win.&nbsp;&nbsp;That's a pithy way to express the point, so let me try to be a bit more precise.</p>
+<p>There are two groups of people who have opinions about which software product is the "best":</p>
+<ul>
+<li>Us.&nbsp; The developers.&nbsp; The geeks.&nbsp; The people who create the products.
+</li>
+<li>Them.&nbsp; The customers.&nbsp; The normal people.&nbsp; The people who buy the products.
+</li>
+</ul>
+<p>Here's the lesson that developers must learn:&nbsp; The customers hold the only opinion that matters.&nbsp; Sometimes their choices don't seem to make any sense.&nbsp; They prefer one product when we know the other one has better technology.</p>
+<p>In the end, we can fuss all day about why the market is making "the wrong choice", but it doesn't matter.&nbsp; Our job is not to make the product that <em>we</em> think is best.&nbsp; Our job is to make the product that <em>they</em> think is best.&nbsp; If you can't accept that, you should consider the possibility that you and your career choice are not as well suited as you thought.</p>
+</blockquote>
+<p><em>Example</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Strictly from a technology perspective, it wasn't terribly difficult to figure who had the best personal computer operating system in 1985.&nbsp; Most people would probably have said that the Amiga operating system was clearly superior to Windows 1.0.&nbsp;</p>
+<p>Twenty years later, the score of this game looks roughly like this:</p>
+<ul>
+<li>Windows:&nbsp; 500 million users
+</li>
+<li>Amiga:&nbsp; 500 users
+</li>
+</ul>
+<p>The "best" product doesn't always win.</p>
+</blockquote>
+<p><em>Don't take this too far</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Your notion of what is the "best" product may not completely match the opinion of the marketplace, but it's probably not 100% wrong.&nbsp; I don't think I have ever seen the Academy give an Oscar to a performance which&nbsp; was also nominated for the <a href="http://www.razzies.com/">Razzies</a>.</p>
+</blockquote>
+<h2>Rugby</h2>
+<p><em>The game</em>
+</p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Most people in the United States are not terribly familiar with <a href="http://www.irb.com/">rugby</a>.&nbsp; It could be compared to football, but it is a sport all its own.&nbsp; Like football, it involves lots of players running into each other.&nbsp; Unlike football, the players aren't wearing pads.</p>
+</blockquote>
+<p><em>The principle</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Traditional Rugby is played with 15 people on each team.&nbsp;&nbsp;At the time of this writing, the <a href="http://www.irb.com/WR/">top</a> three international rugby teams are New Zealand, Australia and South Africa.&nbsp; My rugby fanatic coworker tells me that this configuration is typical.</p>
+<p>Noticeably absent from this list is Fiji, a small island nation in the south Pacific.&nbsp; Fiji is about the size of New Jersey but has about one tenth the population.&nbsp; Rugby is the most popular sport in Fiji, but this tiny country simply doesn't have the resources to compete with the big boys.&nbsp; The Fijan rugby team competes, but don't look for them to be in the top three anytime soon.</p>
+<p>However, there is a variant of rugby which is played with 7 people instead of 15.&nbsp; The game is called "Rugby Sevens".&nbsp; It's not as big as traditional rugby, but its popularity is growing.&nbsp; Guess who won the Rugby Sevens World Cub this year?&nbsp; Fiji.</p>
+<p>Rugby is segmented into two different categories.&nbsp; Fiji puts most of its resources into competing where it has the best chance to win.</p>
+</blockquote>
+<p><em>How software is similar</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Segmentation is perhaps the most important concept in marketing, and the world of software products is no exception.&nbsp; Very often, the way to win is not to be better, but to be <a href="/laws/Law_02.html">different</a>.&nbsp; Look at your market and identify the different segments or categories.&nbsp; For each category, ask yourself lots of questions:</p>
+<ul>
+<li>How many customers are in this category?
+</li>
+<li>How much money do they spend?
+</li>
+<li>Are those customers well served?
+</li>
+<li>Who is selling stuff to those customers now?
+</li>
+<li>What unsolved problems do those customers have?
+</li>
+</ul>
+<p>Choose a category where you can win.</p>
+</blockquote>
+<p><em>Example</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">I think the best example here is the Apple Macintosh.&nbsp; Steve Jobs is very smart.&nbsp;&nbsp;He could have killed the company by trying to beat Microsoft in the broader market.&nbsp; Instead, the Macintosh seems to have found serenity by dominating a small niche of rabid fans.
+</blockquote>
+<p><em>Don't take this too far</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Choosing a category where you can win is not the same thing as a creating a whole new category.&nbsp; Which of the following tasks sounds easier?</p>
+<ul>
+<li>Start a new team to play Rugby Sevens.&nbsp; Make your team good enough to compete with Fiji.
+</li>
+<li>Create a new variant of Rugby which is played with 11 people.&nbsp; Start a team.&nbsp; Learn the nuances of this particular configuration.&nbsp; Make your team really, really good at this newly created game.&nbsp; Contact 29 other nations and convince them to start playing "Rugby Elevens".&nbsp; Convince millions of people that their lives would be happier if they would watch 11 people playing rugby instead of 7 or 15.&nbsp; Find lots of corporations and convince them that they should be advertising to your fan base.&nbsp; Contact the International Olympic Committee and ask them to add yet another sport.
+</li>
+</ul>
+<p>Sound absurd?&nbsp; At this very moment, somewhere in the world, there is a person writing a business plan which is just as silly.&nbsp; If by chance you are that person, please stop now.&nbsp; Creating a new market category is very, very hard.&nbsp; It is much easier to sell people a product which solves a problem they already know about.</p>
+</blockquote>
+<h2>Golf: &nbsp;The Tee Shot</h2>
+<p><em>The game</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>Earlier I mentioned golf in the context of the putting green.&nbsp; But that's the end of the story.&nbsp; Long before the ball lands on the green, each hole starts out with the ball sitting on a tee.</p>
+</blockquote>
+<p><em>The principle</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>
+The fourth hole at my local course is reasonably typical.&nbsp;&nbsp;When I begin to play this hole, my ball is 561 yards away from the cup where it is supposed to end up.&nbsp; The par for this hole would suggest that I should be able to get the ball into that cup by hitting it only 5 times.&nbsp; My last two shots will be far more precise, so what I need from this first shot is distance.&nbsp; It would be great if I could get the ball around halfway there on the first shot.</p>
+<p>This should be easy.&nbsp; It's not like the ball is moving.&nbsp; It's just sitting there waiting for me to smack it.&nbsp; All I have to do is swing my club and hit the darn ball straight.</p>
+<p>Unfortunately, it turns out that this task is incredibly difficult to do with any accuracy.&nbsp; The slightest error will be magnified, usually causing my ball to veer off to the right where it will be reunited with dozens of its friends which are now resting comfortably at the bottom of the lake.</p>
+<p>The tee shot in golf is all about concentration.&nbsp; This is a mental challenge, not a physical one.&nbsp; There are plenty of teenage girls and 75-year-old men who can hit the ball 300 yards.&nbsp; Muscles don't matter.&nbsp; What you need is 100% focus and absolute concentration on the task.</p>
+<p>The easiest and most common way to dilute your concentration is to think about your competitor.&nbsp; During your shot, that guy just doesn't matter.&nbsp; It's not like he's playing defense.&nbsp; The best thing to do is to just ignore him completely.&nbsp; If you think about him, then you're not thinking about your shot, and you're probably going to screw it up.&nbsp; It's just you, the club and the ball.&nbsp; Everything else is a distraction.</p>
+</blockquote>
+<p><em>How software is similar</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>I'm ending the article with this illustration because I believe that managing an ISV is more like the golf tee shot than it is like any other game.&nbsp; It's just you, the product, and the customer.&nbsp; Everything else is a distraction.</p>
+<p>Software companies routinely spend far too much of their attention on their competitors.&nbsp; Our customers wish we would spend all that effort on providing solutions to their problems.</p>
+</blockquote>
+<p><em>Example</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>I'm citing <a href="http://www.fogcreek.com/">Fog Creek</a> as my example here.&nbsp; I suspect that I could find a hundred different bug-tracking products which appeared on the scene before FogBugz, but Joel ignored all that and kept spouting his <a href="http://discuss.fogcreek.com/newyork/default.asp?cmd=show&amp;ixPost=3245">mantra</a>:&nbsp; "<!--StartFragment -->Listen to your customers, not your competitors!"&nbsp; He has built himself a very fine company, and along the way, the rest of us have learned an awful lot of good stuff from his <a href="http://www.joelonsoftware.com/">writings</a>.</p>
+</blockquote>
+<p><em>Don't take this too far</em></p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>It is theoretically possible to take this principle too far, but I've never seen anyone do it.&nbsp; Ignoring our competitors takes discipline.&nbsp; Human nature virtually guarantees that we will err in the other direction.</p>
+<p>If you have achieved this particular flaw, spending so much time focusing on your customers that your business is actually harmed because of your ignorance of the competition, please accept my congratulations.&nbsp; Most of my readers wish their problems were as easy to fix as yours.</p>
+</blockquote>
+<h2>The 19th Hole</h2>
+<p>This article ended up a lot longer than I thought it would be.&nbsp; If you got tired while reading it, just be thankful that I deleted the whole section about how seeing into the future is like trying to look down a dark hallway in Doom 3.&nbsp; Be happy that I never wrote the whole bit about how Lotus 1-2-3 ignored Wayne Gretzsky's sage advice about skating to where the puck will be.&nbsp; And most of all, be grateful that I deleted the long rant about offshore outsourcing, the New York Yankees and the Chicago Cubs.&nbsp; :-)</p>
+<p></p>

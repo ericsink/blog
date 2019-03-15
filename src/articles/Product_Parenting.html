@@ -1,0 +1,584 @@
+---
+layout: default
+esbma_id: 1754
+title: Product Parenting
+date: 2008-10-22 13:00:00
+keywords: (mfg_strategy)
+---
+<p>The genesis of this article happened back in May when I
+posted a <a href="/entries/guadec_bos.html">blog entry</a>
+containing the following snippet:</p>
+
+<p style='margin-left:.5in'><i>And finally, for something
+completely different, don't miss the Jam Session at Tech-Ed on June 3<sup>rd</sup>.&nbsp;
+Several of us minions from SourceGear are planning to take the stage and give
+our rendition of <a href="http://en.wikipedia.org/wiki/Pinball_Wizard">Pinball
+Wizard</a>.&nbsp; It'll be me on acoustic guitar, our development manager <a
+href="http://vaultblog.sourcegear.com/">Jeremy Sheeley</a> on bass, and our product
+manager Paul Roub playing the <a
+href="http://blog.roub.net/2008/02/the_evil_mastermind_guitars_you_heard_me.html">Evil
+Mastermind Schecter PT</a> that will be given away later that week.</i></p>
+
+<p>BTW, I'm not a very good guitar player, but the jam turned
+out <a href="http://www.youtube.com/watch?v=tJcafivoIog">OK</a>.</p>
+
+<p>Anyway, the first comment on that blog post was from a
+reader who said:</p>
+
+<p style='margin-left:.5in'><i>3 managers. Wow. Your company
+must be growing and/or is fairly large.</i></p>
+
+<p>The person who made that comment was probably using the word
+"manager" to refer to "someone who manages people".&nbsp; If so, then yes, our
+company has more than 3 managers, but not all of the 3 people playing Pinball
+Wizard qualify:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li ><a href="http://vaultblog.sourcegear.com/">Jeremy Sheeley</a>
+     is actually a manager.&nbsp; He runs the development team that builds Vault and
+     Fortress.</li>
+ <li >Strictly speaking, I suppose I am a manager.&nbsp; But people
+     who know me would say that referring to me as a manager is an undeserved
+     compliment.</li>
+ <li >But <a href="http://blog.roub.net/">Paul Roub</a> is a "product
+     manager".&nbsp; Here at SourceGear (and in most other companies I know), a product
+     manager is not [necessarily] someone who manages people.</li>
+</ul>
+
+<p>So when I saw that comment, I told myself I should write an
+article about the role of a product manager.&nbsp; This is that article.</p>
+
+<p>(BTW, the content of this article was my presentation (<a
+href="http://network.businessofsoftware.org/video/eric-sink-on-product">video</a>)
+at the <a href="http://businessofsoftware.org/">Business of Software conference</a>
+in September.&nbsp; For more information about this event, keep an eye on the
+Business of Software conference <a href="http://blog.businessofsoftware.org/">blog</a>.)</p>
+
+<h2>What is a product manager?</h2>
+
+<p>In short, a product manager is a marketing person who
+focuses on strategic stuff and stuff that is specific to the product.</p>
+
+<p>When people think of marketing, their thoughts often run to things
+like logos, graphic design, and advertising.&nbsp; This is the communications side
+of marketing.&nbsp; We call it "marcomm".</p>
+
+<p>The <a href="/Marketing_for_Geeks.html">other
+side</a> of marketing is the stuff that is more focused on the product itself:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Positioning</li>
+ <li >Differentiation</li>
+ <li >Features</li>
+ <li >Competition</li>
+ <li >Market research</li>
+</ul>
+
+<p>These activities are the domain of the product manager.</p>
+
+<p>I still remember the moment when I first started to learn
+this distinction.&nbsp; Back when I worked at Spyglass, one of my peers asked, "Why
+don't we have any product marketing people?"</p>
+
+<p>I said, "What do you mean?&nbsp; We've got marketing people.&nbsp;
+Marc and his team just spent six months deciding which Pantone shade of red
+we're going to use for our logo.&nbsp; That's marketing, right?"</p>
+
+<p>The discussion that followed my clueless remark was very
+enlightening.</p>
+
+<h2>Managing Products vs. Managing People</h2>
+
+<p>There is a confusion caused by the word "manager".&nbsp; As noted
+before, a product manager doesn't necessarily manage people.</p>
+
+<p>To highlight the differences between product management and
+people management, I'm going to start by offering a brief but reasonably
+complete lecture on managing people in a software company.</p>
+
+<h2>A Brief but Reasonably Complete Lecture on Managing People in a Software
+Company</h2>
+
+<p>Stop treating them like children.</p>
+
+<h2>That's it?</h2>
+
+<p>Yep, that's it.&nbsp; Stop treating them like children.</p>
+
+<p>If you follow this rule and all of its corollaries, you will
+be a competent manager, thus placing you in the top one percent of all managers
+in the software industry.</p>
+
+<p>Software professionals are grownups.&nbsp; They do not deserve to
+be treated like children.</p>
+
+<h2>On the other hand...</h2>
+
+<p>Unlike your coworkers, software products deserve to be
+treated very much like children.&nbsp; They're rebellious and wayward.&nbsp; They need to
+be given strict boundaries and lots of guidance.</p>
+
+<p>Like children, products go through stages.&nbsp; Joel Spolsky <a
+href="http://www.joelonsoftware.com/articles/fog0000000017.html">said</a> that
+"good software takes ten years".&nbsp; Those ten years are not all the same.</p>
+
+<p>The life of a growing software product has six different
+stages.&nbsp; And the progression of those stages is a lot like the stages of
+parenting a child.</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Each stage requires a different approach.</li>
+ <li >There is a gradual progression from "high control" to "letting
+     go".</li>
+</ul>
+
+<h2>Stage 1:&nbsp; Prepare</h2>
+
+<p>In parenting, the first stage is conception and pregnancy.&nbsp;
+In software, this stage covers all the time before your first product release.&nbsp;
+The key concept for this stage is "prepare".</p>
+
+<p>This is the stage where you find a product idea and dream
+about what it might be when it grows up.</p>
+
+<p>Product managers in stage 1 tend to make the same mistake
+that a new father makes:&nbsp; He believes that since the mother (the development
+team) is carrying the baby (writing the code), he doesn't have anything to do.&nbsp;
+All he has to do is wait until the kid is old enough to throw a baseball around,
+right?</p>
+
+<h3>Prepare</h3>
+
+<p>As a product manager, stage 1 is perhaps your most important
+stage.&nbsp; You have a lot of preparation to do if you want your product to be
+successful.</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >You need to figure out your <a
+     href="/Positioning.html">positioning</a>.</li>
+ <li >You need to clearly define your <a
+     href="http://www.amazon.com/exec/obidos/ASIN/0471028924/sawdust08-20">differentiation</a>.&nbsp;
+     </li>
+ <li >And you need to figure out how those two things are going
+     to express themselves in every other aspect of the product.</li>
+</ul>
+
+<p>This is challenging stuff, and you have to do it now.&nbsp; Later
+it will be too late.</p>
+
+<h3>Fail</h3>
+
+<p>Anybody else remember the <a
+href="http://en.wikipedia.org/wiki/Bandai_Pippin">Apple Pippin</a>?</p>
+
+<p>When I speak at conferences, they sometimes introduce me as "the
+person who led the team at Spyglass who built the browser that Microsoft
+licensed to become Internet Explorer".&nbsp; That's <a
+href="/Browser_Wars.html">true</a>, but it is an
+incomplete rendition of the truth.</p>
+
+<p>Spyglass licensed its browser to around 120 different
+companies who released products based entirely or partially on our code.&nbsp; All
+but one of those products crashed and burned.&nbsp; So it would be equally accurate (albeit
+far less flattering) to introduce me as "the person who has been affiliated with
+more failed web browser products than anyone else on the planet".&nbsp; <b>:-)</b></p>
+
+<p>One of those products was the Apple Pippin (although I would
+hasten to say that my code was not the reason why the Pippin failed).&nbsp; <b>:-)</b></p>
+
+<p>The Pippin was a disastrous example of product marketing.&nbsp; And
+it failed because somebody did a terrible job in stage 1.&nbsp; The positioning of
+this product was never clear.</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Is it a game machine?</li>
+ <li >Is it a computer?</li>
+ <li >Is it a set top box?</li>
+</ul>
+
+<p>The answer to all of these questions was "yes".&nbsp; By trying
+to fit in every category, the Pippin ended up fitting in none of them.</p>
+
+<p>Predictably, the primary differentiation for the Pippin was
+that it was lame in every category.&nbsp; Yes, it was a game machine, but it was insanely
+expensive and incompatible with 100% of the popular games in the world.&nbsp; Yes,
+it was a computer, but it was slow and underpowered.</p>
+
+<h2>Stage 2:&nbsp; Care</h2>
+
+<p>In parenting, the second stage is birth and infancy.&nbsp; In
+software, this stage covers the 1.0 release and the time thereafter.&nbsp; The key
+concept for this stage is "care".</p>
+
+<p>This is the stage where you endure the final pain of getting
+the product out the door.&nbsp; </p>
+
+<p>The product manager has a very important role in the first
+release of a new product.&nbsp; The labor pains are endured by the development team,
+but the product manager is responsible for the launch.&nbsp; It is important to get
+the messaging just right.</p>
+
+<p>Shipping release 1.0 is a lot like the birth of a new baby:&nbsp;
+Lots and lots of pain, followed by a brief period of pure happiness, and then no
+sleep for quite a while.</p>
+
+<p>In most B2B software products, shipping the 1.0 release is
+more like a beginning than an end.</p>
+
+<h3>Care</h3>
+
+<p>After a baby is born, the parents are overwhelmed with the
+responsibility of its care.&nbsp; A newborn is completely dependent, unable to do
+anything for itself.&nbsp; When it wants to be fed at 3 o'clock in the morning,
+that's what has to be done.</p>
+
+<p>Many version 1.0 products have similar needs.&nbsp; Users need
+tech support, sometimes urgently and at very inconvenient times.&nbsp; That's what
+has to be done.</p>
+
+<p>Like the husband of a breast-feeding mother, the product
+manager may not have primary responsibility for all this care that needs to be
+provided.&nbsp; But he can be involved, and both he and the product will benefit
+from his choice to do so.</p>
+
+<p>Product managers and new fathers typically share one other
+task in common during stage 2:&nbsp; Soul searching.&nbsp; </p>
+
+<p>Every father I know has held his new baby and wondered if he
+was really prepared for the responsibility.</p>
+
+<p>Product managers in stage 2 need to be asking themselves
+questions about the quality of their preparation:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Is the positioning right?</li>
+ <li >Is the differentiation sufficient?</li>
+ <li >Is the messaging clear?</li>
+</ul>
+
+<p>Stage 2 is <b>not</b> the time to start doing the stuff you
+should have done in stage 1.&nbsp; But it <b>is</b> time to review.&nbsp; It's not too
+late to make changes.</p>
+
+<h3>Fail</h3>
+
+<p>Around ten years ago, my company shipped version 1.0 of a
+product called SourceSurf.&nbsp; It was a web-based application for browsing source
+code repositories.</p>
+
+<p>If you were to travel back in time and ask SourceSurf what
+it wants to be when it grows up, it would look into the future and say, "I want
+to be sort of like Atlassian <a
+href="http://www.atlassian.com/software/fisheye/">FishEye</a>".&nbsp; But SourceSurf
+never got the chance to grow up.&nbsp; Version 1.0 was its first and last major release.
+&nbsp;What we should have done was tweak the strategy and keep going.&nbsp; Instead, we
+looked at the initial results and gave up.</p>
+
+<p>SourceSurf 1.0 didn't do very well, but the product concept
+was generally good.&nbsp; We failed to make the minor course corrections this
+product needed to be successful.</p>
+
+<h2>Stage 3:&nbsp; Listen</h2>
+
+<p>In parenting, the third stage is the so-called "terrible
+twos", (which, as all parents know, actually lasts until the child is almost
+four).&nbsp; In software, this stage typically covers the 2.0 release cycle.&nbsp; The
+key concept for this stage is "listen".</p>
+
+<p>This is the stage of defiance and rebellion, where the
+product begins to exhibit its own will.</p>
+
+<p>One day when my oldest daughter was in this stage, we called
+her to dinner.&nbsp; She sauntered up to the table, glanced at the food we had prepared,
+and gasped in horror, "There's nothing here I like except butter!"&nbsp; <b>:-)</b></p>
+
+<p>Obviously children need correction during these years.&nbsp; But
+they also need to be heard.&nbsp; This is the stage when "kids say the darndest
+things", some of which are cute, and some of which are annoying or
+embarrassing.&nbsp; Either way, this process is an important stage of growth.&nbsp;
+Parents need to provide correction without crushing the child's spirit.&nbsp; Often
+that means listening to the weird things the child says.</p>
+
+<h3>Listen</h3>
+
+<p>The product manager also needs to spend stage 3 listening.&nbsp;
+Customers ask for a lot of stuff, and that feedback needs to be heard and
+incorporated into the next release of the product.&nbsp; There is still time to
+tweak the strategy before the product goes mainstream.</p>
+
+<h3>Fail</h3>
+
+<p>Stage 3 is the most common place where products fail.&nbsp; There
+are plenty of examples.&nbsp; Almost any product that died at the bottom of the <a
+href="/Act_Your_Age.html">chasm</a> was a failure in
+stage 3.&nbsp; My favorite two examples are <a
+href="http://en.wikipedia.org/wiki/BeOS">BeOS</a> and <a
+href="http://en.wikipedia.org/wiki/Informix_Wingz">Wingz</a>.</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >BeOS was a new operating system released in the late '90s.&nbsp;
+     Technologically, BeOS was very cool, but it fell into the chasm because it
+     never found a niche on the other side.</li>
+ <li >Wingz was a new spreadsheet released in the late '80s.&nbsp;
+     Wingz had features that Excel doesn't have today.&nbsp; But to survive, it
+     needed to get popular with a small group of users and spread from there.&nbsp;
+     I liked Wingz a lot, but I think most people thought it was just too
+     weird.</li>
+</ul>
+
+<p>I often wonder if these products might have succeeded if
+they had been more willing to listen to the very early user feedback and change
+course accordingly.&nbsp; This might have meant allowing the product to become
+something its parents never dreamed it would be.</p>
+
+<h3>Digression:&nbsp; Looking across the chasm</h3>
+
+<p>Since I am employed by a version control vendor, the chasm
+situation that is most interesting to me today is the Decentralized Version
+Control System (<a
+href="http://en.wikipedia.org/wiki/Distributed_revision_control">DVCS</a>).&nbsp;
+Notable examples in this category include open source tools such as Git,
+Mercurial, and Bazaar.</p>
+
+<p>Today, these products are not yet mainstream.&nbsp; They have a
+lot of buzz in certain communities, but the vast majority of all companies
+doing software development are still using centralized tools.</p>
+
+<p>Will the DVCS tools make it across the chasm?</p>
+
+<h2>Stage 4:&nbsp; Talk</h2>
+
+<p>In parenting, the fourth stage is the time from elementary
+school to adolescence.&nbsp; In software, this stage typically covers version 3.0,
+which is often the first release where the product can be considered
+mainstream.&nbsp; The key concept for this stage is "talk".</p>
+
+<p>Parents at this stage often express amazement at what their
+child can do.&nbsp; "Little Bobby is just amazing!&nbsp; Seven years ago we made this
+baby and now I can carry on an actual conversation with it!"&nbsp; Stage 4 arrives,
+and quite suddenly the parent realizes that their baby has become a little
+person.</p>
+
+<p>Similarly, software products in stage 4 have reached the
+point where most people can actually use them.&nbsp; They're mainstream now.&nbsp;
+Previous releases were really only popular with early adopters and people who
+have lots of patience.&nbsp; But release 3.0 is polished enough to be a productive
+solution for more than half of its target market.</p>
+
+<p>Stage 4 is when products and children begin to develop an
+unhealthy level of focus on the competition.&nbsp; When kids go to school, they
+begin to learn that they can make themselves feel better by making others feel
+worse.&nbsp; It will take them many years to unlearn this lesson, to learn that
+mental health and personal peace come from the disciplined choice to not worry
+so much about others and take care of yourself.</p>
+
+<p>Similarly, stage 4 products should probably not be terribly
+focused on the competition.&nbsp; If you don't have good differentiation by now,
+you're not gonna get it.&nbsp; Take care of your own customers.</p>
+
+<h3>Talk</h3>
+
+<p>The most important thing for parents and product managers in
+stage 4 is talking.</p>
+
+<p>This is the stage where kids need information, and it is the
+last stage when they are actually willing to listen to anything you have to say:&nbsp;
+Parents need to talk to their kids about the risks ahead.&nbsp; Tell them about the
+heartache and consequences that can come from poor decisions about smoking and
+sex and drugs and being a fan of the Chicago Cubs.</p>
+
+<p>Similarly, stage 4 is the time when a product manager's
+primary job is providing information.&nbsp; Your product is mainstream now.&nbsp; People
+want it.&nbsp; But to help them realize they want it, you have to give prospective
+customers lots of information.&nbsp; You need whitepapers.&nbsp; You need demo videos.&nbsp;
+You need product comparison documents.&nbsp; And so on.</p>
+
+<h3>Fail</h3>
+
+<p>As an example of a product that didn't do so well in stage
+4, I cite my own company's flagship product, SourceGear Vault.</p>
+
+<p>Vault is very popular and has been a success for our
+company.&nbsp; But when it comes to providing all the different kinds of information
+that a mainstream product needs, we dropped the ball.&nbsp; </p>
+
+<p>Right around the release of Vault 3.0, the product started
+to get lots buzz through "word of mouth".&nbsp; People would come to our website to
+get product information, but the stuff we had there was just too anemic.</p>
+
+<p>To our credit, we realized our mistake and took steps to fix
+it.&nbsp; We hired a product manager to focus on this kind of thing.&nbsp; But still, we
+got a late start, so even now Vault is still catching up to where it should be.</p>
+
+<h2>Stage 5:&nbsp; Balance</h2>
+
+<p>In parenting, the fifth stage is the teenage years, from
+adolescence through high school.&nbsp; In software, this stage typically covers the
+post-3.0 releases.&nbsp; The key concept for this stage is "balance".</p>
+
+<p>This is the stage where a child wants you to stop calling
+them a child.&nbsp; It is a time of transition to adulthood, defined by rebellion.&nbsp;
+No stage is more trying and difficult for a parent than stage 5.&nbsp; Every parent
+wants their children to eventually become independent, but few realize just how
+painful the journey will be.&nbsp; The teenage years are a lot like the terrible
+twos.&nbsp; When the child doesn't get his way, his anger can be quite explosive.&nbsp;
+However, instead of lying on the ground kicking and screaming, he shouts "I
+hate you!" and slams his bedroom door.</p>
+
+<h3>Balance</h3>
+
+<p>But just like the terrible twos, this stage is a critical
+part of growing up.&nbsp; The parent must strike a balance.&nbsp; This stage is the time
+to start steering a bit less.&nbsp; Let the teenager take a bit more control over her
+own life.</p>
+
+<p>Stage 5 is when children and products spend a lot of their
+time asking for things they don't need:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >But Dad, every other teenager on the planet has unlimited
+     text messaging!</li>
+ <li >But Mom, I can't wear a dress that I already wore once!&nbsp; I
+     have to get a new one!</li>
+ <li >But Dad, ALL of the other word processors have a grammar
+     checker!</li>
+</ul>
+
+<p>As product manager in stage 5, you need to give your product
+some slack.&nbsp; It's time to let customers have some of the features you have been
+resisting for years.&nbsp; Even if you don't think the feature is a good idea, as
+long as it won't destroy the product, you should seriously consider letting it
+happen.</p>
+
+<p>But you still need some boundaries:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >A parent must begin to let the teenager be what he wants
+     to be.&nbsp; But don't let the kid ruin his life.&nbsp; Leave enough boundaries in
+     place to ensure that he can finish the journey to adulthood safely and
+     without doing something he'll regret for decades.</li>
+ <li >Similarly, a software product can ruin its life in stage 5
+     by shipping a bad release.&nbsp; A product manager needs to be a champion for
+     quality.&nbsp; It doesn't matter how great version 3.0 was.&nbsp; If version 4.0 is
+     buggy and unreliable, the product's reputation will probably never fully
+     recover.</li>
+</ul>
+
+<h3>Fail</h3>
+
+<p>The perfect example of a product that ruined its life with
+poor quality is Microsoft Visual SourceSafe.</p>
+
+<p>Today, SourceSafe is the punch line to almost every joke
+about version control.&nbsp; It is widely despised and generally regarded to be
+unreliable.</p>
+
+<p>Before Microsoft acquired SourceSafe, it was an outstanding
+and highly respected product.&nbsp; This product didn't become the mostly widely
+used proprietary version control tool for no reason at all.&nbsp; SourceSafe redefined
+the industry by bringing more ease of use than any of its predecessors.</p>
+
+<p>But under Microsoft's parenting, SourceSafe ruined its
+life.&nbsp; Versions 5.0 and 6.0 were disastrous.&nbsp; I would bet that SourceSafe has
+more disdain per user than any other profitable product in history. My company
+has made megabucks from the world's dissatisfaction with SourceSafe.</p>
+
+<p>Ironically, the latest version of SourceSafe probably
+doesn't deserve quite the level of scorn that it receives.&nbsp; I haven't used
+SourceSafe 2005, but I understand that it's not actually that bad.&nbsp; They fixed
+a lot of problems.&nbsp; </p>
+
+<p>But the product has become something that people love to
+hate.&nbsp; Now it's too late.&nbsp; The world will never trust SourceSafe again.</p>
+
+<h2>Stage 6:&nbsp; Let Go</h2>
+
+<p>In parenting, the sixth stage is adulthood.&nbsp; In software,
+this stage covers the time when the product is considered mature.&nbsp; The key
+concept for this stage is "let go".</p>
+
+<p>This is the stage where your work as a parent is basically
+done.&nbsp; From now on, any mistake your child makes is their own fault.&nbsp; You have
+to let go.</p>
+
+<p>Similarly, a product manager doesn't have much to do anymore
+when a product reaches maturity.</p>
+
+<p>For both parent and product manager, this is a time to
+celebrate the successful end of a long and sometimes difficult journey.</p>
+
+<h3>Let Go</h3>
+
+<p>Both parents and product managers often find it difficult to
+let go.&nbsp; But it is important that you do.</p>
+
+<p>You're a product manager.&nbsp; Your job is to help define and shape
+the identity of this product.</p>
+
+<p>Once the child is "all grown up", you need to stop trying to
+help it figure out what it wants to be.&nbsp; It already is.</p>
+
+<p>Let the folks in marcomm, sales and support handle
+everything from now.</p>
+
+<p>This product is done.&nbsp; Go find the next one.</p>
+
+<h3>Epic Fail</h3>
+
+<p>The two most obvious examples where product managers refused
+to let go:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Microsoft Windows</li>
+ <li >Microsoft Office</li>
+</ul>
+
+<p>These products are done.&nbsp; They've been done for years.&nbsp; Unfortunately,
+Microsoft has largely failed to find its next product.&nbsp; So, because Microsoft
+has nothing better to do, they continue to sell us new releases we don't need
+and create contrived reasons to force us to buy them.</p>
+
+<p>Naturally somebody is going to gripe at me for saying that
+the two highest-revenue software products in history are a failure.&nbsp; I'm not
+saying that.&nbsp; What I'm saying is that these two products were stunningly
+successful in stages one through five, and that doesn't change the fact that
+their execution of stage 6 has been awful.</p>
+
+<h2>Final Remarks</h2>
+
+<p>The product manager and the parent both suffer from an
+abundance of diverse opinions.&nbsp; Your local bookstore has hundreds of titles on each
+topic, many of them offering conflicting advice.</p>
+
+<p>This article contains lots of my opinions about parenting
+and product marketing.&nbsp; Some of my readers will agree with me.&nbsp; Others will
+think I am wrong.&nbsp; (The ones in the latter group will send me email.)</p>
+
+<p>The problem with both parenting and product marketing is
+that everybody knows how to do it, but nobody really knows how to do it.&nbsp; You
+read everything you can, and then you do your best.</p>
+
+<p>And in parenting, your best is probably good enough.</p>
+
+<p>This is one very important way that product management is
+completely different from parenting:&nbsp; Most parents are successful.</p>
+
+<p>Very few parents completely fail.&nbsp; We spend many sleepless
+hours worrying, but in the end, stuff tends to work out.&nbsp; If you love your kids
+and give them your best effort, they're probably going to turn out OK.</p>
+
+<p>In contrast, most products fail.&nbsp; Marketing is field where effort
+and "doing your best" are not usually sufficient.</p>
+
+<p>The Pippin didn't fail because there was no product manager
+-- it failed because its product manager was a nitwit.</p>
+
+<p>Microsoft isn't flogging us with Windows Vista because they
+don't care about finding new products.&nbsp; Microsoft <i>tried</i> to find their
+next product.&nbsp; They tried very hard.&nbsp; They assigned their smartest people to
+the challenge.&nbsp; They spent many millions of dollars searching for it.&nbsp; But they
+never found it.</p>
+
+<p>Google did.</p>
+
+<p></p>

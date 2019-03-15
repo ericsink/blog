@@ -1,0 +1,30 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Locks</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="dvcs_weaknesses.html" title="Chapter 6. Weaknesses"><link rel="prev" href="dvcs_weaknesses.html" title="Chapter 6. Weaknesses"><link rel="next" href="dvcs_weakness_very_large_repos.html" title="Very Large Repositories"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Locks</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="dvcs_weaknesses.html">Prev</a> </td><th width="60%" align="center">Chapter 6. Weaknesses</th><td width="20%" align="right"> <a accesskey="n" href="dvcs_weakness_very_large_repos.html">Next</a></td></tr></table><hr></div><div class="section" title="Locks"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp1086752"></a>Locks</h2></div></div></div>
+    
+
+    <p>Just as I believe that many software teams should use <span class="sg-operation">lock</span><a class="indexterm" name="idp1087904"></a> rarely or
+        never, I also understand that for some, <span class="sg-operation">lock</span> is a critical
+        feature.  A great example is a team building a game with lots of
+        graphical assets kept under version control along with the code.
+        With binary files<a class="indexterm" name="idp1089072"></a> and other cases where automerge cannot work, locking a file is often the 
+        right way to go.</p>
+
+    <p>For somewhat obvious reasons, there isn’t much support for <span class="sg-operation">lock</span>
+        in distributed version control.  When the system is designed to provide excellent
+        support for offline usage, a feature which requires online usage is
+        not likely to get much focus.
+        Unless and until DVCS tools provide support for <span class="sg-operation">lock</span>,
+    gaming companies are probably going to stay with centralized tools.</p>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="dvcs_weaknesses.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="dvcs_weaknesses.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="dvcs_weakness_very_large_repos.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 6. Weaknesses </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Very Large Repositories</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

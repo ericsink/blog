@@ -1,0 +1,342 @@
+---
+layout: default
+esbma_id: 3103
+title: Ever have a day like this one?
+date: 2014-05-20 12:00:00
+---
+
+<ul>
+
+    <li>
+    <p>
+    Check email and notice a message from somebody having trouble using
+    SQLitePCL.raw on Windows Phone 8.1.  Realize that I haven't run the test
+    suite since I started working on the new build scripts.  Assume that I
+    broke something.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Hook up the automated test project to the output of the new build system.
+    Sure enough, the tests fail.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Notice that the error message is different from the one in the user's email.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Realize that the user is actually using the old build system, not the new one.
+    Wonder how that could have broken.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Bring up the old build system, run the tests.  Yep, they fail here too.  Must
+    be something in the actual code.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Dig around for a while and try to find what changed.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Use git to go back to the last commit before I started the new build system
+    stuff.  Rebuild all.  Run the tests.  They pass.  Good.  Now I just have to
+    diff and figure out which change caused the breakage.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    git my working directory back to the current version of the code.  Rebuild all
+    and run the tests again to watch them fail again.  BUT NOW THEY PASS.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Wonder if perhaps Visual Studio is less frustrating for people who drink
+    Scotch in the mornings.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Decide that maybe something was flaky in my machine.  The tests are passing
+    again, so there's no problem.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Realize that the user wasn't actually running the test suite.  He was trying to
+    reference from his own project.  And he had to do that manually, because I haven't
+    published the nuget package yet.  Maybe he just screwed up the reference or didn't
+    copy all the necessary pieces.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Run the tests in the new build system to watch them pass there as well.  But
+    here they STILL FAIL.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Decide to take the build system out of the equation and just finish getting things working
+    right with nuget.  Build the unit test package separately in its own solution.  Add a reference
+    to the nuget package and start working out the issues.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Run the tests.  Everything throws because the reference got added to the "bait" version
+    of the PCL instead of the to the WP81 platform assembly.  Oh well.  This is what I need
+    to be fixing anyway.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Notice that the .targets file didn't get properly imported into the test project when the
+    package was installed.  Wonder why.  But that's gotta be why the platform assembly didn't
+    get referenced.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Realize that the bait assembly somehow got referenced.  Wonder why.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    What is Scotch anyway?  Go read several articles about single malt whiskey.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Decide to take nuget out of the equation and focus on why the new build system
+    is producing dlls that won't load.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Google the error message "Package failed updates, dependency or conflict validation".
+    I need to know exactly what was the cause of the failure.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Realize that the default search engine or IE is Bing.  Do the same search in Google.
+    Get different results.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Become annoyed when co-worker interrupts me to tell me that there is a new trailer for Guardians of the Galaxy.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Read a web page on the Microsoft website which explains how to get the actual details
+    of that error message.  Spend time wandering around Event Viewer until I see the
+    right stuff.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Realize that the web page is actually talking about WinRT on the desktop, not Windows Phone.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Try to find a way to get developer-grade error messages in the Windows Phone emulator.
+    Fail.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Notice that below the error message, Visual Studio's suggested resolution is to instead use a
+    unit test project that is targeted for Windows Phone, even thought IT ALREADY IS.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Blame Steve Ballmer FOR EVERYTHING.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Wonder if WP81 is the only thing that broke.  Run the tests for WinRT.  They fail as well.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Get annoyed because the only way Visual Studio can run the unit tests for
+    just one project is to unload all the others.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Get upset because the Visual Studio Reload Project command doesn't work like the way it did
+    a week or two ago.  Now it reloads all the projects instead of just the one I wanted.
+    Did the installation of the Xamarin Visual Studio integration break it?
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Go back to the very basics.  Run the unit tests for plain old .NET 4.5.  They pass.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Re-run the unit tests for WinRT to watch them fail again.  NOW THEY PASS.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Realize the co-worker is absolutely right.  The most important thing is to watch
+    the Guardians of the Galaxy trailer.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Get annoyed because the sound on my MBP isn't working.  Watch the whole trailer
+    anyway, without sound.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Review all my project settings in the Visual Studio dialogs, just to see if I
+    notice anything odd.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Go back to my web browser.  Realize that the world of Scotch whiskey might actually
+    be more complicated than Visual Studio.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Go home.  Discover that the annual spring invasion of ants in our kitchen is
+    proceeding nicely.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Fight some more with Visual Studio.  Give up.  Go to bed.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Wake up the next morning.  Discover that the teenager's contribution to our
+    war against the ants was to leave unrinsed plates by the sink.  Thousands of
+    ants feasting on cheesecake debris and syrup.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Open the laptop.  Run diff to compare the csproj and vcxproj files from the old build system
+    against the new one.  See that there are no differences that should make any difference.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Change them all anyway.  Update every setting to exactly match the old
+    build system.  One at a time.  Run the test suite after each tweak so I can
+    figure out exactly which of the seeminlgy-harmless changes caused the
+    breakage.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Wait.  My kid had cheesecake and waffles FOR DINNER?
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Become seriously annoyed that Visual Studio changes the Output pane
+    from "Tests" to "Build" EVERY SINGLE TIME I run the tests.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Finish getting all the settings to match.  The tests still don't pass.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Try to remember if I ever done anything successfully.  Anything at all.
+    Distinctly recall that when I was mowing the lawn this weekend, the grass
+    got shorter.  Focus on that accomplishment.  Build on that success.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Realize that the old build system works and the new one doesn't.  There has
+    to be a difference that I'm missing.  I just have to find it.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Go back to the old build system.  Rebuild all.  Run the tests so I can watch
+    them pass and start over from there.  BUT NOW THEY'RE FAILING AGAIN.
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Go do something else.
+    </p>
+    </li>
+
+</ul>
+
+<p>&nbsp;</p>
+

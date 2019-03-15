@@ -1,0 +1,236 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Merge (conflicts)</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="git_example.html" title="Chapter 8. Basics with Git"><link rel="prev" href="ch08s13.html" title="Merge (repeated, no conflicts)"><link rel="next" href="ch08s15.html" title="Summary"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Merge (conflicts)</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch08s13.html">Prev</a> </td><th width="60%" align="center">Chapter 8. Basics with Git</th><td width="20%" align="right"> <a accesskey="n" href="ch08s15.html">Next</a></td></tr></table><hr></div><div class="section" title="Merge (conflicts)"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp2028160"></a>Merge (conflicts)</h2></div></div></div>
+
+    
+
+    <p>Sally realizes that C99 has a <code class="code">bool</code> type that should have been used.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git diff</span>
+diff --git a/src/pb.c b/src/pb.c
+index 7881352..3351455 100644
+--- a/src/pb.c
++++ b/src/pb.c
+@@ -2,6 +2,7 @@
+ #include &lt;stdio.h&gt;
+ #include &lt;stdlib.h&gt;
+ #include &lt;string.h&gt;
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+#include &lt;stdbool.h&gt;</span>
+ 
+ #define LUCKY_NUMBER 7
+ #define MAX_WHITE_BALL 59
+@@ -35,7 +36,7 @@
+ {
+     int balls[6];
+     int count_balls = 0;
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-    int favorite = 0;  // this should be a bool</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    bool favorite = false;</span>
+ 
+     for (int i=1; i&lt;argc; i++)
+     {
+@@ -45,7 +46,7 @@
+         {
+             if (0 == strcmp(arg, "-favorite"))
+             {
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-                favorite = 1;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+                favorite = true;</span>
+             }
+             else
+             {
+</pre>
+
+<p>And she commits the change to her private branch.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git commit -a -m "use the bool type"</span>
+[no_boys_allowed a1d4dcf] use the bool type
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git push origin HEAD</span>
+Counting objects: 7, done.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (4/4), 406 bytes, done.
+Total 4 (delta 1), reused 0 (delta 0)
+Unpacking objects: 100% (4/4), done.
+To http://server.futilisoft.com:8000/lottery
+   7570e84..a1d4dcf  HEAD -&gt; no_boys_allowed
+</pre>
+
+<p>Meanwhile, Harry has been grumbling about Sally’s butchering of the Queen’s English and
+    decides to correct the spelling of the word “favourite”.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git diff</span>
+diff --git a/src/pb.c b/src/pb.c
+index 0cecd1c..4d28bbb 100644
+--- a/src/pb.c
++++ b/src/pb.c
+@@ -57,7 +57,7 @@
+ {
+     int balls[6];
+     int count_balls = 0;
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-    int favorite = 0;  // this should be a bool</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    int favourite = 0;  // this should be a bool</span>
+ 
+     for (int i=1; i&lt;argc; i++)
+     {
+@@ -65,9 +65,9 @@
+ 
+         if ('-' == arg[0])
+         {
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-            if (0 == strcmp(arg, "-favorite"))</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+            if (0 == strcmp(arg, "-favourite"))</span>
+             {
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-                favorite = 1;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+                favourite = 1;</span>
+             }
+             else
+             {
+@@ -108,7 +108,7 @@
+         result = result * 2;
+     }
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-    if (favorite)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    if (favourite)</span>
+     {
+         result = result * 2;
+     }
+@@ -118,7 +118,7 @@
+     return 0;
+ 
+ usage_error:
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-    fprintf(stderr, "Usage: %s [-favorite] (5 white balls) power_ball\n", argv[0]);</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    fprintf(stderr, "Usage: %s [-favourite] (5 white balls) power_ball\n", argv[0]);</span>
+     return -1;
+ }
+</pre>
+ 
+<p>Feeling quite chuffed about his pedantry,
+    Harry proceeds to commit the change.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git commit -a -m "fixed spelling error"</span>
+[master f822657] fixed spelling error
+ 1 files changed, 5 insertions(+), 5 deletions(-)
+</pre>
+
+<p>And to once again merge Sally’s changes into the default branch.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git fetch</span>
+remote: Counting objects: 7, done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 4 (delta 1), reused 0 (delta 0)
+Unpacking objects: 100% (4/4), done.
+From http://server.futilisoft.com:8000/lottery
+   7570e84..a1d4dcf  no_boys_allowed -&gt; origin/no_boys_allowed
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git merge origin/no_boys_allowed</span>
+Auto-merging src/pb.c
+CONFLICT (content): Merge <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">conflict</span> in src/pb.c
+Automatic merge failed; fix conflicts and then commit the result.
+</pre>
+
+<p>Crikey!  <a class="indexterm" name="idp2081376"></a>Conflicts in <code class="filename">pb.c</code> again.</p>
+
+
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git diff</span>
+diff --cc src/pb.c
+index 4d28bbb,3351455..0000000
+--- a/src/pb.c
++++ b/src/pb.c
+@@@ -1,6 -1,7 +1,10 @@@
+  #include &lt;stdio.h&gt;
+  #include &lt;stdlib.h&gt;
+  #include &lt;string.h&gt;
+++&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+++=======
++ #include &lt;stdbool.h&gt;
+++&gt;&gt;&gt;&gt;&gt;&gt;&gt; origin/no_boys_allowed
+  
+  #define LUCKY_NUMBER 7
+  #define MAX_WHITE_BALL 59
+@@@ -55,7 -35,7 +59,11 @@@ int main(int argc, char** argv
+  {
+    int balls[6];
+    int count_balls = 0;
+++&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+ +  int favourite = 0; // this should be a bool
+++=======
++   bool favorite = false;
+++&gt;&gt;&gt;&gt;&gt;&gt;&gt; origin/no_boys_allowed
+  
+    for (int i=1; i&lt;argc; i++)
+    {
+@@@ -63,9 -43,9 +71,13 @@@
+  
+        if ('-' == arg[0])
+        {
+ -          if (0 == strcmp(arg, "-favorite"))
+ +          if (0 == strcmp(arg, "-favourite"))
+            {
+++&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+ +              favourite = 1;
+++=======
++               favorite = true;
+++&gt;&gt;&gt;&gt;&gt;&gt;&gt; origin/no_boys_allowed
+            }
+            else
+            {
+</pre>
+
+<p>That <span class="bold"><strong>is</strong></span> a sticky wicket.  Harry quickly realises this conflict 
+    needs to be resolved manually by keeping the proper spelling
+    but converting the type to <code class="code">bool</code> like Sally did.</p>
+
+
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git diff</span>
+diff --cc src/pb.c
+index 4d28bbb,3351455..0000000
+--- a/src/pb.c
++++ b/src/pb.c
+@@@ -55,7 -35,7 +56,7 @@@ int main(int argc, char** argv
+  {
+    int balls[6];
+    int count_balls = 0;
+-   int favourite = 0; // this should be a bool
+ -  bool favorite = false;
+++  bool favourite = false;
+  
+    for (int i=1; i&lt;argc; i++)
+    {
+@@@ -63,9 -43,9 +64,9 @@@
+  
+        if ('-' == arg[0])
+        {
+ -          if (0 == strcmp(arg, "-favorite"))
+ +          if (0 == strcmp(arg, "-favourite"))
+            {
+-               favourite = 1;
+ -              favorite = true;
+++              favourite = true;
+            }
+            else
+            {
+</pre>
+
+<p>After manually merging the changes, Harry proceeds to resolve the conflict and commit the merge.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git commit -a -m "merge, conflicts fixed"</span>
+[master b5480ab] merge, conflicts fixed
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git push</span>
+...
+</pre>
+
+<p>And all of Futilisoft’s customers lived happily ever after.</p>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch08s13.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="git_example.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch08s15.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Merge (repeated, no conflicts) </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Summary</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

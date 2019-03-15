@@ -1,0 +1,153 @@
+---
+layout: default
+esbma_id: 3101
+title: Thoughts on the Bait and Switch PCL Trick
+date: 2014-05-07 12:00:00
+---
+
+<p>This blog entry started its life as comments on 
+<a href="http://log.paulbetts.org/the-bait-and-switch-pcl-trick/">The Bait and Switch PCL Trick</a>, 
+an excellent blog entry by Paul Betts.  </p>
+
+<hr/>
+
+<h2>A little background</h2>
+
+<p>I've been working on a PCL for SQLite.  It's on GitHub:</p>
+
+<p><a href="https://github.com/ericsink/SQLitePCL.raw">https://github.com/ericsink/SQLitePCL.raw</a></p>
+
+<h2>Concerns about the bait-and-switch approach</h2>
+
+<p>(I assume you've read the Paul Betts blog entry as well as the
+Daniel Plaisted <a href="http://blogs.msdn.com/b/dsplaisted/archive/2012/08/27/how-to-make-portable-class-libraries-work-for-you.aspx">blog entry</a> linked therein, so I'm not going to re-describe
+the Bait and Switch concept from square 1.)</p>
+
+<p>I first heard about "the PCL pattern now known as Bait and Switch" 
+several weeks ago in <a href="https://twitter.com/search?q=PCL%20from%3Amigueldeicaza&src=typd">tweets by Miguel de Icaza</a>
+which mentioned the efforts of Xamarin guy <a
+    href="https://github.com/jamesmontemagno">James Montemagno</a>.</p>
+
+<p>And then the Paul Betts blog entry showed up, which named the pattern
+Bait and Switch and proclaimed it to be The Right Way.</p>
+
+<p>Initially, I had concerns.  The technique feels fragile.</p>
+
+<p>(The words "Bait and
+Switch" don't really contribute to this feeling (at least for me), especially
+after seeing Daniel Plaisted on Twitter saying that "the bait-and-switch concept is fundamental to PCLs, because mscorlib is different everywhere".  Makes sense.)</p>
+
+<p>But the technique still seems deserving of the word "Trick".  The reference assembly (the actual PCL assembly, the one with a
+PCL profile) and the platform assemblies don't have much tying them
+together.  It seems like the trick is something that just happens to work,
+almost by accident, and therefore might stop working later, even though I have no reason to believe that it will.</p>
+
+<p>I'm setting this worry aside because the other PCL approach (dependency injection) contains
+a trick which feels just as fragile.  The standard hack is for the PCL assembly
+to use reflection to locate and load and instantiate the platform assembly.  This
+approach doesn't exactly ooze with robustness either.  And in fact, the Bait and Switch
+technique seems to work fine on Xamarin whereas the reflection-load technique does not.
+So, both of these approaches might seem fragile, but one of them definitely is.</p>
+
+<h2>Two kinds of PCLs</h2>
+
+<p>If we accept the idea that the Bait and Switch pattern is The Right Way,
+then there are several corollaries that follow.</p>
+
+<p>There are two kinds of a PCLs:</p>
+
+<ol>
+    <li><p>A PCL which contains only non-portable code.</p></li>
+
+    <li><p>A PCL which contains only portable code.</p></li>
+</ol>
+
+<p>There are no PCLs which contain a mixture of the two.</p>
+
+<p>(To be more precise, I am defining "portable code" as code which 
+is compiled under a PCL profile, and "non-portable code" is code
+which is, er, not compiled under a PCL profile.  I am not claiming 
+that a PCL of type (1) is prohibited from using things like 
+System.String.Length.  :-) ) </p>
+
+<p>I find it helpful put some separation between these two very different kinds of PCLs and
+to explain them as follows.  Perhaps others will find these explanations helpful as well.</p>
+
+<h2>Wrapper PCLs</h2>
+
+<p>For the purpose of this note, I will refer to PCL type (1) as a Wrapper PCL.</p>
+
+<p>A Wrapper PCL is a PCL which exists to provide a portable wrapper around 
+something that is not portable.</p>
+
+<p>A Wrapper PCL always uses the Bait and Switch pattern.</p>
+
+<p>We can refer to a Wrapper PCL in the singular, but it is actually multiple
+assemblies.  There is the PCL assembly itself (the one that claims to be
+portable according to some profile).  And there are platform assemblies,
+non-portable assemblies which play the role of the PCL assembly in real
+life scenarios.</p>
+
+<p>Any consumer of a Wrapper PCL would need to reference exactly one of its
+assemblies.  A library can reference the PCL assembly itself.  An app
+must reference one of the platform assemblies.</p>
+
+<p>With a Wrapper PCL, the PCL assembly itself exists only so that libraries
+can have something to reference.  It is nothing more than a placeholder.</p>
+
+<p>With a Wrapper PCL, the PCL assembly itself contains only stub functions.  
+Those stub functions never get executed.  They might do nothing.  They might
+throw.  They might <a href="http://feross.org/gcc-ownage/">launch nethack</a>.  Nobody knows.  Nobody cares.</p>
+
+<p>A Wrapper PCL, despite the presence of "Portable Class Library" in its name,
+contains no portable code that ever gets used.</p>
+
+<p>A Wrapper PCL claims a PCL profile (such as profile 78, for example), but
+that profile claim is mostly just a list of which platform assemblies 
+are supposed to be present in the package.</p>
+
+<p>With a Wrapper PCL, we don't care at all about the fact that our compiler
+and tooling can gripe about the use of non-portable things (except of
+course to complain if somebody actually does try to launch nethack from
+a stub).  There is no portable code being written, so we don't need the
+compiler evaluating our ability to write things that are portable.</p>
+
+<p>There is no special tooling to help ensure that all of the assemblies
+within a Wrapper PCL actually do implement the same interface, although
+it's not hard to figure out ways of making this happen by code sharing
+across all the assemblies.</p>
+
+<h2>Feature PCL</h2>
+
+<p>As for PCL type (2) in the list above, I will refer to this as a 
+Feature PCL.  </p>
+
+<p>A Feature PCL is a library of portable code.  I'll generously assume
+that it has some reason to exist.  It therefore provides some sort of 
+functionality.  Or a feature.  So I call it a Feature PCL.</p>
+
+<p>A Feature PCL does not use Bait and Switch.  Or Dependency Injection.  It
+has no need for such things.</p>
+
+<p>A Feature PCL is not allowed to have non-portable code in it.  If it did,
+it would not be a PCL.  Or it would violate The Right Way, so its offending
+non-portable portions should be abstracted out into a separate PCL using
+the Bait and Switch pattern.</p>
+
+<p>A Feature PCL is allowed to use things that are allowed by its profile.
+Or it is allowed to reference other PCLs that are compatible with that
+profile.  It is not allowed to reference anything else.  The compiler
+and tooling help ensure this.</p>
+
+<p>A Feature PCL is [conceptually] just one assembly.  It might be implemented
+using multiple assemblies.  That's fine.  What is does NOT have are a
+set of assemblies that are designed to be alternatives.</p>
+
+<h2>Bottom line</h2>
+
+<p>I'm still exploring and experimenting.  Feedback welcome, but my
+blog software doesn't support comments.  I'm @eric_sink on Twitter.  I'll also keep an eye on
+the Paul Betts blog entry for any further discussion that happens there.</p>
+
+<p>&nbsp;</p>
+

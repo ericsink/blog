@@ -1,0 +1,288 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Update, Commit (with a merge)</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="mercurial_example.html" title="Chapter 7. Basics with Mercurial"><link rel="prev" href="ch07s03.html" title="Push, Pull, Log, Diff"><link rel="next" href="ch07s05.html" title="Update (with merge)"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Update, Commit (with a merge)</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch07s03.html">Prev</a> </td><th width="60%" align="center">Chapter 7. Basics with Mercurial</th><td width="20%" align="right"> <a accesskey="n" href="ch07s05.html">Next</a></td></tr></table><hr></div><div class="section" title="Update, Commit (with a merge)"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp1224448"></a>Update, Commit (with a merge)</h2></div></div></div>
+    
+
+<p>Meanwhile, Harry has been coding as well.  He heard somebody say that
+it’s best to compile with all the warnings turned on, so he decides to give it
+a try.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">gcc -std=c99 -Wall -Wextra -Werror lottery.c </span>
+cc1: warnings being treated as errors
+lottery.c:5: <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">warning: unused parameter</span> 'white_balls'
+lottery.c:5: warning: unused parameter 'power_ball'
+</pre>
+
+<p>I say!  The code has some warnings.  The <code class="code">calculate_result()</code> function
+isn’t using its parameters.  Harry looks at the situation and realises the
+problem immediately:  That function should be checking its arguments for
+validity!  The power ball can be from 1 to 39 inclusive.  The white balls can be
+1 to 59 inclusive.  So he implements the error checking.</p>
+
+<pre class="programlisting">int calculate_result(int white_balls[5], int power_ball)
+{
+    for (int i=0; i&lt;5; i++)
+    {
+        if (
+             (white_balls[i] &lt; 1)
+             || (white_balls[i] &gt; 59)
+           )
+        {
+            return -1;
+        }
+    }
+
+    if (
+         (power_ball &lt; 1)
+         || (power_ball &gt; 39)
+       )
+    {
+        return -1;
+    }
+
+    return 0;
+}
+</pre>
+
+<p>Grand.  Let’s see if it compiles.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">gcc -std=c99 -Wall -Wextra -Werror lottery.c</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">ls -l</span>
+total 32
+-rwxr-xr-x  1 harry  staff  8904 May 17 08:17 a.out
+-rw-r--r--  1 harry  staff   843 May 17 08:16 lottery.c
+</pre>
+
+<p>Quite.  But Harry decides to diff before committing, just for good measure.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg diff</span>
+diff -r 1f8baa59f5a4 lottery.c
+--- a/lottery.c Tue May 17 07:58:36 2011 -0500
++++ b/lottery.c Tue May 17 08:17:53 2011 -0500
+@@ -4,6 +4,25 @@
+ 
+ int calculate_result(int white_balls[5], int power_ball)
+ {
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    for (int i=0; i&lt;5; i++)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    {</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        if (</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+             (white_balls[i] &lt; 1)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+             || (white_balls[i] &gt; 59)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+           )</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        {</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+            return -1;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        }</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    }</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    if (</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+         (power_ball &lt; 1)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+         || (power_ball &gt; 39)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+       )</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    {</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        return -1;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    }</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+</span>
+     return 0;
+ }
+</pre>
+
+<p>Good show.  Time to commit the change.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg commit -m "fix some warnings"</span>
+</pre>
+
+<p>No problems there.  This time he remembers that he needs to push his changes to the server.</p>
+
+<p>But Sally has been working at the same time and she had her change ready
+    to commit and push first.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg commit -m "change order of the command line args to be \
+                              more like what the user will expect"</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg push</span>
+pushing to http://server.futilisoft.com:8000/
+searching for changes
+remote: adding changesets
+remote: adding manifests
+remote: adding file changes
+remote: added 1 changesets with 1 changes to 1 files
+</pre>
+
+<p>So Harry tries to push his changes.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg push</span>
+pushing to http://server.futilisoft.com:8000/
+searching for changes
+abort: push creates new remote heads on branch 'default'!
+(you should pull and merge or use push -f to force)
+</pre>
+
+<p>What’s all this then?  Mercurial is not allowing Harry to push his
+change because it would result in the default branch having two heads. </p>
+
+<table xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" align="center" border="0" style="width:350px"><tr><td background="images/eric_aside_06.jpg" style="font-style:italic; padding-left:0.375in; padding-right:0.375in; padding-top:0.25in; padding-bottom:0.25in">
+    <p>This restriction is analogous to the way the second generation tools refuse to
+        allow a commit if it was not based on the most recent version in the
+        repository.  Mercurial allows this behavior to be overridden, but
+        for most situations it is friendlier to the other members of the
+        team if you do the pull and merge before you push.
+         </p>
+</td></tr></table>
+
+<p>Harry uses pull to bring in changes.
+    </p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg pull</span>
+pulling from http://server.futilisoft.com:8000/
+searching for changes
+adding changesets
+adding manifests
+adding file changes
+added 1 changesets with 1 changes to 1 files (+1 heads)
+(run 'hg heads' to see heads, 'hg merge' to merge)
+</pre>
+
+<p>Following the instructions from Mercurial’s output, Harry wants
+    to see what <span class="command"><strong>hg heads</strong></span> has to say.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg heads</span>
+changeset:   2:7dd1d2434f80
+tag:         tip
+parent:      0:1f8baa59f5a4
+user:        Sally &lt;sally@futilisoft.com&gt;
+date:        Tue May 17 08:25:22 2011 -0500
+summary:     change order of the command line args to be \
+             more like what the user will expect
+
+changeset:   1:efcd0b05ec2c
+user:        Harry &lt;harry@futilisoft.com&gt;
+date:        Tue May 17 08:24:01 2011 -0500
+summary:     fix some warnings
+</pre>
+
+<p>Harry wonders why he can’t just update.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg update</span>
+abort: crosses branches (merge branches or use --check to force update)
+</pre>
+
+<p>That didn’t work.  OK, maybe a merge.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg merge</span>
+merging lottery.c
+0 files updated, 1 files merged, 0 files removed, 0 files unresolved
+(branch merge, don't forget to commit)
+</pre>
+
+<p>Great!  Now the merge is in the working copy.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg status</span>
+M lottery.c
+? a.out
+</pre>
+
+<p>Everything seems to be proper good.  Harry wants to see what happened.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg diff</span>
+diff -r <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">efcd0b05ec2c</span> lottery.c
+--- a/lottery.c Tue May 17 08:24:01 2011 -0500
++++ b/lottery.c Tue May 17 08:30:00 2011 -0500
+@@ -30,16 +30,16 @@
+ {
+     if (argc != 7)
+     {
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-        fprintf(stderr, "Usage: %s power_ball (5 white balls)\n", argv[0]);</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        fprintf(stderr, "Usage: %s (5 white balls) power_ball\n", argv[0]);</span>
+         return -1;
+     }
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-    int power_ball = atoi(argv[1]);</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    int power_ball = atoi(argv[6]);</span>
+ 
+     int white_balls[5];
+     for (int i=0; i&lt;5; i++)
+     {
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_del">-        white_balls[i] = atoi(argv[2+i]);</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        white_balls[i] = atoi(argv[1+i]);</span>
+     }
+ 
+     int result = calculate_result(white_balls, power_ball);
+</pre>
+
+<p>Interesting.  Diff shows Sally’s changes.  This is because the diff was
+performed against changeset efcd0b05ec2c.  Harry types <span class="command"><strong>hg parents</strong></span><a class="indexterm" name="idp1277776"></a> to see
+the version of the tree on which his current pending changeset is based.
+</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg parents</span>
+changeset:   1:efcd0b05ec2c
+user:        Harry &lt;harry@futilisoft.com&gt;
+date:        Tue May 17 08:24:01 2011 -0500
+summary:     fix some warnings
+
+changeset:   2:7dd1d2434f80
+tag:         tip
+parent:      0:1f8baa59f5a4
+user:        Sally &lt;sally@futilisoft.com&gt;
+date:        Tue May 17 08:25:22 2011 -0500
+summary:     change order of the command line args to be \
+             more like what the user will expect
+</pre>
+
+<p>Because it is a merge in progress, his working copy has <span class="bold"><strong>two</strong></span> parents.  The resulting DAG node will have two parents as well.</p>
+
+<p>His code is already committed.
+Apparently Mercurial was able to merge Sally’s changes directly into
+Harry’s modified copy of the file without any conflicts.  Smashing!
+Let’s see if it compiles.
+</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">gcc -std=c99 -Wall -Wextra -Werror lottery.c</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">ls -l</span>
+total 32
+-rwxr-xr-x  1 harry  staff  8904 May 17 08:34 a.out
+-rw-r--r--  1 harry  staff   843 May 17 08:28 lottery.c
+</pre>
+
+<p>Very well then.  So Harry is ready to commit the merge.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg commit -m "merge"</span>
+</pre>
+
+<p>And now <span class="command"><strong>hg parents</strong></span> shows only one node but that node has two
+    parents.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg parents</span>
+changeset:   3:edbf336fe3fa
+tag:         tip
+parent:      1:efcd0b05ec2c
+parent:      2:7dd1d2434f80
+user:        Harry &lt;harry@futilisoft.com&gt;
+date:        Tue May 17 08:35:28 2011 -0500
+summary:     merge
+</pre>
+
+<p>And push.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg push</span>
+pushing to http://server.futilisoft.com:8000/
+searching for changes
+remote: adding changesets
+remote: adding manifests
+remote: adding file changes
+remote: added 2 changesets with 2 changes to 1 files
+</pre>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch07s03.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="mercurial_example.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch07s05.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Push, Pull, Log, Diff </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Update (with merge)</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

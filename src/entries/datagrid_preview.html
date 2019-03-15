@@ -1,0 +1,188 @@
+---
+esbma_id: unknown
+title: Preview: DataGrid for Xamarin.Forms
+date: 2014-10-03 10:00:00
+---
+
+<h2>Note</h2>
+
+<p>Update, 11 November 2014</p>
+
+<p>
+Because the approach of this code prevents it from hosting
+Xamarin.Forms.View objects within cells, and because of current difficulties in
+getting a truly high-performance cross-platform drawing API on all three
+Xamarin.Forms platforms (insert unhappy face aimed at Windows Phone here), I
+have stopped work on this project for the time being.
+</p>
+
+<p>
+However, I am currently working on another DataGrid implementation, implemented
+with a different approach. Sorry, nothing from my second attempt at a DataGrid
+has been released publicly yet. Watch my blog and Twitter for announcements.
+</p>
+
+<hr/>
+
+<p><img align="right" src="dg_iphone.png"/></p>
+
+<h2>What is it?</h2>
+
+<p>It's a <a href="http://xamarin.com/forms">Xamarin.Forms</a> grid control for displaying data in rows and columns.
+</p>
+
+<h2>Where's the code?</h2>
+
+<p><a href="https://github.com/ericsink">https://github.com/ericsink</a></p>
+
+<h2>Is this open source?</h2>
+
+<p>Yes.  Apache License v2.</p>
+
+<h2>Why are you writing a grid?</h2>
+
+<p>Because I see an unmet need.  Xamarin.Forms
+needs a good way to display row/column data.  And it needs to be
+capable of handling lots (millions) of cells.  
+And it needs to be really, really fast.</p>
+
+<p>I'm one of the founders of <a href="http://zumero.com/">Zumero</a>.  We're all about mobile apps for
+businesses dealing with data.  Many of our customers are using Xamarin,
+and we want to be able to recommend Xamarin.Forms to them.
+A DataGrid is one of the pieces we need.</p>
+
+<h2>What are the features?</h2>
+
+<ul>
+    <li>Scrolling, both vertical and horizontal</li>
+    <li>Either scroll range can be fixed, infinite, or wraparound.</li>
+    <li>Optional headers, top, left, right, bottom.</li>
+    <li>Ample flexibility in connecting to different data sources</li>
+    <li>Column widths can be fixed width or variable.  Same for row heights.</li>
+</ul>
+
+<h2>Is this ready for use?</h2>
+
+<p>No, this code is still pretty rough.</p>
+
+<h2>Is this ready to play with and complain about?</h2>
+
+<p>Yes, hence its presence on GitHub.  <tt><b>:-)</b></tt></p>
+
+<p>Open dg.sln in Xamarin Studio and it should build.  There's a demo app (Android and iOS) you can use to try it out.  The WP8 code isn't there yet, but it'll be moving in soon.</p>
+
+<h2>Is there a NuGet package?</h2>
+
+<p>Not yet.</p>
+
+<h2>Is the API frozen yet?</h2>
+
+<p>No.  In fact, I'm still considering some API changes that could be described as major.</p>
+
+<p><img align="right" hspace="10" src="dg_wp.png"/></p>
+
+<h2>What platforms does it support?</h2>
+
+<p>Android and iOS are currently in decent shape.  Windows Phone is
+in progress.  (The header row was bashful and refused to cooperate for
+the WP8 screenshot.)</p>
+
+<h2>What will the API be like?</h2>
+
+<p>I don't know yet.  In fact, I'm tempted to quibble when you
+say "the API", because you're speaking of it in the singular,
+and I think I will end up with more than one.  <tt><b>:-)</b></tt></p>
+
+<p>Earlier, I described this thing as "a grid control", but it would be more
+accurate right now to describe it as a framework for building
+grid controls.</p>
+
+<p>I have implemented some sample grids, mostly just to demonstrate
+the framework's capabilities and to experiment with what kinds of
+user-facing APIs would be most friendly.  Examples include:</p>
+
+<ul>
+    <li>A grid that gets its data from an IList<T>, where the properties of objects of class T become columns.</li>
+    <li>A data connector that gets its data from ReactiveList (uses <a href="http://reactiveui.net/">ReactiveUI</a>).</li>
+    <li>A grid that gets its data from a sqlite3_stmt handle (uses my <a href="https://github.com/ericsink/SQLitePCL.raw">SQLitePCL.raw</a> package).</li>
+    <li>A grid that just draws shapes.</li>
+    <li>A grid that draws nothing but a cell border, but the farther you scroll, the bigger the cells get.</li>
+    <li>A 2x2 grid that scrolls forever and just repeats its four cells over and over.</li>
+</ul>
+
+<h2>How is this different from the <a href="http://developer.xamarin.com/guides/cross-platform/xamarin-forms/controls/layouts/">layouts</a> built into Xamarin.Forms?</h2>
+
+<p>This control is not a "Layout", in the Xamarin.Forms sense.  It is not a
+subclass of Xamarin.Forms.Layout.  You can't add child views to it.</p>
+
+<p>If you need something to help arrange the visual elements of your UI on the
+screen, DataGrid is not what you want.  Just use one of the Layouts.  That's
+what they're for.</p>
+
+<p>But maybe you need to display a lot of data.  Maybe you have 200,000 rows.
+Maybe you don't know how many rows you have and you won't know until you read
+the last one.  Maybe you have lots of columns too, so you need the ability to
+scroll in both directions.  Maybe you need one or more header rows at the top
+which sync-scroll horizontally but are frozen vertically.  And so on.</p>
+
+<p>Those kind of use cases are what DataGrid is aimed for.</p>
+
+<h2>What drawing API are you using?</h2>
+
+<p>Mostly I'm working with a hacked-up copy of Frank Krueger's <a href="https://github.com/praeclarum/CrossGraphics">CrossGraphics</a> 
+library, modified in a variety of ways.</p>
+
+<p>The biggest piece of the code (in DataGrid.Core) actually doesn't care about the graphics
+API.  That assembly contains generic classes which accept &lt;TGraphics&gt; as a type parameter.
+(As a proof of concept demo, I've got an iOS implementation built on CGContext
+which doesn't actually depend on Xamarin.Forms at all.)</p>
+
+<h2>So I can't add ANY child views to your DataGrid control?</h2>
+
+<p>Currently, no.  I would like to add this capability in the future.</p>
+<p>(At the moment, I'm pretty sure it is impossible to build a layout control
+for Xamarin.Forms unless you're a Xamarin employee.  There seem to be a
+few important things that are not public.)</p>
+
+<h2>How fast is it?</h2>
+
+<p>Very.  On my Nexus 7, a debug build of DataGrid can easily scroll 
+a full screen of text cells at 60 frames/second.  Performance on iOS is similar.</p>
+
+<p align="center"><a href="dg_n7.png"><img border="0" width="75%" src="dg_n7.png"/></a></p>
+
+<h2>How much code is cross-platform?</h2>
+
+<p>Not counting the demo app or my copy of CrossGraphics, the following table shows lines of code in each
+combination of dependencies:</p>
+
+<table border="1" width="100%">
+    <tr align="center"><td>&nbsp;</td><td>Portable</td><td>iOS-specific</td><td>Android-specific</td></tr>
+    <tr align="center"><td>&lt;TGraphics&gt;</td><td>2,741</td><td>141</td><td>174</td></tr>
+    <tr align="center"><td>Xamarin.Forms</td><td>633</td><td>92</td><td>81</td></tr>
+</table>
+
+<p>Xamarin.Forms is [going to be] a wonderful foundation for cross-platform mobile apps.</p>
+
+<h2>Can I use this from Objective-C or Java?</h2>
+
+<p>No.  It's all C#.</p>
+
+<h2>Why are you naming_things_with_underscores?</h2>
+
+<p>Sorry about that.  It's a habit from my Unix days that I keep slipping back
+into.  I'll clean up my mess soon.</p>
+
+<h2>What's up with IChanged?  Why not IObservable&lt;T&gt;?</h2>
+
+<p>Er, yeah, remember above when I said I'm still considering some major
+changes?  That's one them.</p>
+
+<h2>Does this in any way depend on your <a href="http://zumero.com/dev-center/zss">Zumero for SQL Server</a> product?</h2>
+
+<p>No, DataGrid is a standalone open source library.</p>
+<p>But it's rather likely
+that our commercial products will in the future depend on DataGrid.</p>
+
+<p>&nbsp;</p>
+

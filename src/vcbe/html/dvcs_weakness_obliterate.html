@@ -1,0 +1,87 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Obliterate</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="dvcs_weaknesses.html" title="Chapter 6. Weaknesses"><link rel="prev" href="dvcs_weakness_integration.html" title="Integration"><link rel="next" href="dvcs_weakness_administration.html" title="Administration"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Obliterate</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="dvcs_weakness_integration.html">Prev</a> </td><th width="60%" align="center">Chapter 6. Weaknesses</th><td width="20%" align="right"> <a accesskey="n" href="dvcs_weakness_administration.html">Next</a></td></tr></table><hr></div><div class="section" title="Obliterate"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp1103568"></a>Obliterate<a class="indexterm" name="idp1104560"></a></h2></div></div></div>
+    
+
+<div xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="figure-float" style="float: right; width:3in">
+    <div class="mediaobject"><img src="images/verb_obliterate.jpg"></div>
+</div>
+
+    <p>The “Implicit Backup” idea described in the
+        previous chapter
+             is a coin with two sides.  Having
+        lots of copies of the data does reduce the risk of losing that data, but it also
+        makes it far more difficult to destroy.</p>
+
+<p>Some version control systems have a way of actually altering the history
+    of the repository.  There are certain legitimate situations where we want
+    to delete something and have it actually be deleted.
+    In general, these situations arise when someone has a legal obligation 
+    to destroy all copies of some piece of data.
+    It is insufficient to use the <span class="sg-operation">delete</span> operation, since that doesn’t purge the
+    data from the repository’s history.  
+    This
+    feature is commonly known as “obliterate”.
+    </p>
+
+    <p>Most version control tools do not support obliterate.
+        It is generally agreed 
+        that the most important trait for a VCS is reliability.  
+        In the pursuit of reliability, anything which allows the history of
+        a repository to be altered
+        is at best a distraction and at
+        worst, damaging.
+        In many cases,
+        any provision for the ability to obliterate things would cause the
+        overall design to be altered in ways that compromise the performance and
+        reliability of all operations.
+    </p>
+
+    <p>As you can tell, I don’t like obliterate much.  My company has been
+        selling version control tools for over a decade, and our experience in
+        providing technical support to our customers shows that obliterate is
+        often misused.  In my entire career,
+        I don’t think I’ve ever found occasion to use obliterate.  
+        But I concede that there are valid use cases for it, and the presence of multiple repository instances does make things more difficult, so I mention
+        it here.</p>
+
+    <p>With a DVCS, obliterating something would look roughly like this:</p>
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>Get one repository instance Q which is complete.
+                You’ll need to have every repository instance
+                push everything to Q.
+        </p></li><li class="listitem">
+            <p>
+                Clone Q while excluding the parts you want to obliterate.  This
+                requires that your DVCS support some kind of a “clone with
+                exclude” operation.
+            </p>
+        </li><li class="listitem">
+            <p>
+                Destroy all repository instances, replacing them with
+                the clone you just created.
+            </p>
+        </li></ul></div>
+
+    <p>The difficulty of this recipe is determined primarily by the number of
+        repository instances you have.  With 10 instances, it’s probably not a
+        big problem.  With 5,000 instances, you’ve got a major task on your
+        hands.  Fortunately, the need to obliterate is extremely rare.</p>
+
+    <p>Or at least it <span class="bold"><strong>should</strong></span> be.  If your regular process involves a frequent need to obliterate,
+        you should not be using a DVCS.  In fact, my opinion would be that
+        you should not be using <span class="bold"><strong>any</strong></span> VCS in that kind of situation.
+        You’re doing something that version control tools are not designed
+        to do.  You don’t need version control.  What you need is something
+        else, something that is not the subject of this book.</p>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="dvcs_weakness_integration.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="dvcs_weaknesses.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="dvcs_weakness_administration.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Integration </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Administration</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

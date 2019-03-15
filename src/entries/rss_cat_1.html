@@ -1,0 +1,307 @@
+---
+layout: default
+esbma_id: 3020
+title: Using Zumero from C#
+date: 2013-03-15 12:00:00
+---
+
+<p>I think it's safe to say that more RSS readers are being built this week
+than at any other point in history.  I particularly enjoyed this image from
+Miguel de Icaza which showed up in my Twitter stream yesterday:</p>
+
+<p><img width="60%" src="/entries/rss_cat.png"/></a></p>
+
+<p>I hate being excluded from what all the cool kids are doing, so I'm
+going to build an RSS reader which (1) is designed for mobile devices, and (2)
+has offline support.</p>
+
+<h3>An RSS Reader built on SQLite/Zumero, Part 1</h3>
+
+<p>The basic design is to use one SQLite file to keep a list of all the feeds, plus one
+additional dbfile for each feed.</p>
+
+<p>Here's the SQLite script to create the 'all_feeds' database:</p>
+
+<pre class="screen">
+.load zumero.dylib
+
+.echo ON
+
+BEGIN TRANSACTION;
+
+CREATE VIRTUAL TABLE feeds USING zumero(
+    feedid INTEGER PRIMARY KEY,
+    url TEXT NOT NULL UNIQUE
+    );
+
+-- configure the permissions on this dbfile to allow 'anyone' to 
+-- (1) pull the dbfile, and 
+-- (2) add rows to the feeds table  
+-- and nothing else.
+
+SELECT zumero_define_acl_table('main');
+
+INSERT INTO z_acl (scheme,who,tbl,op,result) VALUES (
+    '',
+    zumero_named_constant('acl_who_anyone'),
+    '',
+    '*',
+    zumero_named_constant('acl_result_deny')
+    );
+
+INSERT INTO z_acl (scheme,who,tbl,op,result) VALUES (
+    zumero_internal_auth_scheme('zumero_users_admin'),
+    zumero_named_constant('acl_who_any_authenticated_user'),
+    '',
+    '*',
+    zumero_named_constant('acl_result_allow')
+    );
+
+INSERT INTO z_acl (scheme,who,tbl,op,result) VALUES (
+    '',
+    zumero_named_constant('acl_who_anyone'),
+    '',
+    zumero_named_constant('acl_op_pull'),
+    zumero_named_constant('acl_result_allow')
+    );
+
+INSERT INTO z_acl (scheme,who,tbl,op,result) VALUES (
+    '',
+    zumero_named_constant('acl_who_anyone'),
+    'feeds',
+    zumero_named_constant('acl_op_tbl_add_row'),
+    zumero_named_constant('acl_result_allow')
+    );
+
+INSERT INTO feeds (url) VALUES ('http://feeds.hanselman.com/ScottHanselman');
+
+COMMIT TRANSACTION;
+
+SELECT zumero_sync(
+    'main',
+    'https://zinst393e9343b87.s.zumero.net',
+    'all_feeds',
+    zumero_internal_auth_scheme('zumero_users_admin'),
+    'admin',
+    'SECRETPASSWORD'
+    );
+</pre>
+
+<p>Highlights:</p>
+
+<ul>
+<li><p>The ".load zumero.dylib" loads the Zumero SQLite extension so that I can
+use Zumero features in SQLite.</p></li>
+<li><p>The main thing going on here is the statement where I CREATE the feeds
+table.  And it's a very simple table.  All I need 
+is a URL for the feed.</p></li>
+<li><p>Then you see a bunch of stuff to configure permissions.  As it says in
+the comments, I want unauthenticated users to be able to see the feed list or add a feed, but
+all other modifications are prohibited unless you are, well, me.</p></li>
+<li><p>I seed the list with the feed from Hansleman's <a href="http://www.hanselman.com/blog/">blog</a>.</p></li>
+<li><p>Finally, I sync this SQLite database up to my server.
+Since I am creating a dbfile and defining its schema, I need to use the
+admin user/password that was created when I signed up for this Zumero
+server.
+</p></li>
+</ul>
+
+<p>To execute this script, I save it to a file called
+<tt>setup_dbfile_all_feeds.sql</tt> and then pipe it into the <tt>sqlite3</tt>
+shell.</p>
+
+<pre class="screen">
+eric$ ./sqlite3 ./all_feeds.db &lt; setup_dbfile_all_feeds.sql
+</pre>
+
+<p>Like I said, anyone can add feeds to this list.  The server URL is actually the one shown in these examples.
+I'm
+going to open my local copy of "all_feeds" and add my own RSS feed URL to the
+list:</p>
+
+<pre class="screen">
+eric$ ./sqlite3 ./all_feeds.db 
+SQLite version 3.7.11 2012-03-20 11:35:50
+Enter ".help" for instructions
+Enter SQL statements terminated with a ";"
+sqlite> .load zumero.dylib
+sqlite> INSERT INTO feeds (url) VALUES ('http://ericsink.com/rss.xml');
+sqlite> SELECT * FROM feeds;
+1|http://feeds.hanselman.com/ScottHanselman
+2|http://ericsink.com/rss.xml
+sqlite> SELECT zumero_sync(
+    'main',
+    'https://zinst393e9343b87.s.zumero.net',
+    'all_feeds'
+    );
+0;0;3584;0;448;0;1249;1264
+</pre>
+
+<p>Note that I didn't need to pass any authentication credentials to the
+zumero_sync() function.</p>
+
+<p>So far, my RSS reader doesn't do anything.  It's just a list of feeds.
+Granted, it's a really cool list, since it supports incremental sync, but still.  I'm probably
+going to need my RSS reader to do something with, er, RSS.  And for that, I'm going to need
+more than just SQL statements piped into the sqlite3 shell.</p>
+
+<p>Here's my starting point, in C#:</p>
+
+<pre class="screen">
+using System;
+using System.Collections.Generic;
+using System.ServiceModel.Syndication;
+using System.Xml;
+
+using SQLite; // https://github.com/praeclarum/sqlite-net
+
+namespace z
+{
+    class Program
+    {
+        // define a little class to represent rows of the feeds table
+
+        public class feed_row
+        {
+            public string feedid { get; set; }
+            public string url { get; set; }
+        };
+
+        public static void Main (string[] args)
+        {
+            // open the local SQLite db
+            SQLiteConnection conn = new SQLiteConnection("all_feeds.db");
+
+            // tell SQLite to allow load_extension()
+            conn.EnableLoadExtension(1);
+
+            // load the Zumero extension
+            // this is the equivalent of 
+            // ".load zumero.dylib" in the sqlite3 shell
+            conn.ExecuteScalar<string>("SELECT load_extension('zumero.dylib');");
+
+            // iterate over all the rows in the feeds table
+            var rows = conn.Query<feed_row> ("SELECT feedid, url FROM feeds;");
+            foreach (feed_row q in rows)
+            {
+                Console.WriteLine(q.url);
+                try
+                {
+                    XmlReader xr = new XmlTextReader(q.url);
+                    SyndicationFeed f = SyndicationFeed.Load(xr);
+
+                    // TODO store the items from this feed
+                }
+                catch (Exception e)
+                {
+                    // TODO failed trying to retrieve or parse this feed.
+                    // TODO log the failure?
+                    // TODO delete the feed row?
+                    // TODO launch nethack?
+                }
+            }
+
+            conn.Close();
+        }
+    }
+}
+</pre>
+
+<p>
+In order to call the SQLite library from C#, I'm using <a href="https://github.com/praeclarum/sqlite-net">SQLite.cs</a>, by Frank Krueger.
+That wrapper doesn't have a way to call <a
+href="http://www.sqlite.org/c3ref/enable_load_extension.html">sqlite3_enable_load_extension()</a>,
+so I added one.  Here's the diff, which I plan to submit as a pull request:
+</p>
+
+<pre class="screen">
+eric$ diff orig_SQLite.cs SQLite.cs 
+183a184,192
+>         public void EnableLoadExtension(int onoff)
+>         {
+>             SQLite3.Result r = SQLite3.EnableLoadExtension(Handle, onoff);
+>           if (r != SQLite3.Result.OK) {
+>               string msg = SQLite3.GetErrmsg (Handle);
+>               throw SQLiteException.New (r, msg);
+>           }
+>         }
+> 
+2645a2655,2659
+>       [DllImport("sqlite3", 
+>                 EntryPoint = "sqlite3_enable_load_extension", 
+>                 CallingConvention=CallingConvention.Cdecl)]
+>       public static extern Result EnableLoadExtension (IntPtr db, int onoff);
+> 
+</pre>
+
+<p>
+I'm using System.ServiceModel.Syndication.SyndicationFeed to do the RSS parsing
+for me.  I don't have any previous experience with that library, but so far, it
+just works.
+</p>
+
+<p>The statement I used to compile this program is:</p>
+
+<pre class="screen">
+eric$ gmcs -reference:System.ServiceModel.Web.dll \
+      -out:z.exe AssemblyInfo.cs SQLite.cs Main.cs
+...
+Compilation succeeded - 3 warning(s)
+</pre>
+
+<p>Since I'm running on Mac OS X (Lion), I had to bring my own SQLite to the party.
+On Mac OS, the sqlite3 library and shell are preinstalled with the OS, but they were
+compiled without support for dynamic extension loading.  If you're on a Mac,
+it's easy to grab and build your own copies:</p>
+
+<pre class="screen">
+eric$ curl --silent --remote-name \
+      http://www.sqlite.org/sqlite-amalgamation-3071502.zip
+
+eric$ unzip sqlite-amalgamation-3071502.zip 
+Archive:  sqlite-amalgamation-3071502.zip
+   creating: sqlite-amalgamation-3071502/
+  inflating: sqlite-amalgamation-3071502/sqlite3.h  
+  inflating: sqlite-amalgamation-3071502/shell.c  
+  inflating: sqlite-amalgamation-3071502/sqlite3ext.h  
+  inflating: sqlite-amalgamation-3071502/sqlite3.c  
+
+eric$ mv sqlite-amalgamation-3071502/* .
+
+eric$ rmdir sqlite-amalgamation-3071502
+
+eric$ clang -dynamiclib -arch i386 -arch x86_64 \
+      -o libsqlite03071502.dylib sqlite3.c
+
+eric$ clang -o sqlite3 -arch i386 -arch x86_64 sqlite3.c shell.c 
+
+eric$ ./sqlite3 --version
+3.7.15.2 2013-01-09 11:53:05 c0e09560d26f0a6456be9dd3447f5311eb4f238f
+</pre>
+
+<p>I also created a .config file because SQLite.cs does
+<tt>DllImport("sqlite3"</tt>, and need to map that to the SQLite library we just
+built.</p>
+
+<pre class="screen">
+&lt;configuration>
+    &lt;dllmap dll="sqlite3" target="libsqlite03071502.dylib" />
+&lt;/configuration>
+</pre>
+
+<p>Running the program yields the expected output:</p>
+
+<pre class="screen">
+eric$ mono ./z.exe
+http://ericsink.com/rss.xml
+http://feeds.hanselman.com/ScottHanselman
+</pre>
+
+<p>So, after all that, this code STILL doesn't really do anything useful.  It
+demonstrates that I can successfully use SQLite and Zumero from C#.  And it
+retrieves and
+parses each feed.  But I have not yet implemented any of the things that are supposed
+to happen next.  Hopefully I'll make more progress in <a href="/entries/rss_cat_2.html">part 2</a>.</p>
+
+<p>&nbsp;</p>
+

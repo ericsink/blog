@@ -1,0 +1,181 @@
+---
+layout: default
+esbma_id: 3053
+title: Introduction
+date: 2014-02-16 12:00:00
+keywords: (mssql_to_sqlite)
+teaser: Microsoft apparently considers SQLite to be the replacement for SQL Server Compact.
+---
+
+<P>(This entry is part of a <A href="/mssql_mobile/index.html">series</A>.  The audience: SQL Server developers.  The topic: SQLite on mobile devices.)</P><hr/>
+
+<h2>A Wave of Change</h2>
+
+<p>More and more of the world's "computers" are actually mobile devices.
+Perhaps you've noticed.  <tt><b>:-)</b></tt></p>
+
+<p>As of February 2014, this trend is huge and still accelerating.  
+Benedict Evans recently <a href="http://ben-evans.com/benedictevans/2014/2/12/apple-passes-microsoft">pointed out</a> 
+that Apple sold more iOS devices in Q4 2013 than the number of Windows PCs
+sold globally: "mobile is the next computing platform and it's a lot bigger
+than PCs in unit sales, so even the smaller player can overtake the total PC
+business".</p>
+
+<p>Remember back around 2005 when we started writing all our clients
+to run inside a web browser?  It was a great disturbance in the industry,
+as if millions of desktop GUI toolkits
+suddenly cried out in terror and were suddenly silenced.</p>
+
+<p>This mobile wave feels even bigger than that.</p>
+
+<p>And it's happening, whether we like it or not.</p>
+
+<p>Suppose you are an enterprise CIO.  Maybe you don't <i>want</i> everybody
+switching to mobile.  Maybe you don't <i>like</i> this Bring Your Own Device (BYOD) thing,
+which forces you to deal
+with security and compatibility and deployment issues for dozens of different
+mobile devices chosen at the whims of your fickle coworkers.</p>
+
+<p>But that's just how it is.</p>
+
+<p>It is hard to overstate just how big this wave of change is.  Some of us will
+be unaffected, but not many.</p>
+
+<h2>However...</h2>
+
+<p>One thing that is NOT going away is SQL.</p>
+
+<h2>What?!?  I heard SQL was dying.</h2>
+
+<p>I have nothing against the NoSQL world and I have no interest in this
+religious war.  Couchbase.  Cassandra.  Hadoop.  There's a lot of cool and
+interesting stuff going on.</p>
+
+<p>But all that stuff exists on a planet where the following things are also true:</p>
+
+<ul>
+    
+<li><p>The vast majority of data in the business world is in some kind of SQL
+database.</p></li>
+
+<li><p>Worldwide investment in SQL-related technologies is in the hundreds of
+billions of dollars.  And I may be understating that.</p></li>
+
+<li><p>The business world makes sweeping technology changes much more slowly
+than the consumer world.  Your bank still runs on COBOL.  IBM mostly sells things
+that people think are dead, and they still have more revenue than Google.</p></li>
+
+<li><p>Switching a large system from SQL to anything NoSQL-ish is a non-smooth
+transition.  The paradigm is very different.</p></li>
+
+</ul>
+
+<p>Most new software projects are not greenfield.  Most
+new code
+has a requirement to integrate with something else that already exists.</p>
+
+<p>Your IT department is simply NOT going to deal with the mobile wave by
+rewriting everything on Mongo.  They're not going to give up constraints and
+ACID and foreign keys.  They're not going to rewrite all their queries with
+map/reduce.  They're not going to discard a mountain of established code and tooling
+and expertise.  It's just not gonna happen.</p>
+
+<p>NoSQL has its place.  But SQL will not disappear during your lifetime.</p>
+
+<h2>But there's still that wave...</h2>
+
+<p>Your business data is in SQL.  Your users are trading in their PCs for
+smartphones and tablets.  If it hasn't happened already, you are going to be
+asked to let them view/edit that data on their mobile devices.</p>
+
+<p>If you want to create a mobile app, 
+you've got two main options for how that app can
+interact with data on the backend:</p>
+
+<ol>
+
+    <li>
+    <p>
+    Remote procedure calls:  Keep a live network
+    connection to the server and do all your database CRUD operations over 
+    something like a REST API.
+    </p>
+    <p>
+    (See also:  "web services")
+    </p>
+    </li>
+
+    <li>
+    <p>
+    Replicate and sync:  Keep a
+    [partial] copy of the data from the server and do all your database CRUD
+    operations locally on the mobile device, synchronizing changes in both
+    directions when the network is available.
+    </p>
+    <p>
+    (See also:  "occasionally connected", "offline first")
+    </p>
+    </li>
+
+</ol>
+
+<p>Or some combination of the two.</p>
+
+<p>There are pros and cons to both of these two approaches.  
+Each of them is popular for different reasons.
+But my primary area of interest is in the situations where you want
+to do at least some of your database operations on the device without a
+network involved.</p>
+
+<p>And if you want to deal with [some of] your data on the device, you
+probably want to use SQL on that device, right?  Especially if you want to
+port some existing code.</p>
+
+<h2>SQL on mobile devices</h2>
+
+<p>The bad news:  SQL Server Compact won't help you anymore.  It is being left behind
+as Microsoft moves ahead with a mobile strategy built on WinRT.  And the world
+is cross-platform now anyway.  Even if Microsoft decides to renew its
+commitment to a compact edition of SQL Server for its own mobile OS, it is not
+likely they will support the same solution on iOS or Android.</p>
+
+<p>The good news:  SQLite (<a href="http://sqlite.org/">sqlite.org</a>) is an outstanding small implementation
+of SQL.  It is open source and supported on all mobile platforms.
+In fact, over a billion mobile devices currently have SQLite preinstalled.  It is
+ubiquitous, reliable, and far more capable than the word "Lite" would seem
+to imply.  Microsoft apparently considers SQLite to be the replacement for SQL
+CE.  If, for whatever reason, you want to use SQL on a mobile device, then
+SQLite is [almost certainly] your best choice.</p>
+
+<h2>About this series of articles</h2>
+
+<p>I'm writing about using SQLite when developing mobile apps.  And my target
+audience is folks who are coming from the world of SQL Server and .NET.</p>
+
+<p>There are differences.  There is a learning curve.  Hopefully this series of
+articles will help.</p>
+
+<p>Most of the entries will be fairly short and focused on a specific issue.</p>
+
+<h2>This is [mostly] not a product pitch</h2>
+
+<p>My goal in this series is to make it useful for people whether they use my
+product or not.</p>
+
+<p>But it's only fair to disclose this right up front:  My company makes a
+product called <a href="http://zumero.com/dev-center/zss/">Zumero for SQL Server</a>, which is designed to synchronize data
+between SQL Server on the backend and SQLite on a mobile device.</p>
+
+<p>But these articles are not Zumero-specific.  Maybe you're doing sync with
+Microsoft Sync Framework.  Or maybe your sync needs are simple and you're just
+writing it yourself.  Or maybe you're not actually doing sync at all.</p>
+
+<p>Whatever.  If you are coming from a SQLServer/.NET background and want to know about using
+SQLite on mobile, I hope you find value in what I'm writing.</p>
+
+<p>(Zumero is relevant to the topic at hand, so I'm sure I'll end up mentioning
+it.  When I do, I'll try to be obvious about it so you can skip those parts if
+you want.)</p>
+
+<p>&nbsp;</p>
+

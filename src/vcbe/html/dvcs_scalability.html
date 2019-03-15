@@ -1,0 +1,39 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Scale out, not just up</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="dvcs_advantages.html" title="Chapter 5. Advantages"><link rel="prev" href="dvcs_implicit_backup.html" title="Implicit Backup"><link rel="next" href="dvcs_weaknesses.html" title="Chapter 6. Weaknesses"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Scale out, not just up</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="dvcs_implicit_backup.html">Prev</a> </td><th width="60%" align="center">Chapter 5. Advantages</th><td width="20%" align="right"> <a accesskey="n" href="dvcs_weaknesses.html">Next</a></td></tr></table><hr></div><div class="section" title="Scale out, not just up"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp1063664"></a>Scale out, not just up</h2></div></div></div>
+    
+    <p>With a CVCS, the server holding the central repository needs
+        to be powerful enough to serve the needs of the entire team.  For a team
+        of 10 people, this is not an issue.  For larger teams, the hardware
+    limitations of the server can be a performance bottleneck.</p>
+
+<p>Some systems (such as
+    IBM<a class="indexterm" name="idp1065680"></a> Rational ClearCase<a class="indexterm" name="idp1066192"></a> or Microsoft<a class="indexterm" name="idp1066704"></a> Team Foundation Server<a class="indexterm" name="idp1067296"></a>) expect the
+    server to do a <span class="bold"><strong>lot</strong></span> of work.
+    It can be challenging and expensive to set up a server to support thousands of users.
+    </p>
+
+<div class="mediaobject"><img src="images/dvcs_scale_out.jpg"></div>
+
+<p>Generally speaking, a DVCS has much more modest hardware requirements for
+    a central server<a class="indexterm" name="idp1071104"></a>.  
+      Users don’t interact with
+      the server unless they need to push or pull.  All the heavy lifting happens
+      on the client side so the server hardware can be very simple indeed.
+    </p>
+
+    <p>With a DVCS, it is also possible to scale the central server by turning it
+        into a server farm.  Instead of one large server machine, you can add capacity by adding
+        more small server machines, using scripts to keep them all in sync with each other.</p>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="dvcs_implicit_backup.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="dvcs_advantages.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="dvcs_weaknesses.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Implicit Backup </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Chapter 6. Weaknesses</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

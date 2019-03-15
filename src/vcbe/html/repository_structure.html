@@ -1,0 +1,166 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Mercurial: Repository Structure</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="internals.html" title="Chapter 12. DVCS Internals"><link rel="prev" href="cryptographic_hashes.html" title="Git: Cryptographic Hashes"><link rel="next" href="dags_and_data.html" title="Veracity: DAGs and Data"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Mercurial: Repository Structure</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="cryptographic_hashes.html">Prev</a> </td><th width="60%" align="center">Chapter 12. DVCS Internals</th><td width="20%" align="right"> <a accesskey="n" href="dags_and_data.html">Next</a></td></tr></table><hr></div><div class="section" title="Mercurial: Repository Structure"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp2952432"></a>Mercurial: Repository Structure</h2></div></div></div>
+    
+
+
+
+<div class="section" title="Revlogs"><div class="titlepage"><div><div><h3 class="title"><a name="idp2953872"></a>Revlogs</h3></div></div></div>
+    
+
+    <p>An important part of Mercurial’s<a class="indexterm" name="idp2955120"></a> design is the notion of a
+        <em class="firstterm">revlog</em><a class="indexterm" name="idp2956064"></a>, a file format which is designed to
+        store all versions of a given file in an efficient manner.  Mercurial
+        uses the revlog format for basically everything it stores in the repository.
+        </p>
+
+        <p>Each revision of a file is identified by a “NodeID”, which is a
+            SHA-1/160<a class="indexterm" name="idp2957264"></a> hash of its contents (combined with the position of that
+            node in the history).</p>
+
+        <p>Each version of the file can be stored as either a complete
+            snapshot of the file’s contents, or as a binary delta against the
+            previous version.  Mercurial stores a complete snapshot every so
+        often to ensure that it is only necessary to walk back so far.</p>
+
+        <p>The revlog file is append-only.  Each new version of an object is
+            written to the end of the file without altering anything that was already
+            there.  This means that it uses forward deltas.  Reverse deltas
+            are a lot more typical today, because the most common operation
+            is the retrieval of the most recent version. With reverse
+            deltas the most recent version is always stored as a snapshot.
+            In Mercurial, retrieving the most recent version might involve
+            reconstructing it from an older snapshot with later deltas applied
+            to it.</p>
+
+        <p>Reading a given version of the file from a revlog can be
+            accomplished by a single contiguous read.  No seeks are necessary.
+            If that version is stored as a snapshot, just read it.  If it is
+            stored as a delta, read it and any deltas before it, back to the
+            previous snapshot.  This elegant aspect of the design
+            is one of the reasons Mercurial is so fast.</p>
+
+        <p>A revlog is actually two files.  The .d file contains the actual
+            file data.  The .i file is an index designed to make it easier to
+            find things.  When the revlog is small, these two files are
+            combined into one, with the data stored in the .i file and no
+            .d file.</p>
+
+        <p>As I said, Mercurial gets a lot of its efficiency from the careful design of this
+            revlog file format, but there are some tradeoffs.  
+              Mercurial always
+            assumes that the entire file (including the last snapshot and all deltas)
+            will fit into RAM.  This makes things much faster, but it makes Mercurial
+            generally not effective for large files (over 10 MB).<sup>[<a name="idp2962112" href="#ftn.idp2962112" class="footnote">48</a>]</sup></p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg debugindex .hg/store/data/src/pb.c.i</span> 
+   rev    offset  length   base linkrev nodeid       p1           p2
+     0         0     467      0      10 a7bdd2379025 000000000000 000000000000
+     1       467     168      0      12 692932a95c0d 000000000000 a7bdd2379025
+     2       635     173      0      15 f1d9cb4201e4 692932a95c0d 000000000000
+     3       808     476      0      17 d238a6113e4c f1d9cb4201e4 000000000000
+     4      1284     491      0      18 b71d299270a5 f1d9cb4201e4 000000000000
+     5      1775     470      0      19 4a7ebb32f962 b71d299270a5 d238a6113e4c
+     6      2245      64      0      20 6b99ca4dde14 4a7ebb32f962 000000000000
+     7      2309     177      0      21 33557d969679 d238a6113e4c 000000000000
+     8      2486     213      0      22 e4d67566afd0 6b99ca4dde14 33557d969679
+     9      2699     102      0      23 ab4bcfb966f8 33557d969679 000000000000
+    10      2801     384      0      24 86d19e47e6d0 e4d67566afd0 000000000000
+    11      3185      88      0      25 4969c00e0bc8 86d19e47e6d0 ab4bcfb966f8
+</pre>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg debugindex .hg/store/00manifest.i</span> 
+   rev    offset  length   base linkrev nodeid       p1           p2
+     0         0      52      0       0 4bf51ef87fa1 000000000000 000000000000
+     1        52      52      1       1 df9a6175c86f 4bf51ef87fa1 000000000000
+     2       104      52      2       2 f282fd300cae 4bf51ef87fa1 000000000000
+     3       156      52      3       3 2128ed694101 df9a6175c86f f282fd300cae
+     4       208      52      4       4 cf6095e27d1b 2128ed694101 000000000000
+     5       260      52      5       5 a3954dc14901 2128ed694101 000000000000
+     6       312      52      6       6 84f3337a15c2 cf6095e27d1b a3954dc14901
+     7       364      56      7       7 723f96182c10 84f3337a15c2 000000000000
+     8       420      52      8       8 f81e41ac9f78 84f3337a15c2 000000000000
+     9       472      56      9       9 43b4d425d11b f81e41ac9f78 723f96182c10
+    10       528     100      9      10 db730b6b114f 43b4d425d11b 000000000000
+    11       628      56     11      11 c0916422f5f9 43b4d425d11b 000000000000
+    12       684      98     11      12 a0a068b209a9 c0916422f5f9 db730b6b114f
+    13       782   12861     11      13 fa7d4fbf3283 a0a068b209a9 000000000000
+    14     13643      91     14      14 847ed0078d54 fa7d4fbf3283 000000000000
+    15     13734      62     14      15 26f762825d61 847ed0078d54 000000000000
+    16     13796      61     14      16 fa14759e626d 26f762825d61 000000000000
+    17     13857      62     14      17 65ed8051c722 fa14759e626d 000000000000
+    18     13919     122     18      18 96c0a3cf81b1 fa14759e626d 000000000000
+    19     14041      62     18      19 61aa1de12abe 96c0a3cf81b1 65ed8051c722
+    20     14103      62     18      20 f68d6078c862 61aa1de12abe 000000000000
+    21     14165     119     21      21 47f22792ec34 65ed8051c722 000000000000
+    22     14284      62     21      22 1e7caebb4684 f68d6078c862 47f22792ec34
+    23     14346      62     21      23 a30745ba5cae 47f22792ec34 000000000000
+    24     14408     119     24      24 cbe36265b98c 1e7caebb4684 000000000000
+    25     14527      62     24      25 f991d0456dd4 cbe36265b98c a30745ba5cae
+</pre>
+
+</div>
+
+<div class="section" title="Manifests"><div class="titlepage"><div><div><h3 class="title"><a name="idp2954128"></a>Manifests</h3></div></div></div>
+    
+
+    <p>For every version of the tree, Mercurial stores a <em class="firstterm">manifest</em>, a complete list of all the files in the tree and their versions.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg debugdata .hg/store/00manifest.i 24</span> 
+.hgtagsc04bfcf9c20c06746293f5474da270d88501a9c1
+Makefileb87f10c1ca797b426bc6ac4522aae0de1bf6902a
+src/pb.c86d19e47e6d07cfddba6a4a7f6d7013dd782075a
+</pre>
+
+    <p>The manifest is also stored in a revlog.  The deltification here is
+        critical because storing a full listing for every revision of the
+        tree could become enormously large.</p>
+
+    <p>Note that a Mercurial manifest only contains files.  Mercurial does
+        not track information about the directories that contain those files.
+        Consequently, it cannot store an empty directory.</p>
+
+</div>
+
+<div class="section" title="Changesets"><div class="titlepage"><div><div><h3 class="title"><a name="idp2986848"></a>Changesets</h3></div></div></div>
+    
+
+    <p>For each revision of the tree, Mercurial stores a changeset.  A
+        changeset is
+        a record which lists all the changes to files, including who made the
+        change, the log message<a class="indexterm" name="idp2988112"></a>, the date/time,  and the name of the
+        branch.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg debugdata .hg/store/00changelog.i 24</span> 
+cbe36265b98c1f656ad1f0c3546c458a68ee85eb
+Harry &lt;harry@futilisoft.com&gt;
+1305662021 18000
+src/pb.c
+
+fixed spelling error
+</pre>
+
+<p>A Mercurial changeset has zero, one, or two parents<a class="indexterm" name="idp2991040"></a>.  If it is the root
+    node of the DAG, it has zero parents.  If it is a merge node, it has two
+parents.  All the rest of the nodes have one parent.</p>
+
+<p>The SHA-1/160 hash of the changeset record becomes the changeset ID.</p>
+
+<p>All changesets are stored in the <em class="firstterm">changelog</em>, which
+    is another revlog file.</p>
+
+</div>
+
+<div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a id="ftn.idp2962112" href="#idp2962112" class="para">48</a>] </sup>There is a
+            Bigfiles extension which works around the problem by keeping the
+            large file somewhere else and storing a reference to it.</p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="cryptographic_hashes.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="internals.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="dags_and_data.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Git: Cryptographic Hashes </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Veracity: DAGs and Data</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

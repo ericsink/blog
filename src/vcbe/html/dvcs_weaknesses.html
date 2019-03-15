@@ -1,0 +1,68 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Chapter 6. Weaknesses</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="pt02.html" title="Part II. Distributed Version Control"><link rel="prev" href="dvcs_scalability.html" title="Scale out, not just up"><link rel="next" href="dvcs_weakness_locks.html" title="Locks"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 6. Weaknesses</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="dvcs_scalability.html">Prev</a> </td><th width="60%" align="center">Part II. Distributed Version Control</th><td width="20%" align="right"> <a accesskey="n" href="dvcs_weakness_locks.html">Next</a></td></tr></table><hr></div><div class="chapter" title="Chapter 6. Weaknesses"><div class="titlepage"><div><div><h2 class="title"><a name="chapter_dvcs_con"></a>Chapter 6. Weaknesses</h2></div></div></div>
+
+
+<p>It’s not <span class="bold"><strong>all</strong></span> pretty flowers and frolicking deer for
+    DVCS systems; there are a few areas where solutions from the CVCS world
+    still win.
+    </p>
+
+<p>Before I begin, let me say a word about the freshness date of the
+    material in this chapter.  As I write this in mid-2011, the
+    most popular tools in the DVCS world are Git<a class="indexterm" name="idp1074384"></a>, Mercurial<a class="indexterm" name="idp1076144"></a>, and Bazaar<a class="indexterm" name="idp1076656"></a>.  The
+    issues mentioned here are common legitimate criticisms heard by 
+    CVCS users who are evaluating the decentralized model
+    for version control.  But things are moving very fast.</p>
+
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>Git<a class="indexterm" name="idp1078224"></a>, Mercurial<a class="indexterm" name="idp1078896"></a>, and Bazaar<a class="indexterm" name="idp1079488"></a> all remain under active
+            development by very smart people.  New and improved versions 
+            are coming out
+            regularly.</p></li><li class="listitem"><p>Relatively recent tools like Fossil<sup>[<a name="idp1080672" href="#ftn.idp1080672" class="footnote">19</a>]</sup><a class="indexterm" name="idp1081344"></a> are bringing new
+            ideas.</p></li><li class="listitem"><p>All the established CVCS leaders are searching for ways to
+            morph their products into a DVCS, or least into some kind of hybrid.
+            Nobody knows yet if or when one of these companies will find a
+            sweet spot, a CVCS which brings just enough benefits from the DVCS
+            architecture.</p></li><li class="listitem"><p>
+    In the design and implementation of Veracity, some of the
+    issues in this chapter have been particular areas of focus for us, areas
+    where we want Veracity to go further than previously available solutions.</p></li></ul></div>
+
+
+<p>So the version control arena is in a sea of change right now, but
+    I am confident of two things:</p>
+
+    <div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>
+            DVCS is the way of the future for version control.  This model <span class="bold"><strong>will</strong></span> become mainstream.
+        </p></li><li class="listitem"><p>
+            In the DVCS world, the current state of the art is just the beginning.
+        </p></li></ol></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a id="ftn.idp1080672" href="#idp1080672" class="para">19</a>] </sup><a xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" href="http://www.fossil-scm.org/">http://www.fossil-scm.org/</a></p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="dvcs_scalability.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="pt02.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="dvcs_weakness_locks.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Scale out, not just up </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Locks</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

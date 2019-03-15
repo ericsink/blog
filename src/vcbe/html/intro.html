@@ -1,0 +1,56 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Chapter 1. Introduction</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="index.html" title="Version Control by Example"><link rel="prev" href="index.html" title="Version Control by Example"><link rel="next" href="history_of_version_control.html" title="A History of Version Control"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 1. Introduction</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="history_of_version_control.html">Next</a></td></tr></table><hr></div><div class="chapter" title="Chapter 1. Introduction"><div class="titlepage"><div><div><h2 class="title"><a name="chapter_introduction"></a>Chapter 1. Introduction</h2></div></div></div>
+    
+
+<p>A version control system is a piece of software
+    that helps the developers on a software team work together and also archives a
+    complete history of their work.</p>
+
+<p>There are three basic goals of a version control system (VCS):</p>
+
+<div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+<p>We want people to be able to work simultaneously, not serially.</p>
+<p>Think of your team
+    as a multi-threaded piece of software with each developer running in his own
+    thread.  The key to high performance in a multi-threaded system is to
+    maximize concurrency.  Our goal is to never have a thread which is blocked
+    on some other thread.</p>
+    </li><li class="listitem">
+<p>When people are working at the same time, we want their changes to not
+    conflict with each other.</p>
+
+    <p>
+        Multi-threaded programming requires great care on the part of the developer and special features such
+        as critical sections, locks, and a test-and-set instruction on the CPU.
+        Without these kinds of things, the threads would overwrite each other’s
+        data.
+        A multi-threaded software team needs things too, so that developers can
+        work without messing each other up.  That is what the version control
+        system provides.
+    </p>
+
+    </li><li class="listitem">
+    <p>We want to archive every version of everything that has ever existed —  ever.  </p>
+
+    <p>And who did it.  And when.  And why.</p>
+    </li></ol></div>
+
+
+
+
+
+
+
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="index.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="history_of_version_control.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Version Control by Example </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> A History of Version Control</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

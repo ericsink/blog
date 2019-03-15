@@ -1,0 +1,271 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Update, Commit (with a merge)</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="git_example.html" title="Chapter 8. Basics with Git"><link rel="prev" href="ch08s03.html" title="Push, Pull, Log, Diff"><link rel="next" href="ch08s05.html" title="Update (with merge)"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Update, Commit (with a merge)</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch08s03.html">Prev</a> </td><th width="60%" align="center">Chapter 8. Basics with Git</th><td width="20%" align="right"> <a accesskey="n" href="ch08s05.html">Next</a></td></tr></table><hr></div><div class="section" title="Update, Commit (with a merge)"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp1736368"></a>Update, Commit (with a merge)</h2></div></div></div>
+    
+
+<p>Meanwhile, Harry has been coding as well.  He heard somebody say that
+it’s best to compile with all the warnings turned on, so he decides to give it
+a try.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">gcc -std=c99 -Wall -Wextra -Werror lottery.c </span>
+cc1: warnings being treated as errors
+lottery.c:5: <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">warning: unused parameter</span> 'white_balls'
+lottery.c:5: warning: unused parameter 'power_ball'
+</pre>
+
+<p>I say!  The code has some warnings.  The <code class="code">calculate_result()</code> function
+isn’t using its parameters.  Harry looks at the situation and realises the
+problem immediately:  That function should be checking its arguments for
+validity!  The power ball can be from 1 to 39 inclusive.  The white balls can be
+1 to 59 inclusive.  So he implements the error checking.</p>
+
+<pre class="programlisting">int calculate_result(int white_balls[5], int power_ball)
+{
+    for (int i=0; i&lt;5; i++)
+    {
+        if (
+             (white_balls[i] &lt; 1)
+             || (white_balls[i] &gt; 59)
+           )
+        {
+            return -1;
+        }
+    }
+
+    if (
+         (power_ball &lt; 1)
+         || (power_ball &gt; 39)
+       )
+    {
+        return -1;
+    }
+
+    return 0;
+}
+</pre>
+
+<p>Grand.  Let’s see if it compiles.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">gcc -std=c99 -Wall -Wextra -Werror lottery.c</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">ls -l</span>
+total 32
+-rwxr-xr-x  1 harry  staff  8904 May 17 08:17 a.out
+-rw-r--r--  1 harry  staff   843 May 17 08:16 lottery.c
+</pre>
+
+<p>Quite.  But Harry decides to diff<a class="indexterm" name="idp1745920"></a> before committing, just for good measure.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git diff</span>
+diff --git a/lottery.c b/lottery.c
+index e59c732..6b1d76a 100644
+--- a/lottery.c
++++ b/lottery.c
+@@ -4,6 +4,25 @@
+ 
+ int calculate_result(int white_balls[5], int power_ball)
+ {
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    for (int i=0; i&lt;5; i++)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    {</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        if (</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+             (white_balls[i] &lt; 1)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+             || (white_balls[i] &gt; 59)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+           )</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        {</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+            return -1;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        }</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    }</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    if (</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+         (power_ball &lt; 1)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+         || (power_ball &gt; 39)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+       )</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    {</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        return -1;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    }</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+</span>
+     return 0;
+ }
+</pre>
+
+<p>Good show.  Time to commit the change.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git commit -a -m "fix some warnings"</span>
+[master 7895c84] fix some warnings
+ 1 files changed, 19 insertions(+), 0 deletions(-)
+</pre>
+
+<p>No problems there.  This time he remembers that he needs to push his changes to the server.</p>
+
+<p>But Sally has been working at the same time and she had her change ready
+    to commit and push first.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git commit -a -m "change order of the command line args to be \
+                              more like what the user will expect"</span>
+[master 37c09ff] change order of the command line args to be more like what the user ...
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git push</span>
+Counting objects: 6, done.
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (6/6), 397 bytes, done.
+Total 6 (delta 1), reused 0 (delta 0)
+To http://server.futilisoft.com:8000/lottery
+   bcb39be..7895c84  master -&gt; master
+</pre>
+
+<p>So Harry tries to push his changes.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git push</span>
+To http://server.futilisoft.com:8000/lottery
+ ! [rejected]        master -&gt; master (non-fast-forward)
+error: failed to push some refs to 'http://server.futilisoft.com:8000/lottery'
+To prevent you from losing history, non-fast-forward updates were rejected
+Merge the remote changes (e.g. 'git pull') before pushing again.  See the
+'Note about fast-forwards' section of 'git push --help' for details.
+</pre>
+
+<p>What’s all this then?  Git is not allowing Harry to push his
+change because Sally has already pushed something to the master
+branch.
+</p>
+
+<p>Harry uses pull to bring in changes.
+    </p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git pull</span>
+remote: Counting objects: 5, done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 3 (delta 1), reused 0 (delta 0)
+Unpacking objects: 100% (3/3), done.
+From http://server.futilisoft.com:8000/lottery
+ + 7895c84...37c09ff master     -&gt; origin/master  (forced update)
+Auto-merging lottery.c
+Merge made by recursive.
+ lottery.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+</pre>
+
+<table xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" align="center" border="0" style="width:350px"><tr><td background="images/eric_aside_04.jpg" style="font-style:italic; padding-left:0.375in; padding-right:0.375in; padding-top:0.25in; padding-bottom:0.25in">
+    <p>I don’t like the way Harry did this.  He used <span class="command"><strong>git pull</strong></span>, which did the merge and committed it without giving Harry a chance to review.  Not cool.  Harry should have used <span class="command"><strong>git pull --no-commit</strong></span>.
+         </p>
+</td></tr></table>
+
+<p>Now the merge is done.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git status -s</span>
+?? a.out
+</pre>
+
+<p>Everything seems to be proper good.</p>
+
+
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git show -c</span>
+commit b19f36cf4dddc2f70a597a0b558cf3be3de205b4
+Merge: 7895c84 37c09ff
+Author: Harry &lt;harry@futilisoft.com&gt;
+Date:   Sat Jun 11 14:02:28 2011 +0200
+
+    Merge branch 'master' of http://server.futilisoft.com:8000/lottery
+
+diff --combined lottery.c
+index 6b1d76a,adf47a7..22bf053
+--- a/lottery.c
++++ b/lottery.c
+@@@ -3,25 -3,6 +3,25 @@@
+  
+  int calculate_result(int white_balls[5], int power_ball)
+  {
+ +  for (int i=0; i&lt;5; i++)
+ +  {
+ +      if (
+ +          (white_balls[i] &lt; 1)
+ +          || (white_balls[i] &gt; 59)
+ +         )
+ +      {
+ +          return -1;
+ +      }
+ +  }
+ +
+ +  if (
+ +      (power_ball &lt; 1)
+ +      || (power_ball &gt; 39)
+ +     )
+ +  {
+ +      return -1;
+ +  }
+ +
+    return 0;
+  }
+  
+@@@ -29,16 -10,16 +29,16 @@@ int main(int argc, char** argv
+  {
+    if (argc != 7)
+    {
+-       fprintf(stderr, "Usage: %s power_ball (5 white balls)\n", argv[0]);
++       fprintf(stderr, "Usage: %s (5 white balls) power_ball\n", argv[0]);
+        return -1;
+    }
+  
+-   int power_ball = atoi(argv[1]);
++   int power_ball = atoi(argv[6]);
+  
+    int white_balls[5];
+    for (int i=0; i&lt;5; i++)
+    {
+-       white_balls[i] = atoi(argv[2+i]);
++       white_balls[i] = atoi(argv[1+i]);
+    }
+  
+    int result = calculate_result(white_balls, power_ball);
+</pre>
+
+<p>The merge commit is done.
+Apparently Git was able to merge Sally’s changes directly into
+Harry’s modified copy of the file without any conflicts.  Smashing!
+Let’s see if it compiles.
+</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">gcc -std=c99 -Wall -Wextra -Werror lottery.c</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">ls -l</span>
+total 32
+-rwxr-xr-x  1 harry  staff  8904 May 17 08:34 a.out
+-rw-r--r--  1 harry  staff   843 May 17 08:28 lottery.c
+</pre>
+
+<table xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" align="center" border="0" style="width:350px"><tr><td background="images/eric_aside_09.jpg" style="font-style:italic; padding-left:0.375in; padding-right:0.375in; padding-top:0.25in; padding-bottom:0.25in">
+    <p>  
+        Harry is checking to see if the merge
+        compiles <span class="bold"><strong>after</strong></span> it has been committed to the repository.
+        If it doesn’t compile, he’ll need to alter the repository (which Git allows using <span class="command"><strong>git commit --amend</strong></span>).
+        Git fans love the ability to alter a repository, rearranging things
+        however they want until they push.  I understand their perspective and its
+        advantages but I still prefer an approach which
+        treats anything committed to any repository instance as immutable<a class="indexterm" name="idp1784016"></a>.
+         </p></td></tr></table>
+
+<p>Very well then.  So Harry is ready to push the merge.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git push</span>
+Counting objects: 10, done.
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (6/6), 717 bytes, done.
+Total 6 (delta 2), reused 0 (delta 0)
+Unpacking objects: 100% (6/6), done.
+To http://server.futilisoft.com:8000/lottery
+   37c09ff..b19f36c  master -&gt; master
+</pre>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch08s03.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="git_example.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch08s05.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Push, Pull, Log, Diff </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Update (with merge)</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

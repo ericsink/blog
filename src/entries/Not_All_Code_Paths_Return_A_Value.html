@@ -1,0 +1,95 @@
+---
+layout: default
+esbma_id: 1723
+title: Shouldn't this be a compiler error?
+date: 2007-10-05 14:21:58
+---
+<p>In C#, the following method will not compile:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:blue'>public</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> <span style='color:blue'>bool</span>
+IsOrange1()<br>
+{<br>
+}</span></p>
+
+<p>The compiler gripes and says:</p>
+
+<p style='text-indent:.5in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>'IsOrange1()': not all code paths return a value</span></p>
+
+<p>Which makes perfect sense.&nbsp; The computer arrives at the end
+of this method, realizes that it is required to return a value, but does not
+know what value to return.&nbsp; We don't want the computer to just make something
+up, so we have the compiler detect this case and fuss about it.</p>
+
+<p>However, the following method DOES compile without errors:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:blue'>public</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> <span style='color:blue'>bool</span>
+IsOrange2()<br>
+{<br>
+&nbsp;&nbsp;&nbsp; <span style='color:blue'>while</span> (<span style='color:blue'>true</span>)<br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp; }<br>
+}</span></p>
+
+<p>Which seems wrong.</p>
+
+<p>I'm not saying this version deserves the same error as the
+previous one.&nbsp; It is clear that IsOrange2 has no code paths that return while
+failing to define the return value.&nbsp; Of course, this is because IsOrange2 has
+no code paths that return!</p>
+
+<p>I am also not saying the compiler should error on any method
+that never returns.&nbsp; There are reasonable uses for that sort of thing:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:blue'>public</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> <span style='color:blue'>void</span>
+SimpleWebServer()<br>
+{<br>
+&nbsp;&nbsp;&nbsp; <span style='color:blue'>while</span> (<span style='color:blue'>true</span>)<br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ListenForOneRequestAndRespondToIt();<br>
+&nbsp;&nbsp;&nbsp; }<br>
+}</span></p>
+
+<p>I am also not saying the compiler should error on any method
+that does nothing.&nbsp; If programmers want to write code that has no purpose, the
+compiler shouldn't care.&nbsp; This code should compile:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:blue'>public</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> <span style='color:blue'>void</span>
+DoNothing()<br>
+{<br>
+}</span></p>
+
+<p>And so should this:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:blue'>public</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> <span style='color:blue'>void</span>
+WorkReallyHardAndDoNothing()<br>
+{<br>
+&nbsp;&nbsp;&nbsp; <span style='color:blue'>while</span> (<span style='color:blue'>true</span>)<br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp; }<br>
+}</span></p>
+
+<p>My problem is that IsOrange2 claims that it returns a value
+but it never does.&nbsp; That just seems wrong.&nbsp; I guess I expected to see:</p>
+
+<p style='text-indent:.5in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>'IsOrange2()': there are no code paths that return a
+value</span></p>
+
+<p>If IsOrange2 is never going to return anything, then it
+should be declared void, not bool.</p>
+
+<p>Maybe this doesn't really deserve an error, but I think it
+should be at least a warning.</p>
+
+<p></p>

@@ -1,0 +1,1935 @@
+---
+layout: default
+esbma_id: 1182
+date: 2004-07-21 18:27:39
+keywords: (ignoretoc)
+esbma_type: js
+---
+</td></tr><tr><td><span align="right" class=ArticleDate>Tuesday, 24 January 2017</span><br><a class="ArticleTitleGreen" href="entries/dont_use_rxui.html">Don't use ReactiveUI</a><br><br></td></tr><tr><td>
+<h2>TL;DR</h2>
+
+<p>This blog post says the opposite of its lazy and deliberately
+provocative title.  I have become a huge fan of <a href="http://reactiveui.net">ReactiveUI</a>.
+I just want to ramble about the path I took to get here.</p>
+
+<h2>Listening to Paul Betts</h2>
+
+<p>I first heard about ReactiveUI at a conference presentation
+by Paul Betts.  I think it was at Xamarin Evolve.  Mostly
+I remember feeling dumb.  He said a lot of things that 
+I didn't understand.</p>
+
+<p>I went to that session without much real experience in Model-View-ViewModel
+(MVVM) development.  Conceptually, I understood the idea of a
+ViewModel.  But Paul mostly talked about how ReactiveUI avoids
+certain problems.  And since I had not experienced those problems,
+his words didn't sink in.</p>
+
+<h2>Talking to teenagers about risk</h2>
+
+<p>Each time one of my kids was approaching adolescence, I sat down
+and explained the risks associated with certain choices.  Laws
+and moral judgements aside, the simple fact is that many choices
+involve risks, and I thought it would be helpful to pass along that
+bit of information.</p>
+
+<p>And in each case, my child said, "Thanks Dad",
+and proceeded to always make wise and low-risk choices from that point on.</p>
+
+<p>Well, actually, no.</p>
+
+<p>Teenagers simply do not learn that way.  They process risk
+very differently from people who are more mature.  Tell a
+16-year-old that "if you drive too fast you might get a ticket".
+The adolescent will immediately begin driving too fast, and, in all
+likelihood, will not get ticket.  This is how teenagers realize
+they are smarter than their parents.</p>
+
+<p>Tangent #1:  It is almost certainly a good thing that young
+people are more brave.  It would be Very Bad if everybody started out with the
+same level of risk aversion as the average 65-year-old.
+Go watch the "Tapestry" episode of Star Trek TNG.</p>
+
+<p>Tangent #2:  I really should claim no expertise in parenting, but if somebody
+forced me to write a book on parenting a teenager, I would say
+this:  Let your kid suffer from their own choices.  That said, it is 
+worth the effort to try and help them avoid the really bad mistakes,
+the ones with consequences that last for decades.  But they do
+have to learn to make their own choices.  Realize this
+as early as you can.  The path to frustration starts with making 
+everything all about you.</p>
+
+<h2>How we learn new technologies</h2>
+
+<p>My metaphor has many problems.  For starters, Paul Betts is not my Dad.</p>
+
+<p>Also, the element of adolescent rebellion was not present.  I didn't
+hear Paul's wisdom and run in the opposite direction because of my
+deep need to separate my identity from his.  In fact,
+I started devouring everything I could find on MVVM and IObservable.
+I really wanted to understand what he was saying.</p>
+
+<p>But the metaphor works in one significant way:  Like a teenager,
+I had to learn by doing.  Nobody's words made much of a difference.
+None of that reading helped me become a
+a user of ReactiveUI.  I went down another path.</p>
+
+<p>Actually, I went down several other paths.</p>
+
+<h2>Maybe it's just me</h2>
+
+<p>I observe that most developers want content that explains
+how to get something done.  "If your objective is to do X, then
+do the following steps."  The most popular books and articles tend
+to follow this pattern.  Questions of this form are the ones that
+do well on StackOverflow.</p>
+
+<p>But this is almost never what I want.</p>
+
+<p>I much prefer content that explains how things work.  Once
+I understand that, I can figure out the steps myself.</p>
+
+<p>When I am developing software, I always, ALWAYS do better
+when I understand what is going on "under hood", when I can
+see through the leaky abstractions.</p>
+
+<p>And as I mentioned, I am apparently in the very small minority 
+on this.  If 90% of the world disagrees with me, does that
+put me in the top 10% ?  Or does it mean my approach is somehow
+defective?
+Modesty aside, my history contains enough successes to
+allow me some confidence in believing that my approach is
+better.</p>
+
+<p>I also observe that my approach is just a different
+spelling for the old adage, "Give a man a fish and you
+feed him
+for a day.  Teach a man to fish and he eats for a lifetime."</p>
+
+<p>If you tell a software developer what to type
+and where to click, you can help them complete today's
+task.  But if you instead teach them how things work,
+they will be able to apply that understanding on other days too.</p>
+
+<p>Hmmm.  I'm talking myself into this.  I don't know why
+most people prefer shallow recipes, but I really do think deep understanding
+is better.</p>
+
+<p>Still, I like to stay open-minded about things.
+I've got a lot of failures too.</p>
+
+<p>The truth is that my approach has tradeoffs.  The need
+to understand everything tends to slow me down during the
+early stages.  I usually gain some of that back in the
+fourth quarter of the game, where deeper understanding
+is often helpful in diagnosing tricky problems.</p>
+
+<p>But again, in the decision making around software development,
+absolutes are rare.  I'll admit that sometimes a simple set of steps
+without depth are exactly what is needed.</p>
+
+<h2>Maybe the ReactiveUI docs are just bad?</h2>
+
+<p>I don't know.  Maybe.  I've read the docs plenty.
+They don't seem bad to me.  I also see nothing there
+that makes me want to defend them as the best docs ever.</p>
+
+<p>Suppose that I regret not choosing ReactiveUI sooner.
+Further suppose that I wanted to blame somebody else for my choices.
+I guess I could find something to complain about.  But I also
+don't tend to find that criticizing somebody else's
+work is helpful.</p>
+
+<p>And remember, I started this journey sitting in
+front of an audience, listening to Paul Betts, and
+feeling dumb.  To be clear, in that kind of context, I *like*
+feeling dumb.  It's an opporunity to learn.</p>
+
+<h2>So why did I not choose ReactiveUI sooner?</h2>
+
+<p>I guess I don't really know.  But I'm pretty sure that nothing
+has made me appreciate ReactiveUI more than the
+suffering that comes from not using it.</p>
+
+<p>And that remark isn't very helpful, is it?  I'd like
+to try and do better.  Let's see...</p>
+
+<p>"Son, it's just basic statistics.  If you're going
+to always drive 15 MPH over the speed limit, you
+will eventually get caught.  Suppose you roll the
+dice 20 times in a row without getting a 12.
+You still might get a 12 on the next roll, right?"</p>
+
+<p>Oh, wait, wrong topic.  Let me try again.</p>
+
+<h2>Why is ReactiveUI awesome?</h2>
+
+<p>In some software development situations, like mobile apps,
+if you take a step back and look at the forest instead of
+the trees, you will see that most of your code is reacting
+to something that changed.</p>
+
+<p>There are lots of tools you can use to approach this kind of app.  
+You can use C# events and callbacks and switch statements and
+delegates and lambdas and observables and notifications and bindings and more.</p>
+
+<p>For simple apps, none of these approaches are much better
+than any other.  But as your app gets more complicated, some
+approaches cope more gracefully than others.</p>
+
+<p>Most cars drive pretty smooth at 30 MPH.  But at
+75 MPH, some vehicles are still giving a smooth ride,
+while others are shaking.</p>
+
+<p>Let's try a conceptual example or two.  Suppose you have a
+button, and you want something to happen when the user
+presses that button.  This is pretty simple.  All reasonable
+solutions to this problem are about the same.</p>
+
+<p>On the other hand, let's say you have a list of items.
+The items in that list come from a SQL query.  That query
+has 4 inputs, each of which comes from a UI control.
+Every time one of those controls changes its value,
+the query needs to be re-run and the list needs to be
+updated.  A couple of those controls need to be disabled under
+certain circumstances.  </p>
+
+<p>These UI elements have
+a complicated relationship.  We still have plenty of
+choices in how to express that relationship in code,
+but this situation is complicated enough that we start 
+to see differences between those approaches.  Some of
+the ones that worked out really well in the simple case
+seem kinda tedious for this case.</p>
+
+<p>If my driveway has half an inch of snow, all
+methods of clearing it are about the same.  But if
+my driveway has 15 inches of snow, a shovel is
+decidedly inferior to a tractor.</p>
+
+<p>Why do I like ReactiveUI?  Because I have found that
+it copes gracefully
+as the situation gets more complicated.</p>
+
+<p>Why is this?  Much of the credit goes to the "reactive" foundation
+on which ReactiveUI is built.  Reactive Extensions.
+Rx.  IObservable.  These building blocks are particularly
+adept at expressing the relationship between a group of
+things that are changing.  ReactiveUI adds another layer (or
+two) on top of these things to make that expressiveness more
+convenient when implementing user interfaces.</p>
+
+<p>To be honest, I fudged a little bit when I said that
+all solutions are roughly equivalent when the problem is simple.
+That's not quite true.  For simple situations, I'd have to
+admit that ReactiveUI might be a little worse.  There is
+a learning curve.</p>
+
+<p>If I am writing a grocery list, I could use a word
+processor, but a pencil and paper is actually simpler.
+But if I am writing a novel, the word processor is the
+clear winner.</p>
+
+<p>I'm claiming that the effort to learn Rx and ReactiveUI
+is worth the trouble.  My claim is based on this notion
+that ReactiveUI shines as complexity increases, but also
+on my belief that most people underestimate the complexity
+of their app.</p>
+
+<p>If you disagreed with me above when I said that "most of your code is reacting
+to something that changed", you might be underestimating
+the complexity of your app.  It is in fact very common to
+start implementing under the assumption that something
+will not change and then later realize that you need
+notifications or events.  Or an observable.</p>
+
+<h2>Hmmmm.</h2>
+
+<p>Would the paragraphs above have changed my course
+earlier?</p>
+
+<p>I don't know.  Probably not.</p>
+
+<p>I didn't start this believing that 
+I could write the best ReactiveUI advocacy ever.
+Looking at it now, I can't believe I wrote it
+with no code in it.  The canonical ReactiveUI
+evangelism pamphlet has gotta have <tt>WhenAnyValue()</tt> in it somewhere.
+</p>
+
+<p>I just think it's interesting that despite my best efforts,
+I was unable to really understand the benefits of ReactiveUI
+until I tried using its alternatives.  My current project
+is late.  If I had chosen ReactiveUI earlier, maybe it would be, er, less late?
+There are questions here worth asking.</p>
+
+<p>But am I 100% certain that it is always better to spare
+yourself the learning experience of using less effective
+approaches?  No.</p>
+
+<p>Can I credibly claim that everyone should
+choose ReactiveUI in every situation?  Certainly not.</p>
+
+<p>Maybe all I can say is that I am currently having a
+great experience with ReactiveUI.</p>
+
+<p>Maybe that means the
+rest of this blog post is useless.</p>
+
+<p>But you should have
+known that when you saw the cheesy title.</p>
+
+<p>&nbsp;</p>
+
+<P> </td></tr> <tr><td>&nbsp;</td></tr><tr><td><span align="right" class=ArticleDate>Wednesday, 15 June 2016</span><br><a class="ArticleTitleGreen" href="entries/sqlite_android_n.html">SQLite and Android N</a><br><br></td></tr><tr><td>
+<h2>TLDR</h2>
+
+<p>The upcoming release of Android N is going to cause 
+problems for many apps that use SQLite.  In some cases,
+these problems include an increased risk of data corruption.
+</p>
+
+<h2>History</h2>
+
+<p>SQLite is an awesome and massively popular database library.  It is
+used every day by billions of people.  If you are keeping a list of
+the Top Ten Coolest Software Projects Ever, SQLite should be on the
+list.</p>
+
+<p>Many mobile apps use SQLite in one fashion or another.  Maybe the developers
+of the app used the SQLite library directly.  Or maybe they used another component
+or library that builds on SQLite.</p>
+
+<p>SQLite is a library, 
+so the traditional way to use it is to just link it into your application.  
+For example, on a platform like Windows Phone 8.1, the app developer
+simply bundles the SQLite library as part of their app.</p>
+
+<p>But iOS and Android have a SQLite library built-in to the platform.
+This is convenient, because developers do not need to bundle
+a SQLite library with their software.</p>
+
+<h2>However</h2>
+
+<p>The SQLite library that comes with Android is actually not intended to
+be used except through the <tt>android.database.sqlite</tt> Java classes.
+If you are accessing this library directly, you are actually breaking the rules.
+</p>
+
+<h2>And the problem is</h2>
+
+<p>Beginning with Android N, these rules are going to be enforced.</p>
+
+<p>If your app is using the system SQLite library without using
+the Java wrapper, it will not be compatible with Android N.</p>
+
+<h2>Does your app have this problem?</h2>
+
+<p>If your app is breaking the rules, you *probably* know it.
+But you might not.</p>
+
+<p>I suppose most Android developers use Java.  
+Any app which is only using <tt>android.database.sqlite</tt> should be fine.
+</p>
+
+<p>But if you are using Xamarin, it is rather more likely that
+your app is breaking the rules.  Many folks in the
+Xamarin community tend to assume that "SQLite is part of the platform, so
+you can just call it".</p>
+
+<p>Xamarin.Android 6.1 includes a fix for this problem for <tt>Mono.Data.Sqlite</tt> (see their <a href="https://developer.xamarin.com/releases/android/xamarin.android_6/xamarin.android_6.1/">release notes</a>).</p>
+
+<p>However, that is not the only way of accessing SQLite in the
+.NET/Xamarin world.  In fact, I daresay it is one of the less common ways.</p>
+
+<p>Perhaps the most popular SQLite wrapper is sqlite-net (<a href="https://github.com/praeclarum/sqlite-net">GitHub</a>).
+If you are using this library on Android and not taking the extra steps to bundle a SQLite library, your
+app will break on Android N.</p>
+
+<p>Are you using Akavache?  Or Couchbase Lite?  Both of these libraries use SQLite under the hood (by way of SQLitePCL.raw, which <a href="https://github.com/ericsink/SQLitePCL.raw">I maintain</a>), so your app will need to be updated to work on Android N.</p>
+
+<p>There are probably dozens of other examples.  GitHub says the sqlite-net
+library has 857 forks.  Are you using one of those?  Do you use the MvvmCross
+SQLite plugin?  Do any of the components or libraries in your app make use of SQLite without you being aware of it?  
+</p>
+
+<p>And the Xamarin community is obviously not the whole story.  There are dozens of other ways to
+build mobile apps.  I can think of PhoneGap/Cordova, Alpha Anywhere, Telerik NativeScript,
+and Corona, just off the top of my head.  How many of these environments (or their surrounding ecosystems) provide (perhaps accidentally) a rule-breaking way
+to access the Android system SQLite?  I don't know.</p>
+
+<p>What I *do* know is that even Java developers might have a problem.</p>
+
+<h2>It's even worse than that</h2>
+
+<p>Above, I said: 
+"Any app which is only using <tt>android.database.sqlite</tt> should be fine."
+The key word here is "only".  If you are using the Java classes but also
+have other code (perhaps some other library) that accesses the system SQLite, then
+you have the problems described above.  But you also have another problem.</p>
+
+<p>To fix this, you are going to have to modify that "other code" to
+stop accessing the system SQLite library directly.  One way to do
+this is to change the other code to call through
+<tt>android.database.sqlite</tt>.  But that might be a lot of work.  Or that
+other code might be a 3rd party library that you do not maintain.  So you
+are probably interested in an easier solution.</p>
+
+<p>Why not just bundle another instance of the SQLite library into your app?
+This is what people who use sqlite-net on Xamarin will need to do, so it
+should make sense in this case too, right?  Unfortunately, no.</p>
+
+<p>What will happen here is that your <tt>android.database.sqlite</tt> code will
+continue using the system SQLite library, and your "other code" will use the
+second instance of the SQLite library that you bundled with your app.
+So your app will have two instances of the SQLite library.  And this is Very Bad.</p>
+
+<h2>The Multiple SQLite Problem</h2>
+
+<p>Basically, having multiple copies of SQLite linked into the same
+appliication can cause data corruption.  For more info, see <a
+    href="https://www.sqlite.org/howtocorrupt.html">this page</a> on 
+sqlite.org.  And also the related <a href="entries/multiple_sqlite_problem.html">blog entry</a> I wrote back in
+2014.</p>
+
+<p>You really, really do not want to have two instances of the SQLite
+library in your app.</p>
+
+<h2>Zumero</h2>
+
+<p>One example of a library which is going to have this problem is
+our own Zumero Client SDK.  The early versions of our sync library bundled
+a copy of the SQLite library, to follow the rules.  But later,
+to avoid possible data corruption from The Multiple SQLite Problem,
+we changed it to call the system SQLite directly.  So, although I
+might like to claim we did it for a decent reason, our library
+breaks the rules, and we did it knowingly.  All Android apps using Zumero will need to be
+updated for Android N.  A new release of the Zumero Client SDK, containing a solution to this problem, 
+is under development and will be released soon-ish.
+</p>
+
+<h2>Informed consent?</h2>
+
+<p>I really cannot recommend that you have two instances of the SQLite
+library in your app.  The possibility of corruption is quite real.
+One of our developers created an <a href="https://github.com/jeremysheeley/Android_N_SQLite_Corruption">example project</a> to demonstrate this.</p>
+
+<p>But for the sake of completeness, I will mention that it might be possible
+to prevent the corruption by ensuring that only one instance of the SQLite
+library is accessing a SQLite file at any given time.  In other words,
+you could build your own layer of locking on top of any code that uses SQLite.</p>
+
+<p>Only you can decide if this risk is worth it.  I cannot feel good
+about sending anyone down that path.</p>
+
+<h2>Stop using <tt>android.database.sqlite</tt>?</h2>
+
+<p>It also makes this blog entry somewhat more complete for me to mention
+that changing your "other code" to go through <tt>android.database.sqlite</tt> is not your only option.  
+You might prefer to leave your "other code" unchanged
+and rewrite the stuff that uses <tt>android.database.sqlite</tt>,
+ending up with both sets of code using one single instance of SQLite
+that is bundled with your app.</p>
+
+<h2>A Lament</h2>
+
+<p>Life was better when there were two kinds of platforms, those that include
+SQLite, and those that do not.  Instead, we now have this third category of
+platforms that "previously included SQLite, but now they don't, but they kinda
+still do, but not really".</p>
+
+<h2>An open letter to somebody at Google</h2>
+
+<p>It is so tempting to blame you for this, but that that would be unfair.  
+I fully admit that those of us who broke the rules have no moral high ground at all.</p>
+
+<p>But it also true that because of the multiple SQLite problem, and the sheer quantity
+of apps that use the Android system SQLite directly, enforcing the rules
+now is the best way to maximize the possibility of Android
+apps that break or experience data corruption.</p>
+
+<p>Would it really be so bad to include libsqlite in the NDK?</p>
+
+<p>&nbsp;</p>
+
+<P> </td></tr> <tr><td>&nbsp;</td></tr><tr><td><span align="right" class=ArticleDate>Monday, 20 July 2015</span><br><a class="ArticleTitleGreen" href="entries/mongodb_wtfs_anger.html">MongoDB and WTFs and Anger</a><br><br></td></tr><tr><td>
+<p>Recently, Sven Slootweg (joepie91) published a blog entry entitled
+<a href="http://cryto.net/~joepie91/blog/2015/07/19/why-you-should-never-ever-ever-use-mongodb/">Why you should never, ever, ever use MongoDB</a>.  
+It starts out with the words "MongoDB is evil" and proceeds to give a list of negative
+statements about same.</p>
+
+<p>I am not here to respond to each of his statements.  He labels them as "facts",
+and some (or perhaps all) of them surely are.  In fact, for now, let's assume that everything he wrote is
+correct.  My point here is not to say that the author is wrong.</p>
+
+<p>Rather, my point here is that this kind of blog entry tells me very little about
+MongoDB while it tells me a great deal about the emotions of the person who
+wrote it.</p>
+
+<p>Like I said, it may be true that every WTF the author listed
+is correct.  It is also true that some software has more WTFs than
+others.</p>
+
+<p>I'm not a MongoDB expert, but I've been digging into it quite a bit,
+and I could certainly make my own list of its WTFs.  And I would also
+admit that my own exploration of Couchbase has yielded fewer of those
+moments.  Therefore, every single person on the planet who chooses
+MongoDB instead of Couchbase is making a terrible mistake, right?
+</p>
+
+<p>Let me briefly shift to a similar situation where I personally have a lot more knowledge:  
+Microsoft SQL Server vs PostgreSQL.  For me, it is hard to study SQL Server without several WTF moments.
+And while PostgreSQL is not perfect, I have found that a careful 
+study there tends to produce more admiration than WTFs.</p>
+
+<p>So, after I discovered that (for example) SQL Server has no support for
+deferred foreign keys, why didn't I write a blog entry entitled 
+"Why you should never, ever, ever use SQL Server"?</p>
+
+<p>Because I calmed down and looked at the bigger picture.</p>
+
+<p>I think I could make an entirely correct list of negative things about SQL Server that
+is several pages long.  And I suppose if I wanted to do that, and if I were really angry
+while I was writing it, I would include only the facts that support my feelings, 
+omitting anything positive.  For example, my rant blog entry would have no reason to acknowledge
+that SQL Server is the mostly widely used relational database server in the world.
+These kinds of facts merely distract people from my point.</p>
+
+<p>But what would happen if I stopped writing my rant and spent some time thinking about the fact I just omitted?</p>
+
+<p>I just convinced myself that
+this piece of software is truly horrible, and yet, millions of people are using it every
+day.  How do I explain this?</p>
+
+<p>If I tried to make a complete list of theories that might fit the facts,
+today's blog entry would get too long.  Suffice it to say this:  Some of those
+theories might support an anti-Microsoft rant (for example, maybe Microsot's
+field sales team is really good at swindling people), but I'm NOT going
+to be able to prove that every single person who chose SQL Server has made
+a horrible mistake.  There is no way I can credibly claim that PostgreSQL is the
+better choice for every single company simply because I admire it.  
+Even though I think (for example) that SQL Server
+handles NULL and UNIQUE in a broken way, there is some very large group of
+people for whom SQL Server is a valid and smart choice.</p>
+
+<p>So why would I write a blog entry that essentially claims that all SQL Server users are stupid when
+that simply cannot be true?  I wouldn't.  Unless I was really angry.</p>
+
+<p>MongoDB is undisputably the top NoSQL vendor.  It is used by thousands of
+companies who serve millions of users every day.  
+Like all young software serving a large user base, 
+it has bugs and flaws, some of which are WTF-worthy.  
+But it is steadily getting better.
+Any discussion of its technical deficiences which does not address these things
+is mostly just somebody venting emotion.</p>
+
+<p>&nbsp;</p>
+
+<P> </td></tr> <tr><td>&nbsp;</td></tr><tr><td><span align="right" class=ArticleDate>Monday, 8 June 2015</span><br><a class="ArticleTitleGreen" href="entries/rust1.html">My initial experience with Rust</a><br><br></td></tr><tr><td>
+<h2>First, a digression about superhero movies</h2>
+
+<p>I am apparently incapable of hating any movie about a 
+comic book superhero.</p>
+
+<p>I can usually distinguish the extremes.
+Yes, I can tell that "The Dark Knight" was
+much better than "Elektra".  My problem is that I tend to think
+that the worst movies in this genre are still pretty good.</p>
+
+<p>And I have the same sort of unreasonable affection toward programming languages.
+I have always been fascinated by languages, compilers, and interpreters.
+My opinions about such things skew toward the positive simply because I find
+them so interesting.</p>
+
+<p>I do still have preferences.  For example, I tend to like strongly
+typed languages more.  In fact, I think it is roughly true
+that the stricter a compiler is, the more I like it.
+But I can easily find things to like in languages that I mostly 
+dislike.</p>
+
+<p>I've spent more of my career writing C than any other language.  But
+in use cases where I need something like C, I am increasingly eager for something more modern.</p>
+
+<p>I started learning Rust with two questions:</p>
+
+<ul>
+    <li><p>How successful might Rust become as a viable replacement for C?</p></li>
+
+    <li><p>If I enjoy functional programming, how much of that enjoyment can I retain while coding in Rust?</p></li>
+</ul>
+
+<h2>The context</h2>
+
+<p>My exploration of Rust has taken place in one of my side projects:
+<a href="https://github.com/ericsink/LSM">https://github.com/ericsink/LSM</a>
+</p>
+
+<p>LSM is a key-value database with a log-structured merge tree design.
+It is conceptually similar to Google LevelDB.  I first wrote it in C#.
+Then I rewrote/ported it to F#.  Now I have ported it to Rust.  (The
+Rust port is not yet mentioned in the README for that repo, but it's in the top-level directory called 'rs'.)</p>
+
+<p>For the purpose of learning F# and Rust, my initial experience was the
+same.  The first thing I did in each of these languages was to port LSM.
+In other words, the F# and Rust ports of LSM are on equal footing.
+Both of them were written by someone who was a newbie in the language.
+</p>
+
+<p>Anyway, although Rust and F# are very different languages, I have used F# as a
+reference point for my learning of Rust, so this blog entry walks that
+path as well.</p>
+
+<p>This is not to say that I think Rust and F# would typically be used for 
+the same kinds of things.
+I can give you directions from Denver to Chicago without asserting
+they are similar.  Nonetheless, given that Rust is mostly intended to
+be a modern replacement for C, it has a surprising number of things
+in common with F#.</p>
+
+<h2>The big comparison table</h2>
+
+<table border="1" cellpadding="2">
+    <tr>
+        <td>&nbsp;</td>
+        <th>F#</th>
+        <th>Rust</th>
+    </tr>
+
+    <tr>
+        <td>Machine model</td>
+        <td>Managed, .NET CLR</td>
+        <td>Native, LLVM</td>
+    </tr>
+
+    <tr>
+        <td>Runtime</td>
+        <td>CLR</td>
+        <td>None</td>
+    </tr>
+
+    <tr>
+        <td>Style</td>
+        <td>Multi-paradigm, functional-first</td>
+        <td>Multi-paradigm, imperative-first</td>
+    </tr>
+
+    <tr>
+        <td>Syntax family</td>
+        <td>ML-ish</td>
+        <td>C-ish</td>
+    </tr>
+
+    <tr>
+        <td>Blocks</td>
+        <td>Significant whitespace</td>
+        <td>Curly braces</td>
+    </tr>
+
+    <tr>
+        <td>Exception handling</td>
+        <td>Yes</td>
+        <td>No</td>
+    </tr>
+
+    <tr>
+        <td>Strings</td>
+        <td>.NET (UTF-16)</td>
+        <td>UTF-8</td>
+    </tr>
+
+    <tr>
+        <td>Free allocated memory</td>
+        <td>Automatic, garbage collector</td>
+        <td>Automatic, static analysis</td>
+    </tr>
+
+    <tr>
+        <td>Type inference</td>
+        <td>Yes, but not from method calls</td>
+        <td>Yes, but only within functions</td>
+    </tr>
+
+    <tr>
+        <td>Functional immutable collections</td>
+        <td>Yes</td>
+        <td>No</td>
+    </tr>
+
+    <tr>
+        <td>Currying</td>
+        <td>Yes</td>
+        <td>No</td>
+    </tr>
+
+    <tr>
+        <td>Partial application</td>
+        <td>Yes</td>
+        <td>No</td>
+    </tr>
+
+    <tr>
+        <td>Compiler strictness</td>
+        <td>Extremely strict</td>
+        <td>Even stricter</td>
+    </tr>
+
+    <tr>
+        <td>Tuples</td>
+        <td>Yes</td>
+        <td>Yes</td>
+    </tr>
+
+    <tr valign="top">
+        <td>Discriminated unions</td>
+<td><pre>
+type Blob =
+    | Stream of Stream
+    | Array of byte[]
+    | Tombstone
+</pre> </td>
+<td><pre>
+enum Blob {
+    Stream(Box<Read>),
+    Array(Box<[u8]>),
+    Tombstone,
+}
+</pre> </td>
+    </tr>
+
+    <tr>
+        <td>Mutability</td>
+        <td>To be avoided</td>
+        <td>Safe to use</td>
+    </tr>
+
+    <tr valign="top">
+        <td>Lambda expressions</td>
+<td><pre>
+let f = 
+  (fun acc item -&gt; acc + item)
+</pre> </td>
+<td><pre>
+let f = 
+  |acc, &amp;item| acc + item;
+</pre> </td>
+    </tr>
+
+    <tr>
+        <td>Higher-order functions</td>
+        <td><code>List.fold f 0 a</code></td>
+        <td><code>a.iter().fold(0, f)</code></td>
+    </tr>
+
+    <tr>
+        <td>Integer overflow checking</td>
+        <td><strike>No</strike> <code>open Checked</code></td>
+        <td>Yes</td>
+    </tr>
+
+    <tr valign="top">
+        <td>Let bindings</td>
+<td><pre>
+let x = 1
+let mutable y = 2
+</pre> </td>
+<td><pre>
+let x = 1;
+let mut y = 2;
+</pre> </td>
+    </tr>
+
+    <tr>
+        <td>if statements are expressions</td>
+        <td>Yes</td>
+        <td>Yes</td>
+    </tr>
+
+    <tr>
+        <td>Unit type</td>
+        <td><code>()</code></td>
+        <td><code>()</code></td>
+    </tr>
+
+    <tr valign="top">
+        <td>Pattern matching</td>
+<td><pre>
+match cur with
+| Some csr -&gt; csr.IsValid()
+| None -&gt; false
+</pre> </td>
+<td><pre>
+match cur {
+    Some(csr) =&gt; csr.IsValid(),
+    None =&gt; false
+}
+</pre> </td>
+    </tr>
+
+    <tr>
+        <td>Primary collection type</td>
+        <td>Linked list</td>
+        <td>Vector</td>
+    </tr>
+
+    <tr>
+        <td>Naming types</td>
+        <td>CamelCase</td>
+        <td>CamelCase</td>
+    </tr>
+
+    <tr>
+        <td>Naming functions, etc</td>
+        <td>camelCase</td>
+        <td>snake_case</td>
+    </tr>
+
+    <tr>
+        <td>Warnings about naming conventions</td>
+        <td>No</td>
+        <td>Yes</td>
+    </tr>
+
+    <tr>
+        <td>Type for integer literals</td>
+        <td>Suffix (<code>0uy</code>)</td>
+        <td>Inference (<code>0</code>) or suffix (<code>0u8</code>)</td>
+    </tr>
+
+    <tr>
+        <td>Project file</td>
+        <td>foo.fsproj (msbuild)</td>
+        <td>Cargo.toml</td>
+    </tr>
+
+    <tr>
+        <td>Testing framework</td>
+        <td>xUnit, NUnit, etc.</td>
+        <td>Built into Cargo</td>
+    </tr>
+
+    <tr>
+        <td>Debug prints</td>
+        <td><code>printf "%A" foo</code></td>
+        <td><code>println!("{:?}", foo);</code></td>
+    </tr>
+
+</table>
+
+<h2>Memory safety</h2>
+
+<p>I have written a lot of C code over the years.  More than once while in the middle of
+a project, I have stopped to explore ways of getting the compiler to catch
+my memory leaks.  I tried the Clang static analyzer
+and Frama-C and Splint and others.  It just seemed like there should be a way,
+even if I had to annotate function signatures with information about who owns a 
+pointer.</p>
+
+<p>So perhaps you can imagine my joy when I first read about Rust.</p>
+
+<p>Even more cool, Rust has taken this set of ideas so much further 
+than the simple feature
+I tried to envision.  Rust doesn't just detect leaks, it also:</p>
+
+<ul>
+    <li><p>frees everything for you, like a garbage collector, but it's not.</p></li>
+    <li><p>prevents access to something that has been freed.</p></li>
+    <li><p>prevents modifying an iterator while it is being used.</p></li>
+    <li><p>prevents all memory corruption bugs.</p></li>
+    <li><p>automatically disposes other kinds of resources, not just allocated memory.</p></li>
+    <li><p>prevents two threads from having simultaneous access to something.</p></li>
+</ul>
+
+<p>That last bullet is worth repeating:  With Rust, you never stare at
+your code trying to figure out if it's thread safe or not.  If it compiles,
+then it's thread safe.</p>
+
+<p>Safety is Rust's killer feature, and it is very compelling.</p>
+
+<h2>Mutability</h2>
+
+<p>If you come to Rust hoping to find a great functional language,
+you will be disappointed.  Rust does have a bunch of functional
+elements, but it is not really a functional language.  It's not even a
+functional-first hybrid.  Nonetheless, Rust has enough cool functional
+stuff available that it has been described as "ML in C++ clothing".</p>
+
+<p>I did my Rust port of LSM as a line-by-line translation from the F# version.  
+This was not a particularly good approach.</p>
+
+<ul>
+    <li><p>Functional programming is all about avoiding mutable things, typically
+    by using recursion, monads, computation expressions, and immutable collections.</p></li>
+
+    <li><p>In Rust, mutability should not be avoided, because it's safe.  If you
+    are trying to use mutability in a way that would not be safe, your code
+    will not compile.  </p></li>
+</ul>
+
+<p>So if you're porting code from a more functional language,
+you can end up with code that isn't very Rusty.</p>
+
+<p>If you are a functional programming fan, you might be skeptical of
+Rust and its claims.  Try to think of it like this:  
+Rust agrees that mutability is a problem -- it is simply offering a different
+solution to that problem.</p>
+
+<h2>Learning curve</h2>
+
+<p>I don't know if Rust is the most difficult-to-learn programming language I have seen,
+but it is running in that race.</p>
+
+<p>Anybody remember back when Joel Spolsky used to talk about how difficult it is for
+some programmers to <a href="http://www.joelonsoftware.com/articles/ThePerilsofJavaSchools.html">understand pointers</a>?  
+Rust is a whole new level above that.
+Compared to Rust, regular pointers are simplistic.</p>
+
+<p>With Rust, we don't just have pointers.  We also have ownership, borrows, 
+and lifetimes.</p>
+
+<p>As you learn Rust, you will reach a point where you think you are starting
+to understand things.  And then you try to return a reference 
+from a function, or store a reference in a struct.  Suddenly you have lifetime<code>&lt;'a&gt;</code>
+annotations<code>&lt;'a&gt;</code> all<code>&lt;'a&gt;</code> over<code>&lt;'a&gt;</code> the<code>&lt;'a&gt;</code> place<code>&lt;'a&gt;</code>.</p>
+
+<p>And why did you put them there?  Because you
+understood something?  Heck no.  You started sprinkling explicit lifetimes
+throughout your code because the compiler error messages told you to.</p>
+
+<p>I'm not saying that Rust isn't worth the pain.  I personally think Rust
+is rather brilliant.</p>
+
+<p>But a little expectation setting is appropriate here.
+Some programming languages are built for the purpose of making programming easier.
+(It is a valid goal to want to make software development
+accessible to a wider group of people.)  Rust is not one of those languages.</p>
+
+<p>That said, the Rust team has invested significant effort
+in excellent documentation (see <a href="https://doc.rust-lang.org/stable/book/">The Book</a>).  And those compiler error messages really are good.</p>
+
+<p>Finally, let me observe that while some things are hard to learn because they are poorly designed,
+Rust is not one of those things.  The deeper I get into this, the more impressed I am.
+And so far, every single time I thought the compiler was wrong, I was mistaken.</p>
+
+<p>I have found it helpful to try to make every battle with the borrow checker
+into a learning experience.  I do not merely want to end up with the compiler
+accepting my code.  I want to understand more than I did when I started.</p>
+
+<h2>Error handling</h2>
+
+<p>Rust does not have exceptions for error handling.  
+Instead, error handling is done through the return values of functions.</p>
+
+<p>But Rust actually makes this far less tedious than it might sound.
+By convention (and throughout the Rust standard library), error handling
+is done by
+returning a generic enum type called Result&lt;T,E&gt;.  This type can encapsulate
+either the successful result of the function or an error condition.</p>
+
+<p>On top of this, Rust has a clever macro called try!.  
+Because of this macro, if you read some Rust code, you might think it has exception 
+handling.</p>
+
+<pre class="screen">
+// This code was ported from F# which assumes that any Stream
+// that supports Seek also can give you its Length.  That method
+// isn't part of the Seek trait, but this implementation should
+// suffice.
+fn seek_len<R>(fs: &amp;mut R) -&gt; io::Result<u64> where R : Seek {
+    // remember where we started (like Tell)
+    let pos = try!(fs.seek(SeekFrom::Current(0)));
+
+    // seek to the end
+    let len = try!(fs.seek(SeekFrom::End(0)));
+
+    // restore to where we were
+    let _ = try!(fs.seek(SeekFrom::Start(pos)));
+
+    Ok(len)
+}
+</pre>
+
+<p>This function returns std::io::Result&lt;u64&gt;.  When it calls the
+seek() method of the trait object it is given, it uses the try! macro,
+which will cause an early return of the function if it fails.</p>
+
+<p>In practice, I like Rust's Result type very much.</p>
+
+<ul>
+    <li><p>The From and Error traits make it easy to combine different kinds of
+    Result/Error values.</p></li>
+
+    <li><p>The distinction between errors and panics seems very clean.</p></li>
+
+    <li><p>I like having the compiler help me be certain that I am propagating
+    errors everywhere I should be.  (I dislike scanning library documentation
+    to figure out if I called something that throws an exception I need to
+    handle.)</p></li>
+</ul>
+
+<p>Nonetheless, when doing a line-by-line port of F# to Rust, this was probably
+the most tedious issue.  Lots of functions that returned () in F# changed to
+return Result in Rust.</p>
+
+<h2>Type inference</h2>
+
+<p>Rust does type inference within functions, but it cannot or will not infer the 
+types of function arguments or function return values.</p>
+
+<p>Very often I miss having the more complete form of type inference
+one gets in F#.  But I do remind myself of certain things:</p>
+
+<ul>
+    <li><p>The Rust type system is far more complicated than that of F#.  Am I
+    holding a Foo?  Or do I have a &amp;Foo (a reference to a Foo)?  Am I trying
+    to transfer ownership of this value or not?  Being a bit more explicit can be helpful.</p></li>
+
+    <li><p>F# type inference has its weaknesses as well.  Most notably, inference
+    doesn't work at all with method calls.  This gives the object-oriented features
+    of F# a very odd "feel", as if they don't belong in the language, but it
+    would be unthinkable for a CLR language not to have them.</p></li>
+
+    <li><p>Rust has type inference for integer literals but F# does not.</p></li>
+
+    <li><p>The type inference capabilities of Rust may get smarter in the future.</p></li>
+</ul>
+
+<h2>Iterators</h2>
+
+<p>Rust iterators are basically like F# seq (which is an alias for .NET IEnumerable).  
+They are really powerful and provide support for functional idioms like List.map.  For
+example:</p>
+
+<pre class="screen">
+fn to_hex_string(ba: &amp;[u8]) -&gt; String {
+    let strs: Vec<String> = ba.iter()
+        .map(|b| format!("{:02X}", b))
+        .collect();
+    strs.connect("")
+}
+</pre>
+
+<ul>
+    <li><p>This function takes a slice (a part of an array) of bytes (u8) and returns its representation as a hex string.</p></li>
+    <li><p>Vec is a growable array</p></li>
+    <li><p>.iter() means something different than it does in F#.  Here, it is the function that returns an iterator for a slice</p></li>
+    <li><p>.map() is pretty similar to F#.  The argument above is Rust's syntax for a closure.</p></li>
+    <li><p>.collect() also means something different than it does in F#.  Here, it consumes the iterator and puts all the mapped results into the Vec<String> we asked for.</p></li>
+    <li><p>.connect("") is basically a join of all the resulting strings.</p></li>
+</ul>
+
+<p>However, there are a few caveats.</p>
+
+<p>In Rust, you have a lot more flexibility about whether you are dealing with
+"a Foo" or "a reference to a Foo", and most of the time, it's the latter.
+Overall, this is just more work than it is in F#, and using
+iterators feels like it magnifies that effect.</p>
+
+<h2>Performance</h2>
+
+<p>I haven't done the sort of careful benchmarking that is necessary to
+say a lot about performance, so I will say only a little.</p>
+
+<ul>
+    <li><p>I typically use one specific test for measuring performance changes.
+    It writes 10 LSM segments and then merges them all into one, resulting in a
+    data file.</p></li>
+
+    <li><p>On that test, the Rust version is VERY roughly 5 times faster than
+    the F# version.</p></li>
+
+    <li><p>The Rust and F# versions end up producing exactly the same output
+    file.</p></li>
+
+    <li><p>The test is not all that fair to F#.  Writing an LSM database in F#
+    was always kind of a square-peg/round-hole endeavor.</p></li>
+
+    <li><p>With Rust, the difference in compiling with or without the optimizer
+    can be huge.  For example, that test runs 15 times faster with compiler
+    optimizations than it does without.</p></li>
+
+    <li><p>With Rust, the LLVM optimizer can't really do its job very well if it can't do
+    function inlining.  Which it can't do across crates unless you use explicit
+    inline attributes or turn on LTO.</p></li>
+
+    <li><p>In F#, there often seems to be a negative correlation between
+    "idiomatic-ness" and "performance".  
+    In other words, the more functional and idiomatic your code, the slower it will run.</p></li>
+
+    <li><p>F# could get a lot faster if it could take better advantage of the
+    ability of the CLR to do value types.  For example, in F#, option and tuple
+    always cause heap allocations.</p></li>
+</ul>
+
+<h2>Integer overflow</h2>
+
+<p>Integer overflow checking is one of my favorite features of Rust.</p>
+
+<p>In languages or environments without overflow checking, unsigned types are very difficult to use
+safely, so people generally use signed integers everywhere, even
+in cases where a negative value makes no sense.  Rust doesn't
+suffer from this silliness.</p>
+
+<p>For example, the following code will panic:</p>
+
+<pre class="screen">
+let x: u8 = 255;
+let y = x + 2;
+println!("{}", y);
+</pre>
+
+<p>That said, I haven't quite figured out how to get overflow
+checking to happen on casts.  I want the following code (or something
+very much like it) to panic:</p>
+
+<pre class="screen">
+let x: u64 = 257;
+let y = x as u8;
+println!("{}", y);
+</pre>
+
+<p>Note that, by default, Rust turns off integer overflow checking in release 
+builds, for performance reasons.</p>
+
+<h2>Miscellany</h2>
+
+<ul>
+    <li><p>F# is still probably the most productive and pleasant language I have ever used.
+    But Rust is far better than C in this regard.</p></li>
+
+    <li><P>IMO, the Read, Write, and Seek traits are a much better design than .NET's Stream, 
+    which tries to encapsulate all three concepts.</p></li>
+
+    <li><p>'cargo test' is a nice, easy-to-use testing framework that is built into Cargo.  
+    I like it.</p></li>
+
+    <li><p><a href="https://crates.io/">crates.io</a> is like NuGet for Rust, and it's integrated with Cargo.</p></li>
+
+    <li><p>If 'cargo bench' wants to always report timings in nanoseconds, I wish it would
+    put in a separator every three digits.</p></li>
+
+    <li><p>I actually like the fact that Rust is taking a
+    stance on things like <code>function_names_in_snake_case</code> and <code>TypeNamesInCamelCase</code>,
+    even to the point of issuing compiler warnings for names that do not match
+    the conventions.
+    I don't agree 100% with their style choices, and that's my point.  Being opinionated
+    might help avoid a useless discussion about something that never really
+    matters very much anyway.
+    </p></li>
+
+    <li><p>I miss printf-style format strings.</p></li>
+
+    <li><p>I'm not entirely sure I like the automatic dereferencing feature.  I kinda wish
+    the compiler wouldn't help me in this manner until I know what I'm doing.</p></li>
+
+</ul>
+
+<h2>Bottom line</h2>
+
+<p>I am seriously impressed with Rust.  Then again, I thought that Eric Bana's Hulk movie was pretty good, so you might want to just ignore everything I say.</p>
+
+<p>In terms of maturity and ubiquity, C has no equal.  Still, I believe Rust has the potential to become a compelling replacement for C in many situations.</p>
+
+<p>I look forward to using Rust more.</p>
+
+<p>&nbsp;</p>
+
+<P> </td></tr> <tr><td>&nbsp;</td></tr><tr><td><span align="right" class=ArticleDate>Friday, 8 May 2015</span><br><a class="ArticleTitleGreen" href="entries/zss2.html">Announcing Zumero for SQL Server, Release 2.0</a><br><br></td></tr><tr><td>
+<p>Zumero for SQL Server (ZSS) is a solution for replication and sync
+between SQL Server and mobile devices.  ZSS can be used to create
+offline-friendly mobile apps for iOS, Android, Windows Phone, PhoneGap,
+and Xamarin.</p>
+
+<p>Our 2.0 release is a major step forward in the maturity
+of the product.</p>
+
+<p>Highlights:</p>
+
+<ul>
+    <li><p>
+    <b>Compatibility with Azure SQL</b> -- 
+    This release offers improved compatibility with Microsoft Azure SQL Database.
+    Whether you prefer cloud or on-prem, ZSS 2.0 is a robust sync solution.
+    </p></li>
+
+    <li><p>
+    <b>Improved filtering</b> -- 
+    In the 2.0 release, filters have become more powerful and easier to use.
+    Arcane limitations of the 1.x filtering feature have been lifted.  New
+    capabilities include filtering by date, and filtering of incoming writes.
+    </p></li>
+
+    <li><p>
+    <b>Schema change detection</b> -- 
+    The handling of schema changes is now friendlier to the use of other
+    SQL tools.  In 1.x, schema changes needed to be performed in the ZSS
+    Manager application.  In 2.0, we detect and handle most
+    schema changes automatically, allowing you to integrate ZSS 
+    without changing the way you do things.
+    </p></li>
+
+    <li><p>
+    <b>Better UI for configuration</b> -- 
+    The ZSS Manager application has been improved to include UI
+    for configuration of multiple backend databases, as well as more fine-grained
+    control of which columns in a table are published for sync.
+    </p></li>
+
+    <li><p>
+    <b>Increased Performance</b> -- 
+    Perhaps most important of all, ZSS 2.0 is faster.  In some situations, it
+    is a LOT faster.
+    </p></li>
+
+</ul>
+
+<p>Lots more info at <a href="http://zumero.com">zumero.com</a>.</p>
+
+<p>&nbsp;</p>
+
+<P> </td></tr> <tr><td>&nbsp;</td></tr><tr><td><span align="right" class=ArticleDate>Thursday, 30 April 2015</span><br><a class="ArticleTitleGreen" href="entries/microsoft_loves_developers.html">Microsoft is becoming cool again</a><br><br></td></tr><tr><td>
+<h2>Isn't "New Microsoft" awesome?</h2>
+
+<p>.NET is going open source?  And cross-platform?  On Github?!?</p>
+
+<p>The news out of Redmond often seems like a mis-timed April fools joke.</p>
+
+<p>But it's real.  This is happening.  Microsoft is apparently willing to do "whatever
+it takes" to get developers to love them again.</p>
+
+<h2>How did this company change so much, so quickly?</h2>
+
+<p>A lot of folks are giving credit to CEO Satya Nadella.  And there could
+be some truth to that.  Maaaaaaybe.</p>
+
+<p>Another popular view:  Two of the most visible people in this story are:</p>
+
+<ul>
+    <li><p><a href="http://www.hanselman.com/">Scott Hanselman</a> (whose
+    last name I cannot type without double-checking the spelling.)</p></li>
+    <li><p>and <a href="http://weblogs.asp.net/scottgu">Scott Gu</a> (whose last name is Guenther.  Or something like that.
+    I can never remember anything after the first two letters.)</p></li>
+</ul>
+
+<p>I understand why people think maybe these two guys caused
+this revolution.  They both seem to do a decent job I suppose.</p>
+
+<p>But the truth is that New Microsoft started when Microsoft hired
+<a href="http://www.woodwardweb.com/">Martin Woodward</a>.</p>
+
+<h2>What?!?  Who the heck is Martin Woodward?</h2>
+
+<p>Martin's current position is Executive Director of the .NET Foundation.
+Prior to that, he worked as a Program Manager on
+various developer tools.</p>
+
+<p>Nobody knows who Martin is.  Either of the Scotts have 2 orders of
+magnitude more Twitter followers.</p>
+
+<p>But I think if you look closely at Martin's five+ year career at
+Microsoft, you will see a pattern.  Every time a piece of Old Microsoft
+got destroyed in favor of New Microsoft, Martin was nearby.</p>
+
+<p>Don't believe me?  Ask anybody in DevDiv how TFS ended up getting
+support for Git.</p>
+
+<p>It's all about Martin.</p>
+
+<h2>So all the credit should go to Martin Woodward then?</h2>
+
+<p>Certainly not.</p>
+
+<p>You see, Martin joined Microsoft in late 2009 as part of their acquisition 
+of Teamprise.</p>
+
+<p>And Teamprise was a division of SourceGear.</p>
+
+<p>I hired Martin Woodward (single-handedly, with no help or input from anybody else) <a href="entries/Welcome_Martin_Woodward.html">in 2005</a>.
+Four years later, when Microsoft acquired our Teamprise division (which I made happen, all by myself), 
+Martin became a Microsoft employee.</p>
+
+<p>Bottom line:  Are you excited about all of the fantastic news coming out of Build 2015 this week?
+That stuff would never have happened if it were not for ME.</p>
+
+<h2>Eric, how can we ever thank you?</h2>
+
+<p>So, now that you know that I am the one behind all the terrific
+things Microsoft is doing, I'm sure you want to 
+express your appreciation.  But that won't be necessary.  While I understand the
+sentiment, in lieu of expensive gifts and extravagant favors, I am asking my
+adoring fans to do two things:</p>
+
+<p>First, try not to forget all the little people at Microsoft
+who are directly involved in the implementation of change.  People like Martin, or the Scotts, or Satya.  Even though these folks 
+are making a relatively minor contribution compared to my own, I would
+like them to be supported in their efforts.  Be positive.  Don't
+second-guess their motives.  Lay aside
+any prejudices you might have from Old Microsoft.  Believe.</p>
+
+<p>Second, get involved.  Interact with New Microsoft as part of
+the community.  Go to Github and grab the code.  Report an issue.
+Send a pull request.</p>
+
+<h2>Embellishments and revisionist history aside...</h2>
+
+<p>Enjoy this!  It's a GREAT time to be a developer.</p>
+
+<p>&nbsp;</p>
+
+<P> </td></tr> <tr><td>&nbsp;</td></tr><tr><td><span align="right" class=ArticleDate>Monday, 27 April 2015</span><br><a class="ArticleTitleGreen" href="entries/elmo_client_side.html">What Mongo-ish API would mobile developers want?</a><br><br></td></tr><tr><td>
+<p>A couple weeks ago I <a href="entries/mobile_sync_for_mongo.html">blogged</a> about mobile sync for MongoDB.</p>
+
+<h2>Updated Status of Elmo</h2>
+
+<p><a href="https://github.com/zumero/Elmo">Embeddable Lite Mongo</a> continues to move forward nicely:</p>
+
+<ul>
+    <li>
+        <p>Progress on indexes:</p>
+        <ul>
+            <li>Compound and multikey indexes are supported.</li>
+            <li>Sparse indexes are not done yet.</li>
+            <li>Index key encoding is different from the KeyString stuff that Mongo itself does.  For encoding numerics, I did an ugly-but-workable F# port of the encoding used by SQLite4.</li>
+            <li>Hint is supported, but is poorly tested so far.</li>
+            <li>Explain is supported, partially, and only for version 3 of the wire protocol.  More work to do there.</li>
+            <li>The query planner (which has delusions of grandeur for even referring to itself by that term) isn't very smart.</li>
+            <li>Indexes cannot yet be used for sorting.</li>
+            <li>Indexes are currently never used to cover a query.</li>
+            <li>When grabbing index bounds from the query, $elemMatch is ignored.  Because of this, and because of the way Mongo multikey indexes work, most index scans are bounded at only one end.</li>
+            <li>The $min and $max query modifiers are supported.</li>
+            <li>The query planner doesn't know how to deal with $or at all.</li>
+        </ul>
+    </li>
+    <li>
+        <p>Progress on full-text search:</p>
+        <ul>
+            <li>This feature is working for some very basic cases.</li>
+            <li>Phrase search is not implemented yet.</li>
+            <li>Language is currently ignored.</li>
+            <li>The matcher step for $text is not implemented yet at all.  Everything within the index bounds will get returned.</li>
+            <li>The tokenizer is nothing more than string.split.  No stemming.  No stop words.</li>
+            <li>Negations are not implemented yet.</li>
+            <li>Weights are stored in the index entries, but textScore is not calculated yet.</li>
+        </ul>
+    </li>
+</ul>
+
+<p>I also refactored to get better separation between the CRUD logic and the storage of bson blobs and indexes (making it easier to plug-in different storage layers).</p>
+
+<h2>Questions about client-side APIs</h2>
+
+<p>So, let's assume you are building a mobile app which communicates with your
+Mongo server in the cloud using a "replicate and sync" approach.  In other
+words, your app is not doing its CRUD operations by making networking/REST calls back to
+the server.  Instead, your app is working directly with a partial clone of the Mongo 
+database that is right there on the mobile device.  (And periodically, that partial 
+clone is magically synchronized with the main database on the server.)</p>
+
+<p>What should the API for that "embedded lite mongo" look like?</p>
+
+<p>Obviously, for each development environment, the form of the API should be
+designed to feel natural or native in that environment.  This is the approach
+taken by Mongo's own client drivers.  In fact, as far as I can tell, these
+drivers don't even share much (or any?) code.  For example, the drivers for C# and Java
+and Ruby are all different, and (unless I'm mistaken) none of them are mere
+wrappers around something lower level like the C driver.  Each one is built
+and maintained to provide the most pleasant experience to developers in
+a specific ecosystem.</p>
+
+<p>My knee-jerk reaction here is to say that mobile developers might want
+the exact same API as presented by their nearest driver.  For example, if
+I am building a mobile app in C# (using the Xamarin tools), there is a good
+chance my previous Mongo experience is also in C#, so I am familiar with
+the C# driver, so that's the API I want.</p>
+
+<p>Intuitive as this sounds, it may not be true.  Continuing with the C#
+example, that driver is quite large.  Is its size appropriate for use on
+a mobile device?  Is it even compatible with iOS, which requires AOT
+compilation?  (FWIW, I tried compiling this driver as a PCL (Portable
+Class Library), and it didn't Just Work.)</p>
+
+<p>For Android, the same kinds of questions would need to be asked about
+the Mongo Java driver.</p>
+
+<p>And then there are Objective-C and Swift (the primary developer platform for iOS), for which there is no official Mongo driver.  But there are a couple of them listed on the Community Supported Drivers page: <a href="http://docs.mongodb.org/ecosystem/drivers/community-supported-drivers/">http://docs.mongodb.org/ecosystem/drivers/community-supported-drivers/</a>.</p>
+
+<p>And we need to consider Phonegap/Cordova as well.  Is the Node.js driver a starting point?</p>
+
+<p>And in all of these cases, if we assume that the mobile API should be the
+same as the driver's API, how should that be achieved?  Fork the driver code
+and rip out all the networking and replace it with calls to the embedded
+library?</p>
+
+<p>Or should each mobile platform get a newly-designed API which is
+specifically for mobile use cases?</p>
+
+<p>Believe it or not, some days I wonder:  Suppose I got Elmo running
+as a server on an Android device, listening on localhost port 27017.  Could an Android app talk to it with the Mongo Java driver
+unchanged?  Even if this would work, it would be more like a proof-of-concept than a production solution.
+Still, when looking for solutions to a problem, the mind goes places...</p>
+
+<p>So anyway, I've got more questions than answers here, and I would welcome thoughts or opinions.</p>
+
+<ul>
+    <li><p>Feel free to post an issue on GitHub: <a href="https://github.com/zumero/Elmo/issues">https://github.com/zumero/Elmo/issues</a></p></li>
+    <li><p>Or email me: eric@zumero.com</p></li>
+    <li><p>Or Tweet: @eric_sink</p></li>
+    <li><p>Or find me at MongoDB World in NYC at the beginning of June.</p></li>
+</ul>
+
+<p>&nbsp;</p>
+
+
+<P> </td></tr> <tr><td>&nbsp;</td></tr><tr><td><span align="right" class=ArticleDate>Monday, 13 April 2015</span><br><a class="ArticleTitleGreen" href="entries/mobile_sync_for_mongo.html">Mobile Sync for Mongo</a><br><br></td></tr><tr><td>
+<p>We here at <a href="http://zumero.com/">Zumero</a> have been exploring the possibility of a mobile sync solution for MongoDB.</p> 
+
+<p>We first released our Zumero for SQL Server product almost 18 months ago, and today
+there are bunches of people using mobile apps which sync using our solution.</p>
+
+<p>But not everyone uses SQL Server, so we often wonder
+what other database backends we should consider supporting.  In this blog entry, I want to
+talk about some progress we've made toward a "Zumero for Mongo" solution and "think out loud" about the 
+possibilities.</p>
+
+<h2>Background: Mobile Sync</h2>
+
+<p>The basic idea of mobile sync is to keep a partial copy of the database on the mobile device so
+the app doesn't have to go back to the network for every single CRUD operation.  The
+benefit is an app that is faster, more reliable, and works offline.  The flip side of
+that coin is the need to keep the mobile copy of the database synchronized with the data
+on the server.</p>
+
+<p>Sync is tricky, but as mobile continues its explosive growth, this approach is gaining momentum:</p>
+
+<ul>
+    <li><p>Legendary developer Dan Bricklin:  <a href="http://www.bricklin.com/offline.htm">http://www.bricklin.com/offline.htm</a></p></li>
+    <li><p>Forrester analyst Michael Facemire:  <a href="http://sdtimes.com/analyst-watch-tackling-mobile-apps-important-difficult-feature/">http://sdtimes.com/analyst-watch-tackling-mobile-apps-important-difficult-feature/</a></p></li>
+</ul>
+
+<p>If the folks at Mongo are already working on something in this area,
+we haven't seen any sign of it.  So we decided to investigate some ideas.</p>
+
+<h2>Pieces of the puzzle</h2>
+
+<p>In addition to the main database (like SQL Server or MongoDB or whatever), a
+mobile sync solution has three basic components:
+</p>
+
+<table border="1">
+    <tr>
+        <td>Mobile database</td>
+        <td>
+            <ul>
+            <li><p>Runs on the mobile device as part of the app</p></li>
+            <li><p>Probably an embedded database library</p></li>
+            <li><p>Keeps a partial replica of the main database</p></li>
+            <li><p>Wants to be as similar as possible to the main database</p></li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td>Sync server</td>
+        <td>
+            <ul>
+            <li><p>Monitors changes made by others to the main database</p></li>
+            <li><p>Sends incremental changes back and forth between clients and the main database</p></li>
+            <li><p>Resolves conflicts, such as when two participants want to change the same data</p></li>
+            <li><p>Manages authentication and permissions for mobile clients</p></li>
+            <li><p>Filters data so that each client only gets what it needs</p></li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td>Sync client</td>
+        <td>
+            <ul>
+            <li><p>Monitors changes made by the app to the mobile database</p></li>
+            <li><p>Talks over the network to the sync server</p></li>
+            <li><p>Pushes and pulls incremental changes to keep the mobile database synchronized</p></li>
+        </td>
+    </tr>
+</table>
+
+<p>For this blog entry, I want to talk mostly about the mobile database.  In
+our Zumero for SQL Server solution, this role is played by SQLite.  There are
+certainly differences between SQL Server and SQLite, but on the whole, SQLite
+does a pretty good job pretending to be SQL Server.</p>
+
+<p>What embedded database could play this role for Mongo?</p>
+
+<p>This question has no clear answer, so we've been building a 
+a lightweight Mongo-compatible database.  Right now
+it's just a prototype, but its development serves the purpose of helping us
+explore mobile sync for Mongo.</p>
+
+<h2>Embeddable Lite Mongo</h2>
+
+<p>Or "Elmo", for short.</p>
+
+<p>Elmo is a database that is designed to be as Mongo-compatible as it can be within the constraints of mobile devices.</p>
+
+<p>In terms of the status of our efforts, let me begin with stuff that does NOT work:</p>
+
+<ul>
+    <li><p>Sharding is an example of a Mongo feature that Elmo does not support and probably never will.</p></li>
+    <li><p>Elmo also has no plans to support any feature which requires embedding a JavaScript engine, since that would violate Apple's rules for the App Store.</p></li>
+    <li><p>We do hope to support full text search ($text, $meta, etc), but this is not yet implemented.</p></li>
+    <li><p>Similarly, we have not yet implemented any of the geo features, but we consider them to be within the scope of the project.</p></li>
+    <li><p>Elmo does not support capped collections, and we are not yet sure if it should.</p></li>
+</ul>
+   
+<p>Broadly speaking, except for the above, everything works.  Mostly:</p>
+
+<ul>
+    <li><p>All documents are stored in BSON</p></li>
+    <li><p>Except for JS code, all BSON types are supported</p></li>
+    <li><p>Comparison and sorting of BSON values (including different types) works</p></li>
+    <li><p>All basic CRUD operations are implemented</p></li>
+    <li><p>The update command supports all the update operators except $isolated</p></li>
+    <li><p>The update command supports upsert as well</p></li>
+    <li><p>The findAndModify command includes full support for its various options</p></li>
+    <li><p>Basic queries are fully functional, including query operators, projection, and sorting</p></li>
+    <li><p>The matcher supports Mongo's notion of query predicates matching any element of an array</p></li>
+    <li><p>CRUD operations support resolution of paths into array subobjects, like x.y to {x:[{y:2}]}</p></li>
+    <li><p>Regex works, with support for the i, s, and m options</p></li>
+    <li><p>The positional operator $ works in update and projection</p></li>
+    <li><p>Cursors and batchSize are supported</p></li>
+    <li><p>The aggregation pipeline is supported, including all expression elements and all stages (except geo)</p></li>
+</ul>
+
+<p>More caveats:</p>
+
+<ul>
+    <li><p>Support for indexes is being implemented, but they don't actually speed anything up yet.</p></li>
+    <li><p>The dbref format is tolerated, but is not [yet] resolved.</p></li>
+    <li><p>The $explain feature is not implemented yet.</p></li>
+    <li><p>For the purpose of storing BSON blobs, Elmo is currently using SQLite.  Changing this later will be straightforward, as we're basically just using SQLite as a key-value store, so the API between all of Elmo's CRUD logic and the storage layer is not very wide.</p></li>
+</ul>
+
+<p>Notes on testing:</p>
+
+<ul>
+    <li><p>Although mobile-focused Elmo does not need an actual server, it has one, simply so that we can run the <a href="https://github.com/mongodb/mongo/tree/master/jstests">jstests</a> suite against it.</p></li>
+    <li><p>The only test suite sections we have worked on are jstests/core and jstests/aggregation.</p></li>
+    <li><p>Right now, Elmo can pass 311 of the test cases from jstests.</p></li>
+    <li><p>We have never tried contacting Elmo with any client driver except the mongo shell.  So this probably doesn't work yet.</p></li>
+    <li><p>Elmo's server only supports the new style protocol, including OP_QUERY, OP_GET_MORE, OP_KILL_CURSORS, and OP_REPLY.  None of the old "fire and forget" messages are implemented.</p></li>
+    <li><p>Where necessary to make a test case pass, Elmo tries to return the same error numbers as Mongo itself.</p></li>
+    <li><p>All effort thus far has been focused on making Elmo functional, with no effort spent on performance.</p></li>
+</ul>
+
+<p>How Elmo should work:</p>
+
+<ul>
+    <li><p>In general, our spec for Elmo's behavior is the MongoDB documentation plus the jstests suite.</p></li>
+    <li><p>In cases where the Mongo docs seem to differ from the actual behavior of Mongo, we try to make Elmo behave like Mongo does.</p></li>
+    <li><p>In cases where the Mongo docs are silent, we often stick a proxy in front of the Mongo server and dump all the messages so we can see exactly what is going on.</p></li>
+    <li><p>We occasionally consult the Mongo server source code for reference purposes, but no Mongo code has been copied into Elmo.</p></li>
+</ul>
+
+<p>Notes on the code:</p>
+
+<ul>
+    <li><p>Elmo is written in F#, which was chosen because it's an insanely productive environment and we want to move quickly.</p></li>
+    <li><p>But while F# is a great language for this exploratory prototype, it may not be the right choice for production, simply because it would confine Elmo use cases to Xamarin, and <a href="https://twitter.com/migueldeicaza">Miguel</a>'s world domination plan is not quite complete yet.  <tt><b>:-)</b></tt></p></li>
+    <li><p>The Elmo code is now available on GitHub at <a href="https://github.com/zumero/Elmo">https://github.com/zumero/Elmo</a>.  Currently the license is GPLv3, which makes it incompatible with production use on mobile platforms, which is okay for now, since Elmo isn't ready for production use anyway.  We'll revisit licensing issues later.</p></li>
+</ul>
+
+<p>Next steps:</p>
+
+<ul>
+    <li><p>Our purpose in this blog entry is to start conversations with others who may be interested in mobile sync solutions for Mongo.</p></li>
+    <li><p>Feel free to post a question or comment or whatever as an issue on GitHub: <a href="https://github.com/zumero/Elmo/issues">https://github.com/zumero/Elmo/issues</a></p></li>
+    <li><p>Or email me: eric@zumero.com</p></li>
+    <li><p>Or Tweet: @eric_sink</p></li>
+    <li><p>If you're interested in a face-to-face conversation or a demo, we'll be at MongoDB World in NYC at the beginning of June.</p></li>
+</ul>
+
+<p>&nbsp;</p>
+
+
+<P> </td></tr> <tr><td>&nbsp;</td></tr><tr><td><span align="right" class=ArticleDate>Tuesday, 27 January 2015</span><br><a class="ArticleTitleGreen" href="entries/xf_13_better.html">Improvements in Xamarin.Forms 1.3</a><br><br></td></tr><tr><td>
+<p>Back in November I wrote a <a href="entries/xf_child_views.html">blog entry</a> about performance problems
+resulting from the design of the layout system in Xamarin.Forms.  I am pleased to 
+report that things took a big step forward with the recent release of version 1.3.</p>
+
+<h2>Reviewing the problem</h2>
+
+<p>In a nutshell, the Layout classes do too much.  They contain functionality to
+make sure everything gets updated whenever something changes.  In principle, this
+is good, since we obviously don't want stale stuff on the screen.  But in practice, there are
+many cases where the built-in update code ends up being slower than necessary.</p>
+
+<p>For example, suppose I'm going to add ten child views to a layout.  With
+the built-in update code, a layout cycle will get triggered ten times, once for
+each child view I add.  Worse, if I'm trying to do any kind of subview recycling, the
+odds are high that I want to add a child view while I am processing a layout cycle.
+This will trigger a recursive layout cycle, resulting in the
+end of civilization as we know it.</p>
+
+<p>Instead, what I want is one layout cycle which happens
+after all ten child views have been added.</p>
+
+<h2>The solution I proposed</h2>
+
+<p>IMHO, the best design for this kind of problem is to have multiple layers:</p>
+
+<ul>
+    <li><p>The Low-Level layer models child view relationships only.  It provides
+    a way for a View to be inside another View, but it doesn't give much more than
+    that.  In iOS terms, this is UIView.addSubView.</p></li> 
+
+    <li><p>The High-Level layer (which is built on the functionality provided by
+    the layers below it) has Views which actively manage their child views.
+    In iOS terms, an example of this would be UICollectionView.</p></li>
+
+    <li><p>In the Middle, it would make sense to have a layer which provides
+    things which are common to all (or nearly all) of the stuff in the High-Level
+    layer, to avoid code duplication.</p></li>
+</ul>
+
+<p>Xamarin.Forms has the High-Level layer and the Middle layer, but it does not have
+the Low-Level layer.  So I proposed creating it.</p>
+
+<p>I didn't get <b>exactly</b> what I wanted, but...</p>
+
+<h2>The solution in Xamarin.Forms 1.3</h2>
+
+<p>In Xamarin.Forms 1.3, the Middle layer is still the lowest thing we've got.
+However, there are new capabilities which allow the Middle layer to pretend
+like it is a Low-Level layer.  It still has a bunch of built-in update code,
+but now that code can be turned off.  <b><tt>:-)</tt></b></p>
+
+<p>The important new capabilities are:</p>
+
+<ul>
+    <li>ShouldInvalidateOnChildAdded</li>
+    <li>ShouldInvalidateOnChildRemoved</li>
+    <li>OnChildMeasureInvalidated</li>
+</ul>
+
+<p>By returning false from my override of ShouldInvalidateOnChildAdded() and ShouldInvalidateOnChildRemoved(),
+I can have a Layout which doesn't do any automatic updates when I add or remove children.</p>
+
+<p>And by overriding OnChildMeasureInvalidated(), I can have a Layout which refuses to do real
+estate negotiations with its child views.</p>
+
+<p>This is good.</p>
+
+<h2>How I'm using this</h2>
+
+<p>Because of this new stuff, an upcoming release of our <a href="https://components.xamarin.com/view/zumerodatagrid">DataGrid component</a> will be even
+faster.  Our panel layout class will look something like this:</p>
+
+<pre class="screen">
+private class myLayout : Layout&lt;View&gt;
+{
+    Func&lt;View,Rectangle&gt; getBox;
+
+    public myLayout(Func&lt;View,Rectangle&gt; f)
+    {
+        getBox = f;
+    }
+
+    public void LayoutOneChild(View v)
+    {
+        Rectangle r = getBox (v);
+        v.Layout (r);
+    }
+
+    public void LayoutAllChildren()
+    {
+        foreach (View v in Children) {
+            LayoutOneChild (v);
+        }
+    }
+
+    protected override bool ShouldInvalidateOnChildAdded (View child)
+    {
+        return false; // stop pestering me
+    }
+
+    protected override bool ShouldInvalidateOnChildRemoved (View child)
+    {
+        return false; // go away and leave me alone
+    }
+
+    protected override void OnChildMeasureInvalidated ()
+    {
+        // I'm ignoring you.  You'll take whatever size I want to give
+        // you.  And you'll like it.
+    }
+
+    protected override void LayoutChildren (double x, double y, double width, double height)
+    {
+        LayoutAllChildren ();
+    }
+}
+</pre>
+
+<p>This Layout class is obviously very simplistic, but it merely scratches the
+surface of what becomes possible now that Xamarin.Forms has [something that
+can imitate] a Low-Level subview layer.</p>
+
+<p>Kudos and thanks to the Xamarin.Forms team!</p>
+
+<p>&nbsp;</p>
+
+
+<P> </td></tr> <tr><td>&nbsp;</td></tr><tr><td><span align="right" class=ArticleDate>Monday, 5 January 2015</span><br><a class="ArticleTitleGreen" href="entries/fsharp_chasm.html">Why your F# evangelism isn't working</a><br><br></td></tr><tr><td>
+<h2>Ouch. Eric, you're one of those anti-F# people, aren't you?</h2>
+
+<p>Nope.</p>
+
+<p>If you skim this blog entry too quickly or just read the title, you might 
+think I am someone
+who does not like F#.  Nothing could be further from the truth.
+Over the last several months, I have become a big F# fan.
+It has become my preferred language for personal projects.</p>
+
+<p>My <a href="https://github.com/ericsink/LSM">current side project</a> is a 
+key-value store in F#.  I have learned a lot by writing it, and I am
+even starting to think it might end up becoming useful.  <tt><b>:-)</b></tt></p>
+
+<p>Mostly, I find coding in F# to be extremely satisfying.</p>
+
+<p>I am writing this article not as an opponent of F#, but rather,
+as someone who hopes that F# will become a mainstream .NET language.</p>
+
+<h2>Eric, you're wrong.  F# is mainstream already.</h2>
+
+<p>Of course it is.  For some definition of "mainstream".</p>
+
+<p>F# is gaining traction really fast.  People are using F# for
+real stuff.  The language is improving.  Xamarin is supporting it.
+By nearly any measure, F# is showing a lot of momentum 
+over the last few years.  If you are an F# fan, there just isn't
+any bad news running around.</p>
+
+<p>But for this article, I am using a definition of "mainstream",
+(which I'll explain below) which I believe F# has not yet reached.</p> 
+
+<p>If, when you arrive at the end of this article, you
+do not like my definition of mainstream, that's okay.
+Just take a copy of this article, and
+do a search and replace all instances of the word
+"mainstream" with "purple".
+I have no desire to argue with you about what "mainstream"
+means, but if you want to argue about the meaning of "purple",
+I'll be happy to.  <tt><b>:-)</b></tt></p>
+
+<h2>You're wrong again.  My F# evangelism IS working</h2>
+
+<p>Of course it is.  To a certain extent.</p>
+
+<p>But in marketing terminology, as far as I can tell, most F# users today are
+"early adopters".  Very few are "pragmatists".  And F# has not yet "crossed
+the chasm".</p>
+
+<h2>What is "the chasm"?</h2>
+
+<p>The term originates from a 1991 book by Geoffrey Moore.</p>
+
+<p>The main point of Moore's book is that the classical
+marketing bell curve has a problem.  Typically (and, prior
+to Moore's book, always), that bell curve is drawn like this:</p>
+
+<p><img src="bell.gif"/></p>
+
+<p>The basic idea of this curve is that when a market adopts a new techology,
+it follows a pattern.  The technology moves from left to right
+on the bell curve, becoming adopted by four groups in the following order:
+
+<ul>
+    <li><p>the "early adopters" (people who like trying
+    new technologies) </p></li>
+    <li><p>the "pragmatists" (people who only care about
+    technology to get something done) </p></li>
+    <li><p>the "conservatives" (pragmatists,
+    but even more risk-averse) </p></li>
+    <li><p>the "laggards" (people who actively
+    avoid new things)</p></li>
+</ul>
+
+<p>Together, the pragmatists and conservatives are the definition
+of "mainstream" for the purpose of this article.</p>
+
+<p>Moore's key observation is that moving from the early adopters
+to the pragmatists is very hard.  Some technologies never make
+it.  To illustrate this problem, Moore suggests drawing the
+bell curve differently, with a "chasm" between the early adopters
+and the pragmatists:</p>
+
+<p><img src="bell2.gif"/></p>
+
+<p>His book explains why the chasm exists, why some technologies
+"die at the bottom of the chasm", and how some technologies
+successfully "cross the chasm".  It is a marketing classic and
+highly recommended.</p>
+
+<p>For the purpose of this blog entry, the main thing you need
+to know is this:  The chasm exists because pragmatists
+generally adopt new techologies as a herd.  They don't adopt
+a new technology until they see other pragmatists using it.
+This creates a chicken-and-egg problem.</p>
+
+<h2>How does this herd thing work?</h2>
+
+<p>Pragmatists have an annual conference where they all agree
+to stay with their existing technologies.  The actual vote is
+not formal, but consensus gets reached.</p>
+
+<p>A lot of this process happens in hallways and the dining hall:
+"Are you considering
+Windows 8 or should we all just stay with Windows 7 and
+see what happens next?"</p>
+
+<p>Some of the process happens in the conference itself,
+where you'll see session titles like, "Why it's safe for
+you to ignore mobile for another year."</p>
+
+<p>At PragmatiCon 2014, the ratified platform looked something
+like this:</p>
+
+<ul>
+    <li><p>SQL is still the only safe choice.</p></li>
+    <li><p>Keep an eye on your developers to make sure they're not using Ruby.</p></li>
+    <li><p>Exchange is still the best email solution.</p></li>
+    <li><p>The cloud is okay for some things, but important data needs to stay in your own server room.</p></li>
+    <li><p>Let's ignore BYOD and hope it goes away.</p></li>
+    <li><p>Building a mobile app is still too expensive and too risky.</p></li>
+</ul>
+
+<h2>So the pragmatists don't care about the ways that F# is better?</h2>
+
+<p>No, not really.</p>
+
+<p>This point is where the title of this blog entry comes from.  If you
+are trying to explain the benefits of F# to pragmatists, you are probably
+frustrated.  It probably seems like they're not listening to you.  That's because they're not.</p>
+
+<p>Pragmatists don't make technology decisions
+on the basis of what is better.  They prefer the safety of the herd.
+A pragmatist wants to be using the same technology as all the other
+pragmatists, even if everybody is somewhat unhappy with it.  They
+will choose "predictably disappointing" over "excellent and unproven"
+every time.</p>
+
+<h2>Maybe we just need to do a better job of explaining the benefits of F#?</h2>
+
+<p>Wouldn't it be great if it were that simple?</p>
+
+<p>But no.  As an early adopter, there is nothing you can say to a
+pragmatist that will make a difference.  They know that your opinion
+and experience are not to be trusted, because they do not share your
+values.</p>
+
+<h2>So these pragmatists are just stupid then?</h2>
+
+<p>Not at all.  Their decision-making process is quite rational.  It
+is a natural consequence of being someone who uses technology to get
+something done rather than using technology for its own sake.</p>
+
+<p>Near the top of this blog entry, I said that I find coding in F# to be extremely satisfying.
+That remark identifies me as an early adopter.  It is something
+a pragmatist would never say.  If any pragmatists accidentally stumbled
+across this blog entry, they stopped reading right there.</p>
+
+<p>Pragmatists don't care about the
+craft of software.  They don't care about how cool something is.
+They care about cars and investments and law
+and soap and oil rigs and health care and construction and transportation and insurance.  
+Technology is just a tool.</p>
+
+<p>BTW, if you find the word "pragmatists" to be too tedious to pronounce,
+you can just refer to these folks by their more commonly-used label: "normal people".</p>
+
+<h2>Fine.  We don't need those pragmatists anyway, right?</h2>
+
+<p>Maybe not.  Some things stay in the land of early adopters
+forever.</p>
+
+<p>But the area under the bell curve matters.  It is roughly
+equivalent to revenue.  Together, the pragmatists and conservatives
+represent almost all of the money in the market.</p>
+
+<p>If your situation allows you to be successful with a given
+technology even though it only gets used by early adopters,
+great.  But many people are (directly or indirectly) placing
+bets (financial or otherwise) which will only pay off when
+their technology get used by the majority of the market.</p>
+
+<h2>So this chicken-and-egg situation is hopeless then?</h2>
+
+<p>Not quite.</p>
+
+<p>Sometimes a pragmatist can be convinced to break with the herd.
+The key is to find what Moore calls a "pragmatist in pain".</p>
+
+<p>A pragmatist in pain is someone whose needs are not being well
+met by whatever technology is current popular among pragmatists.
+The current technology is not merely annoying them.  It is failing
+them.</p>
+
+<p>A pragmatist in pain actually does care about how F# is
+better, even though this goes against their nature.
+They really hate the idea of listening to some F# nerd
+prattle on about immutability and type inference.  But
+they have reached their last resort.  Their pain has forced them 
+to look for hope from somebody outside
+the herd.</p>
+
+<p>This is how a new product gets across the chasm.  Find a pragmatist
+in pain.  Do whatever-it-takes to make them happy with your
+product.  Then go back and do it again.  Repeat until you have enough customers
+that they can go to PragmatiCon without being shunned and ridiculed.</p>
+
+<h2>Why will it be especially hard for F# to cross the chasm?</h2>
+
+<p>Because C# is really, really good.</p>
+
+<p>I love C#, but I hold the opinion that F# is better.</p>
+
+<p style="margin-left:1in;">Kirk: "Better at what?"  <br/>Khan: "Everything."<br/><tt><b>:-)</b></tt></p>
+
+<p>I also understand that F#'s awesomeness is basically
+irrelevant to the question of whether it will go mainstream
+or not.  If the pragmatists are not in pain, they are not
+interested.  C# doesn't cause very much pain.</p>
+
+<h2>Will the hybrid functional-first languages cross the chasm together?</h2>
+
+<p>Mostly, no.</p>
+
+<p>Certainly it is true that F# is part of a trend.  The Java world
+has Scala.  The Apple/iOS world has Swift.  It is not merely true
+that F# is gaining momentum.  It is also true that functional programming
+is gaining momentum.</p>
+
+<p>But in terms of going mainstream, these three languages will
+be related-but-separate.  If Swift cross the chasm first (and it will),
+that will add a bit more momentum to F#, simply because the two
+languages will be seen as comparables in different ecosystems.  
+But F# will have to cross the chasm on its own.</p>
+
+<h2>Why will Swift go mainstream before F#?</h2>
+
+<p>Yes, F# has a seven year head start, but Swift will cross the
+chasm first.  This has nothing to do with the relative merits
+of these two languages.</p>
+
+<p>As of January 2015, F# is quite stable
+and trustworthy for most use cases, while Swift is mostly an unstable
+mess that isn't ready for prime time.  This too is irrelevant.</p>
+
+<p>The simple fact is that C# is kinda great and Objective-C is
+kinda dreadful.  Swift will go mainstream first because you can't
+swing a 9-iron in the Apple/iOS ecosystem without hitting a
+pragmatist in pain.</p>
+
+<h2>Eric, you're wrong.  I know some pragmatists who are using F#.</h2>
+
+<p>Really?  Great!  Please spread the word.</p>
+
+<p>&nbsp;</p>
+
+<P> </td></tr> <tr><td>&nbsp;</td></tr><tr><td bgcolor="white">

@@ -1,0 +1,145 @@
+---
+layout: default
+esbma_id: 1089
+title: Chapter 8: Merge Branches
+date: 2005-05-24 19:08:26
+keywords: (scm) 
+teaser: Successfully using the branching and merging features of your source control tool is first a matter of attitude on the part of the developer. No matter how much help the source control tool provides, it is not as smart as you are. You are responsible for doing the merge. Think of the tool as a tool, not as a consultant.
+---
+<P>This is part of an online book called <a href="/scm/source_control.html">Source Control HOWTO</a>, a best practices guide on source control, version control, and configuration management.</p>
+<table border=0 width="100%">
+<tr>
+<td align="left"><a href="/scm/scm_branches.html">&lt; Chapter 7</a></td>
+<td align="right"><a href="/scm/scm_ide_integration.html">Chapter 9 &gt;</a></td>
+</tr>
+</table>
+<hr>
+<h4>What is "merge branches"?</h4>
+<p>Many users find the word "merge" to be confusing, since it seems to imply that we start out with two things and end up with only one.&nbsp; I'm not going to start trying to invent new vocabulary.&nbsp; Instead, let's just try to be clear about what we mean we speak about merging branches.&nbsp; I define "merge branches" like this:</p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>To "merge branches" is to take some changes which were done to one branch and apply them to another branch.</p>
+</blockquote>
+<p>Sounds easy, doesn't it?&nbsp; In practice, merging branches often is easy.&nbsp; But the edge cases can be really tricky.</p>
+<p>Consider an example.&nbsp; Let's say that Joe has made a bunch of changes in $/branch and we want to apply those changes to $/trunk.&nbsp; At some point in the past, $/branch and $/trunk were the same, but they have since diverged.&nbsp; Joe has been making changes to $/branch while the rest of the team has continued making changes to $/trunk.&nbsp; Now it is time to bring Joe back into the team.&nbsp; We want to take all the changes Joe made to $/branch, no matter what those changes were, and we want to apply those changes to $/trunk, no matter what changes have been to $/trunk during Joe's exile.</p>
+<p>The central question about merge branches is the matter of how much help the source control tool can provide.&nbsp; Let's imagine that our SCM tool provided us with a slider control:</p>
+<p><img height="106" alt="" src="/scm/screendumps/scm_silly_slider.png" width="392" border="0" /></p>
+<p>If we drag this slider all the way to the left, the source control tool does all the work, requiring no help at all from Joe.&nbsp; Speaking as a source control vendor, this is the ideal scenario that we strive for.&nbsp; Most of us don't make it.&nbsp; However, here at SourceGear we made the decision to build our source control product on the .NET Framework, which luckily has full support for the kind of technology needed to implement this.&nbsp; The code snippet below was pasted from our implementation of the Merge Branches feature in Vault:</p><p style="BORDER-RIGHT: #d1d7dc 1px solid; BORDER-TOP: #d1d7dc 1px solid; FONT-SIZE: xx-small; BORDER-LEFT: #d1d7dc 1px solid; BORDER-BOTTOM: #d1d7dc 1px solid; FONT-FAMILY: Courier, 'Courier New', sans-serif; BACKGROUND-COLOR: #fafafa">
+public void MergeBranches(Folder origin, Folder target)
+<br />
+{
+<br />
+&nbsp; ArrayList changes = GetSelectedChanges(origin);
+
+<br />
+<br />
+&nbsp; DeveloperIntention di = System.Magic.FigureOutWhatDeveloperWasTryingToDo(changes);
+<br />
+<br />
+&nbsp; di.Apply(target);
+<br />
+}
+<br /></p>
+<p>Boy do I feel sorry for all those other source control vendors trying to implement Merge Branches without the DeveloperIntention class!&nbsp; And to think that so many people believe the .NET Framework is too large.&nbsp; Sheesh!</p>
+
+<p style="BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: black 1px solid; PADDING-LEFT: 5px; FONT-SIZE: smaller; FLOAT: right; PADDING-BOTTOM: 5px; MARGIN: 5px; BORDER-LEFT: black 1px solid; WIDTH: 50%; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid; BACKGROUND-COLOR: rgb(230,230,230)"><b>Best Practice: Take responsibility for the merge.</b><br /><br />
+Successfully using the branching and merging features of your source control tool is first a matter of attitude on the part of the developer.  No matter how much help the source control tool provides, it is not as smart as you are.  You are responsible for doing the merge.  Think of the tool as a tool, not as a consultant.</p>
+
+<p>OK, I lied.&nbsp; (Stop trying to add a reference to the System.Magic DLL.&nbsp; It doesn't exist.)&nbsp; The actual truth is that this slider can never be dragged all the way to the left.</p>
+<p>If we drag the slider all the way to the right, we get a situation which is actually closer to reality.&nbsp; Joe does all the work and the source control tool is no help at all.&nbsp; In essence, Joe sits down with $/trunk and simply re-does the work he did in $/branch.&nbsp; The context is different, so the changes he makes this time may be very different from what he did before.&nbsp; But Joe is smart, and he can figure out The Right Thing to do.</p>
+<p>In practice, we find ourselves somewhere between these two extremes.&nbsp; The source control tool cannot do magic, but it can usually help make the merge easier.</p>
+<p>Since the developer must still take responsibility for the merge, things will go more smoothly if she understands what's really going on.&nbsp; So let's talk about how merge branches works.&nbsp; First I need to define a bit of terminology.</p>
+<p>For the remainder of this chapter I will be using the words "origin" and "target" to refer to the two branches involved in a merge branches operation.&nbsp; The origin is the folder which contains the changes.&nbsp; The target is the folder to which we want those changes to be applied.</p>
+<p>Note that my definition of merge branches is a one-way operation.&nbsp; We apply changes from the origin to the target.&nbsp; In my example above, $/branch is the origin and $/trunk is the target.&nbsp; That said, there is nothing which prevents me switching things around and applying changes in the opposite direction, with $/trunk as the origin and $/branch as the target, but that would simply be a separate merge branches operation.</p>
+<p>Conceptually, a merge branches operation has four steps:</p>
+<ol>
+<li>Developer selects changes in the origin
+</li>
+<li>Source control tool applies some changes automatically to the target
+</li>
+<li>Developer reviews the results
+and resolves any conflicts&nbsp;
+</li>
+<li>Commit
+</li>
+</ol>
+<p>Each of these steps is described a bit more in the following sections.</p>
+<h4>1.&nbsp; Selecting changes in the origin</h4>
+<p>When you begin a merge branches operation, you know which changes from the origin you want to be applied over in the target.&nbsp; Most of the time you want to be very specific about which changes from the origin are to be merged.&nbsp; This is usually evident in the conversation which preceded the merge:</p>
+<ul>
+<li>"Dan asked me to merge all the bug fixes from 3.0.5 into the main trunk."
+</li>
+<li>"Jeff said we need to merge the fix for bug 7620 from the trunk into the maintenance tree."
+</li>
+<li>"Ian's experimental rewrite of feature X is ready to be merged into the trunk."
+</li>
+</ul>
+<p>One way or another, you need to tell your source control tool which changes are involved in the merge.&nbsp; The interface for this operation can vary significantly depending on which tool you are using.&nbsp; The screen shot below is the point where the Merge Branches Wizard in Vault is asking me to specify which changes should be merged.&nbsp; I'm selecting everything back to the last build label:</p><p><a href="/scm/screendumps/scm_mb_choose.png"><img height="380" alt="" src="/scm/screendumps/scm_mb_choose.png" width="570" border="0" /></a></p>
+<h4>2.&nbsp; Applying changes automatically to the target</h4>
+<p>After selecting the changes to be applied, it's time to try and make those changes happen in the target.&nbsp; It is important here to mention that merging branches requires us to consider every kind of change, not just the common case of edited files.&nbsp; We need to deal with renames, moves, deletes, additions, and whatever else the source control tool can handle.</p>
+<p>I won't spell out every single case.&nbsp; Suffice it to say that each operation should be applied to the target in the way that Makes Sense.&nbsp; This won't succeed in every situation, but when it does, it is usually safe.&nbsp; Examples:</p>
+<ul>
+<li>If a file was edited in the origin and a file with the same relative path exists in the target, try to make the same edit to the target file.&nbsp; Use the automerge algorithm I mentioned in <a href="/scm/scm_file_merge.html">chapter 3</a>.&nbsp; If automerge fails, signal a conflict and ask the user what to do.
+</li>
+<li>If a file was renamed in the origin, try doing the same rename in the target.&nbsp; Here again, if the rename isn't possible, signal a conflict and ask the user what to do.&nbsp; For example, the target file may have been deleted.
+</li>
+<li>If a file was added in the origin, add it to the target.&nbsp; If doing so would cause a name clash, signal a conflict and ask the user what to do.
+</li>
+<li>What happens if an edited file in the origin has been moved in the target to a different subfolder?&nbsp; Should we try to apply the edit?&nbsp; I'd say yes.&nbsp; If the automerge succeeds, there's a good chance it is safe.
+</li>
+</ul>
+<p>Bottom line, a source control tool should do all the operations which seem certain to be safe.&nbsp; And even then, the user needs a chance to review everything before the merge is committed to the repository.</p>
+<p>Let's consider a simple example from Subversion.&nbsp; I created a folder called trunk, added a few files, and then branched it.&nbsp; Then I made three changes to the trunk:</p>
+<ul>
+<li>Deleted __init__.py
+</li>
+<li>Modified panel.py
+</li>
+<li>Added a file called anydbm.py
+</li>
+</ul>
+<p>Then I asked Subversion to merge all changes between version 2 and 4 of my trunk into my branch:</p>
+<p><img height="331" alt="" src="/scm/screendumps/scm_svn_merge.png" width="453" border="0" /></p>
+<p>Subversion correctly detected all three of my changes and applied them to my working copy of the branch.</p>
+<h4>3.&nbsp; Developer review</h4>
+<p style="BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: black 1px solid; PADDING-LEFT: 5px; FONT-SIZE: smaller; FLOAT: right; PADDING-BOTTOM: 5px; MARGIN: 5px; BORDER-LEFT: black 1px solid; WIDTH: 50%; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid; BACKGROUND-COLOR: rgb(230,230,230)"><b>Best Practice: Review the merge before you commit.</b><br /><br />
+After your source control tool has done whatever it can do, it's your turn to finish the job.  Any conflicts need to be resolved.  Make sure the code still builds.  Run the unit tests to make sure everything still works.&nbsp; Use a diff tool to review the changes.<br /><br />
+Merging branches should always take place in a working folder.&nbsp; Your source control tool should give you a chance to do these checks before you commit the final results of a merge branches operation.</p><p>The final step in a merge branches operation is a review by the developer.&nbsp; The developer is ultimately responsible, and is the only one smart enough to declare that the merge is correct.&nbsp; So we need to make sure that the developer is given final approval before we commit the results of our merge to the repository.</p>
+<p>This is the developer's opportunity to take care of anything which could not be done automatically by the source control tool in step 2.&nbsp; For example, suppose the tree contains a file which is in a binary format that cannot be automatically merged, and that this file has been modified in both the origin and the target.&nbsp; In this case, the developer will need to construct a version of this file which correctly incorporates both changed versions.</p>
+
+<h4>4.&nbsp; Commit</h4>
+<p>The very last step of a merge branches operation is to commit the results to the repository.&nbsp; Simplistically, this is a commit like any other.&nbsp; Ideally, it is more.&nbsp; The difference is whether or not the source control tool supports "merge history".</p><h4>The benefits of merge history</h4>
+<p>Merge history contains special historical information about all merge branch operations.&nbsp; Each time you do use the merge branches feature, it remembers what happened.&nbsp; This allows us to handle two cases with a bit more finesse:</p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p><strong>Repeated merge.&nbsp;</strong></p>
+<p>Frequently you want to merge from the same origin to the same target multiple times.&nbsp; Let's suppose you have a sub-team working in a private branch.&nbsp; Every few weeks you want to merge from the branch into the trunk.&nbsp; When it comes time to select the changes to be merged over, you only want to select the changes that haven't already been merged before.&nbsp; Wouldn't it be nice if the source control tool would just remember this for you?&nbsp;</p>
+<p>Merge history allows this and makes things more convenient.&nbsp; The workaround is simply to use a label to mark the point of your last merge.</p>
+<p><strong>Merge in both directions.&nbsp;</strong></p>
+<p>A similar case happens when you have two branches and you sometimes want to merge back and forth in both directions.&nbsp; For example:</p>
+<ol>
+<li>Create a branch
+</li>
+<li>Do some work in both the branch and the trunk
+</li>
+<li>Merge some changes from the branch to the trunk
+</li>
+<li>Do some more work
+</li>
+<li>Merge some changes from the trunk to the branch
+</li>
+</ol>
+<p>At step 5, when it comes time to select changes to be merged, you want the changes from step 3 to be ignored.&nbsp; There is no need to merge those changes from the trunk to the branch because the branch is where those changes came from in the first place!&nbsp; A source control tool with a smart implementation of merge history will know this.</p>
+</blockquote>
+<p>Not all source control tools support merge history.&nbsp; A tool without merge history can still merge branches.&nbsp; It simply requires the developer to be more involved, to do more thinking.</p>
+<p>In fact, I'll have to admit that at the time of this writing, my own favorite tool falls into this category.&nbsp; We're planning some major improvements to the merge branches feature for Vault 4.0, but as of version 3.x, Vault does not support merge history.&nbsp; Subversion doesn't either, as of version 1.1.&nbsp; Perforce is reported to have a good implementation of merge history, so we could say that its "slider" rests a bit further to the left.</p>
+<h4>Summary</h4>
+<p>I don't want this chapter to be a step-by-step guide to using any one particular source control tool, so I'm going to keep this discussion fairly high-level.&nbsp; Each tool implements the merging of branches a little differently.&nbsp;</p>
+<p>For some additional information, I suggest you look at <a href="http://svnbook.red-bean.com/">Version Control with Subversion</a>, a book from O'Reilly.&nbsp; It is obviously Subversion-specific, but it contains a discussion of branching and merging which I think is pretty good.&nbsp;</p>
+<p>The one thing all these tools have in common is the need for the developer to think.&nbsp; Take the time to understand exactly how the branching and merging features work in your source control tool.</p>
+<p>&nbsp;</p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align="left"><a href="/scm/scm_branches.html">&lt; Chapter 7</a></td>
+<td align="right"><a href="/scm/scm_ide_integration.html">Chapter 9 &gt;</a></td>
+</tr>
+</table>

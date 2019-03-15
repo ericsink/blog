@@ -1,0 +1,231 @@
+---
+esbma_id: unknown
+title: Fiddling with ReactiveUI and Xamarin.Forms
+date: 2014-10-06 10:00:00
+---
+
+<p><img align="right" src="dg_rxui.png"/></p>
+
+<p>I'm no expert at <a href="http://reactiveui.net/">ReactiveUI</a>.  I'm just fiddling around in the back
+row of a session 
+here at Xamarin Evolve.
+<tt><b>:-)</b></tt></p>
+
+<h2>The goal</h2>
+
+<p>I want an instance of my <a href="datagrid_preview.html">DataGrid control</a> that is bound to a collection of objects.
+And I want the display to automatically update when I
+change a property on one of those objects.
+</p>
+
+<p>For the sake of this quickie demo, I'm gonna add a tap handler
+for a cell that simply appends an asterisk to the text of that
+cell.  That should end up causing a display update.</p>
+
+<p>Something like this code snippet:</p>
+
+<br style="clear:right;" />
+
+<pre class="screen">
+Main.SingleTap += (object sender, CellCoords e) =&gt; {
+    T r = Rows [e.Row];
+    ColumnInfo ci = Columns[e.Column];
+    var typ = typeof(T);
+    var ti = typ.GetTypeInfo();
+    var p = ti.GetDeclaredProperty(ci.PropertyName);
+    if (p != null)
+    {
+        var val = p.GetValue(r);
+        p.SetValue(r, val.ToString() + "*");
+    }
+};
+</pre>
+
+<p>Actually, that looks complicated,
+because I've got some reflection code that figures out which
+property on my object corresponds to which column.  Ignore the
+snippet above and think of it like this (for a tap in column 0):</p>
+
+<pre class="screen">
+Main.SingleTap += (object sender, CellCoords e) =&gt; {
+    WordPair r = Rows [e.Row];
+    <span style="background-color:yellow;">r.en += "*"</span>;
+};
+</pre>
+
+<p>Which will make more sense if you can see the class I'm using
+to represent a row:</p>
+
+<pre class="screen">
+public class WordPair
+{
+    public string en { get; set; }
+    public string sp { get; set; }
+}
+</pre>
+
+<p>Or rather, that's what it looked like before I started adapting
+it for ReactiveUI.  Now it needs to notify somebody when its properties change,
+so it looks more like this:</p>
+
+<pre class="screen">
+public class WordPair : ReactiveObject
+{
+    private string _en;
+    private string _sp;
+
+    public string en {
+        get { return _en; }
+        set { this.<span style="background-color:yellow;">RaiseAndSetIfChanged</span> (ref _en, value); }
+    }
+    public string sp {
+        get { return _sp; }
+        set { this.RaiseAndSetIfChanged (ref _sp, value); }
+    }
+}
+</pre>
+
+<p>So, basically I want a DataGrid which is bound to a ReactiveList<WordPair>.
+But actually, I want it to be more generic than that.  I want
+WordPair to be a type parameter.
+</p>
+
+<p>So my DataGrid subclass of Xamarin.Forms.View has a type parameter for the
+type of the row:</p>
+
+<pre class="screen">
+public class ColumnishGrid&lt;T&gt; : Xamarin.Forms.View where T : class
+</pre>
+
+<p>And the ReactiveList&lt;T&gt; is stored in a property of that View:</p>
+
+<pre class="screen">
+public static readonly BindableProperty RowsProperty = 
+    BindableProperty.Create&lt;ColumnishGrid&lt;T&gt;,ReactiveList&lt;T&gt;&gt;(
+        p =&gt; p.Rows, null);
+
+public <span style="background-color:yellow;">ReactiveList&lt;T&gt;</span> Rows {
+    get { return (ReactiveList&lt;T&gt;)GetValue(RowsProperty); }
+    set { SetValue(RowsProperty, value); } // TODO disallow invalid values
+}
+</pre>
+
+<p>And the relevant portions of the code to build a Xamarin.Forms content page 
+look like this:</p>
+
+<pre class="screen">
+var mainPage = new ContentPage {
+    Content = new <span style="background-color:yellow;">ColumnishGrid&lt;WordPair&gt;</span> {
+
+        ...
+
+        Rows = new <span style="background-color:yellow;">ReactiveList&lt;WordPair&gt;</span> {
+            new WordPair { en = "drive", sp = "conducir" },
+            new WordPair { en = "speak", sp = "hablar" },
+            new WordPair { en = "give", sp = "dar" },
+            new WordPair { en = "be", sp = "ser" },
+            new WordPair { en = "go", sp = "ir" },
+            new WordPair { en = "wait", sp = "esperar" },
+            new WordPair { en = "live", sp = "vivir" },
+            new WordPair { en = "walk", sp = "andar" },
+            new WordPair { en = "run", sp = "correr" },
+            new WordPair { en = "sleep", sp = "dormir" },
+            new WordPair { en = "want", sp = "querer" },
+        }
+    }
+};
+</pre>
+
+<p>The implementation of ColumnishGrid contains the following snippet, which
+will be followed by further explanation:</p>
+
+<pre class="screen">
+IRowList&lt;T&gt; rowlist = new <span style="background-color:yellow;">RowList_Bindable_ReactiveList&lt;T&gt;</span>(this, RowsProperty);
+
+IValuePerCell&lt;string&gt; vals = new <span style="background-color:yellow;">ValuePerCell_RowList_Properties&lt;string,T&gt;</span>(rowlist, propnames);
+
+IDrawCell&lt;IGraphics&gt; dec = new DrawCell_Text (vals, fmt);
+</pre>
+
+<p>In DataGrid, a RowList is an interface used for binding some data type that represents a whole row.</p>
+
+<pre class="screen">
+public interface IRowList&lt;T&gt; : IPerCell
+{
+    bool get_value(int r, out T val);
+}
+</pre>
+
+<p>A RowList It could be an array of something (like strings), using the column number as an index.  But in this case, 
+I am using a class, with each property mapped to a column.</p>
+
+<p>A ValuePerCell object is used anytime DataGrid needs, er, a value per cell (like
+the text to be displayed):</p>
+
+<pre class="screen">
+public interface IValuePerCell&lt;T&gt; : IPerCell
+{
+    bool get_value(int col, int row, out T val);
+}
+</pre>
+
+<p>And ValuePerCell_RowList_Properties is an object which does the mapping from
+a column number (like 0) to a property name (like WordPair.en).</p>
+
+<p>Then the ValuePerCell object gets handed off to DrawCell_Text, which is what actually draws the
+cell text on the screen.</p>
+
+<p>I skipped one important thing in the snippet above, and that's
+RowList_Bindable_ReactiveList.  Since I'm storing my ReactiveList<WordPair> in
+a property on my View, there are two separate things to listen on.  First, I obviously
+want to listen for changes to the ReactiveList and update the display
+appropriately.  But I also need to listen for the case where somebody replaces
+the entire list.</p>
+
+<p>RowList_Bindable_ReactiveList handles the latter, so it has code that looks like this:</p>
+
+<pre class="screen">
+obj.PropertyChanged += (object sender, System.ComponentModel.PropertyChangedEventArgs e) =&gt; {
+    if (e.PropertyName == prop.PropertyName)
+    {
+        ReactiveList&lt;T&gt; lst = (ReactiveList&lt;T&gt;)obj.GetValue(prop);
+        <span style="background-color:yellow;">_next = new RowList_ReactiveList&lt;T&gt;</span>(lst);
+        if (changed != null) {
+            changed(this, null);
+        }
+        _next.changed += (object s2, CellCoords e2) =&gt; {;
+            if (changed != null) {
+                changed(this, e2);
+            }
+        };
+    }
+};
+</pre>
+
+<p>And finally, the code which listens to the ReactiveList itself:</p>
+
+<pre class="screen">
+public RowList_ReactiveList(ReactiveList&lt;T&gt; rx)
+{
+    _rx = rx;
+
+    _rx.<span style="background-color:yellow;">ChangeTrackingEnabled</span> = true;
+    _rx.ItemChanged.<span style="background-color:yellow;">Subscribe</span> (x =&gt; {
+        if (changed != null) {
+            int pos = _rx.IndexOf(x.Sender);
+            changed(this, new CellCoords(0, pos));
+        }
+    });
+}
+</pre>
+
+<p>DataGrid uses a chain of drawing objects which pass notifications
+up the chain with a C# event.  In the end, the DataGrid core panel will
+hear about the change, and it will trigger the renderer, which will
+cause a redraw.</p>
+
+<p>And that's how the word "give" ended up with an asterisk in the
+screen shot at the top of this blog entry.</p>
+
+<p>&nbsp;</p>
+

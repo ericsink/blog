@@ -1,0 +1,281 @@
+---
+esbma_id: unknown
+title: Don't use ReactiveUI
+date: 2017-01-24 12:00:00
+---
+
+<h2>TL;DR</h2>
+
+<p>This blog post says the opposite of its lazy and deliberately
+provocative title.  I have become a huge fan of <a href="http://reactiveui.net">ReactiveUI</a>.
+I just want to ramble about the path I took to get here.</p>
+
+<h2>Listening to Paul Betts</h2>
+
+<p>I first heard about ReactiveUI at a conference presentation
+by Paul Betts.  I think it was at Xamarin Evolve.  Mostly
+I remember feeling dumb.  He said a lot of things that 
+I didn't understand.</p>
+
+<p>I went to that session without much real experience in Model-View-ViewModel
+(MVVM) development.  Conceptually, I understood the idea of a
+ViewModel.  But Paul mostly talked about how ReactiveUI avoids
+certain problems.  And since I had not experienced those problems,
+his words didn't sink in.</p>
+
+<h2>Talking to teenagers about risk</h2>
+
+<p>Each time one of my kids was approaching adolescence, I sat down
+and explained the risks associated with certain choices.  Laws
+and moral judgements aside, the simple fact is that many choices
+involve risks, and I thought it would be helpful to pass along that
+bit of information.</p>
+
+<p>And in each case, my child said, "Thanks Dad",
+and proceeded to always make wise and low-risk choices from that point on.</p>
+
+<p>Well, actually, no.</p>
+
+<p>Teenagers simply do not learn that way.  They process risk
+very differently from people who are more mature.  Tell a
+16-year-old that "if you drive too fast you might get a ticket".
+The adolescent will immediately begin driving too fast, and, in all
+likelihood, will not get ticket.  This is how teenagers realize
+they are smarter than their parents.</p>
+
+<p>Tangent #1:  It is almost certainly a good thing that young
+people are more brave.  It would be Very Bad if everybody started out with the
+same level of risk aversion as the average 65-year-old.
+Go watch the "Tapestry" episode of Star Trek TNG.</p>
+
+<p>Tangent #2:  I really should claim no expertise in parenting, but if somebody
+forced me to write a book on parenting a teenager, I would say
+this:  Let your kid suffer from their own choices.  That said, it is 
+worth the effort to try and help them avoid the really bad mistakes,
+the ones with consequences that last for decades.  But they do
+have to learn to make their own choices.  Realize this
+as early as you can.  The path to frustration starts with making 
+everything all about you.</p>
+
+<h2>How we learn new technologies</h2>
+
+<p>My metaphor has many problems.  For starters, Paul Betts is not my Dad.</p>
+
+<p>Also, the element of adolescent rebellion was not present.  I didn't
+hear Paul's wisdom and run in the opposite direction because of my
+deep need to separate my identity from his.  In fact,
+I started devouring everything I could find on MVVM and IObservable.
+I really wanted to understand what he was saying.</p>
+
+<p>But the metaphor works in one significant way:  Like a teenager,
+I had to learn by doing.  Nobody's words made much of a difference.
+None of that reading helped me become a
+a user of ReactiveUI.  I went down another path.</p>
+
+<p>Actually, I went down several other paths.</p>
+
+<h2>Maybe it's just me</h2>
+
+<p>I observe that most developers want content that explains
+how to get something done.  "If your objective is to do X, then
+do the following steps."  The most popular books and articles tend
+to follow this pattern.  Questions of this form are the ones that
+do well on StackOverflow.</p>
+
+<p>But this is almost never what I want.</p>
+
+<p>I much prefer content that explains how things work.  Once
+I understand that, I can figure out the steps myself.</p>
+
+<p>When I am developing software, I always, ALWAYS do better
+when I understand what is going on "under hood", when I can
+see through the leaky abstractions.</p>
+
+<p>And as I mentioned, I am apparently in the very small minority 
+on this.  If 90% of the world disagrees with me, does that
+put me in the top 10% ?  Or does it mean my approach is somehow
+defective?
+Modesty aside, my history contains enough successes to
+allow me some confidence in believing that my approach is
+better.</p>
+
+<p>I also observe that my approach is just a different
+spelling for the old adage, "Give a man a fish and you
+feed him
+for a day.  Teach a man to fish and he eats for a lifetime."</p>
+
+<p>If you tell a software developer what to type
+and where to click, you can help them complete today's
+task.  But if you instead teach them how things work,
+they will be able to apply that understanding on other days too.</p>
+
+<p>Hmmm.  I'm talking myself into this.  I don't know why
+most people prefer shallow recipes, but I really do think deep understanding
+is better.</p>
+
+<p>Still, I like to stay open-minded about things.
+I've got a lot of failures too.</p>
+
+<p>The truth is that my approach has tradeoffs.  The need
+to understand everything tends to slow me down during the
+early stages.  I usually gain some of that back in the
+fourth quarter of the game, where deeper understanding
+is often helpful in diagnosing tricky problems.</p>
+
+<p>But again, in the decision making around software development,
+absolutes are rare.  I'll admit that sometimes a simple set of steps
+without depth are exactly what is needed.</p>
+
+<h2>Maybe the ReactiveUI docs are just bad?</h2>
+
+<p>I don't know.  Maybe.  I've read the docs plenty.
+They don't seem bad to me.  I also see nothing there
+that makes me want to defend them as the best docs ever.</p>
+
+<p>Suppose that I regret not choosing ReactiveUI sooner.
+Further suppose that I wanted to blame somebody else for my choices.
+I guess I could find something to complain about.  But I also
+don't tend to find that criticizing somebody else's
+work is helpful.</p>
+
+<p>And remember, I started this journey sitting in
+front of an audience, listening to Paul Betts, and
+feeling dumb.  To be clear, in that kind of context, I *like*
+feeling dumb.  It's an opporunity to learn.</p>
+
+<h2>So why did I not choose ReactiveUI sooner?</h2>
+
+<p>I guess I don't really know.  But I'm pretty sure that nothing
+has made me appreciate ReactiveUI more than the
+suffering that comes from not using it.</p>
+
+<p>And that remark isn't very helpful, is it?  I'd like
+to try and do better.  Let's see...</p>
+
+<p>"Son, it's just basic statistics.  If you're going
+to always drive 15 MPH over the speed limit, you
+will eventually get caught.  Suppose you roll the
+dice 20 times in a row without getting a 12.
+You still might get a 12 on the next roll, right?"</p>
+
+<p>Oh, wait, wrong topic.  Let me try again.</p>
+
+<h2>Why is ReactiveUI awesome?</h2>
+
+<p>In some software development situations, like mobile apps,
+if you take a step back and look at the forest instead of
+the trees, you will see that most of your code is reacting
+to something that changed.</p>
+
+<p>There are lots of tools you can use to approach this kind of app.  
+You can use C# events and callbacks and switch statements and
+delegates and lambdas and observables and notifications and bindings and more.</p>
+
+<p>For simple apps, none of these approaches are much better
+than any other.  But as your app gets more complicated, some
+approaches cope more gracefully than others.</p>
+
+<p>Most cars drive pretty smooth at 30 MPH.  But at
+75 MPH, some vehicles are still giving a smooth ride,
+while others are shaking.</p>
+
+<p>Let's try a conceptual example or two.  Suppose you have a
+button, and you want something to happen when the user
+presses that button.  This is pretty simple.  All reasonable
+solutions to this problem are about the same.</p>
+
+<p>On the other hand, let's say you have a list of items.
+The items in that list come from a SQL query.  That query
+has 4 inputs, each of which comes from a UI control.
+Every time one of those controls changes its value,
+the query needs to be re-run and the list needs to be
+updated.  A couple of those controls need to be disabled under
+certain circumstances.  </p>
+
+<p>These UI elements have
+a complicated relationship.  We still have plenty of
+choices in how to express that relationship in code,
+but this situation is complicated enough that we start 
+to see differences between those approaches.  Some of
+the ones that worked out really well in the simple case
+seem kinda tedious for this case.</p>
+
+<p>If my driveway has half an inch of snow, all
+methods of clearing it are about the same.  But if
+my driveway has 15 inches of snow, a shovel is
+decidedly inferior to a tractor.</p>
+
+<p>Why do I like ReactiveUI?  Because I have found that
+it copes gracefully
+as the situation gets more complicated.</p>
+
+<p>Why is this?  Much of the credit goes to the "reactive" foundation
+on which ReactiveUI is built.  Reactive Extensions.
+Rx.  IObservable.  These building blocks are particularly
+adept at expressing the relationship between a group of
+things that are changing.  ReactiveUI adds another layer (or
+two) on top of these things to make that expressiveness more
+convenient when implementing user interfaces.</p>
+
+<p>To be honest, I fudged a little bit when I said that
+all solutions are roughly equivalent when the problem is simple.
+That's not quite true.  For simple situations, I'd have to
+admit that ReactiveUI might be a little worse.  There is
+a learning curve.</p>
+
+<p>If I am writing a grocery list, I could use a word
+processor, but a pencil and paper is actually simpler.
+But if I am writing a novel, the word processor is the
+clear winner.</p>
+
+<p>I'm claiming that the effort to learn Rx and ReactiveUI
+is worth the trouble.  My claim is based on this notion
+that ReactiveUI shines as complexity increases, but also
+on my belief that most people underestimate the complexity
+of their app.</p>
+
+<p>If you disagreed with me above when I said that "most of your code is reacting
+to something that changed", you might be underestimating
+the complexity of your app.  It is in fact very common to
+start implementing under the assumption that something
+will not change and then later realize that you need
+notifications or events.  Or an observable.</p>
+
+<h2>Hmmmm.</h2>
+
+<p>Would the paragraphs above have changed my course
+earlier?</p>
+
+<p>I don't know.  Probably not.</p>
+
+<p>I didn't start this believing that 
+I could write the best ReactiveUI advocacy ever.
+Looking at it now, I can't believe I wrote it
+with no code in it.  The canonical ReactiveUI
+evangelism pamphlet has gotta have <tt>WhenAnyValue()</tt> in it somewhere.
+</p>
+
+<p>I just think it's interesting that despite my best efforts,
+I was unable to really understand the benefits of ReactiveUI
+until I tried using its alternatives.  My current project
+is late.  If I had chosen ReactiveUI earlier, maybe it would be, er, less late?
+There are questions here worth asking.</p>
+
+<p>But am I 100% certain that it is always better to spare
+yourself the learning experience of using less effective
+approaches?  No.</p>
+
+<p>Can I credibly claim that everyone should
+choose ReactiveUI in every situation?  Certainly not.</p>
+
+<p>Maybe all I can say is that I am currently having a
+great experience with ReactiveUI.</p>
+
+<p>Maybe that means the
+rest of this blog post is useless.</p>
+
+<p>But you should have
+known that when you saw the cheesy title.</p>
+
+<p>&nbsp;</p>
+

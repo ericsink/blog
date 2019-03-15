@@ -1,0 +1,40 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Integration</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="dvcs_weaknesses.html" title="Chapter 6. Weaknesses"><link rel="prev" href="dvcs_weakness_very_large_repos.html" title="Very Large Repositories"><link rel="next" href="dvcs_weakness_obliterate.html" title="Obliterate"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Integration</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="dvcs_weakness_very_large_repos.html">Prev</a> </td><th width="60%" align="center">Chapter 6. Weaknesses</th><td width="20%" align="right"> <a accesskey="n" href="dvcs_weakness_obliterate.html">Next</a></td></tr></table><hr></div><div class="section" title="Integration"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp1096400"></a>Integration</h2></div></div></div>
+    
+
+    <p>Industry-wide, there has been a trend toward more integration between
+        version control and other stuff like project tracking, wikis,
+        discussion forums, build management, etc.  Developers don’t just commit
+        code.  They use a whole bunch of other tools which help them
+        collaborate with each other and with people in other functional
+        areas.  The expectation is that all these tools will integrate together very well, providing a seamless user experience.  This concept is sometimes referred to as Application Lifecycle Management<a class="indexterm" name="idp1098016"></a> (ALM).</p>
+
+    <p>The rapidly increasing popularity of DVCS is generating
+        some momentum
+    in the opposite direction.  The benefits of a DVCS (such as
+    offline usage)
+    are somewhat diminished if all of the other tools a developer needs are
+    still centralized.</p>
+
+<p>Yes, it’s cool that I can commit my code while I’m on a yacht<sup>[<a name="idp1099744" href="#ftn.idp1099744" class="footnote">20</a>]</sup>, but how do I
+    update the bug tracking<a class="indexterm" name="idp1100544"></a> system to mark the bug fixed?  So far, the answer is that I
+    have to wait until the boat gets to shore, hope that the port terminal has Wi-Fi<a class="indexterm" name="idp1101472"></a>, log in to my
+    corporate VPN, bring up a web browser, remember the bug ID, find the bug,
+    change its status, and try to remember my code changes so I can write
+    something relevant in the comments.  That’s not what I want.  What I want is to
+    do all those things offline to my local clone of the bug tracking database
+    and those changes will get pushed at the same time that I push the version
+    control stuff.</p>
+
+<div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a id="ftn.idp1099744" href="#idp1099744" class="para">20</a>] </sup>Certain comments from early reviewers of this book motivate me to clarify that I do <span class="bold"><strong>not</strong></span> actually have a yacht.</p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="dvcs_weakness_very_large_repos.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="dvcs_weaknesses.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="dvcs_weakness_obliterate.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Very Large Repositories </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Obliterate</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

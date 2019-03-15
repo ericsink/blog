@@ -1,0 +1,129 @@
+---
+layout: default
+esbma_id: 1685
+title: 1:  Performance Issues with ScreenSpaceLines3D
+date: 2007-07-13 15:50:33
+---
+<p>This entry is part 1 of a <a
+href="/wpf3d/index.html">12-part series</a> on WPF
+3D.</p>
+
+<h3>Problems with Lines</h3>
+
+<p>WPF 3D doesn't know how to draw lines.</p>
+
+<p><img width=300 height=225 src="/scm/1685_image001.jpg"
+align=left hspace=12>Shocking as it may seem, WPF 3D considers triangles to be
+more fundamental than lines.&nbsp; Everything in 3D is a triangle.&nbsp; If you want to
+draw a line, you have to somehow do it by using triangles.</p>
+
+<p>Actually, this is not all that shocking once you really think
+about it.&nbsp; The problem with a line is that it's <i>too</i> fundamental.&nbsp;
+Geometrically speaking, a line has zero width.&nbsp; If you asked WPF to draw a
+line, it would have nothing to draw.&nbsp; A triangle is the simplest bit of
+geometry that actually has any surface area.</p>
+
+<p>We think that drawing a line should be simple.&nbsp; In 2D
+graphics, it is.&nbsp; But in 3D graphics, where the picture on your screen is a 2D
+projection of a 3D world which uses a completely different coordinate system,
+it's not.</p>
+
+<p><img width=300 height=225 src="/scm/1685_image002.jpg"
+align=right hspace=12>But still, sometimes we want to draw something that we
+think of as a line.&nbsp; Maybe we want a wireframe view of our 3D scene.&nbsp; Maybe we
+just want to highlight the edges of a solid figure to make it easier to see.&nbsp; In
+practical terms, we know intuitively what we want when we think of "a line".&nbsp;
+Usually, we just want it to be one pixel wide on the screen.</p>
+
+<p>But WPF 3D has a pedantic posture.&nbsp; In the WPF 3D coordinate
+system, a line is just a very thin rectangle.&nbsp; Or rather, it is two very thin
+triangles, put together to make a rectangle.</p>
+
+<p>This is tedious for three reasons:</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >We need those triangles to be facing the camera.&nbsp; A
+     triangle has zero thickness.&nbsp; If we're looking at it sideways, then it's
+     not visible.</li>
+ <li >We need the width of those triangles to be set in 3D
+     coordinates such that after the scene is projected onto the 2D display
+     surface of our screen, the resulting "line" is one pixel wide.</li>
+ <li >We need both of the above to stay true even when the scene
+     is rotated or zoomed.</li>
+</ol>
+
+<h3>ScreenSpaceLines3D</h3>
+
+<p>Some clever folks have produced a <a
+href="http://www.codeplex.com/3DTools">3D Tools</a> library which contains
+several classes designed to make WPF 3D programming easier.&nbsp; One of these
+classes is called <a
+href="http://blogs.msdn.com/danlehen/archive/2006/05/29/610310.aspx">ScreenSpaceLines3D</a>.&nbsp;
+It solves all three of the problems above.</p>
+
+<p>And it works beautifully.&nbsp; To create a line, all you have to
+do is instantiate this class and give it two endpoints (in 3D coordinates) and
+a thickness (in screen pixels).&nbsp; The resulting line looks just right, even if
+you rotate or zoom the view.</p>
+
+<p>A perfect solution to the problem, right?</p>
+
+<h3>TANSTAAFL</h3>
+
+<p>I've warned my readers before about using libraries that
+present an abstraction without really understanding what is going on under the
+hood.&nbsp; ScreenSpaceLines3D is a perfect example.</p>
+
+<p>Stop and wonder how ScreenSpaceLines3D does its magic.&nbsp; The
+math isn't actually, the tricky part.&nbsp; Oh, it's tricky, but it's not that bad.&nbsp;
+It simply crawls up to find the dimensions of the Viewport3D in which it
+resides.&nbsp; Then it uses that information to calculate how wide something should
+be if it wants to be one pixel in the 2D projection.&nbsp; Tricky, but that's not
+the problem.</p>
+
+<p>The question isn't so much <i>how</i> to do this calculation,
+but <i>when</i>.&nbsp; The line needs to be rescaled whenever anything about the
+projection changes.</p>
+
+<p>The way ScreenSpaceLines3D handles this is to add a hook to CompositionTarget.Rendering.&nbsp;
+This handy feature of WPF allows us to register a callback function which gets
+called whenever something is being rendered.&nbsp; However, we need to remember that
+this gets called a LOT.&nbsp; Like 60 times per second, or so.</p>
+
+<p>Here's the problem:&nbsp; ScreenSpaceLines3D adds one handler to
+CompositionTarget.Rendering for every instance.&nbsp; And this handler never gets
+removed.</p>
+
+<p>So I noticed one day that Sawdust uses about 10-20% of the
+CPU even when it's not doing anything.&nbsp; In fact, the longer I use Sawdust in a
+single session, the more CPU it uses.&nbsp; If I bring it up and force it to draw
+several hundred pictures, it gets to the point where it is consuming 100% of
+the CPU even while idle.</p>
+
+<p>Why?&nbsp; Because CompositionTarget.Rendering is being called 60
+times per second, and every time it is called, it is rescaling every instance
+of ScreenSpaceLines3D that has ever existed.</p>
+
+<p>Joel would say that ScreenSpaceLines3D is an abstraction
+that <a href="http://joelonsoftware.com/articles/LeakyAbstractions.html">leaks</a>.&nbsp;
+Literally.</p>
+
+<p>Not good.</p>
+
+<h3>My Solution</h3>
+
+<p>I can think of several ways to try and fix this problem.&nbsp; For
+example, I could add code to ScreenSpaceLines3D to unregister the hook function
+when it is no longer needed.</p>
+
+<p>Instead, I have decided that I don't want to use CompositionTarget.Rendering
+for this situation.&nbsp; I hacked my copy of ScreenSpaceLines3D.cs to remove it.&nbsp; Then
+I had lines that never got scaled properly.&nbsp; So I took the OnRender() function,
+made it public and changed its name to Rescale().&nbsp; Then I added stuff to call
+Rescale() whenever I really need to.</p>
+
+<p>This approach was a bit tedious, but it works pretty well.&nbsp;
+Lines get scaled, but the app uses no CPU when it's idle, and it doesn't get
+slower and slower the longer it runs.</p>
+
+<p></p>

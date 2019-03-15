@@ -1,0 +1,57 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Chapter 12. DVCS Internals</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="pt03.html" title="Part III. Beyond Basics"><link rel="prev" href="web_development.html" title="Web"><link rel="next" href="deltas.html" title="Deltas"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 12. DVCS Internals</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="web_development.html">Prev</a> </td><th width="60%" align="center">Part III. Beyond Basics</th><td width="20%" align="right"> <a accesskey="n" href="deltas.html">Next</a></td></tr></table><hr></div><div class="chapter" title="Chapter 12. DVCS Internals"><div class="titlepage"><div><div><h2 class="title"><a name="chapter_internals"></a>Chapter 12. DVCS Internals</h2></div></div></div>
+    
+
+<p>Version control tools
+    are more like cars than clocks.</p>
+
+<p>Clock users have no need to know how a clock works behind the dials.  We
+    just want to know what time it is.  Those who understand the inner workings
+    of a clock can’t tell time any more skillfully than the rest of us.</p>
+
+<p>Version control tools are more like cars.  Lots of people, including me,
+    use cars without knowing much about how they work.  However, people who
+    really understand cars tend to get better performance out of them.</p>
+
+<p>
+    This chapter could be a whole book of its own—I am not giving
+    a comprehensive treatment of how distributed version control tools work.
+    I’ll just offer a few highlights that I think are worth knowing:
+</p>
+
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+        <p>
+            I’ll use Git to discuss cryptographic hashes.
+        </p>
+    </li><li class="listitem">
+        <p>
+            I’ll use Mercurial to discuss deltified storage.
+        </p>
+    </li><li class="listitem">
+        <p>
+            I’ll use Veracity to discuss DAGs and blob storage.  Plus a brief discussion of its decentralized database.
+        </p>
+    </li></ul></div>
+
+<p>First, let’s talk briefly about the concept of a delta.</p>
+
+
+
+
+
+
+
+
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="web_development.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="pt03.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="deltas.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Web </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Deltas</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

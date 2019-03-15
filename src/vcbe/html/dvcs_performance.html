@@ -1,0 +1,34 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Fast</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="dvcs_advantages.html" title="Chapter 5. Advantages"><link rel="prev" href="dvcs_private_workspace.html" title="Private Workspace"><link rel="next" href="dvcs_disconnected_operation.html" title="Offline"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Fast</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="dvcs_private_workspace.html">Prev</a> </td><th width="60%" align="center">Chapter 5. Advantages</th><td width="20%" align="right"> <a accesskey="n" href="dvcs_disconnected_operation.html">Next</a></td></tr></table><hr></div><div class="section" title="Fast"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp998288"></a>Fast</h2></div></div></div>
+    
+
+<p>Developers usually don’t realize how fast<a class="indexterm" name="idp999312"></a> a DVCS can be until they’ve tried one—stuff is really, 
+    really fast when most of your operations are against a local repository instance
+    instead of a server.  For example, I just ran a quick test
+    where I committed the entire valgrind<sup>[<a name="idp1000192" href="#ftn.idp1000192" class="footnote">17</a>]</sup> tree (3,143 files; total size
+    42 MB) using Subversion and several DVCS tools.  The timing results in
+    <a class="xref" href="dvcs_performance.html#table_cvcs_dvcs_perf" title="Table 5.2. Ridiculously Unscientific Benchmarks">Table 5.2, “Ridiculously Unscientific Benchmarks”</a> show
+    that Subversion is <span class="bold"><strong>way</strong></span> slower than the DVCS crowd.
+    Broadly
+    speaking, developers who switch from [almost] any CVCS to [almost] any DVCS
+    experience performance gains like these for [almost] all daily operations.
+    </p>
+
+<div class="table"><a name="table_cvcs_dvcs_perf"></a><p class="title"><b>Table 5.2. Ridiculously Unscientific Benchmarks</b></p><div class="table-contents">
+    
+
+    <table summary="Ridiculously Unscientific Benchmarks" border="1"><colgroup><col align="center" class="col1"><col align="center" class="col2"><col align="center" class="col3"><col align="center" class="col4"><col align="center" class="col5"><col align="center" class="col6"></colgroup><thead><tr><th align="center">Operation</th><th align="center">Subversion (svnserve on 127.0.0.1)</th><th align="center">Bazaar<a class="indexterm" name="idp1011696"></a></th><th align="center">Mercurial<a class="indexterm" name="idp1012624"></a></th><th align="center">Veracity<a class="indexterm" name="idp1013472"></a></th><th align="center">Git<a class="indexterm" name="idp1014240"></a></th></tr></thead><tbody valign="middle"><tr><td align="center" valign="middle">Commit</td><td align="center" valign="middle">21.9 s</td><td align="center" valign="middle">5.2 s</td><td align="center" valign="middle">4.6 s</td><td align="center" valign="middle">3.7 s</td><td align="center" valign="middle">3.2 s<sup>[<a name="idp1018112" href="#ftn.idp1018112" class="footnote">a</a>]</sup></td></tr></tbody><tbody class="footnotes"><tr><td colspan="6"><div class="footnote"><p><sup>[<a id="ftn.idp1018112" href="#idp1018112" class="para">a</a>] </sup>Nobody ever talks about Git winning any awards for ease of use, but good gracious, it is fast.</p></div></td></tr></tbody></table>
+</div></div><br class="table-break">
+
+<div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a id="ftn.idp1000192" href="#idp1000192" class="para">17</a>] </sup><a xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" href="http://www.valgrind.org/">http://www.valgrind.org/</a></p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="dvcs_private_workspace.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="dvcs_advantages.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="dvcs_disconnected_operation.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Private Workspace </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Offline</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

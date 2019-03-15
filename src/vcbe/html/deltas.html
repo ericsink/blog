@@ -1,0 +1,76 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Deltas</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="internals.html" title="Chapter 12. DVCS Internals"><link rel="prev" href="internals.html" title="Chapter 12. DVCS Internals"><link rel="next" href="cryptographic_hashes.html" title="Git: Cryptographic Hashes"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Deltas</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="internals.html">Prev</a> </td><th width="60%" align="center">Chapter 12. DVCS Internals</th><td width="20%" align="right"> <a accesskey="n" href="cryptographic_hashes.html">Next</a></td></tr></table><hr></div><div class="section" title="Deltas"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp2878656"></a>Deltas</h2></div></div></div>
+    
+
+    <p>One of the first things I said in this book is that a VCS repository
+        contains every version of everything that has ever happened.</p>
+
+<p>So how does the repository store all that stuff?  Maybe it just keeps a full snapshot of every version of the tree.  Disk space is cheap, right?</p>
+
+<p>Well, it’s not <span class="bold"><strong>that</strong></span> cheap.  If version control data were stored that way, lots of teams would have repositories of 10 TB or more.  
+Around this point, the common argument that “disk space is cheap” starts
+    to break down.  
+    The cost of dealing with 10 TB of important data is much greater
+    than just the cost of the actual disk platters.</p>
+
+<p>Fortunately, there is a huge amount of redundancy in version-controlled data.
+    We observe that tree N is often not terribly different from
+    tree N-1.  By definition, each version of the tree is derived from its
+    predecessor.  A commit might be as simple as a one-line fix to a single
+    file.  All of the other files are unchanged; we don’t really need to
+    store another copy of them.</p>
+
+<p>So we don’t want to store the full contents of the tree for every single
+    change.  Instead, we want a way to store a tree in terms of the changes
+    relative to another tree.  We call this a <em class="firstterm">delta</em><a class="indexterm" name="idp2883968"></a>.  All version control tools use some form of
+delta concept when storing repository data.</p>
+
+<p>A tree is a hierarchy of directories and files.  A delta is the difference
+    between two trees.  In theory, those two trees do not need to be related. 
+    However, in practice, the only reason we calculate the difference between
+    them is because one of them is derived from the other.  Some developer
+    started with tree N and made one or more changes, resulting in tree
+    N+1.</p>
+
+<p>We can think of a delta as a 
+    list of changes which express the difference between two trees.  This
+includes files or directories that have been added, modified, renamed, deleted, or moved.</p>
+
+<p>The delta concept can be used for individual files as well.  A file delta
+    merely expresses the difference between two files.  Once
+    again, the reason we calculate a file delta is because we believe it will
+    be smaller, usually because one of the files is
+    derived from the other.</p>
+
+<p>Many modern version control tools use binary file deltas
+    for repository storage.  One popular file delta algorithm is called vcdiff<sup>[<a name="idp2887248" href="#ftn.idp2887248" class="footnote">39</a>]</sup><a class="indexterm" name="idp2887920"></a>.
+    It outputs a list of byte ranges which have been changed. 
+    This means it can handle any kind of file, binary or text.  As an ancillary
+    benefit, the vcdiff algorithm compresses the data at the same time.</p>
+
+<p>Binary deltas are a helpful feature for some version control tool users, especially
+    in situations where the binary files<a class="indexterm" name="idp2889168"></a> are large.  Consider the case where a
+    user checks out a 500 MB file, changes a few bytes, and commits it back in. 
+    If the repository is using file deltas,
+    it will only grow by a small amount.</p>
+
+<p>Some version control tools can also use binary deltas 
+    to improve performance over slow network lines.
+    If both sides of the network connection already have version N, then
+    transferring version N+1 over the wire can be accomplished by sending
+    just a delta.
+    The increase in network performance for offsite users can be quite
+    dramatic.</p>
+
+<div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a id="ftn.idp2887248" href="#idp2887248" class="para">39</a>] </sup><a xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" href="http://tools.ietf.org/html/rfc3284">http://tools.ietf.org/html/rfc3284</a></p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="internals.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="internals.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="cryptographic_hashes.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 12. DVCS Internals </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Git: Cryptographic Hashes</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

@@ -1,0 +1,133 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Merge (no conflicts)</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="veracity_example.html" title="Chapter 10. Basics with Veracity"><link rel="prev" href="ch10s11.html" title="Branch"><link rel="next" href="ch10s13.html" title="Merge (repeated, no conflicts)"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Merge (no conflicts)</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch10s11.html">Prev</a> </td><th width="60%" align="center">Chapter 10. Basics with Veracity</th><td width="20%" align="right"> <a accesskey="n" href="ch10s13.html">Next</a></td></tr></table><hr></div><div class="section" title="Merge (no conflicts)"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp2628144"></a>Merge (no conflicts)</h2></div></div></div>
+    
+
+<p>Meanwhile, over in the master branch, Harry decides the white balls should be sorted before analysing them, 
+because that’s how they get shown on the idiot’s lantern.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vv diff</span>
+=== ================
+===   Modified: File @/src/pb.c
+--- @/src/pb.c  5649f2644a495ba4bf4d2a23d9a28e5c30064cd5
++++ @/src/pb.c  2011/05/31 16:44:53.000 +0000
+@@ -6,6 +6,25 @@
+ #define MAX_WHITE_BALL 59
+ #define MAX_POWER_BALL 39
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+static int my_sort_func(const void* p1, const void* p2)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+{</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    int v1 = *((int *) p1);</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    int v2 = *((int *) p2);</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    if (v1 &lt; v2)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    {</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        return -1;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    }</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    else if (v1 &gt; v2)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    {</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        return 1;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    }</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    else</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    {</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        return 0;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    }</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+}</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+</span>
+ int calculate_result(int white_balls[5], int power_ball)
+ {
+     for (int i=0; i&lt;5; i++)
+@@ -27,6 +46,8 @@
+         return -1;
+     }
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    qsort(white_balls, 5, sizeof(int), my_sort_func);</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+</span>
+     return 0;
+ }
+</pre>
+
+<p>And he commits the change.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vv commit -m "sort the white balls"</span>
+
+    revision:  19:e1ff5a3d4def8a5b45179f5326f68367b2f270c9
+      branch:  master
+         who:  harry
+        when:  2011/05/31 11:46:01.784 -0500
+     comment:  sort the white balls
+      parent:  17:d934a35fc8eda4fec7cb6b0d049e3881cd0e4a1d
+</pre>
+
+<p>But now he’s curious about what Sally has been doing.  She said he
+    wasn’t allowed to commit to her branch but she didn’t say anything about
+    <span class="bold"><strong>looking</strong></span> at it.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vv heads</span>
+
+    revision:  18:37939b07309af8232c44048ca0a1633c982b7506
+      branch:  no_boys_allowed
+         who:  sally
+        when:  2011/05/31 11:41:37.432 -0500
+     comment:  add -favorite and cleanup some other stuff
+      parent:  17:d934a35fc8eda4fec7cb6b0d049e3881cd0e4a1d
+
+    revision:  19:e1ff5a3d4def8a5b45179f5326f68367b2f270c9
+      branch:  master
+         who:  harry
+        when:  2011/05/31 11:46:01.784 -0500
+     comment:  sort the white balls
+      parent:  17:d934a35fc8eda4fec7cb6b0d049e3881cd0e4a1d
+...
+</pre>
+
+<p>Interesting.  She added the “favorite” feature.  Harry decides he wants
+    that.  So he asks Veracity to merge<a class="indexterm" name="idp2651440"></a> stuff from Sally’s branch into
+master.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vv merge -r 37939b07309af8232c44048ca0a1633c982b7506</span>
+1 updated, 0 deleted, 0 added, 1 merged, <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">0 unresolved</span>
+</pre>
+
+<table xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" align="center" border="0" style="width:350px"><tr><td background="images/eric_aside_03.jpg" style="font-style:italic; padding-left:0.375in; padding-right:0.375in; padding-top:0.25in; padding-bottom:0.25in">
+<p>
+Harry used <span class="command"><strong>-r 37939b07309a…</strong></span> here.  He could also have used <span class="command"><strong>-r 18</strong></span> (the local revision number) or <span class="command"><strong>-b no_boys_allowed</strong></span> (the head of Sally’s branch).
+</p>
+</td></tr></table>
+
+<p>Top Ho!  Harry examines <code class="filename">pb.c</code> and discovers that it was merged correctly.
+    Sally’s “favorite” changes are there and his <code class="code">qsort</code> changes are as well.  So he
+compiles the code, runs a quick test, and commits the merge.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">make</span>
+gcc -std=c99 -Wall -Wextra -Werror pb.c -o pb
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">./pb -favorite 5 3 33 22 7 31</span>
+0 percent chance of winning
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vv commit -m "merge changes from sally"</span>
+
+    revision:  20:68f12175bcda2296298f6b0f30da326341976356
+      branch:  master
+         who:  harry
+        when:  2011/05/31 11:49:49.565 -0500
+     comment:  merge changes from sally
+      parent:  18:37939b07309af8232c44048ca0a1633c982b7506
+      parent:  19:e1ff5a3d4def8a5b45179f5326f68367b2f270c9
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">vv push</span>
+Pushing to http://server.futilisoft.com:8080/repos/lottery:
+Pushing... Done.                                                               
+</pre>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch10s11.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="veracity_example.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch10s13.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Branch </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Merge (repeated, no conflicts)</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

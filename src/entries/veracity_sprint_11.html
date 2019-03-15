@@ -1,0 +1,289 @@
+---
+layout: default
+esbma_id: 1794
+title: Veracity Status Report, Version 0.5
+date: 2010-10-21 20:27:00
+---
+<p><a href="http://sourcegear.com/news/index.html#101910">Veracity
+0.5</a> has been released.</p>
+
+<h3>What Changed in 0.5</h3>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Full 64-bit support</li>
+ <li >Core performance improvements:</li>
+ <ul style='margin-top:0in' type=circle>
+  <li >More efficient changeset format</li>
+  <li >Better caching of working folder status</li>
+  <li >Massive DAG-walking speedup, affecting update, push,
+      pull, etc.</li>
+ </ul>
+ <li >Repository instance revision numbers (like hg's)</li>
+ <li >Web UI improvements:</li>
+ <ul style='margin-top:0in' type=circle>
+  <li >Lots of performance improvements, particularly the
+      activity stream</li>
+  <li >Improved burndown chart accuracy</li>
+  <li >Friendlier layout for adding and editing bugs</li>
+  <li >Graphical DAG for source history</li>
+  <li >Layout improvements viewing changesets</li>
+  <li >Improved progress indicators throughout</li>
+  <li >Bug relationships: blocks, depends on, duplicates</li>
+  <li >Internet Explorer 8+ compatibility</li>
+ </ul>
+ <li >Merge improvements</li>
+ <ul style='margin-top:0in' type=circle>
+  <li >Default integration with SourceGear Diffmerge</li>
+  <li >Resolve handles additional divergent move/rename/delete
+      cases</li>
+ </ul>
+ <li >Building from source, particularly on Windows, has gotten
+     easier.</li>
+ <li >In progress:</li>
+ <ul style='margin-top:0in' type=circle>
+  <li >Integration with other diff/merge tools</li>
+  <li >Repository packing</li>
+  <li >REST API port to server-side Javascript</li>
+ </ul>
+ <li >Compatibility: Since the 0.3 release in July, most
+     everything has changed.</li>
+ <ul style='margin-top:0in' type=circle>
+  <li >The repository format has changed.</li>
+  <li >The layout of .sgdrawer in working copies has changed.</li>
+  <li >The contents of ~/.sgcloset has changed.</li>
+  <li >REST APIs, including those used by push/pull/clone, have
+      changed.</li>
+  <li >Repositories created with 0.3 will not work with 0.5, and
+      vice versa.</li>
+  <li >Settings saved in .sgcloset by older builds may not show
+      up 0.5.</li>
+  <li >Working copies should be recreated with the new version.</li>
+  <li >Clients and servers must be the same version to play nice
+      together.</li>
+ </ul>
+</ul>
+
+<h3>Looking Ahead to 1.0</h3>
+
+<p>We now have a plan for the release of Veracity 1.0.&nbsp; </p>
+
+<p>In a nutshell, look for a feature-complete beta release
+around the end of January.&nbsp; That'll be the time when we freeze the repo storage
+formats and also deploy a public Veracity server.</p>
+
+<p>The final release will occur whenever the beta feature set
+is clean and solid.&nbsp; We're hoping that occurs in April, but it'll happen when
+it happens.&nbsp; We're not going to call this thing 1.0 until we have lots of
+confidence that it can be trusted.</p>
+
+<p>The following table should answer some of the questions
+about what will be in 1.0 and what will not.</p>
+
+<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
+ style='border-collapse:collapse;border:none'>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p align=center style='text-align:center'><b>Feature</b></p>
+  </td>
+  <td valign=top style='border:solid windowtext 1.0pt;border-left:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p align=center style='text-align:center'><b>In Veracity 1.0?</b></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>Command-line app</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Yes</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>All basic source control operations (checkout, commit,
+  push, pull, tag, diff, history, etc)</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Yes</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>Integrated Scrum package with web UI</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Yes</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>Embedded web server</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Yes</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>Tortoise Windows shell integration</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Yes</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>Named branches</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Yes</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>Subrepositories (like git submodules or svn externals)</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Yes</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>Digital signatures, logins, user accounts</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Yes</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>File locks (optional, not when disconnected)</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Yes</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>Deltified storage using VCDiff</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Yes</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>Build tracking (which bugs were fixed in this build?)</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Yes</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>Visual Studio plugin</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Later</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>Eclipse plugin</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Later</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>Repo storage in SQL Server</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Later</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>Repo storage in PostgreSQL</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Later</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>IIS integration</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Later</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>Apache integration</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Later</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>Rebase</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Later</p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0in 5.4pt 0in 5.4pt'>
+  <p>Pre/Post Commit Hooks</p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt'>
+  <p>Later</p>
+  </td>
+ </tr>
+</table>
+
+<p>Everything we release in the 1.0 timeframe will be part of
+Veracity Core, fully open source under the Apache License 2.0.&nbsp; At some point
+later, we will be selling proprietary add-ons, but Veracity Core will always be
+open source and will be a complete and useful feature set.</p>

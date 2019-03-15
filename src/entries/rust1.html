@@ -1,0 +1,613 @@
+---
+esbma_id: unknown
+title: My initial experience with Rust
+date: 2015-06-08 12:00:00
+---
+
+<h2>First, a digression about superhero movies</h2>
+
+<p>I am apparently incapable of hating any movie about a 
+comic book superhero.</p>
+
+<p>I can usually distinguish the extremes.
+Yes, I can tell that "The Dark Knight" was
+much better than "Elektra".  My problem is that I tend to think
+that the worst movies in this genre are still pretty good.</p>
+
+<p>And I have the same sort of unreasonable affection toward programming languages.
+I have always been fascinated by languages, compilers, and interpreters.
+My opinions about such things skew toward the positive simply because I find
+them so interesting.</p>
+
+<p>I do still have preferences.  For example, I tend to like strongly
+typed languages more.  In fact, I think it is roughly true
+that the stricter a compiler is, the more I like it.
+But I can easily find things to like in languages that I mostly 
+dislike.</p>
+
+<p>I've spent more of my career writing C than any other language.  But
+in use cases where I need something like C, I am increasingly eager for something more modern.</p>
+
+<p>I started learning Rust with two questions:</p>
+
+<ul>
+    <li><p>How successful might Rust become as a viable replacement for C?</p></li>
+
+    <li><p>If I enjoy functional programming, how much of that enjoyment can I retain while coding in Rust?</p></li>
+</ul>
+
+<h2>The context</h2>
+
+<p>My exploration of Rust has taken place in one of my side projects:
+<a href="https://github.com/ericsink/LSM">https://github.com/ericsink/LSM</a>
+</p>
+
+<p>LSM is a key-value database with a log-structured merge tree design.
+It is conceptually similar to Google LevelDB.  I first wrote it in C#.
+Then I rewrote/ported it to F#.  Now I have ported it to Rust.  (The
+Rust port is not yet mentioned in the README for that repo, but it's in the top-level directory called 'rs'.)</p>
+
+<p>For the purpose of learning F# and Rust, my initial experience was the
+same.  The first thing I did in each of these languages was to port LSM.
+In other words, the F# and Rust ports of LSM are on equal footing.
+Both of them were written by someone who was a newbie in the language.
+</p>
+
+<p>Anyway, although Rust and F# are very different languages, I have used F# as a
+reference point for my learning of Rust, so this blog entry walks that
+path as well.</p>
+
+<p>This is not to say that I think Rust and F# would typically be used for 
+the same kinds of things.
+I can give you directions from Denver to Chicago without asserting
+they are similar.  Nonetheless, given that Rust is mostly intended to
+be a modern replacement for C, it has a surprising number of things
+in common with F#.</p>
+
+<h2>The big comparison table</h2>
+
+<table border="1" cellpadding="2">
+    <tr>
+        <td>&nbsp;</td>
+        <th>F#</th>
+        <th>Rust</th>
+    </tr>
+
+    <tr>
+        <td>Machine model</td>
+        <td>Managed, .NET CLR</td>
+        <td>Native, LLVM</td>
+    </tr>
+
+    <tr>
+        <td>Runtime</td>
+        <td>CLR</td>
+        <td>None</td>
+    </tr>
+
+    <tr>
+        <td>Style</td>
+        <td>Multi-paradigm, functional-first</td>
+        <td>Multi-paradigm, imperative-first</td>
+    </tr>
+
+    <tr>
+        <td>Syntax family</td>
+        <td>ML-ish</td>
+        <td>C-ish</td>
+    </tr>
+
+    <tr>
+        <td>Blocks</td>
+        <td>Significant whitespace</td>
+        <td>Curly braces</td>
+    </tr>
+
+    <tr>
+        <td>Exception handling</td>
+        <td>Yes</td>
+        <td>No</td>
+    </tr>
+
+    <tr>
+        <td>Strings</td>
+        <td>.NET (UTF-16)</td>
+        <td>UTF-8</td>
+    </tr>
+
+    <tr>
+        <td>Free allocated memory</td>
+        <td>Automatic, garbage collector</td>
+        <td>Automatic, static analysis</td>
+    </tr>
+
+    <tr>
+        <td>Type inference</td>
+        <td>Yes, but not from method calls</td>
+        <td>Yes, but only within functions</td>
+    </tr>
+
+    <tr>
+        <td>Functional immutable collections</td>
+        <td>Yes</td>
+        <td>No</td>
+    </tr>
+
+    <tr>
+        <td>Currying</td>
+        <td>Yes</td>
+        <td>No</td>
+    </tr>
+
+    <tr>
+        <td>Partial application</td>
+        <td>Yes</td>
+        <td>No</td>
+    </tr>
+
+    <tr>
+        <td>Compiler strictness</td>
+        <td>Extremely strict</td>
+        <td>Even stricter</td>
+    </tr>
+
+    <tr>
+        <td>Tuples</td>
+        <td>Yes</td>
+        <td>Yes</td>
+    </tr>
+
+    <tr valign="top">
+        <td>Discriminated unions</td>
+<td><pre>
+type Blob =
+    | Stream of Stream
+    | Array of byte[]
+    | Tombstone
+</pre> </td>
+<td><pre>
+enum Blob {
+    Stream(Box<Read>),
+    Array(Box<[u8]>),
+    Tombstone,
+}
+</pre> </td>
+    </tr>
+
+    <tr>
+        <td>Mutability</td>
+        <td>To be avoided</td>
+        <td>Safe to use</td>
+    </tr>
+
+    <tr valign="top">
+        <td>Lambda expressions</td>
+<td><pre>
+let f = 
+  (fun acc item -&gt; acc + item)
+</pre> </td>
+<td><pre>
+let f = 
+  |acc, &amp;item| acc + item;
+</pre> </td>
+    </tr>
+
+    <tr>
+        <td>Higher-order functions</td>
+        <td><code>List.fold f 0 a</code></td>
+        <td><code>a.iter().fold(0, f)</code></td>
+    </tr>
+
+    <tr>
+        <td>Integer overflow checking</td>
+        <td><strike>No</strike> <code>open Checked</code></td>
+        <td>Yes</td>
+    </tr>
+
+    <tr valign="top">
+        <td>Let bindings</td>
+<td><pre>
+let x = 1
+let mutable y = 2
+</pre> </td>
+<td><pre>
+let x = 1;
+let mut y = 2;
+</pre> </td>
+    </tr>
+
+    <tr>
+        <td>if statements are expressions</td>
+        <td>Yes</td>
+        <td>Yes</td>
+    </tr>
+
+    <tr>
+        <td>Unit type</td>
+        <td><code>()</code></td>
+        <td><code>()</code></td>
+    </tr>
+
+    <tr valign="top">
+        <td>Pattern matching</td>
+<td><pre>
+match cur with
+| Some csr -&gt; csr.IsValid()
+| None -&gt; false
+</pre> </td>
+<td><pre>
+match cur {
+    Some(csr) =&gt; csr.IsValid(),
+    None =&gt; false
+}
+</pre> </td>
+    </tr>
+
+    <tr>
+        <td>Primary collection type</td>
+        <td>Linked list</td>
+        <td>Vector</td>
+    </tr>
+
+    <tr>
+        <td>Naming types</td>
+        <td>CamelCase</td>
+        <td>CamelCase</td>
+    </tr>
+
+    <tr>
+        <td>Naming functions, etc</td>
+        <td>camelCase</td>
+        <td>snake_case</td>
+    </tr>
+
+    <tr>
+        <td>Warnings about naming conventions</td>
+        <td>No</td>
+        <td>Yes</td>
+    </tr>
+
+    <tr>
+        <td>Type for integer literals</td>
+        <td>Suffix (<code>0uy</code>)</td>
+        <td>Inference (<code>0</code>) or suffix (<code>0u8</code>)</td>
+    </tr>
+
+    <tr>
+        <td>Project file</td>
+        <td>foo.fsproj (msbuild)</td>
+        <td>Cargo.toml</td>
+    </tr>
+
+    <tr>
+        <td>Testing framework</td>
+        <td>xUnit, NUnit, etc.</td>
+        <td>Built into Cargo</td>
+    </tr>
+
+    <tr>
+        <td>Debug prints</td>
+        <td><code>printf "%A" foo</code></td>
+        <td><code>println!("{:?}", foo);</code></td>
+    </tr>
+
+</table>
+
+<h2>Memory safety</h2>
+
+<p>I have written a lot of C code over the years.  More than once while in the middle of
+a project, I have stopped to explore ways of getting the compiler to catch
+my memory leaks.  I tried the Clang static analyzer
+and Frama-C and Splint and others.  It just seemed like there should be a way,
+even if I had to annotate function signatures with information about who owns a 
+pointer.</p>
+
+<p>So perhaps you can imagine my joy when I first read about Rust.</p>
+
+<p>Even more cool, Rust has taken this set of ideas so much further 
+than the simple feature
+I tried to envision.  Rust doesn't just detect leaks, it also:</p>
+
+<ul>
+    <li><p>frees everything for you, like a garbage collector, but it's not.</p></li>
+    <li><p>prevents access to something that has been freed.</p></li>
+    <li><p>prevents modifying an iterator while it is being used.</p></li>
+    <li><p>prevents all memory corruption bugs.</p></li>
+    <li><p>automatically disposes other kinds of resources, not just allocated memory.</p></li>
+    <li><p>prevents two threads from having simultaneous access to something.</p></li>
+</ul>
+
+<p>That last bullet is worth repeating:  With Rust, you never stare at
+your code trying to figure out if it's thread safe or not.  If it compiles,
+then it's thread safe.</p>
+
+<p>Safety is Rust's killer feature, and it is very compelling.</p>
+
+<h2>Mutability</h2>
+
+<p>If you come to Rust hoping to find a great functional language,
+you will be disappointed.  Rust does have a bunch of functional
+elements, but it is not really a functional language.  It's not even a
+functional-first hybrid.  Nonetheless, Rust has enough cool functional
+stuff available that it has been described as "ML in C++ clothing".</p>
+
+<p>I did my Rust port of LSM as a line-by-line translation from the F# version.  
+This was not a particularly good approach.</p>
+
+<ul>
+    <li><p>Functional programming is all about avoiding mutable things, typically
+    by using recursion, monads, computation expressions, and immutable collections.</p></li>
+
+    <li><p>In Rust, mutability should not be avoided, because it's safe.  If you
+    are trying to use mutability in a way that would not be safe, your code
+    will not compile.  </p></li>
+</ul>
+
+<p>So if you're porting code from a more functional language,
+you can end up with code that isn't very Rusty.</p>
+
+<p>If you are a functional programming fan, you might be skeptical of
+Rust and its claims.  Try to think of it like this:  
+Rust agrees that mutability is a problem -- it is simply offering a different
+solution to that problem.</p>
+
+<h2>Learning curve</h2>
+
+<p>I don't know if Rust is the most difficult-to-learn programming language I have seen,
+but it is running in that race.</p>
+
+<p>Anybody remember back when Joel Spolsky used to talk about how difficult it is for
+some programmers to <a href="http://www.joelonsoftware.com/articles/ThePerilsofJavaSchools.html">understand pointers</a>?  
+Rust is a whole new level above that.
+Compared to Rust, regular pointers are simplistic.</p>
+
+<p>With Rust, we don't just have pointers.  We also have ownership, borrows, 
+and lifetimes.</p>
+
+<p>As you learn Rust, you will reach a point where you think you are starting
+to understand things.  And then you try to return a reference 
+from a function, or store a reference in a struct.  Suddenly you have lifetime<code>&lt;'a&gt;</code>
+annotations<code>&lt;'a&gt;</code> all<code>&lt;'a&gt;</code> over<code>&lt;'a&gt;</code> the<code>&lt;'a&gt;</code> place<code>&lt;'a&gt;</code>.</p>
+
+<p>And why did you put them there?  Because you
+understood something?  Heck no.  You started sprinkling explicit lifetimes
+throughout your code because the compiler error messages told you to.</p>
+
+<p>I'm not saying that Rust isn't worth the pain.  I personally think Rust
+is rather brilliant.</p>
+
+<p>But a little expectation setting is appropriate here.
+Some programming languages are built for the purpose of making programming easier.
+(It is a valid goal to want to make software development
+accessible to a wider group of people.)  Rust is not one of those languages.</p>
+
+<p>That said, the Rust team has invested significant effort
+in excellent documentation (see <a href="https://doc.rust-lang.org/stable/book/">The Book</a>).  And those compiler error messages really are good.</p>
+
+<p>Finally, let me observe that while some things are hard to learn because they are poorly designed,
+Rust is not one of those things.  The deeper I get into this, the more impressed I am.
+And so far, every single time I thought the compiler was wrong, I was mistaken.</p>
+
+<p>I have found it helpful to try to make every battle with the borrow checker
+into a learning experience.  I do not merely want to end up with the compiler
+accepting my code.  I want to understand more than I did when I started.</p>
+
+<h2>Error handling</h2>
+
+<p>Rust does not have exceptions for error handling.  
+Instead, error handling is done through the return values of functions.</p>
+
+<p>But Rust actually makes this far less tedious than it might sound.
+By convention (and throughout the Rust standard library), error handling
+is done by
+returning a generic enum type called Result&lt;T,E&gt;.  This type can encapsulate
+either the successful result of the function or an error condition.</p>
+
+<p>On top of this, Rust has a clever macro called try!.  
+Because of this macro, if you read some Rust code, you might think it has exception 
+handling.</p>
+
+<pre class="screen">
+// This code was ported from F# which assumes that any Stream
+// that supports Seek also can give you its Length.  That method
+// isn't part of the Seek trait, but this implementation should
+// suffice.
+fn seek_len<R>(fs: &amp;mut R) -&gt; io::Result<u64> where R : Seek {
+    // remember where we started (like Tell)
+    let pos = try!(fs.seek(SeekFrom::Current(0)));
+
+    // seek to the end
+    let len = try!(fs.seek(SeekFrom::End(0)));
+
+    // restore to where we were
+    let _ = try!(fs.seek(SeekFrom::Start(pos)));
+
+    Ok(len)
+}
+</pre>
+
+<p>This function returns std::io::Result&lt;u64&gt;.  When it calls the
+seek() method of the trait object it is given, it uses the try! macro,
+which will cause an early return of the function if it fails.</p>
+
+<p>In practice, I like Rust's Result type very much.</p>
+
+<ul>
+    <li><p>The From and Error traits make it easy to combine different kinds of
+    Result/Error values.</p></li>
+
+    <li><p>The distinction between errors and panics seems very clean.</p></li>
+
+    <li><p>I like having the compiler help me be certain that I am propagating
+    errors everywhere I should be.  (I dislike scanning library documentation
+    to figure out if I called something that throws an exception I need to
+    handle.)</p></li>
+</ul>
+
+<p>Nonetheless, when doing a line-by-line port of F# to Rust, this was probably
+the most tedious issue.  Lots of functions that returned () in F# changed to
+return Result in Rust.</p>
+
+<h2>Type inference</h2>
+
+<p>Rust does type inference within functions, but it cannot or will not infer the 
+types of function arguments or function return values.</p>
+
+<p>Very often I miss having the more complete form of type inference
+one gets in F#.  But I do remind myself of certain things:</p>
+
+<ul>
+    <li><p>The Rust type system is far more complicated than that of F#.  Am I
+    holding a Foo?  Or do I have a &amp;Foo (a reference to a Foo)?  Am I trying
+    to transfer ownership of this value or not?  Being a bit more explicit can be helpful.</p></li>
+
+    <li><p>F# type inference has its weaknesses as well.  Most notably, inference
+    doesn't work at all with method calls.  This gives the object-oriented features
+    of F# a very odd "feel", as if they don't belong in the language, but it
+    would be unthinkable for a CLR language not to have them.</p></li>
+
+    <li><p>Rust has type inference for integer literals but F# does not.</p></li>
+
+    <li><p>The type inference capabilities of Rust may get smarter in the future.</p></li>
+</ul>
+
+<h2>Iterators</h2>
+
+<p>Rust iterators are basically like F# seq (which is an alias for .NET IEnumerable).  
+They are really powerful and provide support for functional idioms like List.map.  For
+example:</p>
+
+<pre class="screen">
+fn to_hex_string(ba: &amp;[u8]) -&gt; String {
+    let strs: Vec<String> = ba.iter()
+        .map(|b| format!("{:02X}", b))
+        .collect();
+    strs.connect("")
+}
+</pre>
+
+<ul>
+    <li><p>This function takes a slice (a part of an array) of bytes (u8) and returns its representation as a hex string.</p></li>
+    <li><p>Vec is a growable array</p></li>
+    <li><p>.iter() means something different than it does in F#.  Here, it is the function that returns an iterator for a slice</p></li>
+    <li><p>.map() is pretty similar to F#.  The argument above is Rust's syntax for a closure.</p></li>
+    <li><p>.collect() also means something different than it does in F#.  Here, it consumes the iterator and puts all the mapped results into the Vec<String> we asked for.</p></li>
+    <li><p>.connect("") is basically a join of all the resulting strings.</p></li>
+</ul>
+
+<p>However, there are a few caveats.</p>
+
+<p>In Rust, you have a lot more flexibility about whether you are dealing with
+"a Foo" or "a reference to a Foo", and most of the time, it's the latter.
+Overall, this is just more work than it is in F#, and using
+iterators feels like it magnifies that effect.</p>
+
+<h2>Performance</h2>
+
+<p>I haven't done the sort of careful benchmarking that is necessary to
+say a lot about performance, so I will say only a little.</p>
+
+<ul>
+    <li><p>I typically use one specific test for measuring performance changes.
+    It writes 10 LSM segments and then merges them all into one, resulting in a
+    data file.</p></li>
+
+    <li><p>On that test, the Rust version is VERY roughly 5 times faster than
+    the F# version.</p></li>
+
+    <li><p>The Rust and F# versions end up producing exactly the same output
+    file.</p></li>
+
+    <li><p>The test is not all that fair to F#.  Writing an LSM database in F#
+    was always kind of a square-peg/round-hole endeavor.</p></li>
+
+    <li><p>With Rust, the difference in compiling with or without the optimizer
+    can be huge.  For example, that test runs 15 times faster with compiler
+    optimizations than it does without.</p></li>
+
+    <li><p>With Rust, the LLVM optimizer can't really do its job very well if it can't do
+    function inlining.  Which it can't do across crates unless you use explicit
+    inline attributes or turn on LTO.</p></li>
+
+    <li><p>In F#, there often seems to be a negative correlation between
+    "idiomatic-ness" and "performance".  
+    In other words, the more functional and idiomatic your code, the slower it will run.</p></li>
+
+    <li><p>F# could get a lot faster if it could take better advantage of the
+    ability of the CLR to do value types.  For example, in F#, option and tuple
+    always cause heap allocations.</p></li>
+</ul>
+
+<h2>Integer overflow</h2>
+
+<p>Integer overflow checking is one of my favorite features of Rust.</p>
+
+<p>In languages or environments without overflow checking, unsigned types are very difficult to use
+safely, so people generally use signed integers everywhere, even
+in cases where a negative value makes no sense.  Rust doesn't
+suffer from this silliness.</p>
+
+<p>For example, the following code will panic:</p>
+
+<pre class="screen">
+let x: u8 = 255;
+let y = x + 2;
+println!("{}", y);
+</pre>
+
+<p>That said, I haven't quite figured out how to get overflow
+checking to happen on casts.  I want the following code (or something
+very much like it) to panic:</p>
+
+<pre class="screen">
+let x: u64 = 257;
+let y = x as u8;
+println!("{}", y);
+</pre>
+
+<p>Note that, by default, Rust turns off integer overflow checking in release 
+builds, for performance reasons.</p>
+
+<h2>Miscellany</h2>
+
+<ul>
+    <li><p>F# is still probably the most productive and pleasant language I have ever used.
+    But Rust is far better than C in this regard.</p></li>
+
+    <li><P>IMO, the Read, Write, and Seek traits are a much better design than .NET's Stream, 
+    which tries to encapsulate all three concepts.</p></li>
+
+    <li><p>'cargo test' is a nice, easy-to-use testing framework that is built into Cargo.  
+    I like it.</p></li>
+
+    <li><p><a href="https://crates.io/">crates.io</a> is like NuGet for Rust, and it's integrated with Cargo.</p></li>
+
+    <li><p>If 'cargo bench' wants to always report timings in nanoseconds, I wish it would
+    put in a separator every three digits.</p></li>
+
+    <li><p>I actually like the fact that Rust is taking a
+    stance on things like <code>function_names_in_snake_case</code> and <code>TypeNamesInCamelCase</code>,
+    even to the point of issuing compiler warnings for names that do not match
+    the conventions.
+    I don't agree 100% with their style choices, and that's my point.  Being opinionated
+    might help avoid a useless discussion about something that never really
+    matters very much anyway.
+    </p></li>
+
+    <li><p>I miss printf-style format strings.</p></li>
+
+    <li><p>I'm not entirely sure I like the automatic dereferencing feature.  I kinda wish
+    the compiler wouldn't help me in this manner until I know what I'm doing.</p></li>
+
+</ul>
+
+<h2>Bottom line</h2>
+
+<p>I am seriously impressed with Rust.  Then again, I thought that Eric Bana's Hulk movie was pretty good, so you might want to just ignore everything I say.</p>
+
+<p>In terms of maturity and ubiquity, C has no equal.  Still, I believe Rust has the potential to become a compelling replacement for C in many situations.</p>
+
+<p>I look forward to using Rust more.</p>
+
+<p>&nbsp;</p>
+

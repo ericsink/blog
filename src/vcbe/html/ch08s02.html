@@ -1,0 +1,155 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Clone, Add, Status, Commit</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="git_example.html" title="Chapter 8. Basics with Git"><link rel="prev" href="ch08s01.html" title="Create"><link rel="next" href="ch08s03.html" title="Push, Pull, Log, Diff"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Clone, Add, Status, Commit</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch08s01.html">Prev</a> </td><th width="60%" align="center">Chapter 8. Basics with Git</th><td width="20%" align="right"> <a accesskey="n" href="ch08s03.html">Next</a></td></tr></table><hr></div><div class="section" title="Clone, Add, Status, Commit"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp1659136"></a>Clone, Add, Status, Commit</h2></div></div></div>
+    
+
+    <p>By this time Harry is done faffing about and is ready to 
+    start coding.</p>
+
+<p>Since this is Harry’s first time using Git, he first sets up his
+    <code class="filename">.gitconfig</code> file with information that will be used
+    to identify his commits in the log.</p>
+
+<pre class="screen">[user]
+    name = Harry
+    email = harry@futilisoft.com
+</pre>
+
+<p><a class="indexterm" name="idp1662384"></a>Now he needs to get his own repository instance.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">~ harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed"><span class="screen_emphasis">git clone</span> http://server.futilisoft.com:8000/ ./lottery</span>
+Cloning into lottery...
+warning: You appear to have cloned an empty repository.
+</pre>
+
+<table xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" align="center" border="0" style="width:350px"><tr><td background="images/eric_aside_06.jpg" style="font-style:italic; padding-left:0.375in; padding-right:0.375in; padding-top:0.25in; padding-bottom:0.25in">
+    <p>Note that Git doesn’t have a <span class="sg-operation">checkout</span> command.  Or rather, it has <span class="command"><strong>git checkout</strong></span>,
+         but that command is equivalent to <span class="sg-operation">Update</span>.
+        Git keeps the
+        repository instance within the administrative area of the working copy, so
+        <span class="command"><strong>git clone</strong></span> actually performs both <span class="sg-operation">clone</span> and <span class="sg-operation">checkout</span>.  
+        </p>
+</td></tr></table>
+
+    <p>Harry wonders if Sally has already done anything in the new repository.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">~ harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">ls -al lottery</span>
+total 0
+drwxr-xr-x   3 harry  staff  102 May 17 07:55 .
+drwxr-xr-x  21 harry  staff  714 May 17 07:55 ..
+drwxr-xr-x   8 harry  staff  272 May 17 07:55 <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">.git</span>
+</pre>
+
+<p>Apparently not.  Nothing here but the <code class="filename">.git</code>
+    administrative area<a class="indexterm" name="idp1673648"></a>. 
+Jolly good then.  It’s time to start coding.  He opens his text editor and
+    creates the starting point for their product.</p>
+
+<pre class="programlisting">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int calculate_result(int white_balls[5], int power_ball)
+{
+    return 0;
+}
+
+int main(int argc, char** argv)
+{
+    if (argc != 7)
+    {
+        fprintf(stderr, "Usage: %s power_ball (5 white balls)\n", argv[0]);
+        return -1;
+    }
+
+    int power_ball = atoi(argv[1]);
+
+    int white_balls[5];
+    for (int i=0; i&lt;5; i++)
+    {
+        white_balls[i] = atoi(argv[2+i]);
+    }
+
+    int result = calculate_result(white_balls, power_ball);
+
+    printf("%d percent chance of winning\n", result);
+
+    return 0;
+}
+</pre>
+
+<p>Typical of most initial implementations, this is missing a lot of
+    features.  But it’s a good place to begin.  Before committing his
+code, he wants to make sure it compiles and runs.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">gcc -std=c99 lottery.c </span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">ls -l</span>
+total 32
+-rwxr-xr-x  1 harry  staff  8904 May 17 07:56 a.out
+-rw-r--r--  1 harry  staff   555 May 17 07:56 lottery.c
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">./a.out</span>
+Usage: ./a.out power_ball (5 white balls)
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">./a.out 42 1 2 3 4 5</span>
+0 percent chance of winning
+</pre>
+
+<p>Righto.  Time to store this file in the repository.
+    First Harry needs to
+add<a class="indexterm" name="idp1682128"></a> the file to
+the Git staging area (which in Git’s terminology is called the “index”).
+</p>
+
+<table xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" align="center" border="0" style="width:350px"><tr><td background="images/eric_aside_06.jpg" style="font-style:italic; padding-left:0.375in; padding-right:0.375in; padding-top:0.25in; padding-bottom:0.25in">
+    <p>
+        Note that Git’s staging area is similar to my notion of the
+        pending changeset<a class="indexterm" name="idp1683888"></a>, but the semantics are different.
+        The pending changeset is a list of changes in the working copy.
+        The Git staging area can contain things that are neither in
+        the working copy nor the repository instance.
+    </p>
+</td></tr></table>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git add lottery.c</span>
+</pre>
+
+<p>Harry uses the status<a class="indexterm" name="idp1686864"></a> operation to make sure the pending changeset looks proper.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git status -s</span>
+A  lottery.c
+?? a.out
+</pre>
+
+<p>Git is complaining because it doesn’t know what to do about
+    that <code class="filename">a.out</code> file.  Don’t panic!  That’s a compiled
+    executable, which should not be stored in a version control repository.
+    He can just ignore that.  Now
+    it’s time to commit<a class="indexterm" name="idp1690000"></a> the file.</p>
+
+<table xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" align="center" border="0" style="width:350px"><tr><td background="images/eric_aside_05.jpg" style="font-style:italic; padding-left:0.375in; padding-right:0.375in; padding-top:0.25in; padding-bottom:0.25in">
+    <p>
+        In my examples here I am showing <span class="command"><strong>git commit</strong></span> used with the -a flag.
+        This makes <span class="command"><strong>git commit</strong></span> automatically detect modified files, like the other tools covered
+        in this book.  Without this flag, git wants you to explicitly <span class="command"><strong>git add</strong></span>
+        any file which has been modified.
+    </p>
+</td></tr></table>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">git commit -a -m "initial implementation"</span>
+[master (root-commit) 9a0ca10] initial implementation
+ 1 files changed, 30 insertions(+), 0 deletions(-)
+ create mode 100644 lottery.c
+</pre>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch08s01.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="git_example.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch08s03.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Create </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Push, Pull, Log, Diff</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

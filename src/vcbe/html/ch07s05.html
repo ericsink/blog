@@ -1,0 +1,242 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Update (with merge)</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="mercurial_example.html" title="Chapter 7. Basics with Mercurial"><link rel="prev" href="ch07s04.html" title="Update, Commit (with a merge)"><link rel="next" href="ch07s06.html" title="Move"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Update (with merge)</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch07s04.html">Prev</a> </td><th width="60%" align="center">Chapter 7. Basics with Mercurial</th><td width="20%" align="right"> <a accesskey="n" href="ch07s06.html">Next</a></td></tr></table><hr></div><div class="section" title="Update (with merge)"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp1292480"></a>Update (with merge)</h2></div></div></div>
+    
+
+<p>Meanwhile, Sally is fixin’ to go ahead and add a
+    feature that was requested by the sales team:  If
+    the user chooses the lucky number 7 as the red ball, the chances of
+    winning are doubled.  Since she is starting a new task, she decides to
+    begin with a pull and update to make sure she has the latest code.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg pull</span>
+pulling from http://server.futilisoft.com:8000/
+searching for changes
+adding changesets
+adding manifests
+adding file changes
+added 2 changesets with 2 changes to 1 files
+(run 'hg update' to get a working copy)
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg update</span>
+1 files updated, 0 files merged, 0 files removed, 0 files unresolved
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg parents</span>
+changeset:   3:edbf336fe3fa
+tag:         tip
+parent:      2:efcd0b05ec2c
+parent:      1:7dd1d2434f80
+user:        Harry &lt;harry@futilisoft.com&gt;
+date:        Tue May 17 08:35:28 2011 -0500
+summary:     merge
+</pre>
+
+<p>Then she implements the lucky 7 feature in two shakes of a lamb’s tail by
+adding just a few lines
+    of new code to <code class="code">main()</code>.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg diff</span>
+diff -r edbf336fe3fa lottery.c
+--- a/lottery.c Tue May 17 08:35:28 2011 -0500
++++ b/lottery.c Tue May 17 08:45:34 2011 -0500
+@@ -44,6 +44,11 @@
+ 
+     int result = calculate_result(white_balls, power_ball);
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    if (7 == power_ball)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    {</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        result = result * 2;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    }</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+</span>
+     printf("%d percent chance of winning\n", result);
+ 
+     return 0;
+</pre>
+
+<p>And commits her change.  And pushes it too.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg commit -m "lucky 7"</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg push</span>
+pushing to http://server.futilisoft.com:8000/
+searching for changes
+remote: adding changesets
+remote: adding manifests
+remote: adding file changes
+remote: added 1 changesets with 1 changes to 1 files
+</pre>
+
+<p>Meanwhile, Harry has realised his last change had a bug.  He modified
+    <code class="code">calculate_result()</code> to return -1 for invalid arguments but he forgot to modify
+the caller to handle the error.  As a consequence, entering a ball number that is
+out of range causes the program to behave improperly.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">./a.out 61 2 3 4 5 42</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">-1</span> percent chance of winning
+</pre>
+
+<p>The percent chance of winning certainly can’t be a negative number, now can it?  So
+    Harry adds an extra check for this case.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg diff</span>
+diff -r edbf336fe3fa lottery.c
+--- a/lottery.c Tue May 17 08:35:28 2011 -0500
++++ b/lottery.c Tue May 17 10:15:19 2011 -0500
+@@ -44,6 +44,12 @@
+ 
+     int result = calculate_result(white_balls, power_ball);
+ 
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    if (result &lt; 0)</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    {</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        fprintf(stderr, "Invalid arguments\n");</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+        return -1;</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+    }</span>
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_diff_add">+</span>
+     printf("%d percent chance of winning\n", result);
+ 
+     return 0;
+</pre>
+
+<p>And proceeds to commit and push the fix.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg commit -m "propagate error code"</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg push   </span>
+pushing to http://server.futilisoft.com:8000/
+searching for changes
+abort: push creates new remote heads on branch 'default'!
+(you should pull and merge or use push -f to force)
+</pre>
+
+<p>Blimey!  Sally must have pushed a new changeset already.  Harry
+    once again needs to pull and merge to combine Sally’s changes with his
+    own.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg pull</span>
+pulling from http://server.futilisoft.com:8000/
+searching for changes
+adding changesets
+adding manifests
+adding file changes
+added 1 changesets with 1 changes to 1 files (+1 heads)
+(run 'hg heads' to see heads, 'hg merge' to merge)
+</pre>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg merge</span>
+merging lottery.c
+warning: conflicts during merge.
+merging lottery.c failed!
+0 files updated, 0 files merged, 0 files removed, 1 files unresolved
+use 'hg resolve' to retry unresolved file merges or 'hg update -C .' to abandon
+</pre>
+
+<p>The merge didn’t go quite as smoothly<a class="indexterm" name="idp1326496"></a> this time.
+    Harry wonders if anyone would notice if he were to leg it down to the pub.  Apparently there
+was a conflict.
+Harry decides to 
+open up <code class="filename">lottery.c</code> in his editor to examine the situation.</p>
+
+<pre class="screen">...
+    int result = calculate_result(white_balls, power_ball);
+
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; local
+    if (result &lt; 0)
+=======
+    if (7 == power_ball)
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; other
+    {
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; local
+        fprintf(stderr, "Invalid arguments\n");
+        return -1;
+=======
+        result = result * 2;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; other
+    }
+
+    printf("%d percent chance of winning\n", result);
+
+    return 0;
+...
+</pre>
+
+<p>Mercurial has included both Harry’s code and Sally’s code with conflict
+    markers to delimit things. What we want is to include both blocks of code.
+    Sally’s new code can simply be
+    included right after
+Harry’s error checking.
+</p>
+
+<pre class="screen">...
+    int result = calculate_result(white_balls, power_ball);
+
+    if (result &lt; 0)
+    {
+        fprintf(stderr, "Invalid arguments\n");
+        return -1;
+    }
+
+    if (7 == power_ball)
+    {
+        result = result * 2;
+    }
+
+    printf("%d percent chance of winning\n", result);
+
+    return 0;
+...
+</pre>
+
+<p>That should take care of the problem.  Harry compiles the code to make
+    sure and commits the merge.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg commit -m "merge"</span>
+abort: <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">unresolved merge conflicts (see hg resolve)</span>
+</pre>
+
+<p>Crikey!  Now what?  Harry fixed the conflict in <code class="filename">lottery.c</code> but
+Mercurial doesn’t seem to know that.  The output suggested <span class="command"><strong>hg resolve</strong></span>.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg resolve -l</span>
+U lottery.c
+</pre>
+
+<p>Ah yes.  Harry realises that he forgot to tell Mercurial that he had resolved the conflict.
+He
+uses <span class="sg-operation">resolve</span><a class="indexterm" name="idp1336752"></a> to let Mercurial know that the problem has
+been dealt with.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg resolve -m lottery.c</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg resolve -l</span>
+R lottery.c
+</pre>
+
+<p>There, that looks much better.  Harry tries again to commit the merge.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg commit -m "merge"</span>
+</pre>
+
+<p>And then to retry the push.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">hg push</span>
+pushing to http://server.futilisoft.com:8000/
+searching for changes
+remote: adding changesets
+remote: adding manifests
+remote: adding file changes
+remote: added 2 changesets with 2 changes to 1 files
+</pre>
+
+<p>And… that’s the last wicket.</p>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch07s04.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="mercurial_example.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch07s06.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Update, Commit (with a merge) </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Move</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

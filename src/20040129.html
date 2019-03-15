@@ -1,0 +1,76 @@
+---
+layout: default
+esbma_id: 1336
+date: 2004-07-23 14:44:37
+keywords: (cornsharp) (daypage)
+---
+<table>
+<tr class="ArticleBlurbCell"><td colspan="3">&nbsp;<a href="item_10148.html" name="10148"><span class="DayPageArticleTitle">CMake</span></a> <span class="ArticleDate">(Thursday, 29 January 2004)</span></td></tr>
+<tr bgcolor="white">
+<td width="5">&nbsp;</td>
+<td width="99%" valign="top">
+<p>Despite my current monogamous relationship with C#, I've spent most of my 
+career writing code which really needed to be cross-platform.&nbsp; I've come to 
+understand how very hard it is to create any non-trivial body of code that runs 
+on multiple platforms, and I have a great deal of admiration for solutions that 
+actually work well.</p>
+<p>One of the toughest parts of cross-platform&nbsp;development is the build 
+system.&nbsp; No matter how clean and portable your C code is, getting the tree 
+to build on multiple platforms is a whole different problem.</p>
+<p>One solution I have used in the past is to do a completely Unix-centric build 
+system with bash and make, using <a href="http://www.cygwin.com/">cygwin</a> to 
+run it under Windows.&nbsp; This works very well, except that it really annoys 
+the folks who prefer Visual Studio project files.&nbsp; (I've had people assert 
+that my tendency to run emacs on Windows is proof that my parents were brother 
+and sister.)</p>
+<p>Personally, I have always believed that build management was by far the 
+weakest part of the Visual Studio environment.&nbsp; MSBuild looks like a step 
+in the right direction.&nbsp; VS.NET is actually pretty decent.&nbsp; (The build 
+system for Vault is done entirely in a VS.NET .sln file, and it's quite 
+complicated.)&nbsp; Previous Visual Studio releases simply didn't have the power 
+to do custom builds of larger projects, and the result wasn't cross-platform 
+anyway.</p>
+<p>This week I discovered a nifty tool I had never seen before.&nbsp; It's 
+called <a href="http://www.cmake.org/">CMake</a>, and it's the build system used 
+for Kitware's <a href="http://www.vtk.org/">Visualization Toolkit</a>.&nbsp; 
+I've seen lots of alternatives to 'make', but this tool is surprisingly 
+different and deeply neato.</p>
+<p>I started by downloading the VTK tarball on a MacOS X system, which from my 
+point of view is Unix with a nice UI.&nbsp; I ran CMake and edited the 
+configuration settings without much&nbsp;difficulty.&nbsp; But then, instead of 
+performing the build, CMake generated a regular Unix makefile.&nbsp; I typed 
+'make' and the entire tree was built with no problems.&nbsp; I was impressed 
+with the fact that CMake was not replacing my standard toolset, but I didn't 
+really appreciate this tool until I repeated the&nbsp;build on Windows.</p>
+<p>I downloaded the exact same tarball to my Windows machine.&nbsp; I ran CMake 
+and once again edited the configuration settings.&nbsp; When I told CMake to 
+proceed, it generated a complete set of Visual Studio .NET 2003 project and 
+solution files.&nbsp; I opened the .sln and built the entire tree with no 
+problems.</p>
+<p>I didn't go further, but I saw indications that CMake can generate output for 
+other build systems as well, including CodeWarrior on the Mac, and presumably 
+others.</p>
+<p>Very, very&nbsp;cool.&nbsp; If I ever end up working on a cross-platform 
+project again, I will be inclined to use CMake.</p>
+<br /></td>
+<td width="5">&nbsp;</td>
+</tr>
+<tr class="ArticleBlurbCell"><td colspan="3">&nbsp;<a href="item_10147.html" name="10147"><span class="DayPageArticleTitle">MMM in Russian</span></a> <span class="ArticleDate">(Thursday, 29 January 2004)</span></td></tr>
+<tr bgcolor="white">
+<td width="5">&nbsp;</td>
+<td width="99%" valign="top">
+<p>I'm told that <a href="http://www.rsdn.ru/article/career/makemoremistakes.xml">this</a> is a 
+Russian translation of Make More Mistakes.&nbsp; If it were actually a Russian 
+version of Hamlet I wouldn't know the difference.</p>
+<br /></td>
+<td width="5">&nbsp;</td>
+</tr>
+<tr class="ArticleBlurbCell"><td colspan="3">&nbsp;<a href="item_10146.html" name="10146"><span class="DayPageArticleTitle">Getting Started with Your Own Software Company</span></a> <span class="ArticleDate">(Thursday, 29 January 2004)</span></td></tr>
+<tr bgcolor="white">
+<td width="5">&nbsp;</td>
+<td width="99%" valign="top">
+<p>My latest Business of Software column is <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dnsoftware/html/software01262004.asp">now 
+available</a> on the MSDN website.</p>
+<br /></td>
+<td width="5">&nbsp;</td>
+</tr></table>

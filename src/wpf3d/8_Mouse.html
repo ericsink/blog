@@ -1,0 +1,205 @@
+---
+layout: default
+esbma_id: 1693
+title: 8: Mouse Handling
+date: 2007-07-20 16:30:54
+---
+<p>This entry is part 8 of a <a
+href="/wpf3d/index.html">12-part series</a> on WPF
+3D.</p>
+
+<h3>3D and the Mouse</h3>
+
+<p>Many 3D applications want to offer interactive capabilities
+using the mouse:</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li >Click on an object in the 3D scene to "select" so that
+     further actions can be applied that specific item.</li>
+ <li >Click and drag to rotate, zoom or pan.</li>
+ <li >Show coordinates or other information when hovering over
+     specific objects.</li>
+</ul>
+
+<p>The mouse lives in a 2D world.&nbsp; The objects in your scene
+are in a 3D world.&nbsp; You need a few tricks to bridge the gap.</p>
+
+<h3>The Need for an Overlay</h3>
+
+<p>WPF makes it fairly simply to get mouse notifications for
+any Visual.&nbsp; It is therefore tempting to just add mouse event handlers to the
+Viewport3D object, somewhat like this:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:blue'>&lt;</span><span
+style='font-size:10.0pt;font-family:"Courier New";color:maroon'>Viewport3D</span><span
+style='font-size:10.0pt;font-family:"Courier New";color:blue'><br>
+&nbsp;&nbsp;&nbsp; </span><span style='font-size:10.0pt;font-family:"Courier New";color:red'>MouseUp</span><span
+style='font-size:10.0pt;font-family:"Courier New";color:blue'>=</span><span
+style='font-size:10.0pt;font-family:"Courier New"'>&quot;<span
+style='color:blue'>OnViewportMouseUp</span>&quot;<span style='color:blue'> <br>
+&nbsp;&nbsp;&nbsp; </span><span style='color:red'>MouseDown</span><span style='color:blue'>=</span>&quot;<span
+style='color:blue'>OnViewportMouseDown</span>&quot;<span style='color:blue'> <br>
+&nbsp;&nbsp;&nbsp; </span><span style='color:red'>MouseMove</span><span style='color:blue'>=</span>&quot;<span
+style='color:blue'>OnViewportMouseMove</span>&quot;<span style='color:blue'>
+&gt;</span></span></p>
+
+<p>The problem with this approach is that the Viewport3D will
+only receive mouse events when the mouse is actually hovering over one of the
+rendered triangles in the scene.&nbsp; When the mouse is over the background, no
+events are sent.&nbsp; </p>
+
+<p>For some situations (such as picking a 3D object, or a 3D
+scene which fills the entire screen), this is fine.&nbsp; For others (such as
+interactive rotation of a model centered on the screen), this may not be not so
+good.</p>
+
+<p>The usual fix for this problem is to overlay another element
+directly on top of the Viewport3D.&nbsp; The overlay must be transparent to allow
+the Viewport3D to be completely visible.&nbsp; The mouse event handlers should be
+placed on the overlay instead, as the Viewport3D will receive no mouse events
+at all.&nbsp; Because the overlay and the Viewport3D have the same 2D coordinate
+system, all the math works out just fine.&nbsp; In XAML, this approach might look
+something like this:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:blue'>&lt;</span><span
+style='font-size:10.0pt;font-family:"Courier New";color:maroon'>Grid</span><span
+style='font-size:10.0pt;font-family:"Courier New";color:blue'> &gt;<br>
+&nbsp; &lt;</span><span style='font-size:10.0pt;font-family:"Courier New";
+color:maroon'>Viewport3D</span><span style='font-size:10.0pt;font-family:"Courier New";
+color:blue'> </span><span style='font-size:10.0pt;font-family:"Courier New";
+color:red'>Grid.Row</span><span style='font-size:10.0pt;font-family:"Courier New";
+color:blue'>=</span><span style='font-size:10.0pt;font-family:"Courier New"'>&quot;<span
+style='color:blue'>0</span>&quot;<span style='color:blue'> </span><span
+style='color:red'>Grid.Column</span><span style='color:blue'>=</span>&quot;<span
+style='color:blue'>0</span>&quot;<span style='color:blue'> &gt;<br>
+&nbsp; (model stuff goes here)<br>
+&nbsp; &lt;/</span><span style='color:maroon'>Viewport3D</span><span
+style='color:blue'>&gt;<br>
+&nbsp; &lt;</span><span style='color:maroon'>Canvas</span><span style='color:blue'> </span><span
+style='color:red'>Grid.Row</span><span style='color:blue'>=</span>&quot;<span
+style='color:blue'>0</span>&quot;<span style='color:blue'> </span><span
+style='color:red'>Grid.Column</span><span style='color:blue'>=</span>&quot;<span
+style='color:blue'>0</span>&quot;<span style='color:blue'> <br>
+&nbsp;&nbsp;&nbsp; </span><span style='color:red'>Background</span><span style='color:blue'>=</span>&quot;<span
+style='color:blue'>Transparent</span>&quot;<span style='color:blue'> <br>
+&nbsp;&nbsp;&nbsp; </span><span style='color:red'>MouseUp</span><span style='color:blue'>=</span>&quot;<span
+style='color:blue'>OnViewportMouseUp</span>&quot;<span style='color:blue'> <br>
+&nbsp;&nbsp;&nbsp; </span><span style='color:red'>MouseDown</span><span style='color:blue'>=</span>&quot;<span
+style='color:blue'>OnViewportMouseDown</span>&quot;<span style='color:blue'> <br>
+&nbsp;&nbsp;&nbsp; </span><span style='color:red'>MouseMove</span><span style='color:blue'>=</span>&quot;<span
+style='color:blue'>OnViewportMouseMove</span>&quot;<span style='color:blue'>&nbsp;
+/&gt;<br>
+&lt;/</span><span style='color:maroon'>Grid</span><span style='color:blue'>&gt;</span></span></p>
+
+<h3>From 2D to 3D</h3>
+
+<p>Inside the mouse handlers, you want to take the 2D
+coordinates of the mouse click and find the 3D object where that click
+occurred.&nbsp; WPF 3D makes part of this work simple with
+VisualTreeHelper.HitTest().&nbsp; After that, the handling will depend greatly on
+your application.</p>
+
+<p>For example, in Sawdust, every 3D scene is generated on the
+fly, constructed from a data structure which was built from the solid modeling
+code.&nbsp; When the user clicks on the 3D model, a specific piece of wood is
+selected so that further operations can be applied directly to it.&nbsp; My code for
+OnViewportMouseDown() looks something like this:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:gray'>///</span><span
+style='font-size:10.0pt;font-family:"Courier New";color:green'> </span><span
+style='font-size:10.0pt;font-family:"Courier New";color:gray'>&lt;summary&gt;<br>
+///</span><span style='font-size:10.0pt;font-family:"Courier New";color:green'>
+On mouse click, select the specific board <br>
+</span><span style='font-size:10.0pt;font-family:"Courier New";color:gray'>///</span><span
+style='font-size:10.0pt;font-family:"Courier New";color:green'> where the click
+happened.<br>
+</span><span style='font-size:10.0pt;font-family:"Courier New";color:gray'>///</span><span
+style='font-size:10.0pt;font-family:"Courier New";color:green'> </span><span
+style='font-size:10.0pt;font-family:"Courier New";color:gray'>&lt;/summary&gt;<br>
+///</span><span style='font-size:10.0pt;font-family:"Courier New";color:green'>
+</span><span style='font-size:10.0pt;font-family:"Courier New";color:gray'>&lt;param
+name=&quot;sender&quot;&gt;&lt;/param&gt;<br>
+///</span><span style='font-size:10.0pt;font-family:"Courier New";color:green'>
+</span><span style='font-size:10.0pt;font-family:"Courier New";color:gray'>&lt;param
+name=&quot;args&quot;&gt;&lt;/param&gt;<br>
+</span><span style='font-size:10.0pt;font-family:"Courier New";color:blue'>public</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> <span style='color:blue'>void</span>
+OnViewportMouseDown(<br>
+&nbsp;&nbsp;&nbsp; <span style='color:blue'>object</span> sender, <br>
+&nbsp;&nbsp;&nbsp; System.Windows.Input.<span style='color:teal'>MouseEventArgs</span> args)<br>
+{<br>
+&nbsp;&nbsp;&nbsp; <span style='color:blue'>if</span> (vstuff.models == <span
+style='color:blue'>null</span>)<br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style='color:blue'>return</span>;<br>
+&nbsp;&nbsp;&nbsp; }<br>
+<br>
+&nbsp;&nbsp;&nbsp; <span style='color:blue'>if</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style='color:teal'>Keyboard</span>.IsKeyDown(<span
+style='color:teal'>Key</span>.LeftCtrl)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; || <span style='color:teal'>Keyboard</span>.IsKeyDown(<span
+style='color:teal'>Key</span>.RightCtrl)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style='color:green'>// extending the selection.&nbsp; <br>
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style='color:green'>// don't unselect all first.<br>
+</span>&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; <span style='color:blue'>else<br>
+</span>&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UnselectAll();<br>
+&nbsp;&nbsp;&nbsp; }<br>
+<br>
+&nbsp;&nbsp;&nbsp; <span style='color:teal'>RayMeshGeometry3DHitTestResult</span>
+rayMeshResult = <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (<span style='color:teal'>RayMeshGeometry3DHitTestResult</span>) <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style='color:teal'>VisualTreeHelper</span>.HitTest(myVP,
+args.GetPosition(myVP));<br>
+&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp; <span style='color:blue'>if</span> (rayMeshResult != <span
+style='color:blue'>null</span>)<br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style='color:teal'>PartialModel</span> found = <span
+style='color:blue'>null</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style='color:blue'>foreach</span> (<span style='color:teal'>PartialModel</span>
+pm <span style='color:blue'>in</span> vstuff.models)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style='color:blue'>if</span> (pm.mesh ==
+rayMeshResult.MeshHit)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; found = pm;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style='color:blue'>break</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style='color:blue'>if</span> (found != <span style='color:blue'>null</span>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;<span style='color:blue'>if</span> (IsSelected(found.bag.solid))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Unselect(found.bag.solid);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style='color:blue'>else<br>
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Select(found.bag.solid);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; }<br>
+}</span></p>
+
+<p>I included all the code, even though most of this routine is
+specific to my application.&nbsp; In particular, vstuff, PartialModel, IsSelect(), Select(),
+Unselect(), and UnselectAll() are all elements of Sawdust.&nbsp; Your app will have
+different things, depending on the manner and data structures used to generate
+your 3D scenes.</p>
+
+<p>The key is the RayMeshGeometry3DHitTestresult returned by VisualTreeHelper.HitTest().&nbsp;
+The members of this object contain plenty of helpful information.&nbsp; In my
+particular case, I use the MeshHit member to search my data structures so I can
+find the original information used to construct that piece of the 3D model.&nbsp; My
+life would be a bit easier if MeshGeometry3D had something like a Tag member,
+so I could just tuck a reference to my PartialModel object right there for easy
+retrieval.</p>
+
+<p></p>

@@ -1,0 +1,138 @@
+---
+layout: default
+esbma_id: 1088
+title: Chapter 7: Branches
+date: 2005-02-24 20:08:13
+keywords: (scm)
+teaser: Nelly has a friend who has a cousin with a neighbor who knows somebody whose life completely fell apart after they tried using the branch and merge features of their source control tool. So Nelly refuses to use branching at all.
+---
+<P>This is part of an online book called <a href="/scm/source_control.html">Source Control HOWTO</a>, a best practices guide on source control, version control, and configuration management.</p>
+<table border=0 width="100%">
+<tr>
+<td align="left"><a href="/scm/scm_history.html">&lt; Chapter 6</a></td>
+<td align="right"><a href="/scm/scm_merge_branches.html">Chapter 8 &gt;</a></td>
+</tr>
+</table>
+<hr>
+<h4>What is a branch?</h4>
+<p>A branch is what happens when your development team needs to work on two distinct copies of a project at the same time.&nbsp; This is best explained by citing a common example:</p>
+<p>Suppose your development team has just finished and released version 1.0 of <em>UltraHello</em>, your new flagship product, developed with the hope of capturing a share of the rapidly growing market for "Hello World" applications.&nbsp;</p>
+<p>But now that 1.0 is out the door, you have a new problem you have never faced before.&nbsp; For the last two years, everybody on your team has been 100% focused on this release.&nbsp; Everybody has been working in the same tree of source code.&nbsp; You have had only one "line of development", but now you have two:</p>
+<ul>
+<li><strong>Development of 2.0</strong>.&nbsp; You have all kinds of new features which just didn't make it into 1.0, including "multilingual Hello", DirectX support for animated Hellos, and of course, the ability to <a href="http://www.catb.org/~esr/jargon/html/Z/Zawinskis-Law.html">read email</a>.&nbsp;
+</li>
+<li><strong>Maintenance of 1.0</strong>.&nbsp; Now that real customers are using <em>UltraHello</em>, they will probably find at least one bug your testing didn't catch.&nbsp; For bug fixes or other minor improvements requested by customers, it is quite possible that you will need to release a version 1.0.1.
+</li>
+</ul>
+<p>It is important for these two lines of development to remain distinct.&nbsp; If you release a version 1.0.1, you don't want it to contain a half-completed implementation of a 2.0 feature.&nbsp; So what you need here is two distinct source trees so your team can work on both lines of development without interfering with each other.</p>
+<p>The most obvious way to solve this problem would simply be to make a copy of your entire source control repository.&nbsp; Then you can use one repository for 1.0 maintenance and the other repository for 2.0 development.&nbsp; I know people who do it this way, but it's definitely not a perfect solution.</p>
+<p>The two-repository approach becomes disappointing in situations where you want to apply a change to both trees.&nbsp; For example, every time we fix a bug in the 1.0 maintenance tree, we probably also want to apply that same bug fix to the 2.0 development tree.&nbsp; Do we really want to have to do this manually?&nbsp; If the bug fix is a simple change, like fixing the incorrect spelling of the word "Hello", then it won't take a programmer very long to make the change twice.&nbsp; But some bug fixes are more involved, requiring changes to multiple files.&nbsp; It would be nice if our source control tool would help.&nbsp;&nbsp;A primary goal for any source control tool should be to help software teams be more concurrent, everybody busy, all at the same time, without getting in each other's way.</p>
+<p>To address this very type of problem, source control tools support a feature which is usually called "branching".&nbsp; This terminology arises from the tendency of computer scientists to use the language of a physical tree every time hierarchy is involved.&nbsp; In this particular situation, the metaphor breaks down very quickly, but we keep the name anyhow.&nbsp;</p>
+<p>A somewhat better metaphor happens when we envision a nature path which forks into two directions.&nbsp; Before the fork, there was one path.&nbsp; Now there are two, but they share a common history.&nbsp; When you use the branching feature of your source control tool, it creates a fork in the path of your development progress.&nbsp; You now have two trees, but the source control has not forgotten the fact that these two trees used to be one.&nbsp; For this reason, the SCM tool can help make it easier to take code changes from one fork and apply those changes to the other.&nbsp; We call this operation "merging branches", a term which highlights why the physical tree metaphor fails.&nbsp; The two forks of a nature path can merge back into one, but two branches of an oak tree just don't do that.&nbsp; I'll talk a lot more about merging branches in the next chapter.</p>
+<p>At this point I should take a step back and admit that my example of doing 1.0 maintenance and 2.0 features is very simplistic.&nbsp; Real life examples are sometimes far more complicated, involving multiple branches, active development in each branch, and the need to easily migrate changes between any two of them.&nbsp; Branching and merging is perhaps the most complex operation offered by a source control tool, and there is much to say about it.&nbsp; I'll begin with some "<a href="/scm/scm_repositories.html">cars and clocks</a>" stuff and talk about how branching works "under the hood".</p><h4>Two branching models</h4><p style="BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: black 1px solid; PADDING-LEFT: 5px; FONT-SIZE: smaller; FLOAT: right; PADDING-BOTTOM: 5px; MARGIN: 5px; BORDER-LEFT: black 1px solid; WIDTH: 50%; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid; BACKGROUND-COLOR: rgb(230,230,230)"><b>Best Practice: Organize your branches</b><br /><br />
+The "folder" model of branching usually requires you to have one extra level of hierarchy in your repository tree.  Keep your main development in a folder named $/trunk.  Then create another folder called $/branches.  Each time you create a branch off of the trunk, put it in $/branches.</p>
+<p>First of all, let's acknowledge that there are [at least] two popular models for branching.&nbsp; In the first approach, a branch is like a parallel universe.&nbsp;</p>
+<ul>
+<li>The hierarchy of files and folders in the repository is sort of like the regular universe.&nbsp;
+</li>
+<li>For each branch, there is another universe which contains the same hierarchy of files and folders, but with different contents.&nbsp;&nbsp;
+</li>
+</ul>
+<p>In order to retrieve a file, you specify not just a path but the name of the universe, er, branch, from which you want the file retrieved.&nbsp; If you don't specify a branch, then the file will be retrieved from the "default branch".&nbsp; This is the approach used by CVS and PVCS.</p>
+<p>In the other branching model, a branch is just another folder, located in the same repository hierarchy as everything else.&nbsp; When you create a branch of a folder, it shows up as another folder.&nbsp;&nbsp;With this approach, a repository path is sufficient to describe a location.</p>
+<p>Personally, I prefer the "folder" style of branching over the "parallel universe" style of branching, so my writing will generally come from this perspective.&nbsp; This is the approach used by most modern source control tools, including Vault, Subversion (they call it "<a href="http://subversion.tigris.org/">copy</a>"), Perforce (they call it "<a href="http://www.perforce.com/perforce/branch.html">Inter-File Branching</a>") and Visual Studio Team System (looks like they call it branching in "<a href="http://blogs.msdn.com/team_foundation/archive/2005/02/23/379179.aspx">path space</a>").</p>
+<h4>Under the hood</h4>
+<p>Good source control tools are clever about how they manage the underlying storage issues of branching.&nbsp; For example, let us suppose that the source code tree for <em>UltraHello</em> is stored in $/projects/Hello/trunk.&nbsp; This folder contains everything necessary to do a complete build of the shipping product, so there are quite a few subfolders and several hundred files in there.</p>
+<p>Now that you need to go forward with 1.0 maintenance and 2.0 development simultaneously, it is time to create a branch.&nbsp; So you create a folder called $/projects/Hello/branches.&nbsp; Inside there, you create a branch called 1.0.</p>
+<p>At the moment right after the branch, the following two folders are exactly the same:</p>
+<blockquote dir="ltr" style="MARGIN-RIGHT: 0px">
+<p>$/projects/Hello/trunk</p>
+<p>$/projects/Hello/branches/1.0</p>
+</blockquote>
+<p>It appears that the source control tool has made an exact copy of everything in your source tree, but actually it hasn't.&nbsp; The repository database on disk has barely increased in size.&nbsp; Instead of duplicating the contents of every file, it has merely pointed the branch at the same contents as the trunk.</p>
+<p>As you make changes in one or both of these folders, they diverge, but they continue to share a common history.</p>
+<h4>The Pitiful Lives of Nelly and Eddie</h4>
+<p>In order to use your source control tool most effectively, you need to develop just the right amount of fear of branching.&nbsp; This delicate balance seems to be very difficult to find.&nbsp;&nbsp;Most people either have too much fear or not enough.
+</p>
+<p>Nelly is an example of a person who has too much fear of branching.&nbsp;&nbsp;Nelly has a friend who has a cousin with a neighbor who knows somebody whose life completely fell apart after they tried using the branch and merge features of their source control tool.&nbsp; So Nelly refuses to use branching at all.&nbsp; In fact, she wrote a 45-page policy document which requires her development team to never use branching, because after all, "it's not safe".&nbsp;</p>
+<p>So Nelly's development team goes to great lengths to avoid using branching, but eventually they reach a point where they need to do concurrent development.&nbsp; When this happens, they do anything they can to solve the problem, as long as it doesn't involve the word "branch".&nbsp; They fork a copy of their tree and begin working with two completely separate repositories.&nbsp; When they need to make a change to both repositories, they simply make the change by hand, twice.</p>
+<p style="BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: black 1px solid; PADDING-LEFT: 5px; FONT-SIZE: smaller; FLOAT: right; PADDING-BOTTOM: 5px; MARGIN: 5px; BORDER-LEFT: black 1px solid; WIDTH: 50%; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid; BACKGROUND-COLOR: rgb(230,230,230)"><b>Best Practice: Don't be afraid of branches</b><br /><br />
+If you're doing parallel development, let your source control tool help.  That's what it was designed to do.</p>
+<p>Obviously these people are still branching, but they keep Nelly happy by never using "the b word".&nbsp; These folks are happy, and we should probably just leave them alone, but the whole situation is kind of sad.&nbsp; Their source control tool has features which were specifically designed to make their lives easier.</p>
+<p>At the other end of the spectrum is Eddie, who uses branching far too often.&nbsp; Eddie started out just like Nelly, afraid of branching because he didn't understand it.&nbsp; But to his credit, Eddie overcame his fear and learned how powerful branching and merging can be.</p>
+<p>And then he went off the deep end.</p>
+<p>After he tried branching and had a good first experience with it, Eddie now uses it all the time.&nbsp; He sometimes branches multiple times per week.&nbsp; Every time he makes a code change, he creates a private branch.&nbsp;</p>
+<p>Eddie arrives on Monday morning and discovers that he has been assigned bug 7136 (In the Elbonian version, the main window is too narrow because the Elbonian language requires 9 words to say "Hello World".)&nbsp; So Eddie sits down at his desk and begins the process of fixing this bug.&nbsp; The first thing he does is create a branch called "bug_7136".&nbsp; He makes his code change there in his "private branch" and checks it in.&nbsp; Then, after verifying that everything is working okay, he uses the Merge Branches feature to migrate all changes from the trunk into his private branch, just to make sure his code change is compatible with the very latest stuff.&nbsp; Then he runs his test suite again.&nbsp; Then he notices that the repository has changed yet again, then he does this loop once more.&nbsp; Finally, he uses Merge Branches to apply his code fixes to the trunk.&nbsp; Then he grabs a copy of the trunk code, builds it and runs the test suite to verify that he didn't accidentally break anything.&nbsp; When at last he is satisfied that his code change is proper, he marks bug 7136 as complete.&nbsp; By now it is Friday afternoon at 4:00pm, and there's no point in starting anything new at this point, so he just decides to go home.</p>
+<p>Eddie never checks anything into the main trunk.&nbsp; He only checks stuff into his private branch, and then merges changes into the trunk.&nbsp; His care and attention to detail are admirable, but he's spending far more time using his source control tool than working on his code.</p>
+<p>Let's not even think about what the kids would be like if Eddie and Nelly were to get married.</p>
+<h4>Dev--Test--Prod</h4>
+<p>Once you established the proper level of comfort with the branching features of your source control tool, the next question is how to use those features effectively.</p>
+<p>One popular methodology for SCM is often called "code promotion".&nbsp; The basic idea here is that your code moves through three stages, "dev" (stuff that is in active development), "test" (stuff that is being tested) and "prod" (stuff that is ready for production release):</p>
+<ul>
+<li>As code gets written by programmers, it is placed in the dev tree.&nbsp; This tree is "basically unstable".&nbsp; Programmers are only allowed to check code into dev.
+</li>
+<li>When the programmers decide they are done with the code, they "promote" it from dev to test.&nbsp;&nbsp;Programmers are not allowed to check code directly into the test tree.&nbsp; The only way to get code into test is to promote it.&nbsp; By promoting code to test, the programmers are handing the code over to the QA team for testing.
+</li>
+<li>When the testers decide the code meets their standards, they promote it from test to prod.&nbsp; Code can only be part of a release when it has been promoted to prod.
+</li>
+</ul>
+<p>For a variety of reasons, I personally don't like working this way, but there's nothing wrong with it.&nbsp; Lots of people use this code promotion model effectively, especially in larger companies where the roles of programmer and tester are very clearly separated.&nbsp;</p>
+<p>I understand that PVCS has specific feature support for "promotion groups", although I've never used this product personally.&nbsp;&nbsp;With other source control tools, the code promotion model can be easily implemented using three branches, one for dev, one for test, and one for prod.&nbsp; The Merge Branches feature is used to promote code from one level to the next.</p>
+<h4>Eric's Preferred Branching Practice</h4><p style="BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: black 1px solid; PADDING-LEFT: 5px; FONT-SIZE: smaller; FLOAT: right; PADDING-BOTTOM: 5px; MARGIN: 5px; BORDER-LEFT: black 1px solid; WIDTH: 50%; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid; BACKGROUND-COLOR: rgb(230,230,230)"><b>Best Practice: Keep a "basically unstable" trunk.</b><br /><br />
+Do your active development in the trunk, the stability of which increases as you approach release.  After you ship, create a maintenance branch and always keep it very stable.</p>
+<p>Here at SourceGear our main development tree is called the "trunk".&nbsp; In our repository it is rooted at $/trunk and it contains all the source code and documentation for our entire product.</p>
+<p>Most new code is checked into the trunk.&nbsp; In general, our developers try to never "break the tree".&nbsp; Anyone who checks in code which causes the trunk builds to fail will be the recipient of heaping helpings of trash talk and teasing until he gets it fixed.&nbsp; The trunk should always build, and as much as possible, the resulting build should always work.</p>
+<p>Nonetheless, the trunk is the place where active development of new features is happening.&nbsp; The trunk could be described as "basically unstable", a philosophy of branching which is explained in <a href="http://www.amazon.com/exec/obidos/ASIN/0596004591/sawdust08-20">Essential CVS</a>, a fine book on CVS by O'Reilly.&nbsp; In our situation, the stability of the trunk build fluctuates over the months during our development cycle.</p>
+<p>During the early and middle parts of a development cycle, the trunk is often not very stable at all.&nbsp; As we approach alpha, beta and final release, things settle down and the trunk gets more and more stable.&nbsp; Not long before release, the trunk becomes almost sacred.&nbsp; Every code change gets reviewed carefully to ensure that we don't regress backwards.</p>
+<p>At the moment of release, a branch gets created.&nbsp; This branch becomes our maintenance tree for that release.&nbsp; Our current maintenance branch is called "3.0", since that's the current major version number of our product.&nbsp;&nbsp;When we need to do a bug fix or patch release, it is done in the maintenance branch.&nbsp; Each time we do a release out of the maintenance branch (like 3.0.2), we apply a label.</p>
+<p>After the maintenance branch is created, the trunk once again becomes "basically unstable".&nbsp; Developers start adding the risky code changes we didn't want to include in the release.&nbsp; New feature work begins.&nbsp; The cycle starts over and repeats itself.</p>
+<h4>When to branch?&nbsp; Part 1:&nbsp; Principles</h4>
+<p style="BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: black 1px solid; PADDING-LEFT: 5px; FONT-SIZE: smaller; FLOAT: right; PADDING-BOTTOM: 5px; MARGIN: 5px; BORDER-LEFT: black 1px solid; WIDTH: 50%; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid; BACKGROUND-COLOR: rgb(230,230,230)"><b>Best Practice: Don't create a branch unless you are willing to take care of it.</b><br /><br />
+A branch is like a puppy.</p>
+<p>Your decisions about when to branch should be guided by one basic principle:&nbsp; When you create a branch, you have to take care of it.&nbsp; There are responsibilities involved.&nbsp;</p>
+<ul>
+<li>In most cases, you will eventually have to perform one or more merge operations.&nbsp; Yes, the SCM tool will make that merge easy, but you still have to do it.
+</li>
+<li>If a merge is never necessary, then you probably have the responsibility of maintaining the branch forever.&nbsp;
+</li>
+<li>If you create a branch with the intention of never merging to or from it, and never making changes to it, then you should not be creating a branch.&nbsp; Use a label instead.
+</li>
+</ul>
+<p>Be afraid of branches, but not so afraid that you never use the feature.&nbsp; Don't branch on a whim, but do branch when you need to branch.</p>
+<h4>When to branch?&nbsp; Part 2:&nbsp; Scenarios</h4>
+<p>There are some situations where branching is NOT the recommended way to go:</p>
+<ul>
+<li><strong>Simple changes</strong>.&nbsp; As I mentioned above in my "Eddie" scenario, don't branch for every bug fix or feature.
+</li>
+<li><strong>Customer-specific versions</strong>.&nbsp; There are exceptions to this rule, but in general, you should not branch simply for the sake of doing a custom version for a specific customer.&nbsp; Find a way to build the customizability into your app.
+</li>
+</ul>
+<p>And there are some situations where branching is the best practice:</p>
+<ul>
+<li><strong>Maintenance and development</strong>.&nbsp; The classic example, and the one I used above in my story about <em>UltraHello</em>.&nbsp; Maintaining version N while developing version N+1 is the perfect example of a time to use branching.
+</li>
+<li><strong>Subteam</strong>.&nbsp; Sometimes a subset of your team needs to work on something experimental that will take several weeks.&nbsp; When they finish, their work will be folded into the main tree, but in the meantime, they need a separate place to work.
+</li>
+<li><strong>Code promotion</strong>.&nbsp;&nbsp;If you want to use the dev-test-prod methodology I mentioned above, use a branch to model each of the three levels of code promotion.
+&nbsp;
+</li>
+</ul>
+<h4>When to branch?&nbsp; Part 3:&nbsp; Pithy Analogy<?XML:NAMESPACE PREFIX = CD /?></h4>
+<ul>
+<li>A branch is like a working folder for multiple people.
+</li>
+<li>A working folder facilitates parallel development by allowing each person to have their own private place to work.
+</li>
+<li>When multiple people need a private place to work together, they need a branch.
+</li>
+</ul>
+<h4>Looking Ahead</h4>
+<p>In the next chapter I will delve into the topic of merging branches.</p>
+<p>&nbsp;</p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align="left"><a href="/scm/scm_history.html">&lt; Chapter 6</a></td>
+<td align="right"><a href="/scm/scm_merge_branches.html">Chapter 8 &gt;</a></td>
+</tr>
+</table>

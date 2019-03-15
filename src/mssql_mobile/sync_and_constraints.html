@@ -1,0 +1,110 @@
+---
+layout: default
+esbma_id: 3062
+title: Issues with sync and constraints
+date: 2014-02-26 12:00:00
+keywords: (mssql_to_sqlite)
+teaser: In a replicate-and-sync app, it would be really nice if the SQLite database on the mobile device had exactly the same constraints as the SQL Server database on the backend.
+---
+
+<P>(This entry is part of a <A href="/mssql_mobile/index.html">series</A>.  The audience: SQL Server developers.  The topic: SQLite on mobile devices.)</P><hr/>
+
+<h2>Fail Fast</h2>
+
+<p>Think of a bug as having two parts:</p>
+
+<ol>
+    <li><p>The incorrect code</p></li>
+    <li><p>The visible symptom</p></li>
+</ol>
+
+<p>The worst bugs are the ones where these two parts are separated.</p>
+
+<p>For example, consider the following function in C:</p>
+
+<pre class="screen">
+void crash_now(void)
+{
+    char* p = NULL;
+    *p = 5;
+}
+</pre>
+
+<p>This crash will be easy to find and fix, because the incorrect code is very close
+to the point where the crash is going to occur.</p>
+
+<p>In contrast, the following code is likely going to waste more time:</p>
+
+<pre class="screen">
+int count_decimal_digits(int n)
+{
+    char* p = malloc(64);
+    sprintf(p, "%d", n);
+    return strlen(p);
+}
+</pre>
+
+<p>One of the several bugs in this function is a memory leak.  Whatever symptom arises from
+this leak will almost certain occur much later, making it much more difficult to realize
+that the incorrect code is right here in this function.</p>
+
+<p>In 1992 I was working at Spyglass (before we joined the browser wars, when our focus
+was on scientific data visualization tools).  We had a product named Spyglass Format
+which had a bug involving our failure to properly dispose of a handle we got
+from the Mac palette manager.  The visible symptom of that bug was an intermittent, unreproduceable
+crash.  Bugs like that are <i>so</i> hard to find, but this one was unusually difficult,
+because the crash always happened in a different app, not in Spyglass Format.  <tt><b>:-)</b></tt></p>
+
+<p>Of course,
+the affected user started by calling the vendor of the <i>other</i> product (which happened
+to be Apple) about this problem.  And of course, Apple was unable to help them.
+And of course, when they called us to claim that "it seems like MPW only crashes when Spyglass
+Format is also running", we were initially rather skeptical.
+The whole thing took months to figure out.
+</p>
+
+<h2>Sync and Constraints</h2>
+
+<p>Let's talk about situations where you are using SQLite on a mobile device
+and synchronizing with SQL Server on the backend.</p>
+
+<p>Compared to an app which does all database operations over REST calls, the advantages 
+of this "replicate and sync" architecture include offline support and much better performance.
+However, one of the potential disadvantages of this approach is that it can move the symptom of a
+constraint violation bug far away from the incorrect code that caused it.</p>
+
+<p>In your SQL Server database on the backend, you have constraints which are designed to
+protect the integrity of your data.</p>
+
+<p>Suppose you have an app which is trying to INSERT
+an invalid row directly, such as through ADO.NET.  The constraint violation
+will cause an error right away.  This is good.</p>
+
+<p>However, in a mobile app which uses "replicate and sync", changes to the data happen in
+two steps:</p>
+
+<ol>
+    <li><p>The row gets INSERTed into a SQLite database on the mobile
+    device.</p></li>
+    <li><p>Later, the next time that device syncs with the backend, that row will get INSERTed into the actual SQL Server database.
+    </p></li>
+</ol>
+
+<p>If the new row is invalid (because of, say, a bug in the mobile app), we want the failure to happen when we try the
+INSERT into SQLite on the mobile device, not [potentially much] later when the
+sync happens.</p>
+
+<p>Or to put this another way:  Any transaction successfully committed to the SQLite
+database on the mobile device should also succeed when that change is synchronized
+to the SQL Server backend.</p>
+
+<h2>Summary</h2>
+
+<p>If SQLite <i>always</i> behaved exactly like SQL Server,
+this would not be an issue.  But there are differences, and that's what this blog series is all about.  
+Several of the entries later in this series
+will deal with specific cases where SQLite might accept something that
+SQL Server would not.  In a "replicate and sync" architecture, all of these cases deserve a bit of extra attention.</p>
+
+<p>&nbsp;</p>
+

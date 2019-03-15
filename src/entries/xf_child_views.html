@@ -1,0 +1,342 @@
+---
+esbma_id: unknown
+title: Fixing the #1 problem with Xamarin.Forms
+date: 2014-11-14 12:00:00
+---
+
+<h2>Update</h2>
+
+<p>I'm not sure what I expected when I wrote this blog entry.  I just
+figured I would "throw it out there" and see what happened.
+Maybe the Xamarin.Forms team would talk about my idea at their next standup.
+</p>
+
+<p>What actually happened is that within an hour, Jason Smith (the lead
+developer of Xamarin.Forms) invited me to a Skype call, shared his
+screen, brought up The Code, and we talked about ways it could be
+improved.</p>
+
+<p>I didn't expect <b>that</b>.</p>
+
+<p>(But it was glorious, as nerd conversations about
+code so often are.)</p>
+
+<p>The discussion gave me a decent idea of what kind of changes
+Jason intended to make, but I don't think it is my place to say
+more about the details.
+Suffice it to say that I'm probably not getting exactly
+what I suggested, but it looks like I'll be getting what I need.
+If Jason and his team end up confirming the viability of the changes
+he and I discussed, then it will definitely become possible to get
+much better performance in a Xamarin.Forms app.
+</p>
+
+<p>Anyway, huge kudos and thanks to Jason for a response I consider
+way "above and beyond the call".</p>
+
+<hr/>
+
+<h2>And the #1 problem is...</h2>
+
+<p>It's slow.</p>
+
+<h2>To be fair...</h2>
+
+<p>It's not <b>always</b> slow.  There are plenty of use cases where it works fine.</p>
+
+<p>And not <b>all</b> of Xamarin.Forms is slow.  The biggest offender is the layout system.</p>
+
+<p>But this can be a pretty big problem.  
+It's not too hard to find <a href="http://forums.xamarin.com/discussion/comment/68637">stories</a> 
+of people who gave up on
+Xamarin.Forms simply because there was no way to make their app perform
+acceptably.</p>
+
+<h2>Positive remarks to balance my complaining</h2>
+
+<p>Xamarin.Forms is terribly exciting.  I've spent much of the last three
+months working with it, and I love it.  Like any young technology trying to
+solve very hard problems, it has plenty of rough edges.  But it shows high
+potential for awesomeness.</p>
+
+<p>And <b>lots</b> of people seem to agree.  In fact, I daresay that the
+level of excitement around Xamarin.Forms has taken some people at Xamarin by surprise.  
+I can't
+quote verbatim, but I'm pretty sure I heard somebody at Evolve say that they
+changed their plans for the training and sessions to include a lot more Xamarin.Forms content because of
+the buzz.</p>
+
+<p>People want this technology.  And they want it to be great.</p>
+
+<p>That's my goal in writing this piece.  I just want to help make Xamarin.Forms great.</p>
+
+<h2>BTW</h2>
+
+<p>If the code were open source, this blog entry would be a pull request.  And
+it wouldn't be my only one.</p>
+
+<p>Someone has made the decision to <b>not</b> open source Xamarin.Forms, and I shall
+not criticize or second-guess this choice.  But I can't resist saying that if it
+were open source, I would be actively spending my time helping make it better.</p>
+
+<h2>This is a very difficult problem</h2>
+
+<p>Cross-platform stuff is really hard.  And if you add "UI" into the previous sentence then
+you have to add a least two more "reallys".</p>
+
+<p>I've been doing cross platform development for a long time.  I've used dozens
+of different UI toolkits and APIs.  After you master the first ten, they all
+start to look the same.</p>
+
+<p>Until you try to wrap them in a common API, and then the differences stop
+whispering and start screaming.</p>
+
+<p>Xamarin.Forms is venturing into territory where dozens of others have
+failed.  We're going to have to be patient.</p>
+
+<h2>But good grief the layout code is slow</h2>
+
+<p>Seriously.  Write something non-trivial with Xamarin.Forms and then bring it up under a profiler.</p>
+
+<h2>But that's okay...</h2>
+
+<p>... for two reasons.  
+
+<ul>
+    <li><p>The layout code is doing a lot of work for you.  I don't mind code that
+    takes time when it's doing stuff I need done.  That's life.  The layout
+    system is powerful, and convenience always comes at a price.</p></li>
+    <li><p>The code will get better.  I've spent an awful lot of time reading
+    Xamarin.Forms.Core.dll in the Xamarin Studio Assembly Browser.  This code
+    simply hasn't had much attention given to optimizaiton yet.  When it does,
+    it will get faster.  </p></li>
+</ul>
+
+<p>I'm not complaining about the layout code being slow.  I'm complaining that
+I <b>always</b> have to use it.</p>
+
+<h2>Child views vs. Layouts</h2>
+
+<p>The real problem here is that Xamarin.Forms gives you no way to have child
+views without using a subclass of Layout.
+What I want is the ability to write a subclass of View that can have child
+views.</p>
+
+<p>Right now I can do something like this:</p>
+
+<pre class="screen">
+public class myParentView : Layout&lt;View&gt;
+{
+    private Rectangle getBox(View child)
+    {
+        // whatever
+    }
+
+    protected override void LayoutChildren (double x, double y, double width, double height)
+    {
+        foreach (View v in Children) {
+            Rectangle r = getBox (v);
+            v.Layout (r);
+        }
+    }
+}
+</pre>
+
+<p>But for some situations, the Layout system is just way too much.  Events
+propagating up and down.  Height
+and width requests.  Real estate negotiations between every child view and its
+parent.</p>
+
+<p>And for the sake of making sure the layout always gets updated when it
+needs to be, the code triggers a layout cycle in response to, well, almost
+everything.</p>
+
+<p>Add or remove a child view?  Relayout everything.</p>
+
+<p>Here's my favorite:  Put a Label in a Frame in a StackLayout
+in another StackLayout in a ScrollView in a Whatever.  The details
+don't matter.  Just build a hierarchy several levels deep with a
+Label down near the bottom.  Then change the Text property of that
+label from "foo" to "bar".  This triggers a layout cycle, because
+the label might want to request more size, and the parent might
+want to care about that request, so the whole negotiation starts over.</p>
+
+<p>For extra fun, bind that Label's Text property to something that
+is also bound to the Text property of an Entry.  Now you can trigger
+a complete relayout on every keystroke.</p>
+
+<p>Xamarin.Forms currently suffers from a problem that is very typical
+for cross-platform UI toolkits at the toddler stage:  It is constantly
+triggering layout updates "just in case" one might be needed.  In
+general, it is better to have your forums filled with people saying
+"layout is slow" rather than people saying "I changed something and 
+layout didn't update".</p>
+
+<h2>We need a lower-level mechanism</h2>
+
+<p>I would like to rewrite my example above to look
+something like this:</p>
+
+<pre class="screen">
+public class myParentView : View
+{
+    private List<View> myChildren;
+
+    private Rectangle getBox(View child)
+    {
+        // whatever
+    }
+
+    public LayoutMyChildren()
+    {
+        foreach (View v in myChildren) {
+            Rectangle r = getBox (v);
+            v.Layout (r);
+        }
+    }
+}
+</pre>
+
+<ul>
+    <li><p>Instead of subclassing Layout<View>, I have subclassed View.</p></li>
+    <li><p>Since I no longer inherit a Children collection, I have defined my own.</p></li>
+    <li><p>Whereas previously I did an override of the abstract
+    LayoutChildren() method, now I just provide a method called
+    LayoutMyChildren().</p></li>
+    <li><p>Whenever I know I need to arrange all my child views,
+    instead of triggering a layout cycle, I call LayoutMyChildren().</p></li>
+    <li><p>If I only need to arrange some of my child views, I can write a method that does less work.</p></li>
+    <li><p>Not shown, but I probably need to override OnSizeAllocated() and call LayoutMyChildren().</p></li>
+    <li><p>Since I own myChildren, inserts and deletes from this collection
+    will not automatically trigger a layout cycle.  If anything needs to
+    updated when my set of child views changes, I have to do that myself.</p></li>
+</ul>
+
+<p>In other words, I don't want any help laying things out.  I just want
+the ability to have child views, and I don't want anybody meddling with
+my right to parent those children however I see fit.</p>
+
+<p>A full implementation of myParentView is going to be rather complicated.
+But it's going to be <b>fast</b>, because myParentView has all the knowledge
+it needs to allow it to make smart decisions and avoid doing things that
+don't need to be done.</p>
+
+<h2>The design of child views in Xamarin.Forms</h2>
+
+<p>The concept of "child views" should be
+be distinct from the concept of "deciding where those child views should
+be placed".  Thinking over the various UI toolkits I have used, the separation of
+these two concepts is a common pattern.</p>
+
+<p>But the example above doesn't work in Xamarin.Forms 1.2.  My child views never get a renderer
+assigned to them, so they never show up.  The element hierarchy on the PCL
+side is fine.  It just never gets mirrored on the platform side.</p>
+
+<p>When I explained this to a coworker, I said, "The whole idea almost
+works.  In fact, it all works, right up until the end, when it doesn't
+work at all."</p>
+
+<p>Interestingly, Xamarin.Forms is very close to the design I want it to have.
+In researching this problem, I expected to find the child view management
+stuff in Xamarin.Forms.Layout, but it's just not there.
+As it turns out, the ability to have child views
+is actually <b>not</b> specific to Xamarin.Forms.Layout.  Rather, this concept
+is implemented in Xamarin.Forms.Element (right where it belongs, IMNSHO).
+</p>
+
+<p>The Element class has three important members.  It does not actually
+manage a collection of child views.  Rather, it exposes a way for a subclass
+to do so.  OnChildAdded() and OnChildRemoved() need to be called when
+the child views collection has changed.  These methods set the Parent property
+of the new child view, but more importantly, they trigger an event.  The
+platform code is listening to this event (in VisualElementPackager), and
+that is where child views get their renderer assigned.</p>
+
+<p>So what I need to do is call OnChildAdded() whenever I add something
+to myChildren.  Now my layout wannabe class looks like this:</p>
+
+<pre class="screen">
+public class myParentView : View
+{
+    private List<View> myChildren;
+
+    private Rectangle getBox(View child)
+    {
+        // whatever
+    }
+
+    private addChild(View child)
+    {
+        myChildren.Add(child);
+        OnChildAdded(child);
+    }
+
+    public LayoutMyChildren()
+    {
+        foreach (View v in myChildren) {
+            Rectangle r = getBox (v);
+            v.Layout (r);
+        }
+    }
+}
+</pre>
+
+<p>And this almost works, but not quite.  As I said above, Element has three
+important members which are used to communicate with the renderer about child views.  
+The first two (discussed above) are OnChildAdded() and OnChildRemoved().  The 
+third one is a property called LogicalChildren.  This property is, well, the
+collection of child views.  The two OnChild* methods are just there to keep
+things up to do date, but LogicalChildren is the starting point.</p>
+
+<p>So what I need to do in myParentView is just override the LogicalChildren property,
+which is virtual.  No problem, right?</p>
+
+<p>Here's the problem:  LogicalChildren is marked "internal", 
+so a subclass cannot override it unless it was written by Xamarin.</p>
+
+<h2>My request</h2>
+
+<p>Broadly speaking, I am asking the Xamarin.Forms team for the ability to have a View subclass which
+can have and manage its own child views without being a subclass of Layout.</p>
+
+<p>My suggested implementation of that idea is to just change Element.LogicalChildren
+from "internal" to "protected internal".</p>
+
+<p>And I've spent some time trying to prove that my suggestion would work.  Purely
+as a proof of concept, I used Mono.Cecil to create a hacked-up copy of Xamarin.Forms.Core.dll
+which has my suggested change:</p>
+  
+<pre class="screen">
+#r "Mono.Cecil.dll"
+
+open Mono.Cecil
+
+let a = AssemblyDefinition.ReadAssembly("Xamarin.Forms.Core.dll")
+for t in a.MainModule.Types do
+    if t.FullName = "Xamarin.Forms.Element" then
+        for p in t.Properties do
+            if p.Name = "LogicalChildren" then
+                let m = p.GetMethod
+                m.IsFamilyOrAssembly <- true
+a.Write("Better.Xamarin.Forms.Core.dll")
+</pre>
+
+<p>And then I wrote a myParentView class which has an override for LogicalChildren.  The
+result is a <b>huge</b> performance increase for my particular use case, because
+myParentView doesn't need all the general-purpose stuff that the Layout subclasses provide.
+My contention is that there are <b>lots</b> of similar use cases which can
+benefit from this approach.</p>
+
+<p>So that's my suggested change, but I don't actually care <b>how</b> this gets
+done.  If the Xamarin.Forms team were to ship 1.3 with my "child views without layouts"
+concept exposed in some other fashion, I would be just as happy.  </p>
+
+<h2>Moving forward</h2>
+
+<p>The Xamarin.Forms.Layout classes still need to get faster.  And they will.</p>
+
+<p>But regardless of when this happens, the concept of "child views" deserves to exist on
+its own.</p>
+
+<p>&nbsp;</p>
+

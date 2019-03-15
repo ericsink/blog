@@ -1,0 +1,75 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Offline</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="dvcs_advantages.html" title="Chapter 5. Advantages"><link rel="prev" href="dvcs_performance.html" title="Fast"><link rel="next" href="dvcs_geography.html" title="Geography"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Offline</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="dvcs_performance.html">Prev</a> </td><th width="60%" align="center">Chapter 5. Advantages</th><td width="20%" align="right"> <a accesskey="n" href="dvcs_geography.html">Next</a></td></tr></table><hr></div><div class="section" title="Offline"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp1019344"></a>Offline</h2></div></div></div>
+    
+
+<p>When talking about disconnected operation<a class="indexterm" name="idp1020704"></a><a class="indexterm" name="idp1021088"></a>, the so-called “airplane
+    example”<a class="indexterm" name="idp1021600"></a> is invariably the first thing talked about.  Stop me if you’ve
+    heard this one, but a developer has to fly across the country and writes
+    some code on the plane.  Two hours in, at 31,000 feet, he’s finished his
+    changes and wants to commit them.  With a DVCS, this is possible, since he
+    has a
+    repository instance on his laptop.  How cool is that?!?!?</p>
+
+<p>Well, not really that cool, if we’re honest.
+    When it comes right down to it, most programmers don’t fly on airplanes
+    very much.  When they do fly on airplanes, they use their laptops to watch Han Solo get frozen in carbonite for the 73rd time, not to write code. 
+    If, by some chance, they do write some code on the plane, it’s not always
+    true that they 
+    actually <span class="bold"><strong>need</strong></span> to commit the changes.  Finally, in 2011, many commercial
+    airlines are offering in-flight Wi-Fi<a class="indexterm" name="idp1024128"></a>.  Conclusion: Airplanes are not the
+    best metaphor to use when talking about working while disconnected.</p>
+
+<p>The thing I hate most about the metaphor is not its fundamental dumbness
+    (though I do hate that plenty), but that disconnected operation is an
+    important benefit of a DVCS and the airplane example is a lousy way to
+    convince anyone of that fact.</p>
+
+<p>Why does disconnected operation matter?  Here’s one simple scenario:
+    Suppose you are offline and you want to fix two unrelated bugs and commit them
+    in separate changesets.  With a second generation tool, you can’t
+    commit until you get back online, so both of the bug-fixes are going
+    to end up in your pending changeset at the same time.
+    </p>
+
+<p>Fine, so a DVCS is great when you’re offline.  But that never
+    happens anymore, right?</p>
+
+<p>Actually, it does.  If you need Internet access all
+    the time, you will quickly discover how often you don’t have it.</p>
+
+<p>I find that Wi-Fi Internet access is like the
+    police.  It’s everywhere… except when you really need it.  Everywhere I go,
+    I see cafes with Wi-Fi signs and McDonald’s with Wi-Fi signs and I have a
+    laptop, an iPad, and an Android phone that all support Wi-Fi but I still
+    have the strong impression that when I really need to use Wi-Fi, it’s not
+    there.</p>
+
+<p>This very paragraph is being written at 12:45pm on April 15th, 2011.  I am
+    sitting in the food court at the mall in Champaign, Illinois.  There is
+    no Wi-Fi here.</p>
+
+<p>Furthermore, just because I have <span class="bold"><strong>some</strong></span>
+    form of connectivity does
+    not mean that I want to be dependent on it.  Even more common than “no Wi-Fi” is
+    “crappy Wi-Fi” with high latency and packet loss.  There are good
+    reasons why I may want to do stuff offline and then sync.  Peter
+    Deutsch<a class="indexterm" name="idp1029936"></a> wrote about his “fallacies of distributed computing”<sup>[<a name="idp1030320" href="#ftn.idp1030320" class="footnote">18</a>]</sup> back in 1994, and they still apply.</p>
+
+<p>We’ve never had more Internet than we have right now, and we
+    still don’t have enough.
+    There may come a time when offline operation is no longer
+    an important part of the DVCS story, but that time is not yet
+    here.</p>
+
+<div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a id="ftn.idp1030320" href="#idp1030320" class="para">18</a>] </sup><a xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" href="http://en.wikipedia.org/wiki/Fallacies_of_Distributed_Computing">http://en.wikipedia.org/wiki/Fallacies_of_Distributed_Computing</a></p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="dvcs_performance.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="dvcs_advantages.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="dvcs_geography.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Fast </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Geography</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

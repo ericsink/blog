@@ -1,0 +1,134 @@
+---
+layout: default
+esbma_id: 1767
+title: Ten Quirky Issues with Cross-Platform Version Control
+date: 2009-04-13 18:16:27
+---
+<p>A big chunk of the software industry today can mostly ignore
+the issues of multiple platforms, for one of the following reasons:</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >They only support Windows. &nbsp;It's got like 90% market
+     share, so why not?<br>
+     <br>
+ </li>
+ <li >They serve a web application and don't care what the end
+     user is actually using as long as their browser works.</li>
+</ol>
+
+<p>But version control tools involve more cross-platform
+concerns than most other kinds of software.&nbsp; Neither of the reasons above tends
+to work very well.</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >If a software team has 450 Windows users and 50 people on
+     Mac or Unix, then a Windows-only solution just won't do.<br>
+     <br>
+ </li>
+ <li >Since a primary task of a version control tool is to
+     manage source code trees on the user's hard disk, a web application just
+     won't do.</li>
+</ol>
+
+<p>So, even as most coders have moved on to a world where they
+can remain blissfully ignorant of the problems of writing software for multiple
+operating systems, those of us who create version control tools are still wrestling
+with those problems.</p>
+
+<p>And in fact, I claim that our challenges are tougher than most.&nbsp;
+Version control users ask for the darndest things, especially in the big
+enterprise companies.&nbsp; It's easy to believe that all you need is Windows, Mac,
+Linux and maybe Solaris.&nbsp; Then you find out just how prevalent things like AIX
+and HPUX are.&nbsp; Terms like "Irix" and "Win95" and "mainframe" get tossed around
+until you're numb and nothing surprises you anymore.&nbsp; When somebody asks for a
+port to an arcane platform, you roll your eyes and wonder is if it uses 8-bit
+bytes or <a href="http://en.wikipedia.org/wiki/CDC_Cyber">not</a>.</p>
+
+<p>Worse than that, version control vendors aren't just <i>porting</i>
+to oddball operating systems.&nbsp; We actually have to make our software <i>interoperate</i>
+across all those environments.</p>
+
+<p>And that's where things start to get quirky.</p>
+
+<ol style='margin-top:0in' start=1 type=1>
+ <li >On a Linux system, create a file called "README".&nbsp; In the
+     same directory, create a file called "readme".&nbsp; Check them both in.&nbsp; Now
+     go to a Mac and check them both out.&nbsp; Since the Mac file system is
+     [usually] case insensitive, something bad is going to happen.&nbsp; Same goes
+     for Windows/NTFS.<br>
+     <br>
+ </li>
+ <li >On a Mac, checkin a file called "PRN".&nbsp; Check it out on a
+     Windows system.&nbsp; That file name is <a
+     href="http://stackoverflow.com/questions/62771/how-check-if-given-string-is-legal-allowed-file-name-under-windows">not
+     allowed</a> under Windows, for backward compatibility with MS-DOS..<br>
+     <br>
+ </li>
+ <li >Under Linux, checkin a file with a name that ends in a
+     dot.&nbsp; Check it out under Windows.&nbsp; The trailing dot is probably gone.&nbsp; Now
+     check the file back in and go back to your Unix system.&nbsp; If your version
+     control system handled this badly, you've probably got two copies of the
+     file, one with the trailing dot, and one without.&nbsp; Same goes for a
+     trailing space.<br>
+     <br>
+ </li>
+ <li >On a Linux system, checkin a file with a path that is 261
+     characters long.&nbsp; Check it out under Windows.&nbsp; This might work.&nbsp; It
+     probably won't.&nbsp; It kind of depends on whether .NET is involved or not.&nbsp;
+     There's a \\?\ trick to get around the limitations of the Win32 layer, but
+     the .NET libraries don't use it. <br>
+     <br>
+ </li>
+ <li >On a Mac, checkin a file that has a <a
+     href="http://en.wikipedia.org/wiki/Resource_fork">resource fork</a> and
+     some Finder info.&nbsp; Check it out on a Linux machine.&nbsp; What happens?&nbsp; Did
+     stuff show up as <a
+     href="http://en.wikipedia.org/wiki/Extended_file_attributes">xattrs</a>?&nbsp;
+     Should it have?&nbsp; On that same Linux machine, make a change and check it
+     back in.&nbsp; Then check it out on the Mac again.&nbsp; Is the Finder info still
+     there?<br>
+     <br>
+ </li>
+ <li >On a Linux machine, checkin a file with a colon in the
+     name.&nbsp; Check it out on a Mac.&nbsp; Not sure what'll happen, but it probably
+     won't be what you want.<br>
+     <br>
+ </li>
+ <li >On a Windows machine, checkin a file with a name that
+     begins with a dash.&nbsp; Now check it out under Linux and <a
+     href="http://www.dwheeler.com/essays/fixing-unix-linux-filenames.html">try
+     manipulating it</a> with command-line utilities.&nbsp; Apps will think the
+     filename is a command-line option.&nbsp; <s>What if somebody creates a file
+     named "-rf *" and a Linux user tries to rm it?&nbsp; </s><i>OK, bad example.&nbsp;
+     The point remains:&nbsp; Filenames which begin with a dash may cause more
+     problems on some platforms than on others.</i><br>
+     <br>
+ </li>
+ <li >On a Linux machine, create a source code file and check it
+     in.&nbsp; Check it out on Windows and open it with notepad.&nbsp; The <a
+     href="http://en.wikipedia.org/wiki/Newline">line-endings</a> are Unix-standard
+     LF, but Windows apps expect CRLF, so notepad shows the entire file as one
+     line.&nbsp; Now open the same file under Visual Studio.&nbsp; The file looks fine
+     now.&nbsp; Now edit a few lines in the middle of the file, check it back in,
+     and check it out on Linux again.&nbsp; The lines you edited are messed up.<br>
+     <br>
+ </li>
+ <li >On a recent Ubuntu Linux system, create a file called "Español".&nbsp;
+     Do the same thing on Mac OS X 10.5.&nbsp; These two files have the same name,
+     but even though you are [probably] using the utf-8 encoding of Unicode on
+     both systems, the bytes which represent that name do not match.&nbsp; On the
+     Linux machine, the file name [probably] will be in NFC normalized form (Espa\u00f1ol).&nbsp;
+     On the Mac, everything gets normalized to NFD (Espan\u0303ol).&nbsp; When you
+     check these files in and start working with them, bad things will happen
+     unless your version control tool <a
+     href="http://svn.haxx.se/dev/archive-2008-03/0780.shtml">understands</a>
+     what's going on and deals with it appropriately.<br>
+     <br>
+ </li>
+ <li >On a Unix machine, checkin a symbolic link.&nbsp; Check it out
+     on Windows.&nbsp; What happens?</li>
+</ol>
+
+<p>Like I said, things get quirky.</p>
+
+<p></p>

@@ -1,0 +1,208 @@
+---
+layout: default
+esbma_id: 3059
+title: EF6 on Xamarin: Progress (or lack thereof)
+date: 2014-02-21 12:00:00
+keywords: (mssql_to_sqlite)
+teaser: Not ready for prime time.
+---
+
+<P>(This entry is part of a <A href="/mssql_mobile/index.html">series</A>.  The audience: SQL Server developers.  The topic: SQLite on mobile devices.)</P><hr/>
+
+<h2>Yes, actually I <t>DO</t> want that</h2>
+
+<p>"I want Entity Framework on Xamarin."</p>
+
+<p>Variations of this remark show up regularly in various online forums.  The typical response is something like: "You don't want Entity Framework on a mobile device.  It's too big and heavy.  You should just use <a href="https://github.com/praeclarum/sqlite-net">sqlite-net</a>."</p>
+
+<p>I hate this reply, but it has [more than] a grain of truth in it.  Yes, sqlite-net is very cool, and a much better fit for mobile use cases.  Yes, Entity Framework is big and heavy.</p>
+
+<p>But I would bet a dollar that at least one person has claimed that "EF is too big for mobile" and then proceeded to play "Star Wars: Knights of the Old Republic" on their iPhone.</p>
+
+<p>Besides, some people have a a big pile of EF code and need to port it for a mobile app.
+There are valid reasons to want EF on Xamarin.</p>
+
+<p>Recently I decided to get my hands dirty and try to make this work.  I have not
+succeeded.  Yet.  But I've made some progress and reached a
+good place to report my findings.  Maybe other people working on this
+will find some useful information here.</p>
+
+<h2>The Goal</h2>
+
+<ul>
+    <li><p>I'd like to see EF6 code running on Xamarin.iOS and Xamarin.Android.</p></li>
+    <li><p>Tooling doesn't matter much.  I'm not expecting Xamarin Studio to show me lines and boxes for my model.</p></li>
+    <li><p>I would even declare some measure of victory if I had a solution which handled only one of EF's four workflows.  I focused on "Code First with Existing Database".</p></li>
+    <li><p>The only provider that matters is SQLite.  I focused on <a href="http://system.data.sqlite.org/">System.Data.SQLite</a>.</p></li>
+</ul>
+
+<h2>The Challenge</h2>
+
+<p>There are basically four different implementations of the platform:</p>
+
+<ul>
+    <li><p>.NET is, well, the full platform.  The "official" one.  From Microsoft.</p></li>
+    <li><p>Mono is an open source implementation.  It has most everything in .NET.  But not all.</p></li>
+    <li><p>Xamarin.Android is Mono for Android.  It has a lot of Mono, but not all.  (Most notably, System.Configuration is missing.)</p></li>
+    <li><p>Xamarin.iOS is Mono for iOS.  It has even less of the stuff in Mono than the Android version does.  (Most notable, it's an AOT compiler.)</p></li>
+</ul>
+
+<p>I focused on Xamarin.Android.</p>
+
+<h2>Two clarifications before I proceed</h2>
+
+<ul>
+<li><p>I'm a huge fan of Xamarin.  Anything here which looks like criticism is just me being objective about the weaknesses and tradeoffs of their still-very-awesome product suite.</p></li>
+
+<li><p>Julie Lerman's dog probably knows more about Entity Framework than I do.</p></li>
+</ul>
+
+<h2>Starting point</h2>
+
+<p>Entity Framework was open sourced in 2012, and shortly thereafter was made part of Mono 2.11.3.</p>
+
+<p>For a little while, I proceeded under the delusion that I would not have to make any changes to the Entity Framework code.  That didn't last long.</p>
+
+<p>When I started hacking and tearing things apart, I began <a href="http://entityframework.codeplex.com/SourceControl/changeset/fc58ec7a7ea48917294f0ad4fbcca334a4ac894e">here</a>.</p>
+
+<p>I had no problem building the tree on Windows.  With a few small changes to the build files (remove all use of $([MSBuild]::GetDirectoryNameOfFileAbove())), I was able to build on my Mac using:</p>
+
+<pre class="screen">
+xbuild EntityFramework.csproj
+</pre>
+
+<h2>System.Configuration</h2>
+
+<p>Perhaps the biggest issue is the lack of System.Configuration in both of the Xamarin platforms.</p>
+
+<p>Xamarin dude Jonathan Pryor <a href="http://forums.xamarin.com/discussion/comment/11823/#Comment_11823">says</a>:</p>
+
+<blockquote>
+    "The problem with System.Configuration is that once it's in the door, the
+    entire XML stack comes along for the ride, and the linker can't remove it
+    because it's used from ~everywhere. System.Xml.dll is 1.2MB, so that would
+    be at least a 1.2MB increase to minimum app sizes."
+</blockquote>
+
+<p>This is a huge problem for Entity Framework, which uses the app.config file all over the place.  I tried several different approaches to deal with this:</p>
+
+<ul>
+    <li><p>First I tried to just remove all the code which uses System.Configuration, starting with a hacked up version of <a href="http://entityframework.codeplex.com/SourceControl/changeset/view/fc58ec7a7ea48917294f0ad4fbcca334a4ac894e#src/EntityFramework/Internal/AppConfig.cs">AppConfig.cs</a>. Then I realized what a huge change that was, so I reverted and started over.</p></li>
+    <li><p>Then I tried to just stub in a minimal, non-functional implementation of only the parts of System.Configuration that I needed to make the build succeed.  Then I realized what a huge job that was, so I reverted and started over.</p></li>
+    <li><p>Then I tried to bring in Mono's System.Configuration.dll and make it part of my app.  This would be the preferable solution anyway, since it would require far fewer code changes to the Entity Framework code while preserving some ability to use an app.config file.  But I couldn't get this to work, and somebody at Xamarin support expressed significant pessimism about this path.</p></li>
+    <li><p>Finally, I just removed all references to System.Configuration, including AppConfig.cs and everything that references it.  This solution is far from ideal, but it did get me moving on to the next problem.</p></li>
+</ul>
+
+<h2>System.Data.Common.DbProviderFactories</h2>
+
+<p>Xamarin doesn't support this either, largely for the same reason.  It's really just another way of reading an XML config file.</p>
+
+<p>This function is used in a few places in the Dependency Resolution part of Entity Framework.</p>
+
+<p>Right about here is when I got seriously tempted to just remove all the
+Dependency Resolution code completely.  After all, I only care about one
+ADO.NET provider.  Why do I need this big and ultra-powerful config system
+which is mostly designed to support a diversity of providers that I don't care
+about?</p>
+
+<p>I talked myself off this ledge before too long.  I remove the uses of System.Data.Common.DbProviderFactories, replacing them temporarily with stuff like "return null".</p>
+
+<h2>Subclass DbConfiguration</h2>
+
+<p>My rationale for removing all these configuration capabilities was that I
+hoped they would not be necessary if I gave my DbContext subclass an actual
+connection instead of a connection string.</p>
+
+<pre class="screen">
+    public class BloggingContext : DbContext
+    {
+        public BloggingContext(DbConnection c) : base(c, false)
+        {
+        }
+
+        public DbSet<Blog> Blogs { get; set; }
+        public DbSet<Post> Posts { get; set; }
+    }
+
+...
+
+        var sb = new System.Data.SQLite.SQLiteConnectionStringBuilder();
+        sb.DataSource = Path.Combine(Path.GetTempPath(), "whatever.db");
+        string cs = sb.ConnectionString;
+
+        var conn = new System.Data.SQLite.SQLiteConnection(cs);
+        conn.Open();
+
+        using (var db = new BloggingContext(conn))
+        {
+            var blog = new Blog { Name = "thoughts" };
+            db.Blogs.Add(blog);
+            db.SaveChanges();
+
+            // Display all Blogs from the database 
+            var query = from b in db.Blogs
+                        orderby b.Name
+                        select b;
+
+            Console.WriteLine("All blogs in the database:");
+            foreach (var item in query)
+            {
+                Console.WriteLine(item.Name);
+            }
+        }
+</pre>
+
+<p>At some point I realized that Entity Framework needs a lot more info
+about the provider than just the connection string.  Julie's dog would have
+known better.</p>
+
+<p>So I read about <a href="http://msdn.microsoft.com/en-us/data/jj680699.aspx">Code-Based Configuration</a>.  And then I did this:</p>
+
+<pre class="screen">
+    public class MyConfiguration : DbConfiguration
+    {
+        public MyConfiguration()
+        {
+            SetProviderServices(
+                "System.Data.SQLite", 
+                System.Data.SQLite.EF6.SQLiteProviderServices.Instance
+                );
+        }
+    }
+</pre>
+
+<p>And that required me to hack the SQLite provider to make
+System.Data.SQLite.EF6.SQLiteProviderServices public instead of internal, which seems more correct anyway.  I think.</p>
+
+<h2>AssociatedMetadataTypeTypeDescriptionProvider</h2>
+
+<p>For some reason, this class (in System.ComponentModel.DataAnnotations) is not supported by Xamarin.  It's intentional.  The <a href="https://github.com/mono/mono/blob/master/mcs/class/System.ComponentModel.DataAnnotations/System.ComponentModel.DataAnnotations/AssociatedMetadataTypeTypeDescriptionProvider.cs">code</a> on Github shows that file surrounded by:</p>
+
+<pre class="screen">
+    #if !MOBILE
+</pre>
+
+<p>But I don't know why.</p>
+
+<p>I ducked this problem by copying a bunch of stuff from that Mono file into my hacked-up code.</p>
+
+<h2>Time for a break</h2>
+
+<p>This is where I decided to pause.  The next problem was an exception being thrown while Entity Framework was trying to ingest SQLiteProviderServices.ProviderManifest.xml.  I stared at this for a while, but didn't get past it.</p>
+
+<p>It's Friday.  I spent most of the week on this investigation, and now I need to catch up on some other things.</p>
+
+<p>If/when I make more progress on this, I'll post more info about it.</p>
+
+<p>If you make progress, please let me know.</p>
+
+<h2>I am hopeful about this link:</h2>
+
+<p><a href="https://entityframework.codeplex.com/wikipage?title=Entity%20Framework%20Everywhere">Entity Framework Everywhere</a></p>
+
+<h2>Summary</h2>
+
+<p>You don't want Entity Framework on a mobile device.  It's too big and heavy.  You should just use <a href="https://github.com/praeclarum/sqlite-net">sqlite-net</a>.</p>
+
+<p>&nbsp;</p>
+

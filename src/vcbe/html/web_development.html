@@ -1,0 +1,87 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Web</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="workflows.html" title="Chapter 11. Workflows"><link rel="prev" href="shrinkwrap.html" title="Shrinkwrap"><link rel="next" href="internals.html" title="Chapter 12. DVCS Internals"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Web</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="shrinkwrap.html">Prev</a> </td><th width="60%" align="center">Chapter 11. Workflows</th><td width="20%" align="right"> <a accesskey="n" href="internals.html">Next</a></td></tr></table><hr></div><div class="section" title="Web"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp2795280"></a>Web</h2></div></div></div>
+    
+
+    <p><a class="indexterm" name="idp2857328"></a>With a Web-based application, the notion of a “release” is different, so
+        the way we use the VCS is different.</p>
+
+    <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+            <p>
+                For web developers, “release” means deploying new code to the website.  That new code immediately becomes available to all users.
+            </p>
+        </li><li class="listitem">
+            <p>
+                The website has only one version of the software on it.
+                Everybody is always using the latest version.  There is no
+                obligation to continue providing support to users who chose
+                to stay with an older version instead of upgrading to the
+                new release.
+            </p>
+        </li><li class="listitem">
+            <p>
+                Users are generally unaware of versioning.  Version numbers are
+                not part of the user’s consciousness.  People who talk at
+                conferences about their experience with Google Calendar do not
+                ask each other which version they are running.
+            </p>
+        </li><li class="listitem">
+            <p>
+                For web developers, there isn’t much overhead in doing a
+                release, so they can deploy new versions
+                with new features and fixes as often as makes sense.
+                Some major websites deploy changes 
+                multiples times per day.
+            </p>
+        </li></ul></div>
+
+    <p>Despite all the differences, there are some ways where the use of a
+        VCS for Web developers is the same.  Just as with shrinkwrap, we have a
+        Master branch, the main line of development.  Everything finds its way
+        here.</p>  
+
+    <p>We also
+    have a Release branch, but there’s only one of them, and it’s a long-lived
+    branch.  It always contains the exact code which is currently deployed on the
+    website.</p>
+
+<p>So, omitting the details of Polishing, we can think of a Web app workflow as an
+    ongoing Release branch which periodically merges changes from the
+    ongoing Master branch, as shown in <a class="xref" href="web_development.html#web_versions" title="Figure 11.7. Versions of a Web App">Figure 11.7, “Versions of a Web App”</a>.</p>
+
+<div class="figure"><a name="web_versions"></a><p class="title"><b>Figure 11.7. Versions of a Web App</b></p><div class="figure-contents">
+    
+<div class="mediaobject"><img src="images/web_versions.jpg" alt="Versions of a Web App"></div>
+</div></div><br class="figure-break">
+
+    <p>We handle critical fixes the same way as well.  Do the fix in the Release branch.  Merge it back into Master.</p>
+
+<p>Feature branches are perhaps even more important for Web developers than
+    for situations where releases are less frequent.  A typical Web app team is
+    a bunch of developers working on a variety of features that are going to be ready for deployment at different times.  With a shrinkwrap workflow, we try to get all the
+    features to be done at the same time.  If we have a feature that isn’t ready for
+    release, we have to (a) slip the release or (b) make the feature miss the boat and wait 12 months until the next departure.  
+    With a Web app, each feature can get released whenever it is ready.</p>
+
+<p>
+    When we prepare to do a release,
+    we want to gather the feature(s) that are ready into a Polishing branch
+    so we can integrate and test and polish and make sure they are truly
+    ready for deployment.  
+    But if all the features being developed are mixed up together in the same
+    branch, it’s a lot harder to grab just the ones we want to deploy.  
+    Feature branches make it much easier to pick and
+    choose only certain features, excluding the ones that we need to keep
+    cooking until they’re ready.</p>
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="shrinkwrap.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="workflows.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="internals.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Shrinkwrap </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Chapter 12. DVCS Internals</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

@@ -1,0 +1,74 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Clone</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="dvcs_basics.html" title="Chapter 4. More Basics"><link rel="prev" href="dvcs_basics.html" title="Chapter 4. More Basics"><link rel="next" href="basics_push.html" title="Push"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Clone</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="dvcs_basics.html">Prev</a> </td><th width="60%" align="center">Chapter 4. More Basics</th><td width="20%" align="right"> <a accesskey="n" href="basics_push.html">Next</a></td></tr></table><hr></div><div class="section" title="Clone"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp853696"></a>Clone</h2></div></div></div>
+
+<p class="verb_concise"><a class="indexterm" name="idp856128"></a>Create a new repository instance that is a copy of another.</p>
+
+        <p>The essential difference between a Centralized Version Control System (CVCS) and
+            a DVCS is the notion of a <em class="firstterm">repository instance</em><a class="indexterm" name="idp857280"></a>.</p>
+
+<p>Just like with a CVCS, when a repository is created for the very first
+    time, we use <span class="sg-operation">create</span>.  After that, 
+    what makes a DVCS different is that we can have multiple instances of that
+    repository.  The <span class="sg-operation">clone</span> operation is the way those new
+    instances get created.</p>
+
+            <p>  In a CVCS, the
+            repository exists in one place on a central server<a class="indexterm" name="idp860304"></a>.  Every piece
+            of software that is used to access the repository includes a
+            network client.  See <a class="xref" href="basics_clone.html#cvcs_topology" title="Figure 4.1. Centralized Version Control">Figure 4.1, “Centralized Version Control”</a>.</p>
+
+<div class="figure"><a name="cvcs_topology"></a><p class="title"><b>Figure 4.1. Centralized Version Control</b></p><div class="figure-contents">
+    
+<div class="mediaobject"><img src="images/cvcs_topology.jpg" alt="Centralized Version Control"></div>
+</div></div><br class="figure-break">
+
+        <p>In contrast, a DVCS allows the repository to exist in more than one place.
+            We can have multiple repository instances.  Of course, having more than
+            one instance of the repository means that we will need ways of keeping
+            them synchronized.</p>
+
+        <p>In fact, not only does a DVCS <span class="bold"><strong>allow</strong></span> multiple repository instances, it generally
+    works that way all the time.  Most operations interact with a local repository
+    instance, not a network server.  
+    The only time
+    networking code gets involved is when the
+    repository instances are being synchronized.  Every developer has his own
+    private repository instance.  The typical situation ends up looking like
+    <a class="xref" href="basics_clone.html#dvcs_topology" title="Figure 4.2. Decentralized Version Control">Figure 4.2, “Decentralized Version Control”</a>.</p>
+
+<div class="figure"><a name="dvcs_topology"></a><p class="title"><b>Figure 4.2. Decentralized Version Control</b></p><div class="figure-contents">
+    
+<div class="mediaobject"><img src="images/dvcs_topology.jpg" alt="Decentralized Version Control"></div>
+</div></div><br class="figure-break">
+
+        <p>Upon someone’s first exposure to the DVCS concept, it is
+            common to hear them express a measure of alarm because they think
+            that there will not be a
+            central server<a class="indexterm" name="idp885616"></a>.  But this worry is not necessary.  The point of
+            multiple repository instances is not to eliminate the central
+            server.  Rather, the point is
+            to get more flexibility.
+            With a CVCS, the
+            central server is the only repository instance, so it must do
+            everything.  With a DVCS, we can have repository instances that
+            are dedicated
+            to specific purposes.</p>
+
+    <p>In practice, virtually all DVCS
+            teams have a central server.  With a CVCS, a central server happens
+            because it is inherent in the centralized model.  With a DVCS, a central
+            server happens because of the team’s decision to have one.  </p>
+
+
+</div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="dvcs_basics.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="dvcs_basics.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="basics_push.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 4. More Basics </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Push</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

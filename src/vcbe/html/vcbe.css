@@ -1,0 +1,161 @@
+
+pre.screen { 
+    background-color: #E0EFF1; 
+    padding:0.15in; border-radius:12pt
+}
+
+pre.programlisting { 
+    background-color: #E0EFF1; 
+    padding:0.15in; border-radius:12pt
+}
+
+span.screen_typed { 
+    color:#387E70 
+}
+
+span.screen_prompt { 
+    color:#6B0026 
+}
+
+span.screen_emphasis { 
+    border-style:solid; 
+    border-width:1px; border-radius:3pt; 
+    border-color:#B80866 
+}
+
+span.screen_diff_add { 
+    color:#246B2D 
+}
+
+span.screen_diff_del { 
+    color:#B21933 
+}
+
+div.acknowledgements { 
+    font-size:80% 
+}
+
+span.no_line_breaks {   
+    white-space:nowrap;
+}
+
+p.eric_code { 
+    white-space:nowrap; 
+    font-family:monospace; 
+}
+
+body { 
+    margin-left:auto; 
+    margin-right:auto; 
+    width:800px; 
+    padding-top:150px;
+    padding-left:100px;
+    padding-right:100px;
+    background-image:url('top_header.jpg'); 
+    background-repeat:no-repeat; 
+    background-position:center top;
+}
+
+h1,h2,h3,tr a{
+    font-family:sans-serif; 
+}
+
+html {
+    overflow-y: scroll;
+}
+
+a:link {
+    text-decoration:none;
+    color: #60929D;
+    font-weight:bold;
+}
+a:visited {
+    text-decoration:none;
+    color: #738E85;
+    font-weight:bold;
+}
+a:hover {
+    text-decoration:underline;
+    color: #55B3BD;
+    font-weight:bold;
+}
+a:active {
+    text-decoration:underline;
+    color: #55B3BD;
+    font-weight:bold;
+}
+hr {
+    border: 1px solid #ccc;    
+}
+
+.footnote p {
+    font-size: 75%;
+}
+.informaltable table, .table table {
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.informaltable table, .table table {
+    background-color: #DDD;
+    font-size: 90%;
+	border: none;
+}
+
+.informaltable table tr, .informaltable table td, .informaltable table th {
+    background-color: #FFF;
+    border: none;
+
+}
+.table table tr, .table table td, .table table th {
+    background-color: #FFF;
+    border: none;
+
+}
+
+.informaltable table th, .informaltable table td {
+    padding: 5px;
+	vertical-align: top;
+}
+.table table th, .table table td {
+    padding: 5px;
+	vertical-align: top;
+}
+
+.informaltable table th { 
+	border: none;
+	text-align: center;
+}
+.table table th { 
+	border: none;
+	text-align: center;
+}
+
+.informaltable table td {
+	text-align: center;
+}
+
+.table table td {
+	text-align: center;
+}
+
+td {
+    background-repeat: no-repeat;
+}
+
+span.italic { 
+    font-style:italic; 
+}
+
+span.bold { 
+    font-weight:bold; 
+}
+
+span.sg-operation { 
+    font-weight:bold; 
+}
+
+p.verb_concise { 
+    font-weight:bold; 
+}
+

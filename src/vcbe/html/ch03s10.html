@@ -1,0 +1,70 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Tag</title><link rel="stylesheet" type="text/css" href="vcbe.css"><meta name="generator" content="DocBook XSL Stylesheets V1.76.1"><link rel="home" href="index.html" title="Version Control by Example"><link rel="up" href="subversion_example.html" title="Chapter 3. Basics with Subversion"><link rel="prev" href="ch03s09.html" title="Lock, Revert"><link rel="next" href="ch03s11.html" title="Branch"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Tag</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch03s09.html">Prev</a> </td><th width="60%" align="center">Chapter 3. Basics with Subversion</th><td width="20%" align="right"> <a accesskey="n" href="ch03s11.html">Next</a></td></tr></table><hr></div><div class="section" title="Tag"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="idp628784"></a>Tag</h2></div></div></div>
+    
+
+<p>Still mourning the loss of his email code, Harry creates a
+    tag<a class="indexterm" name="idp666608"></a> so he can more easily access it later.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">mkdir tags</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">svn add tags</span>
+A         tags
+</pre>
+
+<table xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" align="center" border="0" style="width:350px"><tr><td background="images/eric_aside_08.jpg" style="font-style:italic; padding-left:0.375in; padding-right:0.375in; padding-top:0.25in; padding-bottom:0.25in">
+    <p>Subversion implements <span class="sg-operation">tag</span> through the use of its
+        “cheap copy” mechanism, which is also used for <span class="sg-operation">branch</span>.  The idea is that Subversion can make a copy of any object in the tree without duplicating all the data.  The new copy is simply a link to the other one, but as the two items change, they diverge while sharing their history.  In Subversion, a tag is a branch which nobody intends to modify.</p></td></tr></table>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">svn copy --revision=10 trunk \
+                                      tags/just_before_sally_deleted_my_email_code</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">svn st</span>
+A       tags
+A  +    tags/just_before_sally_deleted_my_email_code
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery harry$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">svn commit -m "tag snapshot in case I need the email code"</span>
+Adding         tags
+Adding         tags/just_before_sally_deleted_my_email_code
+
+Committed revision 13.
+</pre>
+
+<p>Sally sees Harry gloating in the company chat room about his
+beloved tag, so she does an
+    update.</p>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">trunk sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">svn update</span>
+At revision 13.
+</pre>
+
+<p>She doesn’t get the tag.  But Sally didn’t just fall off the turnip truck.  She notices that she executed that command from the <code class="filename">trunk</code> directory.  She needs to cd up one level and try again.</p>
+
+<table xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" align="center" border="0" style="width:350px"><tr><td background="images/eric_aside_05.jpg" style="font-style:italic; padding-left:0.375in; padding-right:0.375in; padding-top:0.25in; padding-bottom:0.25in">
+    <p>Note that with Subversion, most commands take effect from the
+        current directory and recurse down.  Everything else is
+        ignored.  This contrasts with some other VCS tools where most commands
+        work on the entire tree. </p></td></tr></table>
+
+<pre class="screen"><span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">trunk sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">cd ..</span>
+
+<span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_prompt">lottery sally$</span> <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_typed">svn update</span>
+A    tags
+A    <span xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" class="screen_emphasis">tags/just_before_sally_deleted_my_email_code</span>
+...
+Updated to revision 13.
+</pre>
+
+<p>Sally sees Harry’s tag and rolls her eyes.  Fine.  Whatever.</p>
+      
+    </div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch03s09.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="subversion_example.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch03s11.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Lock, Revert </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a> | <a accesskey="t" href="bk01-toc.html">ToC</a></td><td width="40%" align="right" valign="top"> Branch</td></tr></table></div><script xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:axf="http://www.antennahouse.com/names/XSL/Extensions" type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24709512-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script></body></html>

@@ -1,0 +1,118 @@
+---
+layout: default
+esbma_id: 3075
+title: UNIQUE NULL
+date: 2014-03-07 12:00:00
+keywords: (mssql_to_sqlite)
+teaser: SQL Server treats NULL as a value. SQLite treats it as the absence of a value.
+---
+
+<P>(This entry is part of a <A href="/mssql_mobile/index.html">series</A>.  The audience: SQL Server developers.  The topic: SQLite on mobile devices.)</P><hr/>
+
+<h2>Nullable columns in UNIQUE constraints</h2>
+
+<p>The following code will cause a unique constraint violation in SQL Server:</p>
+
+<pre class="screen">
+CREATE TABLE foo (pk int PRIMARY KEY IDENTITY, x int UNIQUE NULL);
+INSERT INTO foo (x) VALUES (1);
+INSERT INTO foo (x) VALUES (2);
+INSERT INTO foo (x) VALUES (NULL);
+INSERT INTO foo (x) VALUES (NULL);
+</pre>
+
+<p>SQL Server doesn't allow the second NULL value to be inserted for column
+[x].</p>
+
+<p>But SQLite allows this.  See <a href="/mssql_mobile/sync_and_constraints.html">Issues with sync and constraints</a> for more
+discussion of why this kind of thing matters.</p>
+
+<h2>Boxes and Cats</h2>
+
+<p>The difference arises from the question of whether NULL is considered a value or the absence of a value.</p>
+
+<p><img align="right" src="/mssql_mobile/box_cat.jpg"/>Suppose you have a set of
+cardboard boxes.  Each box can hold one cat.  And the cats must be unique.</p>
+
+<p>SQLite thinks of NULL as an empty box.  Having multiple empty boxes does not
+violate the rule about cats being unique.</p>
+
+<p>SQL Server thinks of NULL as the name of a specific cat.  A box cannot be empty.  And the NULL cat can only be in one box.</p>
+
+<p>If you prefer an explanation with more technical detail and fewer cat
+pictures, see <a href="http://www.sqlite.org/nulls.html">this page</a> on the
+SQLite website, which (at the time of this writing)
+provides a chart of how 12 different SQL implementations handle 8 different
+situations with NULL values.  An additional remark about the
+amibiguous language in the SQL92 standard appears in the <a href="https://sqlite.org/faq.html">SQLite FAQ</a>.</p>
+
+<h2>Solution 1:  Don't have the problem</h2>
+
+<p>One possible solution is to never have this problem in the first place.  Obviously, this issue
+won't arise if you don't have any nullable columns in unique constraints.</p>
+
+<h2>Solution 2:  Don't cause the problem</h2>
+
+<p>Another option is to just not have any bugs in your app.  <b><tt>:-)</tt></b></p>
+
+<p>Hmmm.  That was a bit too flippant to be helpful.  Let me try to explain it a different way:</p>
+
+<p>In many (or most?) situations, SQL constraints are used as a way to prevent bugs in upper
+layers from screwing up the data.  In other words, if a constraint gets violated, that's
+a sign that something went wrong.  A constraint violation is typically <i>not</i> used
+as control flow of the software under normal usage.  So, if a constraint violation
+happens, it is usually a sign of a bug in an upper layer.</p>
+
+<p>SQL constraints also provide guarantees which allow the code in upper layers to be
+simpler.  Those guarantees are part of the contractual agreement between your application
+code and your database.  If the database is promising that values in column [foo] will 
+never be greater than 5, the application code can trust in that promise.  It doesn't
+need to do range checking on every value it gets from the database.</p>
+
+<p>If SQL constraints did not exist, we would simply have to enforce our data integrity
+rules in application code instead of at the database level.  This is not "The SQL Way", but it is
+certainly possible.  The NoSQL folks have to live this way all the time.</p>
+
+<p>So, you have the option of simply accepting
+the fact that SQLite will not enforce SQL Server's rule about distinct NULLs.
+If your app never inserts a NULL into that column, you don't need to worry about it.
+Or you can make your application code do extra checking to make sure.</p>
+
+<h2>Solution 3:  Use a trigger to make SQLite act like SQL Server</h2>
+
+<p>If you want SQLite to enforce distinct NULLs at the database level in the same
+way as SQL Server does, you can get that behavior by adding triggers to your SQLite
+tables.  For example:</p>
+
+<pre class="screen">
+CREATE TRIGGER "uniqnull" BEFORE INSERT ON "foo" WHEN ( (NEW."x" IS NULL) )
+BEGIN
+
+SELECT RAISE(ABORT, 'constraint violation: unique null')
+WHERE EXISTS (SELECT 1 FROM "foo" c WHERE ( (c."x" IS NEW."x") ));
+
+END
+</pre>
+
+<p>The syntax of this trigger probably looks strange to you.  I'll be writing about
+the differences between SQL Server triggers and SQLite triggers in another entry
+in this series.</p>
+
+<p>This trigger will impact performance.  You can decide if the tradeoff is worth
+it for your application.  Measure it.</p>  
+
+<p>(When <a href="http://zumero.com/dev-center/zss/">Zumero for SQL Server</a> encounters a nullable column in a unique
+constraint, it automatically adds triggers like this one to the corresponding SQLite table on
+the client side.  Those triggers include a comment about possible
+performance impact and suggesting that the trigger can simply be dropped if the
+other tradeoff is preferable.)</p>
+
+<h2>Summary</h2>
+
+<p>SQLite handles nullable columns in unique constraints differently from SQL Server.  
+This distinction may never cause you problems, but if it does, you have several
+options for dealing with it.</p>
+
+<p>&nbsp;</p>
+
+

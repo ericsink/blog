@@ -1,0 +1,122 @@
+---
+layout: default
+esbma_id: 1691
+title: 7: XAML
+date: 2007-07-19 13:00:00
+---
+<p>This entry is part 7 of a <a
+href="/wpf3d/index.html">12-part series</a> on WPF
+3D.</p>
+
+<h3>Copying a WPF 3D Scene to the Clipboard as XAML</h3>
+
+<p style='text-indent:.5in'><span style='font-size:10.0pt;
+font-family:"Courier New";color:teal'>Clipboard</span><span style='font-size:
+10.0pt;font-family:"Courier New"'>.SetText(<span style='color:teal'>XamlWriter</span>.Save(myViewport3D));</span></p>
+
+<p>The one-line solution above actually does work.&nbsp; But in my
+situation, I had to do a bit more to get exactly what I wanted.&nbsp; I like to be
+able to click the Copy button in Sawdust and then just Paste into <a
+href="http://www.charlespetzold.com/wpf/">XAML Cruncher</a>.&nbsp; Once again,
+ScreenSpaceLines3D got in my way.</p>
+
+<p>First of all, just as I did in the bitmap case in <a
+href="/wpf3d/3_Bitmap.html">part 3</a>, I prepare a
+Viewport3D offscreen, give it a size, and then call Arrange(), Measure() and
+UpdateLayout() to get it all ready to draw.&nbsp; Then I call every instance of
+ScreenSpaceLines3D and tell them all to rescale.</p>
+
+<p>The problem is that the XAML created by XamlWriter will have
+&lt;ScreenSpaceLines3D&gt; tags.&nbsp; This is the correct thing for XamlWriter to
+do, but it's not what I want.&nbsp; When I paste the result into XAML Cruncher, it
+doesn't work because the ScreenSpaceLines3D class isn't available.&nbsp; I believe
+XAML Cruncher has a way to load other DLLs for this kind of situation, but I
+really just want my XAML to be more generic.</p>
+
+<p style='text-autospace:none'>ScreenSpaceLines3D is a subclass
+of ModelVisual3D.&nbsp; So it's really just a ModelVisual3D except that it has extra
+methods to rebuild its geometry as needed.&nbsp; For the purpose of exporting to
+XAML, I just want a ModelVisual3D which contains a snapshot of the geometry in
+its current state.&nbsp; So, I do this:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:teal'>List</span><span
+style='font-size:10.0pt;font-family:"Courier New"'>&lt;<span style='color:teal'>ScreenSpaceLines3D</span>&gt;
+remove = <br>
+&nbsp;&nbsp;&nbsp; <span style='color:blue'>new</span> <span style='color:teal'>List</span>&lt;<span
+style='color:teal'>ScreenSpaceLines3D</span>&gt;();<br>
+<span style='color:teal'>List</span>&lt;<span style='color:teal'>ModelVisual3D</span>&gt;
+add = <br>
+&nbsp;&nbsp;&nbsp; <span style='color:blue'>new</span> <span style='color:teal'>List</span>&lt;<span
+style='color:teal'>ModelVisual3D</span>&gt;();<br>
+<span style='color:blue'>foreach</span> (<span style='color:teal'>ModelVisual3D</span>
+mv3d <span style='color:blue'>in</span> myViewport3D.Children)<br>
+{<br>
+&nbsp;&nbsp;&nbsp; <span style='color:blue'>if</span> (mv3d <span style='color:blue'>is</span>
+<span style='color:teal'>ScreenSpaceLines3D</span>)<br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style='color:teal'>ScreenSpaceLines3D</span> ss = mv3d <span
+style='color:blue'>as</span> <span style='color:teal'>ScreenSpaceLines3D</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style='color:teal'>ModelVisual3D</span> plain = <span
+style='color:blue'>new</span> <span style='color:teal'>ModelVisual3D</span>();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; plain.Content = ss.Content;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; add.Add(plain);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; remove.Add(ss);<br>
+&nbsp;&nbsp;&nbsp; }<br>
+}<br>
+<span style='color:blue'>foreach</span> (<span style='color:teal'>ModelVisual3D</span>
+mv3d <span style='color:blue'>in</span> add)<br>
+{<br>
+&nbsp;&nbsp;&nbsp; myViewport3D.Children.Add(mv3d);<br>
+}<br>
+<span style='color:blue'>foreach</span> (<span style='color:teal'>ScreenSpaceLines3D</span>
+ss <span style='color:blue'>in</span> remove)<br>
+{<br>
+&nbsp;&nbsp;&nbsp; myViewport3D.Children.Remove(ss);<br>
+}</span></p>
+
+<p>This gets me very close to what I want.&nbsp; I can take this
+Viewport3D, generate the XAML and paste it into XAML Cruncher, and it mostly
+works.&nbsp; I just want two more changes.</p>
+
+<p>First, I want the XAML to be indented.&nbsp; The single argument
+version of XamlWriter.Save() returns XAML in its most compact form, with no
+indentation.&nbsp; So, instead, I have to use one of the other overloads to
+XamlWriter.Save(), the one that writes to an XmlTextWriter, something like
+this:</p>
+
+<p style='margin-left:.5in;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:teal'>StringBuilder</span><span
+style='font-size:10.0pt;font-family:"Courier New"'> sb = <span
+style='color:blue'>new</span> <span style='color:teal'>StringBuilder</span>();<br>
+<span style='color:teal'>TextWriter</span> tw = <span style='color:blue'>new</span>
+<span style='color:teal'>StringWriter</span>(sb);<br>
+<span style='color:teal'>XmlTextWriter</span> xw = <span style='color:blue'>new</span>
+<span style='color:teal'>XmlTextWriter</span>(tw);<br>
+xw.Formatting = <span style='color:teal'>Formatting</span>.Indented;<br>
+<span style='color:teal'>XamlWriter</span>.Save(myViewport3D, xw);<br>
+xw.Close();<br>
+<span style='color:blue'>string</span> xaml = sb.ToString();</span></p>
+
+<p>Finally, I really don't want the Viewport3D in the XAML
+output to have a fixed size.&nbsp; Because I gave it a size and forced it through
+the Arrange/Measure/UpdateLayout process, the resulting XAML includes the size
+attributes on the Viewport3D tag.&nbsp; When I paste the whole thing into XAML
+Cruncher, it honors the requested size whether it fits or not, but I want the
+picture to automatically size to the available space.&nbsp; So...</p>
+
+<p style='margin-left:.5in'><span style='font-size:10.0pt;
+font-family:"Courier New"'>xaml = xaml.Replace(<br>
+&nbsp; <span style='color:blue'>string</span>.Format(<br>
+&nbsp;&nbsp;&nbsp; <span style='color:maroon'>&quot;&lt;Viewport3D Height=\&quot;{0}\&quot; Width=\&quot;{1}\&quot;
+&quot;</span>, <br>
+&nbsp;&nbsp;&nbsp; myViewport.height, myViewport.width), <br>
+&nbsp; <span style='color:maroon'>&quot;&lt;Viewport3D &quot;</span>);</span></p>
+
+<p>If I wanted this to be a bit more robust, I might parse the
+XAML and remove the two attributes using the XML APIs, but you get the idea.</p>
+
+<p>The resulting XAML file containing a picture of the
+workbench is <a href="/wpf3d/workbench.xaml">here</a>.</p>
+
+<p></p>
