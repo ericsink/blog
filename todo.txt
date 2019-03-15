@@ -1,7 +1,11 @@
 
-jekyll layout inheritance ?
+hitting /vcbe yields error but vcbe/index.html works
 
-scm/index.html has {{{include
+aws s3 sync uploads when the timestamp is newer.
+it would be nice to only upload files that have
+changed.
+
+jekyll layout inheritance ?
 
 we should be pretty close to being ready to rm csgen.
 not even sure it works anymore.
@@ -36,9 +40,7 @@ just to make sure they actually go somewhere
 
 --
 
-investigate fornax
-
---
+F# like C#
 
 autogen dsl
 
