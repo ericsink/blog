@@ -2,7 +2,6 @@
 jekyll layout inheritance ?
 
 are the front matter variable names finalized?
-    datefiled
 
 scm/index.html has {{{include
 

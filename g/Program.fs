@@ -85,12 +85,12 @@ let make_front_page template dir_content (items: Dictionary<string,Dictionary<st
 
     add content "</td></tr>"
 
-    let a = items.OrderByDescending(fun kv -> kv.Value.["datefiled"]).Take(10).ToList()
+    let a = items.OrderByDescending(fun kv -> kv.Value.["date"]).Take(10).ToList()
 
     for kv in a do
         let path = kv.Key
         let title = if kv.Value.ContainsKey("title") then kv.Value.["title"] else null
-        let datefiled = kv.Value.["datefiled"]
+        let date = kv.Value.["date"]
 
         //printfn "path: %s" path
         // TODO windows-specific code below
@@ -102,7 +102,7 @@ let make_front_page template dir_content (items: Dictionary<string,Dictionary<st
         let (front_matter, my_content) = get_front_matter html
 
         add content "<tr><td><span align=\"right\" class=ArticleDate>"
-        add content (blog.fsfun.format_date(datefiled))
+        add content (blog.fsfun.format_date(date))
         add content "</span><br><a class=\"ArticleTitleGreen\" href=\""
         add content path
         add content "\">"
@@ -139,12 +139,12 @@ let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) =
     add content "<copyright>{{site.copyright}}</copyright>"
     add content "<generator>mine</generator>"
 
-    let a = items.OrderByDescending(fun kv -> kv.Value.["datefiled"]).Take(10).ToList()
+    let a = items.OrderByDescending(fun kv -> kv.Value.["date"]).Take(10).ToList()
 
     for kv in a do
         let path = kv.Key
         let title = if kv.Value.ContainsKey("title") then kv.Value.["title"] else null
-        let datefiled = kv.Value.["datefiled"]
+        let date = kv.Value.["date"]
 
         //printfn "path: %s" path
         // TODO windows-specific code below
@@ -167,7 +167,7 @@ let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) =
         add content local_link
         add content "</link>"
         add content "<pubDate>"
-        add content (blog.fsfun.format_date_rss(datefiled))
+        add content (blog.fsfun.format_date_rss(date))
         add content "</pubDate>"
         add content "<description>"
         add content "<![CDATA["
@@ -203,10 +203,10 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (template :strin
             if front_matter.ContainsKey("title") then
                 let title = front_matter.["title"]
                 front_matter.Add("page.title", title)
-                let datefiled = front_matter.["datefiled"]
+                let date = front_matter.["date"]
                 // TODO this is dorky.  the markup should go in the template, just replace the date
                 // current implementation means that if there is no title, the markup around it is omitted.
-                let s = "<p class=\"ArticleDate\" align=right>" + datefiled + "</p><h1>" + title + "</h1>";
+                let s = "<p class=\"ArticleDate\" align=right>" + date + "</p><h1>" + title + "</h1>";
                 front_matter.Add("article.title", s)
             else
                 front_matter.Add("page.title", "Eric Sink")

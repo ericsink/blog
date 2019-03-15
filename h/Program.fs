@@ -101,7 +101,7 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
                 if it.title <> null then
                     pairs.Add("title", it.title)
                 if it.datefiled <> null then
-                    pairs.Add("datefiled", it.datefiled)
+                    pairs.Add("date", it.datefiled)
                 if it.keywords <> null then
                     pairs.Add("keywords", it.keywords)
                 if it.teaser <> null then
@@ -139,7 +139,7 @@ let do_file (url_dir :string) (from :string) dest_dir (old_index :Dictionary<str
                     let s = v.Replace(date_begin, "")
                     let i = s.IndexOf("</p>")
                     let q = if i > 0 then (s.Substring(0, i)) else s
-                    pairs.Add("datefiled", q)
+                    pairs.Add("date", q)
                 | None -> ()
 
                 let text = File.ReadAllText(from)
