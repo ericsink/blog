@@ -3,7 +3,11 @@ hitting /vcbe yields error but vcbe/index.html works
 
 aws s3 sync uploads when the timestamp is newer.
 it would be nice to only upload files that have
-changed.
+changed.  consider having g run into an existing
+directory, more like a sync, only modifying a file
+if it has changed, so the timestamps from the previous
+run will be the same.  would need to remove from
+dest when a corresponding file is not in src.
 
 jekyll layout inheritance ?
 

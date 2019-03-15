@@ -84,7 +84,7 @@ let add_defaults (d: Dictionary<string,string>) =
     d.Add("site.tagline", "SourceGear Founder")
     d.Add("site.copyright", "Copyright 2001-2019 Eric Sink. All Rights Reserved")
 
-let make_front_page template dir_content (items: Dictionary<string,Dictionary<string,string>>) = 
+let make_front_page template dir_src (items: Dictionary<string,Dictionary<string,string>>) = 
     let add (sb :StringBuilder) (s :string) =
         sb.Append(s) |> ignore
 
@@ -103,7 +103,7 @@ let make_front_page template dir_content (items: Dictionary<string,Dictionary<st
         // TODO windows-specific code below
         let path_fixed = path.Substring(1).Replace("/", "\\")
         //printfn "path_fixed: %s" path_fixed
-        let path_content = Path.Combine(dir_content, path_fixed)
+        let path_content = Path.Combine(dir_src, path_fixed)
         //printfn "path_content: %s" path_content
         let html = File.ReadAllText(path_content)
         let (front_matter, my_content) = get_front_matter html
@@ -129,7 +129,7 @@ let make_front_page template dir_content (items: Dictionary<string,Dictionary<st
     let result = crunch template pairs
     result
 
-let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) = 
+let make_rss dir_src (items: Dictionary<string,Dictionary<string,string>>) = 
     let add (sb :StringBuilder) (s :string) =
         sb.Append(s) |> ignore
 
@@ -157,7 +157,7 @@ let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) =
         // TODO windows-specific code below
         let path_fixed = path.Substring(1).Replace("/", "\\")
         //printfn "path_fixed: %s" path_fixed
-        let path_content = Path.Combine(dir_content, path_fixed)
+        let path_content = Path.Combine(dir_src, path_fixed)
         //printfn "path_content: %s" path_content
         let html = File.ReadAllText(path_content)
         let (front_matter, my_content) = get_front_matter html
@@ -192,6 +192,35 @@ let make_rss dir_content (items: Dictionary<string,Dictionary<string,string>>) =
     let result = crunch s pairs
     result
 
+let write_if_changed content dest =
+    let different =
+        if (File.Exists(dest)) then
+            let cur = File.ReadAllText(dest)
+            cur <> content
+        else
+            true
+    if different then
+        printfn "write %s" dest
+        File.WriteAllText(dest, content)
+
+let copy_if_changed src dest =
+    let different =
+        if (File.Exists(dest)) then
+            let fi_src = FileInfo(src)
+            let fi_dest = FileInfo(dest)
+            if fi_src.Length <> fi_dest.Length then
+                true
+            else
+                let ba_src = File.ReadAllBytes src
+                let ba_dest = File.ReadAllBytes dest
+                ba_src <> ba_dest
+        else
+            true
+    if different then
+        printfn "different %s -- %s" src dest
+        printfn "copy %s" dest
+        File.Copy(src, dest)
+
 let do_file (url_dir :string) (from :string) (dest_dir :string) (template :string) (items: Dictionary<string,Dictionary<string,string>>) =
     let name = Path.GetFileName(from)
     let dest_path = Path.Combine(dest_dir, name)
@@ -220,12 +249,28 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (template :strin
                 front_matter.Add("article.title", "")
 
             let all = crunch template front_matter
-            File.WriteAllText(dest_path, all)
             items.Add(url_path, front_matter)
+            write_if_changed all dest_path
         else
-            File.Copy(from, dest_path)
+            copy_if_changed from dest_path
     else
-        File.Copy(from, dest_path)
+        copy_if_changed from dest_path
+
+let rec do_clean (url_dir :string) (skip :HashSet<string>) (src :string) (dest :string) =
+    for f in (Directory.GetFiles(dest)) do
+        let name = Path.GetFileName(f)
+        let src_path = Path.Combine(src, name)
+        let path = blog.fsfun.path_combine url_dir name
+        if not (skip.Contains(path)) then
+            if not (File.Exists(src_path)) then
+                printfn "delete %s" f
+                File.Delete(f)
+
+    for sub in (Directory.GetDirectories(dest)) do
+        let name = Path.GetFileName(sub)
+        let src_sub = Path.Combine(src, name)
+        let url_subdir = blog.fsfun.path_combine url_dir name
+        do_clean url_subdir skip src_sub sub
 
 let rec do_dir (url_dir :string) (from :string) (dest_dir :string) template (items: Dictionary<string,Dictionary<string,string>>) =
     Directory.CreateDirectory(dest_dir) |> ignore
@@ -242,26 +287,29 @@ let rec do_dir (url_dir :string) (from :string) (dest_dir :string) template (ite
 
 [<EntryPoint>]
 let main argv =
-    let dir_content = argv.[0]
+    let dir_src = argv.[0]
     let dir_dest = argv.[1]
-    if (Directory.Exists(dir_dest)) then
-        raise (Exception("dest directory must not already exist"))
     let path_template = 
-        let dir_layouts = Path.Combine(dir_content, "_layouts")
+        let dir_layouts = Path.Combine(dir_src, "_layouts")
         Path.Combine(dir_layouts, "default.html")
     let default_template = File.ReadAllText(path_template)
     let items = Dictionary<string,Dictionary<string,string>>()
-    do_dir "/" dir_content dir_dest default_template items
+    do_dir "/" dir_src dir_dest default_template items
 
-    let full_path_content = Path.GetFullPath(dir_content)
+    let skip_on_clean = HashSet<string>()
+    skip_on_clean.Add("/rss.xml")
+    skip_on_clean.Add("/index.html")
+    do_clean "/" skip_on_clean dir_src dir_dest
+
+    let full_path_content = Path.GetFullPath(dir_src)
 
     let rss = make_rss full_path_content items
     let path_rss = Path.Combine(dir_dest, "rss.xml")
-    File.WriteAllText(path_rss, rss)
+    write_if_changed rss path_rss
 
     let front_page = make_front_page default_template full_path_content items
     let path_front_page = Path.Combine(dir_dest, "index.html")
-    File.WriteAllText(path_front_page, front_page)
+    write_if_changed front_page path_front_page
 
     0 // return an integer exit code
 
