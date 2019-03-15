@@ -18,16 +18,6 @@ template?
 
 shouldn't things without a title still show the date?
 
-once everything with h is clean, commit c1
-to the repo and deploy to s3
-
-for the items harvested only from blog_live (missing
-from the esbma.json), the links do not get pre-crunched
-to be path-absolute.  which is fine for the actual
-file in its original path, but the links break when
-they go in the rss.  example:  the sqlite android n
-item has a link to the multiple sqlite problem item.
-
 --
 
 what to do about the print- items?
