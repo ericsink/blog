@@ -289,10 +289,11 @@ let rec do_dir (url_dir :string) (from :string) (dest_dir :string) template (ite
 let main argv =
     let dir_src = argv.[0]
     let dir_dest = argv.[1]
-    let path_template = 
-        let dir_layouts = Path.Combine(dir_src, "_layouts")
-        Path.Combine(dir_layouts, "default.html")
-    let default_template = File.ReadAllText(path_template)
+    let default_template =
+        let path_template = 
+            let dir_layouts = Path.Combine(dir_src, "_layouts")
+            Path.Combine(dir_layouts, "default.html")
+        File.ReadAllText(path_template)
     let items = Dictionary<string,Dictionary<string,string>>()
     do_dir "/" dir_src dir_dest default_template items
 
