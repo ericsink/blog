@@ -277,15 +277,11 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictio
 
             // TODO this is dorky.  the markup should go in the template.
             // TODO temp solution, do this only if layout name is default.
-            if page_front_matter.ContainsKey("title") then
-                let title = page_front_matter.["title"]
-                let date = page_front_matter.["date"]
-                // current implementation means that if there is no title, the markup around it is omitted.
-                let s = "<p class=\"ArticleDate\" align=right>" + date + "</p><h1>" + title + "</h1>";
-                page_front_matter.Add("title_markup", s)
+            if (page_front_matter.ContainsKey("title")) && ((get_layout_name page_front_matter) = "default") then
+                page_front_matter.["layout"] <- "post"
             else
                 page_front_matter.Add("title", "Eric Sink")
-                page_front_matter.Add("title_markup", "")
+                page_front_matter.["layout"] <- "other"
 
             let layout_name = get_layout_name page_front_matter
             let after_crunch = wrap layout_name page_front_matter src_content layouts
