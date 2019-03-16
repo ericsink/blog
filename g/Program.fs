@@ -221,7 +221,7 @@ let copy_if_changed src dest =
         printfn "copy %s" dest
         File.Copy(src, dest)
 
-let do_file (url_dir :string) (from :string) (dest_dir :string) (template :string) (items: Dictionary<string,Dictionary<string,string>>) =
+let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictionary<string,string>) (items: Dictionary<string,Dictionary<string,string>>) =
     let name = Path.GetFileName(from)
     let dest_path = Path.Combine(dest_dir, name)
     if (from.EndsWith(".html")) then
@@ -230,7 +230,18 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (template :strin
         if front_matter <> null then
             add_defaults front_matter
             let url_path = blog.fsfun.path_combine url_dir name
-            front_matter.Add("content", content)
+
+            let crunchy =
+                if front_matter.ContainsKey("layout") then
+                    let layout_name = front_matter.["layout"]
+                    if layout_name = "null" then
+                        content
+                    else
+                        let layout = layouts.[layout_name]
+                        front_matter.Add("content", content)
+                        layout
+                else
+                    content
 
             // TODO instead of passing in the template here, this should
             // check pairs for the template, find it, and use that.  so
@@ -248,7 +259,7 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (template :strin
                 front_matter.Add("page.title", "Eric Sink")
                 front_matter.Add("article.title", "")
 
-            let all = crunch template front_matter
+            let all = crunch crunchy front_matter
             items.Add(url_path, front_matter)
             write_if_changed all dest_path
         else
@@ -272,10 +283,10 @@ let rec do_clean (url_dir :string) (skip :HashSet<string>) (src :string) (dest :
         let url_subdir = blog.fsfun.path_combine url_dir name
         do_clean url_subdir skip src_sub sub
 
-let rec do_dir (url_dir :string) (from :string) (dest_dir :string) template (items: Dictionary<string,Dictionary<string,string>>) =
+let rec do_dir (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictionary<string,string>) (items: Dictionary<string,Dictionary<string,string>>) =
     Directory.CreateDirectory(dest_dir) |> ignore
     for f in (Directory.GetFiles(from)) do
-        do_file url_dir f dest_dir template items
+        do_file url_dir f dest_dir layouts items
 
     for from_sub in (Directory.GetDirectories(from)) do
         let name = Path.GetFileName(from_sub)
@@ -283,19 +294,22 @@ let rec do_dir (url_dir :string) (from :string) (dest_dir :string) template (ite
         if name <> "_layouts" then
             let dest_sub = Path.Combine(dest_dir, name)
             let url_subdir = blog.fsfun.path_combine url_dir name
-            do_dir url_subdir from_sub dest_sub template items
+            do_dir url_subdir from_sub dest_sub layouts items
 
 [<EntryPoint>]
 let main argv =
     let dir_src = argv.[0]
     let dir_dest = argv.[1]
-    let default_template =
-        let path_template = 
-            let dir_layouts = Path.Combine(dir_src, "_layouts")
-            Path.Combine(dir_layouts, "default.html")
-        File.ReadAllText(path_template)
+    let layouts =
+        let dir_layouts = Path.Combine(dir_src, "_layouts")
+        let d = Dictionary<string,string>()
+        for f in (Directory.GetFiles(dir_layouts)) do
+            let basename = Path.GetFileNameWithoutExtension(f)
+            let html = File.ReadAllText(f)
+            d.Add(basename, html)
+        d
     let items = Dictionary<string,Dictionary<string,string>>()
-    do_dir "/" dir_src dir_dest default_template items
+    do_dir "/" dir_src dir_dest layouts items
 
     let skip_on_clean = HashSet<string>()
     skip_on_clean.Add("/rss.xml")
@@ -308,7 +322,8 @@ let main argv =
     let path_rss = Path.Combine(dir_dest, "rss.xml")
     write_if_changed rss path_rss
 
-    let front_page = make_front_page default_template full_path_content items
+    let default_layout = layouts.["default"]
+    let front_page = make_front_page default_layout full_path_content items
     let path_front_page = Path.Combine(dir_dest, "index.html")
     write_if_changed front_page path_front_page
 
