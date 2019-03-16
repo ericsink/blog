@@ -65,7 +65,7 @@ let get_front_matter (s :string) =
     else
         (null, s)
 
-let crunch (html :string) (pairs: Dictionary<string,string>) =
+let crunch (html :string) (content :string) (pairs :Dictionary<string,Dictionary<string,string>>) =
     let mutable t = html
 
     let expr = """{{(?<v>[^{}]+)}}"""
@@ -74,15 +74,28 @@ let crunch (html :string) (pairs: Dictionary<string,string>) =
     if a <> null then
         for m in a do
             let v = m.Groups.["v"].Value.Trim().ToLower()
-            let replacement = pairs.[v]
+            let replacement =
+                if v = "content" then
+                    // special case
+                    content
+                else
+                    let parts = v.Split(".")
+                    let section = parts.[0]
+                    let k = parts.[1]
+                    pairs.[section].[k]
             t <- t.Replace(m.Value, replacement)
 
     t
 
-let add_defaults (d: Dictionary<string,string>) =
-    d.Add("site.title", "Eric Sink")
-    d.Add("site.tagline", "SourceGear Founder")
-    d.Add("site.copyright", "Copyright 2001-2019 Eric Sink. All Rights Reserved")
+let add_pair (d: Dictionary<string,Dictionary<string,string>>) section k v =
+    if not (d.ContainsKey(section)) then
+        d.Add(section, Dictionary<string,string>())
+    d.[section].Add(k, v)
+
+let add_site_defaults (d: Dictionary<string,Dictionary<string,string>>) =
+    add_pair d "site" "title" "Eric Sink"
+    add_pair d "site" "tagline" "SourceGear Founder"
+    add_pair d "site" "copyright" "Copyright 2001-2019 Eric Sink. All Rights Reserved"
 
 let make_front_page template dir_src (items: Dictionary<string,Dictionary<string,string>>) = 
     let add (sb :StringBuilder) (s :string) =
@@ -121,12 +134,11 @@ let make_front_page template dir_src (items: Dictionary<string,Dictionary<string
     add content "<tr><td bgcolor=\"white\">"
 
     let s = content.ToString()
-    let pairs = Dictionary<string,string>()
-    add_defaults pairs
-    pairs.Add("content", s)
-    pairs.Add("page.title", "Eric Sink")
-    pairs.Add("article.title", "")
-    let result = crunch template pairs
+    let pairs = Dictionary<string,Dictionary<string,string>>()
+    add_site_defaults pairs
+    add_pair pairs "page" "title" "Eric Sink"
+    add_pair pairs "page" "title_markup" ""
+    let result = crunch template s pairs
     result
 
 let make_rss dir_src (items: Dictionary<string,Dictionary<string,string>>) = 
@@ -187,9 +199,9 @@ let make_rss dir_src (items: Dictionary<string,Dictionary<string,string>>) =
     add content "</rss>"
 
     let s = content.ToString()
-    let pairs = Dictionary<string,string>()
-    add_defaults pairs
-    let result = crunch s pairs
+    let pairs = Dictionary<string,Dictionary<string,string>>()
+    add_site_defaults pairs
+    let result = crunch s null pairs
     result
 
 let write_if_changed content dest =
@@ -226,38 +238,44 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictio
     let dest_path = Path.Combine(dest_dir, name)
     if (from.EndsWith(".html")) then
         let html = File.ReadAllText(from)
-        let (front_matter, content) = get_front_matter html
+        let (front_matter, src_content) = get_front_matter html
         if front_matter <> null then
-            add_defaults front_matter
-            let url_path = blog.fsfun.path_combine url_dir name
+            let pairs = Dictionary<string,Dictionary<string,string>>()
+            add_site_defaults pairs
 
-            let before_crunch =
+            let (layout_front_matter, before_crunch, content) =
                 if front_matter.ContainsKey("layout") then
                     let layout_name = front_matter.["layout"]
                     if layout_name = "null" then
-                        content
+                        (null, src_content, null)
                     else
                         let layout = layouts.[layout_name]
-                        front_matter.Add("content", content)
-                        layout
+                        let (template_front, template_html) = get_front_matter layout
+                        (template_front, template_html, src_content)
                 else
-                    content
+                    (null, src_content, null)
 
+            // TODO temp solution, do this only if layout name is default
             if front_matter.ContainsKey("title") then
                 let title = front_matter.["title"]
-                front_matter.Add("page.title", title)
                 let date = front_matter.["date"]
                 // TODO this is dorky.  the markup should go in the template, just replace the date
                 // current implementation means that if there is no title, the markup around it is omitted.
                 let s = "<p class=\"ArticleDate\" align=right>" + date + "</p><h1>" + title + "</h1>";
-                front_matter.Add("article.title", s)
+                front_matter.Add("title_markup", s)
             else
-                front_matter.Add("page.title", "Eric Sink")
-                front_matter.Add("article.title", "")
+                front_matter.Add("title", "Eric Sink")
+                front_matter.Add("title_markup", "")
 
-            let after_crunch = crunch before_crunch front_matter
-            items.Add(url_path, front_matter)
+            pairs.Add("page", front_matter)
+            pairs.Add("layout", layout_front_matter)
+
+            let after_crunch = crunch before_crunch content pairs
+            // TODO if layout_front_matter, need to recurse, with after_crunch as src_content
             write_if_changed after_crunch dest_path
+
+            let url_path = blog.fsfun.path_combine url_dir name
+            items.Add(url_path, front_matter)
         else
             copy_if_changed from dest_path
     else
