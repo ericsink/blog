@@ -233,49 +233,66 @@ let copy_if_changed src dest =
         printfn "copy %s" dest
         File.Copy(src, dest)
 
+let get_layout_name (front_matter :Dictionary<string,string>) =
+    if front_matter = null then
+        null
+    else
+        if (front_matter.ContainsKey("layout")) then
+            let layout_name = front_matter.["layout"]
+            if layout_name = "null" then
+                null
+            else
+                layout_name
+        else
+            null
+
+let rec wrap (layout_name :string) (page_front_matter :Dictionary<string,string>) (src_content :string) (layouts: Dictionary<string,string>) =
+    let (layout_front_matter, before_crunch, content) =
+        if layout_name = null then
+            (null, src_content, null)
+        else
+            let layout = layouts.[layout_name]
+            let (template_front, template_html) = get_front_matter layout
+            (template_front, template_html, src_content)
+
+    let pairs = Dictionary<string,Dictionary<string,string>>()
+    add_site_defaults pairs
+    pairs.Add("page", page_front_matter)
+    pairs.Add("layout", layout_front_matter)
+
+    let after_crunch = crunch before_crunch content pairs
+    let next_layout_name = get_layout_name layout_front_matter
+    if next_layout_name <> null then
+        wrap next_layout_name page_front_matter after_crunch layouts
+    else
+        after_crunch
+
 let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictionary<string,string>) (items: Dictionary<string,Dictionary<string,string>>) =
     let name = Path.GetFileName(from)
     let dest_path = Path.Combine(dest_dir, name)
     if (from.EndsWith(".html")) then
         let html = File.ReadAllText(from)
-        let (front_matter, src_content) = get_front_matter html
-        if front_matter <> null then
-            let pairs = Dictionary<string,Dictionary<string,string>>()
-            add_site_defaults pairs
+        let (page_front_matter, src_content) = get_front_matter html
+        if page_front_matter <> null then
 
-            let (layout_front_matter, before_crunch, content) =
-                if front_matter.ContainsKey("layout") then
-                    let layout_name = front_matter.["layout"]
-                    if layout_name = "null" then
-                        (null, src_content, null)
-                    else
-                        let layout = layouts.[layout_name]
-                        let (template_front, template_html) = get_front_matter layout
-                        (template_front, template_html, src_content)
-                else
-                    (null, src_content, null)
-
-            // TODO temp solution, do this only if layout name is default
-            if front_matter.ContainsKey("title") then
-                let title = front_matter.["title"]
-                let date = front_matter.["date"]
-                // TODO this is dorky.  the markup should go in the template, just replace the date
+            // TODO this is dorky.  the markup should go in the template.
+            // TODO temp solution, do this only if layout name is default.
+            if page_front_matter.ContainsKey("title") then
+                let title = page_front_matter.["title"]
+                let date = page_front_matter.["date"]
                 // current implementation means that if there is no title, the markup around it is omitted.
                 let s = "<p class=\"ArticleDate\" align=right>" + date + "</p><h1>" + title + "</h1>";
-                front_matter.Add("title_markup", s)
+                page_front_matter.Add("title_markup", s)
             else
-                front_matter.Add("title", "Eric Sink")
-                front_matter.Add("title_markup", "")
+                page_front_matter.Add("title", "Eric Sink")
+                page_front_matter.Add("title_markup", "")
 
-            pairs.Add("page", front_matter)
-            pairs.Add("layout", layout_front_matter)
-
-            let after_crunch = crunch before_crunch content pairs
-            // TODO if layout_front_matter, need to recurse, with after_crunch as src_content
+            let layout_name = get_layout_name page_front_matter
+            let after_crunch = wrap layout_name page_front_matter src_content layouts
             write_if_changed after_crunch dest_path
 
             let url_path = blog.fsfun.path_combine url_dir name
-            items.Add(url_path, front_matter)
+            items.Add(url_path, page_front_matter)
         else
             copy_if_changed from dest_path
     else
