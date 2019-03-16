@@ -231,7 +231,7 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictio
             add_defaults front_matter
             let url_path = blog.fsfun.path_combine url_dir name
 
-            let crunchy =
+            let before_crunch =
                 if front_matter.ContainsKey("layout") then
                     let layout_name = front_matter.["layout"]
                     if layout_name = "null" then
@@ -242,10 +242,6 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictio
                         layout
                 else
                     content
-
-            // TODO instead of passing in the template here, this should
-            // check pairs for the template, find it, and use that.  so
-            // pass in a dictionary of templates or an interface to get them.
 
             if front_matter.ContainsKey("title") then
                 let title = front_matter.["title"]
@@ -259,9 +255,9 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictio
                 front_matter.Add("page.title", "Eric Sink")
                 front_matter.Add("article.title", "")
 
-            let all = crunch crunchy front_matter
+            let after_crunch = crunch before_crunch front_matter
             items.Add(url_path, front_matter)
-            write_if_changed all dest_path
+            write_if_changed after_crunch dest_path
         else
             copy_if_changed from dest_path
     else
@@ -306,6 +302,7 @@ let main argv =
         for f in (Directory.GetFiles(dir_layouts)) do
             let basename = Path.GetFileNameWithoutExtension(f)
             let html = File.ReadAllText(f)
+            // TODO get front matter from template
             d.Add(basename, html)
         d
     let items = Dictionary<string,Dictionary<string,string>>()
