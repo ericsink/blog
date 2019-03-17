@@ -2,9 +2,6 @@
 hitting /vcbe yields error but vcbe/index.html works.
 bucket config issue?
 
-we should be pretty close to being ready to rm csgen.
-not even sure it works anymore.
-
 --
 
 what to do about the print- items?
@@ -14,6 +11,8 @@ etc
 
 redo front page.  no more complete copies of
 recent items.  each item appears on its own page.
+content of front page should not know about the
+td that contains it in the template.
 
 responsive:  get rid of sidebar?  just a header
 and footer?
