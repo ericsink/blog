@@ -1,4 +1,9 @@
 
+how soon can we replace default.html layout
+with lite.html?
+
+do we need separate style sheets for each template?
+
 4 items across in header links might still
 be too wide for cell phone screens
 
@@ -20,8 +25,6 @@ items without front matter, don't worry about.
 
 hitting /vcbe yields error but vcbe/index.html works.
 bucket config issue?
-
-do we need separate style sheets for each template?
 
 includes, like jekyll ?
 
