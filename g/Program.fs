@@ -254,9 +254,8 @@ let copy_if_changed src dest =
         else
             true
     if different then
-        printfn "different %s -- %s" src dest
         printfn "copy %s" dest
-        File.Copy(src, dest)
+        File.Copy(src, dest, true)
 
 let get_layout_name (front_matter :Dictionary<string,string>) =
     if front_matter = null then
