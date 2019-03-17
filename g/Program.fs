@@ -133,13 +133,18 @@ let add_site_defaults (d: Dictionary<string,Dictionary<string,string>>) =
     add_pair d "site" "tagline" "SourceGear Founder"
     add_pair d "site" "copyright" "Copyright 2001-2019 Eric Sink. All Rights Reserved"
 
+let read_from_src (dir_src :string) (uri_path :string) =
+    // TODO windows-specific code below
+    let path_fixed = uri_path.Substring(1).Replace("/", "\\")
+    let path_content = Path.Combine(dir_src, path_fixed)
+    let html = File.ReadAllText(path_content)
+    html
+
 let make_front_page template dir_src (items: Dictionary<string,Dictionary<string,string>>) = 
     let add (sb :StringBuilder) (s :string) =
         sb.Append(s) |> ignore
 
     let content = StringBuilder()
-
-    add content "</td></tr>"
 
     let a = items.OrderByDescending(fun kv -> kv.Value.["date"]).Take(10).ToList()
 
@@ -148,26 +153,16 @@ let make_front_page template dir_src (items: Dictionary<string,Dictionary<string
         let title = if kv.Value.ContainsKey("title") then kv.Value.["title"] else null
         let date = kv.Value.["date"]
 
-        //printfn "path: %s" path
-        // TODO windows-specific code below
-        let path_fixed = path.Substring(1).Replace("/", "\\")
-        //printfn "path_fixed: %s" path_fixed
-        let path_content = Path.Combine(dir_src, path_fixed)
-        //printfn "path_content: %s" path_content
-        let html = File.ReadAllText(path_content)
+        let html = read_from_src dir_src path
         let (front_matter, my_content) = get_front_matter html
 
-        add content "<tr><td><span align=\"right\" class=ArticleDate>"
-        add content (format_date(date))
-        add content "</span><br><a class=\"ArticleTitleGreen\" href=\""
-        add content path
-        add content "\">"
-        add content title
-        add content "</a><br><br></td></tr><tr><td>"
-        add content my_content
-        add content "<P> </td></tr> <tr><td>&nbsp;</td></tr>"
+        let line1 = sprintf """<p class="ArticleDate" align=right>%s</p><h1>%s</h1>""" (format_date date) title
 
-    add content "<tr><td bgcolor=\"white\">"
+        add content line1
+        add content "\n"
+        add content my_content
+        add content "\n"
+        add content "<hr/>\n"
 
     let s = content.ToString()
     let pairs = Dictionary<string,Dictionary<string,string>>()
@@ -201,13 +196,7 @@ let make_rss dir_src (items: Dictionary<string,Dictionary<string,string>>) =
         let title = if kv.Value.ContainsKey("title") then kv.Value.["title"] else null
         let date = kv.Value.["date"]
 
-        //printfn "path: %s" path
-        // TODO windows-specific code below
-        let path_fixed = path.Substring(1).Replace("/", "\\")
-        //printfn "path_fixed: %s" path_fixed
-        let path_content = Path.Combine(dir_src, path_fixed)
-        //printfn "path_content: %s" path_content
-        let html = File.ReadAllText(path_content)
+        let html = read_from_src dir_src path
         let (front_matter, my_content) = get_front_matter html
         let local_link = "https://ericsink.com" + path
 
