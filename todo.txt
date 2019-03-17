@@ -10,9 +10,7 @@ link to blog repo on github, issues, pull requests,
 etc
 
 redo front page.  no more complete copies of
-recent items.  each item appears on its own page.
-content of front page should not know about the
-td that contains it in the template.
+recent items?  each item appears on its own page.
 
 responsive:  get rid of sidebar?  just a header
 and footer?
