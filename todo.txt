@@ -1,6 +1,9 @@
 
+4 items across in header links might still
+be too wide for cell phone screens
+
 fix basic aspects of style sheet to look like 
-popular blogs
+popular blogs.  font size, etc.
 
 does google analytics still work?
 
