@@ -1,6 +1,11 @@
 
+would be nice to get everything validating by xhtml.
+so we could use xml reader to script changes.
+
 hitting /vcbe yields error but vcbe/index.html works.
 bucket config issue?
+
+separate style sheets for each template?
 
 --
 
