@@ -1,14 +1,26 @@
 
+fix basic aspects of style sheet to look like 
+popular blogs
+
+does google analytics still work?
+
+which links are worth including in the lite header?
+
 generate some kind of complete index?  so that robots
 can find everything?
 
 would be nice to get everything validating by xhtml.
-so we could use xml reader to script changes.
+so we could use xml reader to script changes.  want
+each item to be loadable as an xml fragment, without
+its template.  for the items with front matter anyway.
+items without front matter, don't worry about.
 
 hitting /vcbe yields error but vcbe/index.html works.
 bucket config issue?
 
 do we need separate style sheets for each template?
+
+includes, like jekyll ?
 
 --
 
