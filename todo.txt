@@ -1,11 +1,14 @@
 
+generate some kind of complete index?  so that robots
+can find everything?
+
 would be nice to get everything validating by xhtml.
 so we could use xml reader to script changes.
 
 hitting /vcbe yields error but vcbe/index.html works.
 bucket config issue?
 
-separate style sheets for each template?
+do we need separate style sheets for each template?
 
 --
 
@@ -18,10 +21,11 @@ redo front page.  no more complete copies of
 recent items?  each item appears on its own page.
 
 responsive:  get rid of sidebar?  just a header
-and footer?
+and footer?  progress on this with lite layout.
 
 need link checking, for within-the-site links,
-just to make sure they actually go somewhere
+just to make sure they actually go somewhere.
+need xhtml for this?
 
 --
 
