@@ -156,7 +156,7 @@ let make_front_page template dir_src (items: Dictionary<string,Dictionary<string
         let html = read_from_src dir_src path
         let (front_matter, my_content) = get_front_matter html
 
-        let line1 = sprintf """<p class="ArticleDate" align=right>%s</p><h1>%s</h1>""" (format_date date) title
+        let line1 = sprintf """<p class="ArticleDate" align=right>%s</p><h1><a href="%s">%s</a></h1>""" (format_date date) path title
 
         add content line1
         add content "\n"
