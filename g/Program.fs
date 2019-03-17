@@ -6,6 +6,42 @@ open System.Collections.Generic
 open System.Text
 open System.Text.RegularExpressions;
 
+// an implementation of Path.Combine which always uses fwd slash
+let path_combine (a :string) (b :string) =
+    if (a.Length = 0) then
+        b
+    elif (b.Substring(0, 1) = "/") then
+        b
+    elif (a.Substring(a.Length - 1, 1) = "/") then
+        a + b
+    else
+        a + "/" + b;
+
+// TODO this is probably too strict
+// just use DateTime.Parse?
+let parse_date (s :string) =
+    let twoparts = s.Split(' ')
+    let dateparts = twoparts.[0].Split('-')
+    let timeparts = twoparts.[1].Split(':')
+    let year = System.Int32.Parse(dateparts.[0])
+    let month = System.Int32.Parse(dateparts.[1])
+    let day = System.Int32.Parse(dateparts.[2])
+    let hour = System.Int32.Parse(timeparts.[0])
+    let min = System.Int32.Parse(timeparts.[1])
+    let sec = System.Int32.Parse(timeparts.[2])
+
+    let d = new System.DateTime(year, month, day, hour, min, sec, 0)
+    d
+
+let format_date_rss s =
+    //<pubDate>{{{loop.datefiled:format='ddd, dd MMM yyyy HH:mm:ss CST'}}}</pubDate>
+    let d = parse_date(s)
+    d.ToString("ddd, dd MMM yyyy HH:mm:ss CST")
+
+let format_date s =
+    let d = parse_date(s)
+    d.ToString("dddd, d MMMM yyyy")
+
 let get_front_matter (s :string) =
     let marker_front_lf = "---\n"
     let marker_front_crlf = "---\r\n"
@@ -122,7 +158,7 @@ let make_front_page template dir_src (items: Dictionary<string,Dictionary<string
         let (front_matter, my_content) = get_front_matter html
 
         add content "<tr><td><span align=\"right\" class=ArticleDate>"
-        add content (blog.fsfun.format_date(date))
+        add content (format_date(date))
         add content "</span><br><a class=\"ArticleTitleGreen\" href=\""
         add content path
         add content "\">"
@@ -186,7 +222,7 @@ let make_rss dir_src (items: Dictionary<string,Dictionary<string,string>>) =
         add content local_link
         add content "</link>"
         add content "<pubDate>"
-        add content (blog.fsfun.format_date_rss(date))
+        add content (format_date_rss(date))
         add content "</pubDate>"
         add content "<description>"
         add content "<![CDATA["
@@ -282,7 +318,7 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictio
             let after_crunch = wrap layout_name page_front_matter src_content layouts
             write_if_changed after_crunch dest_path
 
-            let url_path = blog.fsfun.path_combine url_dir name
+            let url_path = path_combine url_dir name
             items.Add(url_path, page_front_matter)
         else
             copy_if_changed from dest_path
@@ -293,7 +329,7 @@ let rec do_clean (url_dir :string) (skip :HashSet<string>) (src :string) (dest :
     for f in (Directory.GetFiles(dest)) do
         let name = Path.GetFileName(f)
         let src_path = Path.Combine(src, name)
-        let path = blog.fsfun.path_combine url_dir name
+        let path = path_combine url_dir name
         if not (skip.Contains(path)) then
             if not (File.Exists(src_path)) then
                 printfn "delete %s" f
@@ -302,7 +338,7 @@ let rec do_clean (url_dir :string) (skip :HashSet<string>) (src :string) (dest :
     for sub in (Directory.GetDirectories(dest)) do
         let name = Path.GetFileName(sub)
         let src_sub = Path.Combine(src, name)
-        let url_subdir = blog.fsfun.path_combine url_dir name
+        let url_subdir = path_combine url_dir name
         do_clean url_subdir skip src_sub sub
 
 let rec do_dir (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictionary<string,string>) (items: Dictionary<string,Dictionary<string,string>>) =
@@ -315,7 +351,7 @@ let rec do_dir (url_dir :string) (from :string) (dest_dir :string) (layouts: Dic
         // TODO skip _layouts at every depth, or just at the top?
         if name <> "_layouts" then
             let dest_sub = Path.Combine(dest_dir, name)
-            let url_subdir = blog.fsfun.path_combine url_dir name
+            let url_subdir = path_combine url_dir name
             do_dir url_subdir from_sub dest_sub layouts items
 
 [<EntryPoint>]

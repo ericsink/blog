@@ -9,8 +9,4 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
 
-<ItemGroup>
-	<ProjectReference Include="..\fslib\fslib.fsproj" />
-</ItemGroup>
-
 </Project>
