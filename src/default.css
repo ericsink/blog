@@ -1,104 +1,86 @@
+body
+{
+    max-width: 640px;
+}
+
 img[align=right] 
 {
     margin: 1em 0 1em 1em;
 }
 
+.header table
+{
+    border-spacing: 8px;
+}
+
+.header td
+{
+    background-color: tan; 
+    padding: 8px;
+    text-align : center;
+}
+
 pre.screen
 {
     background-color: tan; 
-    padding:0.15in; 
-    //border-radius:12pt;
-    color:black;
-    font-size:9pt;
-}
-
-.class_sidebar ul {
-    list-style-type:none;
-    font-size: 80%;
-    font-weight: normal;
+    padding: 0.15in; 
     color: black;
-    margin: 0;
-    padding: 0;
-    line-height: 1.5em;
+    font-size: 12px;
+    line-height: 16px;
 }
 
-.class_sidebar li {
-    text-indent: 0;
-}
-
-.class_sidebar a {
-    display: block;
-    width: 190px;
-    text-align: left;
-    padding: 8px 10px 8px 10px;
-    outline: none;
-}
-
-.class_sidebar a:link, .class_sidebar  a:visited 
+div.header
 {
-    color: black;
-    text-decoration:none;
+    color:black; 
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14pt;
+    line-height: 21pt;
 }
 
-.class_sidebar a:hover 
+div.content
 {
-    color: gray;
-    text-decoration:none;
+    color:black; 
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16pt;
+    line-height: 24pt;
 }
 
-.class_sidebar a:active 
+div.footer
 {
-    color: gray;
-    text-decoration:none;
+    color:black; 
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    line-height: 18pt;
 }
 
-.class_body a 
+h1
 {
-    outline: none;
-    text-decoration:underline;
+    font-size: 24pt;
     font-weight: bold;
 }
 
-.class_body a:link, .class_body a:visited 
+h2
 {
-    display: inline;    
-    color: black;    
-    background-color:transparent;    
-    text-decoration:underline;
+    font-size: 22pt;
+    font-weight: bold;
 }
 
-.class_body a:hover 
-{    
-    color: gray;
-    background-color:none;
-    text-decoration:underline;
-}
-    
-.class_body a:active 
+h3
 {
-    color: gray;
-    background-color:none;
-    text-decoration:underline;
+    font-size: 20pt;
+    font-weight: bold;
+}
+
+h4
+{
+    font-size: 18pt;
+    font-weight: bold;
 }
 
 .SiteTitle {font-family: Arial, Helvetica, sans-serif; font-size:36pt}
 .Tagline {font-family: Arial, Helvetica, sans-serif}
-.ArticleTitle {text-decoration: none; color: black; font-family: Arial, Helvetica, sans-serif; font-weight:bold; font-size:16pt}
-.ArticleTitleGreen {text-decoration: none; color: #669900; font-family: Arial, Helvetica, sans-serif; font-weight:bold; font-size:20pt}
-.DayPageArticleTitle {text-decoration: none; color: black; font-family: Arial, Helvetica, sans-serif; font-weight:bold; font-size:12pt}
-.ArticleDate {color:black; font-family: Arial, Helvetica, sans-serif; font-size:8pt;font-weight:normal}
-.LeftSide {font-family: Arial, Helvetica, sans-serif; font-size:10pt}
-.Copyright { color:white; font-family: Arial, Helvetica, sans-serif; font-size:7pt }
-BLOCKQUOTE {font-family: Arial, Helvetica, sans-serif; font-size:10pt}
-P {font-family: Arial, Helvetica, sans-serif; font-size:11pt}
-OL {font-family: Arial, Helvetica, sans-serif; font-size:11pt}
-UL {font-family: Arial, Helvetica, sans-serif; font-size:11pt}
-LI {font-family: Arial, Helvetica, sans-serif; font-size:11pt}
-TH {font-family: Arial, Helvetica, sans-serif; font-size:11pt}
-TD {font-family: Arial, Helvetica, sans-serif; font-size:11pt}
-H1 {font-family:Arial,Helvetica,sans-serif}
-H2 {font-family:Arial,Helvetica,sans-serif}
-H3 {font-family:Arial,Helvetica,sans-serif}
-H4 {font-family:Arial,Helvetica,sans-serif}
-H5 {font-family:Arial,Helvetica,sans-serif}
+.ArticleTitle {text-decoration: none; color: black; font-family: Arial, Helvetica, sans-serif; font-weight:bold; font-size:20pt}
+.DayPageArticleTitle {text-decoration: none; color: black; font-family: Arial, Helvetica, sans-serif; font-weight:bold; font-size:18pt}
+.ArticleDate {color:black; font-family: Arial, Helvetica, sans-serif; font-size:12pt;font-weight:normal}
+.Copyright { color:black; font-family: Arial, Helvetica, sans-serif; font-size:12pt }
 
