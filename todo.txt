@@ -1,11 +1,23 @@
 
+font tags
+
+excessive use of <br>
+
+entries that assume they are inside a table.
+no tr/td stuff unless the entry has a table
+of its own.
+
+so many &nbsp;
+
 fix all links to software.ericsink.com, etc
 
 fonts look too big on desktop, still not right
-on phone
+on phone.  probably need to use a media query.
 
 4 items across in header links might still
 be too wide for cell phone screens
+
+Best Of
 
 does google analytics still work?
 
@@ -33,7 +45,6 @@ recent items?  each item appears on its own page.
 
 need link checking, for within-the-site links,
 just to make sure they actually go somewhere.
-need xhtml for this?
 
 --
 
