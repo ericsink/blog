@@ -42,65 +42,6 @@ let format_date s =
     let d = parse_date(s)
     d.ToString("dddd, d MMMM yyyy")
 
-let get_front_matter (s :string) =
-    let marker_front_lf = "---\n"
-    let marker_front_crlf = "---\r\n"
-    if (s.StartsWith(marker_front_lf)) || (s.StartsWith(marker_front_crlf)) then
-        // first remove that first line
-        let s2 = 
-            // whether it was lf or crlf, we can just find the lf and chop there
-            let n = s.IndexOf("\n") // TODO could assert, must be > 0
-            s.Substring(n + 1)
-
-        // now find the other marker
-
-        let (n, len) = 
-            // the second marker should match \n--- for either EOL
-            let marker_back_lf = "\n---\n"
-            let marker_back_crlf = "\n---\r\n"
-            let n_lf = s2.IndexOf(marker_back_lf)
-            let n_crlf = s2.IndexOf(marker_back_crlf)
-            if n_lf > 0 then
-                if n_crlf > 0 then
-                    // found 2nd marker in BOTH lf and crlf forms?
-                    // take the first one
-                    if n_lf < n_crlf then
-                        (n_lf, marker_back_lf.Length)
-                    else
-                        (n_crlf, marker_back_crlf.Length)
-                else
-                    (n_lf, marker_back_lf.Length)
-            elif n_crlf > 0 then
-                (n_crlf, marker_back_crlf.Length)
-            else
-                raise (Exception("second front matter marker not found"))
-
-        let s3 = s2.Substring(0, n)
-        let remain = s2.Substring(n + len)
-
-        // split on lf should work for either eol here.
-        // the cr will remain, but it gets trimmed out.
-        let a = s3.Split("\n")
-        let d = Dictionary<string,string>()
-        for pair in a do
-            if pair.Length > 0 then
-                let n_colon = pair.IndexOf(":")
-                let k = pair.Substring(0, n_colon).Trim()
-                let v = pair.Substring(n_colon + 1).Trim()
-                // TODO we may want to allow v to be empty string or null
-                if (k.Length > 0) && (v.Length > 0) then
-                    d.Add(k, v)
-        (*
-        if d.ContainsKey("date") then
-            let s = d.["date"]
-            let dt = DateTime.Parse(s)
-            let normalized = dt.ToString("yyyy-MMM-dd HH:mm:ss")
-            d.["date"] <- normalized
-        *)
-        (d, remain)
-    else
-        (null, s)
-
 let crunch (html :string) (content :string) (pairs :Dictionary<string,Dictionary<string,string>>) =
     let mutable t = html
 
@@ -154,7 +95,7 @@ let make_front_page template dir_src (items: Dictionary<string,Dictionary<string
         let date = kv.Value.["date"]
 
         let html = read_from_src dir_src path
-        let (front_matter, my_content) = get_front_matter html
+        let (front_matter, my_content) = util.fm.get_front_matter html
 
         let line1 = sprintf """<p class="ArticleDate" align=right>%s</p><h1><a href="%s">%s</a></h1>""" (format_date date) path title
 
@@ -197,7 +138,7 @@ let make_rss dir_src (items: Dictionary<string,Dictionary<string,string>>) =
         let date = kv.Value.["date"]
 
         let html = read_from_src dir_src path
-        let (front_matter, my_content) = get_front_matter html
+        let (front_matter, my_content) = util.fm.get_front_matter html
         let local_link = "https://ericsink.com" + path
 
         add content "<item>"
@@ -276,7 +217,7 @@ let rec wrap (layout_name :string) (page_front_matter :Dictionary<string,string>
             (null, src_content, null)
         else
             let layout = layouts.[layout_name]
-            let (template_front, template_html) = get_front_matter layout
+            let (template_front, template_html) = util.fm.get_front_matter layout
             (template_front, template_html, src_content)
 
     let pairs = Dictionary<string,Dictionary<string,string>>()
@@ -296,7 +237,7 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictio
     let dest_path = Path.Combine(dest_dir, name)
     if (from.EndsWith(".html")) then
         let html = File.ReadAllText(from)
-        let (page_front_matter, src_content) = get_front_matter html
+        let (page_front_matter, src_content) = util.fm.get_front_matter html
         if page_front_matter <> null then
 
             if not (page_front_matter.ContainsKey("title")) then

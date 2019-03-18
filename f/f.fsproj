@@ -10,6 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\util\util.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="anglesharp" Version="0.11.0" />
   </ItemGroup>
 
