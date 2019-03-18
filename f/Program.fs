@@ -36,7 +36,7 @@ let rec find_links (n: INode) =
         let a = n :?> IHtmlAnchorElement
         let path = a.GetAttribute("href")
         if path <> null then
-            if (path.StartsWith("../")) then
+            if (path.StartsWith("item_")) then
                 printfn "    %s" path
 
     if n.HasChildNodes then
@@ -123,6 +123,14 @@ let do_file_rel f =
     let (front_matter, html) = util.fm.get_front_matter src
     if front_matter <> null then
         let new_html = html.Replace("""href="../entries/""", """href="/entries/""").Replace("""href="scm/""", """href="/scm/""").Replace("""href="../item_""", """href="/item_""").Replace("""href="../articles/""", """href="/articles/""")
+        if new_html <> html then
+            util.fm.write_with_front_matter f front_matter new_html
+    
+let do_file_rel2 f =
+    let src = File.ReadAllText(f)
+    let (front_matter, html) = util.fm.get_front_matter src
+    if front_matter <> null then
+        let new_html = html.Replace("""href="item_1""", """href="/item_1""")
         if new_html <> html then
             util.fm.write_with_front_matter f front_matter new_html
     
