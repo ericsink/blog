@@ -24,20 +24,31 @@ let path_combine (a :string) (b :string) =
     else
         a + "/" + b;
 
+let dump (path :string) =
+    if path <> null then
+        if (path.StartsWith("http:")) then
+            ()
+        elif (path.StartsWith("https:")) then
+            ()
+        elif (path.StartsWith("ftp:")) then
+            ()
+        elif (path.StartsWith("mailto:")) then
+            ()
+        elif (path.StartsWith("/")) then
+            ()
+        else
+            printfn "    %s" path
+
 let rec find_links (n: INode) =
     if (n :? IHtmlImageElement) then
         let a = n :?> IHtmlImageElement
         let path = a.GetAttribute("src")
-        if path <> null then
-            if (path.StartsWith("../")) then
-                printfn "    %s" path
+        dump path
 
     if (n :? IHtmlAnchorElement) then
         let a = n :?> IHtmlAnchorElement
         let path = a.GetAttribute("href")
-        if path <> null then
-            if (path.StartsWith("item_")) then
-                printfn "    %s" path
+        dump path
 
     if n.HasChildNodes then
         for sub in n.ChildNodes do
