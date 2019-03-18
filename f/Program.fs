@@ -25,10 +25,19 @@ let path_combine (a :string) (b :string) =
         a + "/" + b;
 
 let rec find_links (n: INode) =
-    // TODO img src as well
+    if (n :? IHtmlImageElement) then
+        let a = n :?> IHtmlImageElement
+        let path = a.GetAttribute("src")
+        if path <> null then
+            if (path.StartsWith("../")) then
+                printfn "    %s" path
+
     if (n :? IHtmlAnchorElement) then
         let a = n :?> IHtmlAnchorElement
-        printfn "    %s" (a.GetAttribute("href"))
+        let path = a.GetAttribute("href")
+        if path <> null then
+            if (path.StartsWith("../")) then
+                printfn "    %s" path
 
     if n.HasChildNodes then
         for sub in n.ChildNodes do
@@ -128,7 +137,7 @@ let do_file_url f =
 let rec do_dir (url_dir :string) (from :string) =
     for f in (Directory.GetFiles(from)) do
         let name = Path.GetFileName(f)
-        do_file_rel f
+        do_file_links url_dir f
 
     for from_sub in (Directory.GetDirectories(from)) do
         let name = Path.GetFileName(from_sub)
