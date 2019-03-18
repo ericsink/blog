@@ -11,12 +11,6 @@ sg services link
 generate some kind of complete index?  so that robots
 can find everything?
 
-would be nice to get everything validating by xhtml.
-so we could use xml reader to script changes.  want
-each item to be loadable as an xml fragment, without
-its template.  for the items with front matter anyway.
-items without front matter, don't worry about.
-
 hitting /vcbe yields error but vcbe/index.html works.
 bucket config issue?
 
@@ -31,9 +25,6 @@ etc
 
 redo front page.  no more complete copies of
 recent items?  each item appears on its own page.
-
-responsive:  get rid of sidebar?  just a header
-and footer?  progress on this with lite layout.
 
 need link checking, for within-the-site links,
 just to make sure they actually go somewhere.
