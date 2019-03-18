@@ -36,6 +36,8 @@ let dump (path :string) =
             ()
         elif (path.StartsWith("/")) then
             ()
+        elif (path.StartsWith("#")) then
+            ()
         else
             printfn "    %s" path
 
