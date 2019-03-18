@@ -145,6 +145,14 @@ let do_file_rel2 f =
         if new_html <> html then
             util.fm.write_with_front_matter f front_matter new_html
     
+let do_file_rel3 f =
+    let src = File.ReadAllText(f)
+    let (front_matter, html) = util.fm.get_front_matter src
+    if front_matter <> null then
+        let new_html = html.Replace("""src="smiley.gif""", """src="/smiley.gif""")
+        if new_html <> html then
+            util.fm.write_with_front_matter f front_matter new_html
+    
 let do_file_url f =
     let src = File.ReadAllText(f)
     let (front_matter, html) = util.fm.get_front_matter src
