@@ -1,26 +1,11 @@
 
-er, 20010830 appears to be a copy of item_10065.
-looks like all the ArticleBlurbCell items are
-like that.  just remove them all?
-
-hmmm.  20040601 is item_10173, but it contains more
-
-20030603 contains items 10098 AND 10099
-
-this one the script got fooled:
-20030730.html (1) claims item_10172.html but len diff 313
-
-some of the 200x.html items are dupes of things
-with names not like item_xxxxx.  about author is one.
-
-I don't think I've found a 200x item that is not
-a dupe of other item(s)
+get rid of amazon affiliate links
 
 for those old items, the date in the text doesn't
 match the date in the front matter
 
 it looks like there may be item_ddddd items that are
-dupes of something else
+dupes of something else.  like all of the 22 laws items.
 
 font tags
 
