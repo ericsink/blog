@@ -8,9 +8,44 @@ open System.Linq
 open System.Text.RegularExpressions;
 
 open AngleSharp.Html.Parser
-open AngleSharp.Xhtml
 open AngleSharp.Html
 open AngleSharp.Html.Dom.Events
+open AngleSharp.Html.Dom
+open AngleSharp.Dom
+
+// TODO mv to util
+let path_combine (a :string) (b :string) =
+    if (a.Length = 0) then
+        b
+    elif (b.Substring(0, 1) = "/") then
+        b
+    elif (a.Substring(a.Length - 1, 1) = "/") then
+        a + b
+    else
+        a + "/" + b;
+
+let rec find_links (n: INode) =
+    // TODO img src as well
+    if (n :? IHtmlAnchorElement) then
+        let a = n :?> IHtmlAnchorElement
+        printfn "    %s" (a.GetAttribute("href"))
+
+    if n.HasChildNodes then
+        for sub in n.ChildNodes do
+            find_links sub
+
+let do_file_links (url_dir :string) (f :string) =
+    let name = Path.GetFileName(f)
+    let src = File.ReadAllText(f)
+    let (front_matter, html) = util.fm.get_front_matter src
+    let url_path = path_combine url_dir name
+    if front_matter <> null then
+        printfn "%s" url_path
+        let parser = HtmlParser()
+        let dom = parser.ParseDocument("<html><body></body></html>")
+        let nodes = parser.ParseFragment(html, dom.Body)
+        for n in nodes do
+            find_links n
 
 let just_count (html :string) (s :string) =
     let regx = Regex(s)
@@ -82,21 +117,21 @@ let do_file_url f =
         if new_html <> html then
             util.fm.write_with_front_matter f front_matter new_html
     
-let rec do_dir (from :string) =
+let rec do_dir (url_dir :string) (from :string) =
     for f in (Directory.GetFiles(from)) do
         let name = Path.GetFileName(f)
-        if (name.StartsWith("200")) then
-            do_file_dedup f
+        do_file_links url_dir f
 
     for from_sub in (Directory.GetDirectories(from)) do
         let name = Path.GetFileName(from_sub)
         // TODO skip _layouts at every depth, or just at the top?
         if name <> "_layouts" then
-            do_dir from_sub
+            let url_subdir = path_combine url_dir name
+            do_dir url_subdir from_sub
 
 [<EntryPoint>]
 let main argv =
     let dir_src = argv.[0]
-    do_dir dir_src
+    do_dir "/" dir_src
     0 // return an integer exit code
 

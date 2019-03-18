@@ -7,6 +7,7 @@ open System.Text
 open System.Text.RegularExpressions;
 
 // an implementation of Path.Combine which always uses fwd slash
+// TODO mv to util
 let path_combine (a :string) (b :string) =
     if (a.Length = 0) then
         b
