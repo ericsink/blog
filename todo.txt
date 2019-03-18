@@ -1,4 +1,6 @@
 
+fix all links to software.ericsink.com, etc
+
 fonts look too big on desktop, still not right
 on phone
 
