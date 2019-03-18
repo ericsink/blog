@@ -4,6 +4,7 @@ open System
 open System.IO
 open System.Collections.Generic
 open System.Text
+open System.Linq
 open System.Text.RegularExpressions;
 
 open AngleSharp.Html.Parser
@@ -11,22 +12,48 @@ open AngleSharp.Xhtml
 open AngleSharp.Html
 open AngleSharp.Html.Dom.Events
 
+let just_count (html :string) (s :string) =
+    let regx = Regex(s)
+    let a = regx.Matches(html);
+    if a <> null then
+        a.Count
+    else
+        0
+
 let do_file_dedup (f :string) =
     let dir = Path.GetDirectoryName(f)
     let name = Path.GetFileName(f)
     let src = File.ReadAllText(f)
     let (front_matter, html) = util.fm.get_front_matter src
-    let expr = """item_[0-9]+.html"""
+    let count_blurbs = just_count html "ArticleBlurbCell"
+    let expr = """<tr class="ArticleBlurbCell"><td colspan="3">&nbsp;<a name="(?<id>[0-9]+)" href="(?<href>[^"]+)">"""
     let regx = Regex(expr)
     let a = regx.Matches(html);
-    if a <> null then
+    if (a <> null) && (a.Count > 0) then
+        printfn "%s claims to contain %d items" name a.Count
+        if a.Count <> count_blurbs then
+            printfn "    but count_blurbs is %d" count_blurbs
+        let mutable total_other_len = 0
         for m in a do
-            let other_name = m.Value
+            let id = m.Groups.["id"].Value
+            let other_name = m.Groups.["href"].Value
             let other_path = Path.Combine(dir, other_name)
             if (File.Exists(other_path)) then
-                printfn "%s is %s" name other_name
+                let other = File.ReadAllText(other_path)
+                let len_other = other.Length
+                total_other_len <- total_other_len + len_other
+                printfn "    %s" other_name
             else
-                printfn "%s has no dup" name
+                printfn "    %s not found" other_name
+        let len_src = src.Length
+        let len_diff = len_src - total_other_len
+        let abs_diff = Math.Abs(len_diff)
+        let each = abs_diff / count_blurbs
+        printfn "    ---- len_diff %d (%d each)" abs_diff each
+        if each > 275 then
+            printfn "    big"
+    else
+        printfn "%s has no dup" name
 
 let do_file_parse f =
     let src = File.ReadAllText(f)
