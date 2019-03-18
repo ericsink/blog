@@ -4,11 +4,29 @@ open System
 open System.IO
 open System.Collections.Generic
 open System.Text
+open System.Text.RegularExpressions;
 
 open AngleSharp.Html.Parser
 open AngleSharp.Xhtml
 open AngleSharp.Html
 open AngleSharp.Html.Dom.Events
+
+let do_file_dedup (f :string) =
+    let dir = Path.GetDirectoryName(f)
+    let name = Path.GetFileName(f)
+    let src = File.ReadAllText(f)
+    let (front_matter, html) = util.fm.get_front_matter src
+    let expr = """item_[0-9]+.html"""
+    let regx = Regex(expr)
+    let a = regx.Matches(html);
+    if a <> null then
+        for m in a do
+            let other_name = m.Value
+            let other_path = Path.Combine(dir, other_name)
+            if (File.Exists(other_path)) then
+                printfn "%s is %s" name other_name
+            else
+                printfn "%s has no dup" name
 
 let do_file_parse f =
     let src = File.ReadAllText(f)
@@ -39,7 +57,9 @@ let do_file_url f =
     
 let rec do_dir (from :string) =
     for f in (Directory.GetFiles(from)) do
-        do_file_url f
+        let name = Path.GetFileName(f)
+        if (name.StartsWith("200")) then
+            do_file_dedup f
 
     for from_sub in (Directory.GetDirectories(from)) do
         let name = Path.GetFileName(from_sub)

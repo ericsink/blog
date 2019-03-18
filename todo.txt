@@ -1,4 +1,13 @@
 
+er, 20010830 appears to be a copy of item_10065.
+looks like all the ArticleBlurbCell items are
+like that.  just remove them all?
+
+hmmm.  20040601 is item_10173, but it contains more
+
+for those old items, the date in the text doesn't
+match the date in the front matter
+
 font tags
 
 excessive use of <br>
