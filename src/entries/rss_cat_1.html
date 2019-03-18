@@ -125,10 +125,10 @@ SQLite version 3.7.11 2012-03-20 11:35:50
 Enter ".help" for instructions
 Enter SQL statements terminated with a ";"
 sqlite> .load zumero.dylib
-sqlite> INSERT INTO feeds (url) VALUES ('http://ericsink.com/rss.xml');
+sqlite> INSERT INTO feeds (url) VALUES ('https://ericsink.com/rss.xml');
 sqlite> SELECT * FROM feeds;
 1|http://feeds.hanselman.com/ScottHanselman
-2|http://ericsink.com/rss.xml
+2|https://ericsink.com/rss.xml
 sqlite> SELECT zumero_sync(
     'main',
     'https://zinst393e9343b87.s.zumero.net',
@@ -293,7 +293,7 @@ built.</p>
 
 <pre class="screen">
 eric$ mono ./z.exe
-http://ericsink.com/rss.xml
+https://ericsink.com/rss.xml
 http://feeds.hanselman.com/ScottHanselman
 </pre>
 

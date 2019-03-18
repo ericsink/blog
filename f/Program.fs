@@ -10,7 +10,7 @@ open AngleSharp.Xhtml
 open AngleSharp.Html
 open AngleSharp.Html.Dom.Events
 
-let do_file f =
+let do_file_parse f =
     let src = File.ReadAllText(f)
     let (front_matter, html) = util.fm.get_front_matter src
     if front_matter <> null then
@@ -29,9 +29,17 @@ let do_file f =
         let new_html = sw.ToString()
         util.fm.write_with_front_matter f front_matter new_html
     
+let do_file_url f =
+    let src = File.ReadAllText(f)
+    let (front_matter, html) = util.fm.get_front_matter src
+    if front_matter <> null then
+        let new_html = html.Replace("software.ericsink.com", "ericsink.com").Replace("www.ericsink.com", "ericsink.com").Replace("http://ericsink.com", "https://ericsink.com").Replace("href=\"https://ericsink.com/", "href=\"/")
+        if new_html <> html then
+            util.fm.write_with_front_matter f front_matter new_html
+    
 let rec do_dir (from :string) =
     for f in (Directory.GetFiles(from)) do
-        do_file f
+        do_file_url f
 
     for from_sub in (Directory.GetDirectories(from)) do
         let name = Path.GetFileName(from_sub)
