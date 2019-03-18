@@ -109,6 +109,14 @@ let do_file_parse f =
         let new_html = sw.ToString()
         util.fm.write_with_front_matter f front_matter new_html
     
+let do_file_rel f =
+    let src = File.ReadAllText(f)
+    let (front_matter, html) = util.fm.get_front_matter src
+    if front_matter <> null then
+        let new_html = html.Replace("""href="../entries/""", """href="/entries/""").Replace("""href="scm/""", """href="/scm/""").Replace("""href="../item_""", """href="/item_""").Replace("""href="../articles/""", """href="/articles/""")
+        if new_html <> html then
+            util.fm.write_with_front_matter f front_matter new_html
+    
 let do_file_url f =
     let src = File.ReadAllText(f)
     let (front_matter, html) = util.fm.get_front_matter src
@@ -120,7 +128,7 @@ let do_file_url f =
 let rec do_dir (url_dir :string) (from :string) =
     for f in (Directory.GetFiles(from)) do
         let name = Path.GetFileName(f)
-        do_file_links url_dir f
+        do_file_rel f
 
     for from_sub in (Directory.GetDirectories(from)) do
         let name = Path.GetFileName(from_sub)
