@@ -1,4 +1,7 @@
 
+fonts look too big on desktop, still not right
+on phone
+
 4 items across in header links might still
 be too wide for cell phone screens
 

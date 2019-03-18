@@ -8,6 +8,7 @@ open System.Text
 open AngleSharp.Html.Parser
 open AngleSharp.Xhtml
 open AngleSharp.Html
+open AngleSharp.Html.Dom.Events
 
 let get_front_matter (s :string) =
     let marker_front_lf = "---\n"
@@ -86,11 +87,17 @@ let do_file f =
     let src = File.ReadAllText(f)
     let (front_matter, html) = get_front_matter src
     let parser = HtmlParser()
+    parser.Error.Add(
+        fun s -> 
+            let e = s :?> HtmlErrorEvent
+            printfn "%d: %s" e.Code e.Message
+        )
     let dom = parser.ParseDocument("<html><body></body></html>")
     let nodes = parser.ParseFragment(html, dom.Body)
     let sw = StringWriter()
+    let fmt = PrettyMarkupFormatter()
     for n in nodes do
-        n.ToHtml(sw, HtmlMarkupFormatter.Instance)
+        n.ToHtml(sw, fmt)
     let new_html = sw.ToString()
     write_with_front_matter f front_matter new_html
     
