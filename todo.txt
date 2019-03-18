@@ -35,8 +35,6 @@ includes, like jekyll ?
 
 --
 
-what to do about the print- items?
-
 link to blog repo on github, issues, pull requests,
 etc
 
