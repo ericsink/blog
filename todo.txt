@@ -1,4 +1,7 @@
 
+https://developer.mozilla.org/en-US/docs/Mozilla/Mobile/Viewport_meta_tag
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 fonts look too big on desktop, still not right
 on phone.  probably need to use a media query.
 
