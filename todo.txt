@@ -4,8 +4,8 @@ get rid of amazon affiliate links
 for those old items, the date in the text doesn't
 match the date in the front matter
 
-it looks like there may be item_ddddd items that are
-dupes of something else.  like all of the 22 laws items.
+are there other things in item_ddddd that are dupes
+of other things?
 
 font tags
 
@@ -18,8 +18,6 @@ no tr/td stuff unless the entry has a table
 of its own.
 
 so many &nbsp;
-
-fix all links to software.ericsink.com, etc
 
 fonts look too big on desktop, still not right
 on phone.  probably need to use a media query.
