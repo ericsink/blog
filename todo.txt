@@ -1,15 +1,6 @@
 
 code formatting.  screen.
 
-redo front page.  no more complete copies of
-recent items?  each item appears on its own page.
-instead, perhaps put the About Eric stuff, plus
-a table of contents, with links to items.  Best Of,
-plus most recent.
-
-maybe front_index will end up being done with a
-kind of toc
-
 toc for Best Of
 
 put the twitter and github links back somewhere
