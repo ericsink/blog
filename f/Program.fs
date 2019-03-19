@@ -198,8 +198,10 @@ let main argv =
             all_links.Add(a) |> ignore
             if not (all_items.Contains(a)) then
                 printfn "broken from %s to %s" path a
+    (*
     for a in all_items do
         if not (all_links.Contains(a)) then
             printfn "never linked %s" a
+    *)
     0 // return an integer exit code
 
