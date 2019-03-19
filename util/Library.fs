@@ -6,6 +6,7 @@ module fm =
     open System.Collections.Generic
     open System.Text
 
+    // TODO return option string
     let get_front_matter (s :string) =
         let marker_front_lf = "---\n"
         let marker_front_crlf = "---\r\n"

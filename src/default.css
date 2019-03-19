@@ -28,6 +28,26 @@ pre.screen
     line-height: 16px;
 }
 
+p.toc_item_date
+{
+    font-size: 12pt;
+    margin-bottom: 0pt;
+}
+
+p.toc_item_title
+{
+    margin-left: 24pt;
+    margin-top: 0pt;
+    margin-bottom: 0pt;
+}
+
+p.toc_item_teaser
+{
+    font-size: 12pt;
+    margin-top: 0pt;
+    margin-left: 48pt;
+}
+
 div.header
 {
     color: black; 

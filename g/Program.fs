@@ -75,10 +75,17 @@ let add_site_defaults (d: Dictionary<string,Dictionary<string,string>>) =
     add_pair d "site" "tagline" "SourceGear Founder"
     add_pair d "site" "copyright" "Copyright 2001-2019 Eric Sink. All Rights Reserved"
 
-let read_from_src (dir_src :string) (uri_path :string) =
+// dir is a platform path
+// uri_path is forward-slashes
+// result is a platform path
+let weird_path_combine (dir :string) (uri_path :string) =
     // TODO windows-specific code below
     let path_fixed = uri_path.Substring(1).Replace("/", "\\")
-    let path_content = Path.Combine(dir_src, path_fixed)
+    let path = Path.Combine(dir, path_fixed)
+    path
+
+let read_from_src (dir_src :string) (uri_path :string) =
+    let path_content = weird_path_combine dir_src uri_path
     let html = File.ReadAllText(path_content)
     html
 
@@ -88,7 +95,7 @@ let make_front_page template dir_src (items: Dictionary<string,Dictionary<string
 
     let content = StringBuilder()
 
-    let a = items.OrderByDescending(fun kv -> kv.Value.["date"]).Take(10).ToList()
+    let a = items.Where(fun kv -> kv.Value.ContainsKey("date")).OrderByDescending(fun kv -> kv.Value.["date"]).Take(10).ToList()
 
     for kv in a do
         let path = kv.Key
@@ -131,7 +138,7 @@ let make_rss dir_src (items: Dictionary<string,Dictionary<string,string>>) =
     add content "<copyright>{{site.copyright}}</copyright>"
     add content "<generator>mine</generator>"
 
-    let a = items.OrderByDescending(fun kv -> kv.Value.["date"]).Take(10).ToList()
+    let a = items.Where(fun kv -> kv.Value.ContainsKey("date")).OrderByDescending(fun kv -> kv.Value.["date"]).Take(10).ToList()
 
     for kv in a do
         let path = kv.Key
@@ -233,6 +240,95 @@ let rec wrap (layout_name :string) (page_front_matter :Dictionary<string,string>
     else
         after_crunch
 
+let make_toc (magic: Dictionary<string,string>) dir_src (items: Dictionary<string,Dictionary<string,string>>) = 
+    let add (sb :StringBuilder) (s :string) =
+        sb.Append(s) |> ignore
+
+    let kw_include = magic.["keyword"]
+    let showdate =
+        if (magic.ContainsKey("showdate")) then
+            magic.["showdate"] = "true"
+        else
+            true
+    let showteaser =
+        if (magic.ContainsKey("showteaser")) then
+            magic.["showteaser"] = "true"
+        else
+            true
+    let sortby =
+        if (magic.ContainsKey("sortby")) then
+            magic.["sortby"]
+        else
+            "date"
+
+    // TODO allow multiple included keywords here?
+    // TODO allow keyword exclusion here?
+
+    let filtered = items.Where(fun kv -> (kv.Value.ContainsKey("keywords")) && (kv.Value.["keywords"].Contains(kw_include)))
+
+    let a = filtered.OrderByDescending( fun kv -> if (kv.Value.ContainsKey(sortby)) then kv.Value.[sortby] else null )
+
+    let content = StringBuilder()
+
+    for kv in a do
+        let path = kv.Key
+        let title = kv.Value.["title"]
+
+        add content "<div class=\"toc_item\">\n"
+
+        if showdate then
+            let date = kv.Value.["date"]
+            sprintf "  <p class=\"toc_item_date\">%s</p>\n" (format_date date) |> add content
+
+        sprintf "  <p class=\"toc_item_title\"><a href=\"%s\">%s</a></p>" path title |> add content
+
+        if showteaser then
+            if (kv.Value.ContainsKey("teaser")) then
+                let teaser = kv.Value.["teaser"]
+                sprintf "  <p class=\"toc_item_teaser\">%s</p>\n" teaser |> add content
+            else
+                sprintf "  <p class=\"toc_item_teaser\"></p>\n" |> add content
+                () // TODO do we want an empty para for the teaser?
+
+        add content "</div>\n"
+
+    let s = content.ToString()
+    s
+
+let crunch_magic html dir_src (items: Dictionary<string,Dictionary<string,string>>) =
+    let mutable t = html
+
+    let expr = """{@(?<magic>[^{}]+)@}"""
+    let regx = Regex(expr)
+    let a = regx.Matches(t);
+    if a <> null then
+        for m in a do
+            let magic = m.Groups.["magic"].Value.Trim().ToLower()
+            let parts = magic.Split(',').Select(fun s -> s.Trim()).ToList()
+            let d = Dictionary<string,string>()
+            for p in parts do
+                let subparts = p.Split('=')
+                let k = subparts.[0].Trim()
+                let v = subparts.[1].Trim()
+                d.Add(k, v)
+            let gen_type = d.["type"]
+            let replacement =
+                if gen_type = "toc" then
+                    make_toc d dir_src items
+                else
+                    raise(NotImplementedException(sprintf "magic type %s" gen_type))
+            t <- t.Replace(m.Value, replacement)
+
+    t
+
+let do_file_with_magic (from :string) (dir_src :string) (dest_path :string) (layouts: Dictionary<string,string>) (items: Dictionary<string,Dictionary<string,string>>) =
+    let html = File.ReadAllText(from)
+    let (page_front_matter, src_content) = util.fm.get_front_matter html
+    let tocs_done = crunch_magic src_content dir_src items
+    let layout_name = get_layout_name page_front_matter
+    let after_crunch = wrap layout_name page_front_matter tocs_done layouts
+    write_if_changed after_crunch dest_path
+
 let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictionary<string,string>) (items: Dictionary<string,Dictionary<string,string>>) =
     let name = Path.GetFileName(from)
     let dest_path = Path.Combine(dest_dir, name)
@@ -241,13 +337,26 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictio
         let (page_front_matter, src_content) = util.fm.get_front_matter html
         if page_front_matter <> null then
 
-            if not (page_front_matter.ContainsKey("title")) then
-                page_front_matter.Add("title", "Eric Sink")
+            if not (page_front_matter.ContainsKey("gen")) then
+                if not (page_front_matter.ContainsKey("title")) then
+                    page_front_matter.Add("title", "Eric Sink")
 
-            let layout_name = get_layout_name page_front_matter
-            let after_crunch = wrap layout_name page_front_matter src_content layouts
-            write_if_changed after_crunch dest_path
+                let layout_name = get_layout_name page_front_matter
+                let after_crunch = wrap layout_name page_front_matter src_content layouts
+                write_if_changed after_crunch dest_path
 
+            let url_path = path_combine url_dir name
+            items.Add(url_path, page_front_matter)
+        else
+            copy_if_changed from dest_path
+    elif (from.EndsWith(".xml")) then
+        let html = File.ReadAllText(from)
+        let (page_front_matter, src_content) = util.fm.get_front_matter html
+        if page_front_matter <> null then
+            if (page_front_matter.ContainsKey("gen")) then
+                ()
+            else
+                raise(NotImplementedException())
             let url_path = path_combine url_dir name
             items.Add(url_path, page_front_matter)
         else
@@ -255,21 +364,20 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictio
     else
         copy_if_changed from dest_path
 
-let rec do_clean (url_dir :string) (skip :HashSet<string>) (src :string) (dest :string) =
+let rec do_clean (url_dir :string) (src :string) (dest :string) =
     for f in (Directory.GetFiles(dest)) do
         let name = Path.GetFileName(f)
         let src_path = Path.Combine(src, name)
         let path = path_combine url_dir name
-        if not (skip.Contains(path)) then
-            if not (File.Exists(src_path)) then
-                printfn "delete %s" f
-                File.Delete(f)
+        if not (File.Exists(src_path)) then
+            printfn "delete %s" f
+            File.Delete(f)
 
     for sub in (Directory.GetDirectories(dest)) do
         let name = Path.GetFileName(sub)
         let src_sub = Path.Combine(src, name)
         let url_subdir = path_combine url_dir name
-        do_clean url_subdir skip src_sub sub
+        do_clean url_subdir src_sub sub
 
 let rec do_dir (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictionary<string,string>) (items: Dictionary<string,Dictionary<string,string>>) =
     Directory.CreateDirectory(dest_dir) |> ignore
@@ -283,6 +391,25 @@ let rec do_dir (url_dir :string) (from :string) (dest_dir :string) (layouts: Dic
             let dest_sub = Path.Combine(dest_dir, name)
             let url_subdir = path_combine url_dir name
             do_dir url_subdir from_sub dest_sub layouts items
+
+let do_gen dir_src dir_dest path (layouts: Dictionary<string,string>) (items: Dictionary<string,Dictionary<string,string>>) = 
+    let front_matter = items.[path]
+    let gen_type = front_matter.["gen"]
+    let path_dest = weird_path_combine dir_dest path
+    if gen_type = "rss" then
+        let rss = make_rss dir_src items
+        write_if_changed rss path_dest
+    elif gen_type = "front_index" then
+        let layout_name = front_matter.["layout"]
+        let layout = layouts.[layout_name]
+        let front_page = make_front_page layout dir_src items
+        write_if_changed front_page path_dest
+    elif gen_type = "magic" then
+        let path_src = weird_path_combine dir_src path
+        let path_dest = weird_path_combine dir_dest path
+        do_file_with_magic path_src dir_src path_dest layouts items
+    else
+        raise(NotImplementedException(sprintf "unknown gen type %s" gen_type))
 
 [<EntryPoint>]
 let main argv =
@@ -300,21 +427,15 @@ let main argv =
     let items = Dictionary<string,Dictionary<string,string>>()
     do_dir "/" dir_src dir_dest layouts items
 
-    let skip_on_clean = HashSet<string>()
-    skip_on_clean.Add("/rss.xml")
-    skip_on_clean.Add("/index.html")
-    do_clean "/" skip_on_clean dir_src dir_dest
+    do_clean "/" dir_src dir_dest
 
     let full_path_content = Path.GetFullPath(dir_src)
 
-    let rss = make_rss full_path_content items
-    let path_rss = Path.Combine(dir_dest, "rss.xml")
-    write_if_changed rss path_rss
-
-    let default_layout = layouts.["default"]
-    let front_page = make_front_page default_layout full_path_content items
-    let path_front_page = Path.Combine(dir_dest, "index.html")
-    write_if_changed front_page path_front_page
+    for kv in items do
+        let path = kv.Key
+        let front_matter = kv.Value
+        if (front_matter.ContainsKey("gen")) then
+            do_gen full_path_content dir_dest path layouts items
 
     0 // return an integer exit code
 

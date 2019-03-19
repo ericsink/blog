@@ -26,6 +26,7 @@ let path_combine (a :string) (b :string) =
 
 let links = Dictionary<string,HashSet<string>>()
 let all_items = HashSet<string>()
+let all_keywords = HashSet<string>()
 
 let add_link (from :string) (dest :string) =
     if not (links.ContainsKey(from)) then
@@ -191,6 +192,16 @@ let do_file_rel3 f =
         if new_html <> html then
             util.fm.write_with_front_matter f front_matter new_html
     
+let do_file_find_keywords f =
+    let src = File.ReadAllText(f)
+    let (front_matter, html) = util.fm.get_front_matter src
+    if front_matter <> null then
+        if (front_matter.ContainsKey("keywords")) then
+            let s = front_matter.["keywords"].Split(' ')
+            for k in s do
+                let k2 = k.Trim()
+                all_keywords.Add(k2) |> ignore
+    
 let do_file_url f =
     let src = File.ReadAllText(f)
     let (front_matter, html) = util.fm.get_front_matter src
@@ -204,8 +215,7 @@ let rec do_dir (url_dir :string) (from :string) =
         let name = Path.GetFileName(f)
         let url_path = path_combine url_dir name
         all_items.Add(url_path) |> ignore
-        if (name.StartsWith("item_")) then
-            do_file_old_item f
+        do_file_find_keywords f
 
     for from_sub in (Directory.GetDirectories(from)) do
         let name = Path.GetFileName(from_sub)
@@ -219,6 +229,9 @@ let main argv =
     let dir_src = argv.[0]
     do_dir "/" dir_src
     all_items.Add("/index.html") |> ignore
+    for k in all_keywords do
+        printfn "%s" k
+    (*
     let all_links = HashSet<string>()
     for path in links.Keys do
         let h = links.[path]
@@ -226,6 +239,7 @@ let main argv =
             all_links.Add(a) |> ignore
             if not (all_items.Contains(a)) then
                 printfn "broken from %s to %s" path a
+    *)
     (*
     for a in all_items do
         if not (all_links.Contains(a)) then
