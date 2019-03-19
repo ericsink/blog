@@ -1,8 +1,8 @@
 
-get rid of amazon affiliate links
+fonts look too big on desktop, still not right
+on phone.  probably need to use a media query.
 
-for those old items, the date in the text doesn't
-match the date in the front matter
+get rid of amazon affiliate links
 
 are there other things in item_ddddd that are dupes
 of other things?
@@ -18,9 +18,6 @@ no tr/td stuff unless the entry has a table
 of its own.
 
 so many &nbsp;
-
-fonts look too big on desktop, still not right
-on phone.  probably need to use a media query.
 
 4 items across in header links might still
 be too wide for cell phone screens
