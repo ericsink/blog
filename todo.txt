@@ -23,7 +23,9 @@ of its own.
 so many &nbsp;
 
 4 items across in header links might still
-be too wide for cell phone screens
+be too wide for cell phone screens.  and the
+twitter and github items are wasteful anyway.
+and the vcbe link makes no sense on a phone.
 
 Best Of
 
