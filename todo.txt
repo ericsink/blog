@@ -1,4 +1,17 @@
 
+code formatting.  screen.
+
+redo front page.  no more complete copies of
+recent items?  each item appears on its own page.
+instead, perhaps put the About Eric stuff, plus
+a table of contents, with links to items.  Best Of,
+plus most recent.
+
+maybe front_index will end up being done with a
+kind of toc
+
+toc for Best Of
+
 put the twitter and github links back somewhere
 in the layout?
 
@@ -14,8 +27,6 @@ toc for dotnet?
 
 toc for rx
 
-toc for Best Of
-
 toc for (mssql_to_sqlite) ?
 
 toc for old wpf stuff?
@@ -28,22 +39,13 @@ tag things with keywords for fsharp, rust, etc
 
 and sqlite.  and xamarin.
 
-maybe front_index will end up being done with a
-kind of toc
-
 what date format should tocs use?
 
 front_matter for gen could contain other parameters
 used to construct the content.  like for rss, the
 number of items to include.
 
-redo front page.  no more complete copies of
-recent items?  each item appears on its own page.
-instead, perhaps put the About Eric stuff, plus
-a table of contents, with links to items.  Best Of,
-plus most recent.
-
-mt princeton image is too heavy
+mt princeton image is too heavy?
 
 https://developer.mozilla.org/en-US/docs/Mozilla/Mobile/Viewport_meta_tag
 <meta name="viewport" content="width=device-width, initial-scale=1">
