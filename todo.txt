@@ -1,8 +1,4 @@
 
-not sure I like all tags in (parens) anymore.
-a plain identifer would be nicer, just need to
-make sure we split/trim etc
-
 put the twitter and github links back somewhere
 in the layout?
 

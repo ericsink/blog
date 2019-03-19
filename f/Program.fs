@@ -201,7 +201,53 @@ let do_file_find_keywords f =
             for k in s do
                 let k2 = k.Trim()
                 all_keywords.Add(k2) |> ignore
-    
+
+let fix_one_kw (s :string) (k : string) =
+    let without = k.Replace("(", "").Replace(")", "")
+    let mutable t = s
+    t <- t.Replace(k, without)
+    t
+
+
+let fix_keywords (s :string) =
+    let mutable t = s
+    t <- fix_one_kw t "(ignoretoc)"
+    t <- fix_one_kw t "(dev)"
+    t <- fix_one_kw t "(mfg_strategy)"
+    t <- fix_one_kw t "(book_marketing)"
+    t <- fix_one_kw t "(cornsharp)"
+    t <- fix_one_kw t "(laughs)"
+    t <- fix_one_kw t "(xamarin)"
+    t <- fix_one_kw t "(sourcegear)"
+    t <- fix_one_kw t "(book_biz)"
+    t <- fix_one_kw t "(book_dev)"
+    t <- fix_one_kw t "(mfg_marcomm)"
+    t <- fix_one_kw t "(topic)"
+    t <- fix_one_kw t "(biz)"
+    t <- fix_one_kw t "(bos)"
+    t <- fix_one_kw t "(sol)"
+    t <- fix_one_kw t "(fsharp)"
+    t <- fix_one_kw t "(sqlite)"
+    t <- fix_one_kw t "(dotnet)"
+    t <- fix_one_kw t "(wpf)"
+    t <- fix_one_kw t "(rust)"
+    t <- fix_one_kw t "(sqlitepclraw)"
+    t <- fix_one_kw t "(law)"
+    t <- fix_one_kw t "(mssql_to_sqlite)"
+    t <- fix_one_kw t "(scm)"
+    t
+
+let do_file_fix_keywords f =
+    let src = File.ReadAllText(f)
+    let (front_matter, html) = util.fm.get_front_matter src
+    if front_matter <> null then
+        if (front_matter.ContainsKey("keywords")) then
+            let kw = front_matter.["keywords"]
+            let kw_fixed = fix_keywords kw
+            front_matter.["keywords"] <- kw_fixed
+        let html_fixed = fix_keywords html
+        util.fm.write_with_front_matter f front_matter html_fixed
+
 let do_file_url f =
     let src = File.ReadAllText(f)
     let (front_matter, html) = util.fm.get_front_matter src
@@ -215,12 +261,12 @@ let rec do_dir (url_dir :string) (from :string) =
         let name = Path.GetFileName(f)
         let url_path = path_combine url_dir name
         all_items.Add(url_path) |> ignore
-        do_file_find_keywords f
+        do_file_fix_keywords f
 
     for from_sub in (Directory.GetDirectories(from)) do
         let name = Path.GetFileName(from_sub)
         // TODO skip _layouts at every depth, or just at the top?
-        if (name <> "_layouts") && (name <> "vcbe") then
+        if (name <> "_layouts") then
             let url_subdir = path_combine url_dir name
             do_dir url_subdir from_sub
 

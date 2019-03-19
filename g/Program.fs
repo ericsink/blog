@@ -264,7 +264,19 @@ let make_toc (magic: Dictionary<string,string>) dir_src (items: Dictionary<strin
     // TODO allow multiple included keywords here?
     // TODO allow keyword exclusion here?
 
-    let filtered = items.Where(fun kv -> (kv.Value.ContainsKey("keywords")) && (kv.Value.["keywords"].Contains(kw_include)))
+    let has_kw (fm :Dictionary<string,string>) (kw :string) =
+        if (fm.ContainsKey("keywords")) then
+            let keywords = fm.["keywords"]
+            let a = keywords.Split(' ').Select(fun s -> s.Trim())
+            let h = HashSet<string>()
+            for k in a do
+                h.Add(k) |> ignore
+            let b = h.Contains(kw)
+            b
+        else
+            false
+        
+    let filtered = items.Where(fun kv -> has_kw (kv.Value) kw_include)
 
     let a = filtered.OrderByDescending( fun kv -> if (kv.Value.ContainsKey(sortby)) then kv.Value.[sortby] else null )
 
