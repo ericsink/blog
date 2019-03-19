@@ -87,6 +87,9 @@ includes, like jekyll ?
 
 --
 
+link to blog repo on github, issues, pull requests,
+etc
+
 need link checking, for within-the-site links,
 just to make sure they actually go somewhere.
 did this, but it probably doesn't work with tocs.
