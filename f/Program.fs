@@ -24,7 +24,15 @@ let path_combine (a :string) (b :string) =
     else
         a + "/" + b;
 
-let dump (path :string) =
+let links = Dictionary<string,HashSet<string>>()
+let all_items = HashSet<string>()
+
+let add_link (from :string) (dest :string) =
+    if not (links.ContainsKey(from)) then
+        links.Add(from, HashSet<string>())
+    links.[from].Add(dest) |> ignore
+
+let dump (from :string) (path :string) =
     if path <> null then
         if (path.StartsWith("http:")) then
             ()
@@ -34,40 +42,40 @@ let dump (path :string) =
             ()
         elif (path.StartsWith("mailto:")) then
             ()
-        elif (path.StartsWith("/")) then
-            ()
+        //elif (path.StartsWith("/")) then
+            //()
         elif (path.StartsWith("#")) then
             ()
         else
-            printfn "    %s" path
+            //printfn "    %s" path
+            add_link from path
 
-let rec find_links (n: INode) =
+let rec find_links (from :string) (n: INode) =
     if (n :? IHtmlImageElement) then
         let a = n :?> IHtmlImageElement
         let path = a.GetAttribute("src")
-        dump path
+        dump from path
 
     if (n :? IHtmlAnchorElement) then
         let a = n :?> IHtmlAnchorElement
         let path = a.GetAttribute("href")
-        dump path
+        dump from path
 
     if n.HasChildNodes then
         for sub in n.ChildNodes do
-            find_links sub
+            find_links from sub
 
 let do_file_links (url_dir :string) (f :string) =
     let name = Path.GetFileName(f)
     let src = File.ReadAllText(f)
     let (front_matter, html) = util.fm.get_front_matter src
     let url_path = path_combine url_dir name
-    if front_matter <> null then
-        printfn "%s" url_path
-        let parser = HtmlParser()
-        let dom = parser.ParseDocument("<html><body></body></html>")
-        let nodes = parser.ParseFragment(html, dom.Body)
-        for n in nodes do
-            find_links n
+    //printfn "%s" url_path
+    let parser = HtmlParser()
+    let dom = parser.ParseDocument("<html><body></body></html>")
+    let nodes = parser.ParseFragment(html, dom.Body)
+    for n in nodes do
+        find_links url_path n
 
 let just_count (html :string) (s :string) =
     let regx = Regex(s)
@@ -166,12 +174,15 @@ let do_file_url f =
 let rec do_dir (url_dir :string) (from :string) =
     for f in (Directory.GetFiles(from)) do
         let name = Path.GetFileName(f)
+        let name = Path.GetFileName(f)
+        let url_path = path_combine url_dir name
+        all_items.Add(url_path) |> ignore
         do_file_links url_dir f
 
     for from_sub in (Directory.GetDirectories(from)) do
         let name = Path.GetFileName(from_sub)
         // TODO skip _layouts at every depth, or just at the top?
-        if name <> "_layouts" then
+        if (name <> "_layouts") && (name <> "vcbe") then
             let url_subdir = path_combine url_dir name
             do_dir url_subdir from_sub
 
@@ -179,5 +190,18 @@ let rec do_dir (url_dir :string) (from :string) =
 let main argv =
     let dir_src = argv.[0]
     do_dir "/" dir_src
+    all_items.Add("/index.html") |> ignore
+    let all_links = HashSet<string>()
+    for path in links.Keys do
+        let h = links.[path]
+        for a in h do
+            all_links.Add(a) |> ignore
+            if not (all_items.Contains(a)) then
+                printfn "broken from %s to %s" path a
+    (*
+    for a in all_items do
+        if not (all_links.Contains(a)) then
+            printfn "never linked %s" a
+    *)
     0 // return an integer exit code
 
