@@ -77,6 +77,34 @@ let do_file_links (url_dir :string) (f :string) =
     for n in nodes do
         find_links url_path n
 
+// <p><span class="ArticleTitle">Crabby is as crabby does</span><br><span class="ArticleDate">10 Oct 2003</span></p>
+
+let do_file_old_item (f :string) =
+    let dir = Path.GetDirectoryName(f)
+    let name = Path.GetFileName(f)
+    let src = File.ReadAllText(f)
+    let (front_matter, html) = util.fm.get_front_matter src
+    let expr = """<p><span class="ArticleTitle">(?<title>[^<]*)</span><br><span class="ArticleDate">(?<date>[^<]+)</span></p>"""
+    let regx = Regex(expr)
+    let a = regx.Matches(html);
+    if (a <> null) && (a.Count = 1) then
+        let m = a.First()
+        let title = m.Groups.["title"].Value.Trim()
+        let date = m.Groups.["date"].Value
+        //printfn "%s is %s: %s" name date title
+        front_matter.["layout"] <- "post"
+        let fixed_title =
+            if title.Length = 0 then
+                sprintf "Blog entry on %s" date
+            else
+                title
+        front_matter.["title"] <- fixed_title
+        let d = DateTime.Parse(date)
+        let date_formatted = d.ToString("yyyy-MM-dd") + " 12:00:00"
+        front_matter.["date"] <- date_formatted
+        let new_html = html.Replace(m.Value, "")
+        util.fm.write_with_front_matter f front_matter new_html
+
 let just_count (html :string) (s :string) =
     let regx = Regex(s)
     let a = regx.Matches(html);
@@ -174,10 +202,10 @@ let do_file_url f =
 let rec do_dir (url_dir :string) (from :string) =
     for f in (Directory.GetFiles(from)) do
         let name = Path.GetFileName(f)
-        let name = Path.GetFileName(f)
         let url_path = path_combine url_dir name
         all_items.Add(url_path) |> ignore
-        do_file_links url_dir f
+        if (name.StartsWith("item_")) then
+            do_file_old_item f
 
     for from_sub in (Directory.GetDirectories(from)) do
         let name = Path.GetFileName(from_sub)
