@@ -4,8 +4,6 @@ vs. the rss feed
 
 --
 
-code formatting.  screen.
-
 toc for Best Of
 
 put the twitter and github links back somewhere
@@ -28,8 +26,6 @@ toc for (mssql_to_sqlite) ?
 toc for old wpf stuff?
 
 toc for scm?
-
-toc for 22 laws?
 
 tag things with keywords for fsharp, rust, etc
 
