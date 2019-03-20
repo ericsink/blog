@@ -6,7 +6,6 @@ module fm =
     open System.Collections.Generic
     open System.Text
 
-    // TODO return option string
     let get_front_matter (s :string) =
         let marker_front_lf = "---\n"
         let marker_front_crlf = "---\r\n"
@@ -62,18 +61,18 @@ module fm =
                 let normalized = dt.ToString("yyyy-MMM-dd HH:mm:ss")
                 d.["date"] <- normalized
             *)
-            (d, remain)
+            (Some d, remain)
         else
-            (null, s)
+            (None, s)
 
     let create_front_matter (d: Dictionary<string,string>) =
         // front matter parsing is strict
         let sb = StringBuilder()
-        sb.Append("---\n")
+        sb.Append("---\n") |> ignore
         for kv in d do
             let line = sprintf "%s: %s\n" kv.Key kv.Value
-            sb.Append(line)
-        sb.Append("---\n")
+            sb.Append(line) |> ignore
+        sb.Append("---\n") |> ignore
         sb.ToString()
 
     let write_with_front_matter (dest : string) (d: Dictionary<string,string>) (s :string) =

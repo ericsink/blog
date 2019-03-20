@@ -103,7 +103,7 @@ let make_front_page template dir_src (items: Dictionary<string,Dictionary<string
         let date = kv.Value.["date"]
 
         let html = read_from_src dir_src path
-        let (front_matter, my_content) = util.fm.get_front_matter html
+        let (_, my_content) = util.fm.get_front_matter html
 
         let line1 = sprintf """<p class="ArticleDate" align=right>%s</p><h1><a href="%s">%s</a></h1>""" (format_date date) path title
 
@@ -146,7 +146,7 @@ let make_rss dir_src (items: Dictionary<string,Dictionary<string,string>>) =
         let date = kv.Value.["date"]
 
         let html = read_from_src dir_src path
-        let (front_matter, my_content) = util.fm.get_front_matter html
+        let (_, my_content) = util.fm.get_front_matter html
         let local_link = "https://ericsink.com" + path
 
         add content "<item>"
@@ -208,36 +208,46 @@ let copy_if_changed src dest =
 
 let get_layout_name (front_matter :Dictionary<string,string>) =
     if front_matter = null then
-        null
+        None
     else
         if (front_matter.ContainsKey("layout")) then
             let layout_name = front_matter.["layout"]
             if layout_name = "null" then
-                null
+                None
             else
-                layout_name
+                Some layout_name
         else
-            null
+            None
 
-let rec wrap (layout_name :string) (page_front_matter :Dictionary<string,string>) (src_content :string) (layouts: Dictionary<string,string>) =
+let get_layout_name_opt (front_matter :Dictionary<string,string> option) =
+    match front_matter with
+    | Some front_matter -> get_layout_name front_matter
+    | None -> None
+
+let rec wrap (layout_name :string option) (page_front_matter :Dictionary<string,string>) (src_content :string) (layouts: Dictionary<string,string>) =
     let (layout_front_matter, before_crunch, content) =
-        if layout_name = null then
-            (null, src_content, null)
-        else
+        match layout_name with
+        | Some layout_name ->
             let layout = layouts.[layout_name]
             let (template_front, template_html) = util.fm.get_front_matter layout
             (template_front, template_html, src_content)
+        | None ->
+            (None, src_content, null)
 
     let pairs = Dictionary<string,Dictionary<string,string>>()
     add_site_defaults pairs
     pairs.Add("page", page_front_matter)
-    pairs.Add("layout", layout_front_matter)
+    match layout_front_matter with
+    | Some layout_front_matter ->
+        pairs.Add("layout", layout_front_matter)
+    | None ->
+        ()
 
     let after_crunch = crunch before_crunch content pairs
-    let next_layout_name = get_layout_name layout_front_matter
-    if next_layout_name <> null then
-        wrap next_layout_name page_front_matter after_crunch layouts
-    else
+    match get_layout_name_opt layout_front_matter with
+    | Some next_layout_name ->
+        wrap (Some next_layout_name) page_front_matter after_crunch layouts
+    | None ->
         after_crunch
 
 let make_toc (magic: Dictionary<string,string>) dir_src (items: Dictionary<string,Dictionary<string,string>>) = 
@@ -336,10 +346,15 @@ let crunch_magic html dir_src (items: Dictionary<string,Dictionary<string,string
 let do_file_with_magic (from :string) (dir_src :string) (dest_path :string) (layouts: Dictionary<string,string>) (items: Dictionary<string,Dictionary<string,string>>) =
     let html = File.ReadAllText(from)
     let (page_front_matter, src_content) = util.fm.get_front_matter html
-    let tocs_done = crunch_magic src_content dir_src items
-    let layout_name = get_layout_name page_front_matter
-    let after_crunch = wrap layout_name page_front_matter tocs_done layouts
-    write_if_changed after_crunch dest_path
+    match page_front_matter with
+    | Some page_front_matter ->
+        let tocs_done = crunch_magic src_content dir_src items
+        let layout_name = get_layout_name page_front_matter
+        let after_crunch = wrap layout_name page_front_matter tocs_done layouts
+        write_if_changed after_crunch dest_path
+    | None ->
+        // TODO should never happen here
+        ()
 
 let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictionary<string,string>) (items: Dictionary<string,Dictionary<string,string>>) =
     let name = Path.GetFileName(from)
@@ -347,8 +362,8 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictio
     if (from.EndsWith(".html")) then
         let html = File.ReadAllText(from)
         let (page_front_matter, src_content) = util.fm.get_front_matter html
-        if page_front_matter <> null then
-
+        match page_front_matter with
+        | Some page_front_matter ->
             if not (page_front_matter.ContainsKey("gen")) then
                 if not (page_front_matter.ContainsKey("title")) then
                     page_front_matter.Add("title", "Eric Sink")
@@ -359,19 +374,20 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictio
 
             let url_path = path_combine url_dir name
             items.Add(url_path, page_front_matter)
-        else
+        | None ->
             copy_if_changed from dest_path
     elif (from.EndsWith(".xml")) then
         let html = File.ReadAllText(from)
         let (page_front_matter, src_content) = util.fm.get_front_matter html
-        if page_front_matter <> null then
+        match page_front_matter with
+        | Some page_front_matter ->
             if (page_front_matter.ContainsKey("gen")) then
                 ()
             else
                 raise(NotImplementedException())
             let url_path = path_combine url_dir name
             items.Add(url_path, page_front_matter)
-        else
+        | None ->
             copy_if_changed from dest_path
     else
         copy_if_changed from dest_path

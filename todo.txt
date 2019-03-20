@@ -1,4 +1,10 @@
 
+f# dictionary trygetvalue match
+
+need a way to specify in the front matter that something
+should not be published, like because it's a draft and
+isn't ready.
+
 inconsistency between items included on front page of blog
 vs. the rss feed
 

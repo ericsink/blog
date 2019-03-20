@@ -13,6 +13,12 @@ open AngleSharp.Html.Dom.Events
 open AngleSharp.Html.Dom
 open AngleSharp.Dom
 
+// ok so this is fairly ridiculous...
+let my_get_front_matter src =
+    match util.fm.get_front_matter src with
+    | (Some front_matter, html) -> (front_matter, html)
+    | (None, html) -> (null, html)
+
 // TODO mv to util
 let path_combine (a :string) (b :string) =
     if (a.Length = 0) then
@@ -69,7 +75,7 @@ let rec find_links (from :string) (n: INode) =
 let do_file_links (url_dir :string) (f :string) =
     let name = Path.GetFileName(f)
     let src = File.ReadAllText(f)
-    let (front_matter, html) = util.fm.get_front_matter src
+    let (front_matter, html) = my_get_front_matter src
     let url_path = path_combine url_dir name
     //printfn "%s" url_path
     let parser = HtmlParser()
@@ -84,7 +90,7 @@ let do_file_old_item (f :string) =
     let dir = Path.GetDirectoryName(f)
     let name = Path.GetFileName(f)
     let src = File.ReadAllText(f)
-    let (front_matter, html) = util.fm.get_front_matter src
+    let (front_matter, html) = my_get_front_matter src
     let expr = """<p><span class="ArticleTitle">(?<title>[^<]*)</span><br><span class="ArticleDate">(?<date>[^<]+)</span></p>"""
     let regx = Regex(expr)
     let a = regx.Matches(html);
@@ -118,7 +124,7 @@ let do_file_dedup (f :string) =
     let dir = Path.GetDirectoryName(f)
     let name = Path.GetFileName(f)
     let src = File.ReadAllText(f)
-    let (front_matter, html) = util.fm.get_front_matter src
+    let (front_matter, html) = my_get_front_matter src
     let count_blurbs = just_count html "ArticleBlurbCell"
     let expr = """<tr class="ArticleBlurbCell"><td colspan="3">&nbsp;<a name="(?<id>[0-9]+)" href="(?<href>[^"]+)">"""
     let regx = Regex(expr)
@@ -151,7 +157,7 @@ let do_file_dedup (f :string) =
 
 let do_file_parse f =
     let src = File.ReadAllText(f)
-    let (front_matter, html) = util.fm.get_front_matter src
+    let (front_matter, html) = my_get_front_matter src
     if front_matter <> null then
         let parser = HtmlParser()
         parser.Error.Add(
@@ -170,7 +176,7 @@ let do_file_parse f =
     
 let do_file_rel f =
     let src = File.ReadAllText(f)
-    let (front_matter, html) = util.fm.get_front_matter src
+    let (front_matter, html) = my_get_front_matter src
     if front_matter <> null then
         let new_html = html.Replace("""href="../entries/""", """href="/entries/""").Replace("""href="scm/""", """href="/scm/""").Replace("""href="../item_""", """href="/item_""").Replace("""href="../articles/""", """href="/articles/""")
         if new_html <> html then
@@ -178,7 +184,7 @@ let do_file_rel f =
     
 let do_file_rel2 f =
     let src = File.ReadAllText(f)
-    let (front_matter, html) = util.fm.get_front_matter src
+    let (front_matter, html) = my_get_front_matter src
     if front_matter <> null then
         let new_html = html.Replace("""href="item_1""", """href="/item_1""")
         if new_html <> html then
@@ -186,7 +192,7 @@ let do_file_rel2 f =
     
 let do_file_rel3 f =
     let src = File.ReadAllText(f)
-    let (front_matter, html) = util.fm.get_front_matter src
+    let (front_matter, html) = my_get_front_matter src
     if front_matter <> null then
         let new_html = html.Replace("""src="smiley.gif""", """src="/smiley.gif""")
         if new_html <> html then
@@ -194,7 +200,7 @@ let do_file_rel3 f =
     
 let do_file_find_keywords f =
     let src = File.ReadAllText(f)
-    let (front_matter, html) = util.fm.get_front_matter src
+    let (front_matter, html) = my_get_front_matter src
     if front_matter <> null then
         if (front_matter.ContainsKey("keywords")) then
             let s = front_matter.["keywords"].Split(' ')
@@ -239,7 +245,7 @@ let fix_keywords (s :string) =
 
 let do_file_fix_keywords f =
     let src = File.ReadAllText(f)
-    let (front_matter, html) = util.fm.get_front_matter src
+    let (front_matter, html) = my_get_front_matter src
     if front_matter <> null then
         if (front_matter.ContainsKey("keywords")) then
             let kw = front_matter.["keywords"]
@@ -250,7 +256,7 @@ let do_file_fix_keywords f =
 
 let do_file_url f =
     let src = File.ReadAllText(f)
-    let (front_matter, html) = util.fm.get_front_matter src
+    let (front_matter, html) = my_get_front_matter src
     if front_matter <> null then
         let new_html = html.Replace("software.ericsink.com", "ericsink.com").Replace("www.ericsink.com", "ericsink.com").Replace("http://ericsink.com", "https://ericsink.com").Replace("href=\"https://ericsink.com/", "href=\"/")
         if new_html <> html then
