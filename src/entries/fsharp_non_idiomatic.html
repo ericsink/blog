@@ -1,0 +1,123 @@
+---
+layout: post
+title: Non-idiomatic F#
+date: 2019-03-19 12:00:00
+keywords: fsharp front
+teaser: I claim that writing non-functional F# works out WAY better than writing functional C#.
+---
+
+<p>Mark Seemann wrote a very fine blog post this week entitled 
+<a href="https://blog.ploeh.dk/2019/03/18/the-programmer-as-decision-maker/">The programmer as decision maker</a>,
+in which he says (among other things) that trying to do functional programming in C# doesn't work out very well.
+It's a thought-provoking piece, and worth a read.</p>
+
+<p>I want to respond to the point mentioned above, not to argue with it, but to observe that 
+it is asymmetric:  Writing non-functional F# works out WAY better than writing
+functional C#.</p>
+
+<p>Lately I've been writing F# code that a purist would hate.  I've been
+writing F# with roughly the same approach I would use when writing C#.</p>
+
+<p>It turns out this approach works, and has some real benefits.  I want to discuss 
+two of them:</p>
+
+<h3>if-then-else</h3>
+
+<p>I grumble every time I find myself writing C# code like the following:</p>
+
+<pre class="screen"><span style="color:blue;">string</span>&nbsp;s;
+<span style="color:blue;">if</span>&nbsp;(condition1)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;s&nbsp;=&nbsp;expr1;
+}
+<span style="color:blue;">else</span>&nbsp;<span style="color:blue;">if</span>&nbsp;(condition2)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;s&nbsp;=&nbsp;expr2;
+}
+<span style="color:blue;">else</span>
+{
+&nbsp;&nbsp;&nbsp;&nbsp;s&nbsp;=&nbsp;other;
+}
+<span style="color:green;">//&nbsp;do&nbsp;something&nbsp;with&nbsp;s</span>
+</pre>
+
+<p>In C#, if statements are not expressions, so I have to declare the variable separately and then put an assignment in each branch.  
+I also dislike how this code structure takes away the privilege of type inference, forcing me to declare s as string instead of var.</p>
+
+<p>(Yes, I know about the conditional expression operator, but that's not quite the same, 
+especially for cases involving "else if".  Basically, there are multiple ways to do 
+this in C#, but all of them are disappointing in some way.)</p>
+
+<p>This works out much nicer in F#:</p>
+
+<pre class="screen"><span style="color:blue;">let</span>&nbsp;s&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">if</span>&nbsp;condition1&nbsp;<span style="color:blue;">then</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;expr1
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">elif</span>&nbsp;condition2&nbsp;<span style="color:blue;">then</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;expr2
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">else</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;other
+<span style="color:green;">//&nbsp;do&nbsp;something&nbsp;with&nbsp;s</span>
+</pre>
+
+<p>One assignment, with type inference.  Elegant.  And I like the fact that s is not mutable.  Which reminds me...</p>
+
+<h3>mutable</h3>
+
+<p>One of my favorite things about F# is that it forces me to take extra steps to make a mutable variable.</p>
+
+<p>I suspect that more than half the local variables I use in C# would actually not need to be mutable.  Like this one:</p>
+
+<pre class="screen"><span style="color:blue;">var</span>&nbsp;x&nbsp;=&nbsp;obj.Method();
+<span style="color:green;">//&nbsp;code&nbsp;that&nbsp;uses&nbsp;x&nbsp;but&nbsp;doesn&#39;t&nbsp;modify&nbsp;it</span>
+</pre>
+
+<p>But the language gives me no way to express that, so the compiler cannot enforce it.  Suppose I come back later, having forgotten what was going on, and change x.  Suppose somebody else comes in later and changes x.  I want the compiler to complain.</p>
+
+<p>The F# equivalent is nearly identical:</p>
+
+<pre class="screen"><span style="color:blue;">let</span>&nbsp;x&nbsp;=&nbsp;obj.Method()
+<span style="color:green;">//&nbsp;code&nbsp;that&nbsp;uses&nbsp;x&nbsp;but&nbsp;doesn&#39;t&nbsp;modify&nbsp;it</span>
+</pre>
+
+<p>But x is immutable, and if anybody ever tries to violate that rule, the compiler will fuss.</p>
+
+<p>Note that when I am choosing to be in this mode, writing "non-idiomatic F#", I give myself permission to use mutable without guilt.</p>
+
+<pre class="screen"><span style="color:blue;">let</span>&nbsp;<span style="color:blue;">mutable</span>&nbsp;total&nbsp;=&nbsp;0
+<span style="color:blue;">for</span>&nbsp;s&nbsp;<span style="color:blue;">in</span>&nbsp;a&nbsp;<span style="color:blue;">do</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:green;">//&nbsp;do&nbsp;something&nbsp;with&nbsp;s</span>
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:green;">//&nbsp;but&nbsp;also&nbsp;keep&nbsp;a&nbsp;running&nbsp;total&nbsp;of&nbsp;the&nbsp;length</span>
+&nbsp;&nbsp;&nbsp;&nbsp;total&nbsp;<span style="color:blue;">&lt;-</span>&nbsp;total&nbsp;+&nbsp;s.Length
+<span style="color:blue;">let</span>&nbsp;total&nbsp;=&nbsp;total&nbsp;<span style="color:green;">//&nbsp;shadow</span>
+total&nbsp;<span style="color:blue;">&lt;-</span>&nbsp;5&nbsp;<span style="color:green;">//&nbsp;error</span>
+</pre>
+
+<p>Yeah, yeah, I like functional folds, but the exercise here is to try writing C#-ish code with F#.  
+So a for loop with mutable variable is a likely way to do this.  
+F# supports this just fine, with the mutable keyword, and with the different syntax for the 
+assignment.</p>
+
+<p>Note that I threw in a little trick.  After the loop ends, I added an immutable let binding for total, 
+setting it to the value of "mutable total", thus shadowing the mutable and making it unavailable.  So the 
+attempted assignment on the next line will error.  In effect, I am celebrating F#'s ability to let 
+me make this variable mutable, but also its ability to specify that the time for mutability has come to an end.</p>
+
+<h3>Summary</h3>
+
+<p>I'm not claming any of this is the best way to write F#.  From a functional programming 
+perspective, these are considered bad practices.</p>
+
+<p>But non-incremental change is hard and scary.  You want a really ineffective way to promote
+F# in the .NET world?  Let's tell everybody that they have to retrain all their developers
+with a completely new paradigm and rewrite all their code (probably twice) with a 
+totally new approach.</p>
+
+<p>I'm a fan of functional programming.  I am also a fan of incremental change, and
+things that have good ROI.</p>
+
+<p>So I find it really cool how easy it is to add a little F# into a C# code base, 
+or to make a gradual, incremental transition from C# to F#.  It works, with full interop between 
+the two languages.  And adopting F# in this manner starts paying off right away.</p>
+

@@ -1,4 +1,9 @@
 
+inconsistency between items included on front page of blog
+vs. the rss feed
+
+--
+
 code formatting.  screen.
 
 toc for Best Of

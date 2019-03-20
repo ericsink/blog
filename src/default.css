@@ -34,6 +34,7 @@ pre.screen
     border-radius: 4px;
     border-style: solid;
     border-width: 1px;
+    font-family: Consolas, Courier New, Courier, monospace;
 }
 
 p.toc_item_date
