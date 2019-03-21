@@ -15,12 +15,13 @@ should not be published, like because it's a draft and
 isn't ready.
 
 inconsistency between items included on front page of blog
-vs. the rss feed
+(explicitly included by keyword) vs. the rss feed (strictly
+by date)
 
 --
 
 chg f script to gripe about things that have no
-tags.  or rather, no tags we care about.  cornsharp
+keywords.  or rather, no keywords we care about.  cornsharp
 doesn't count, for example.  anyway, the goal is to find
 things that should have a keyword but do not.
 
