@@ -1,4 +1,13 @@
 
+the EF6 on Xamarin entry deserves an update to
+mention EF Core
+
+the mssql_to_sqlite articles deserve to be part of
+the sqlite topic?  or should mssql_to_sqlite be a
+topic of its own?
+
+consider sg services msg in footer
+
 f# dictionary trygetvalue match
 
 need a way to specify in the front matter that something
@@ -12,9 +21,8 @@ vs. the rss feed
 
 chg f script to gripe about things that have no
 tags.  or rather, no tags we care about.  cornsharp
-doesn't count, for example.
-
-consider sg services msg in footer
+doesn't count, for example.  anyway, the goal is to find
+things that should have a keyword but do not.
 
 toc for Best Of
 
@@ -26,8 +34,6 @@ toc for Veracity?
 toc for SourceGear?
 
 toc for Zumero?
-
-toc for xamarin forms?
 
 toc for dotnet?
 
