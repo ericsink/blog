@@ -99,7 +99,10 @@ let make_front_page template dir_src (items: Dictionary<string,Dictionary<string
 
     for kv in a do
         let path = kv.Key
-        let title = if kv.Value.ContainsKey("title") then kv.Value.["title"] else null
+        let title =
+            match kv.Value.TryGetValue("title") with
+            | (true, t) -> t
+            | (false, _) -> null
         let date = kv.Value.["date"]
 
         let html = read_from_src dir_src path
@@ -210,13 +213,13 @@ let get_layout_name (front_matter :Dictionary<string,string>) =
     if front_matter = null then
         None
     else
-        if (front_matter.ContainsKey("layout")) then
-            let layout_name = front_matter.["layout"]
+        match front_matter.TryGetValue("layout") with
+        | (true, layout_name) ->
             if layout_name = "null" then
                 None
             else
                 Some layout_name
-        else
+        | _ ->
             None
 
 let get_layout_name_opt (front_matter :Dictionary<string,string> option) =
@@ -258,26 +261,24 @@ let make_toc (magic: Dictionary<string,string>) dir_src (items: Dictionary<strin
 
     let kw_include = magic.["keyword"]
     let showdate =
-        if (magic.ContainsKey("showdate")) then
-            magic.["showdate"] = "true"
-        else
-            true
+        match magic.TryGetValue("showdate") with
+        | (true, v) -> v = "true" // TODO parse bool
+        | _ -> true
     let showteaser =
-        if (magic.ContainsKey("showteaser")) then
-            magic.["showteaser"] = "true"
-        else
-            true
+        match magic.TryGetValue("showteaser") with
+        | (true, v) -> v = "true" // TODO parse bool
+        | _ -> true
     let sortby =
-        if (magic.ContainsKey("sortby")) then
-            magic.["sortby"]
-        else
-            "date"
+        match magic.TryGetValue("sortby") with
+        | (true, s) -> s
+        | _ -> "date"
 
     // TODO allow multiple included keywords here?
     // TODO allow keyword exclusion here?
 
     let has_kw (fm :Dictionary<string,string>) (kw :string) =
-        if (fm.ContainsKey("keywords")) then
+        match fm.TryGetValue("keywords") with
+        | (true, keywords) ->
             let keywords = fm.["keywords"]
             let a = keywords.Split(' ').Select(fun s -> s.Trim())
             let h = HashSet<string>()
@@ -285,7 +286,7 @@ let make_toc (magic: Dictionary<string,string>) dir_src (items: Dictionary<strin
                 h.Add(k) |> ignore
             let b = h.Contains(kw)
             b
-        else
+        | _ ->
             false
         
     let filtered = items.Where(fun kv -> has_kw (kv.Value) kw_include)
