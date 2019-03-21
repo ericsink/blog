@@ -296,7 +296,7 @@ let make_toc (magic: Dictionary<string,string>) dir_src (items: Dictionary<strin
         
     let filtered = items.Where(fun kv -> has_kw (kv.Value) kw_include)
 
-    let a = filtered.OrderByDescending( fun kv -> if (kv.Value.ContainsKey(sortby)) then kv.Value.[sortby] else null )
+    let a = filtered.OrderByDescending( fun kv -> match dict_get kv.Value sortby with | Some k -> k | None -> null )
 
     let content = StringBuilder()
 
@@ -313,12 +313,11 @@ let make_toc (magic: Dictionary<string,string>) dir_src (items: Dictionary<strin
         sprintf "  <p class=\"toc_item_title\"><a href=\"%s\">%s</a></p>" path title |> add content
 
         if showteaser then
-            if (kv.Value.ContainsKey("teaser")) then
-                let teaser = kv.Value.["teaser"]
+            match dict_get kv.Value "teaser" with
+            | Some teaser ->
                 sprintf "  <p class=\"toc_item_teaser\">%s</p>\n" teaser |> add content
-            else
+            | None ->
                 sprintf "  <p class=\"toc_item_teaser\"></p>\n" |> add content
-                () // TODO do we want an empty para for the teaser?
 
         add content "</div>\n"
 
