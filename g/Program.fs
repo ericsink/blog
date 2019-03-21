@@ -218,13 +218,13 @@ let get_layout_name (front_matter :Dictionary<string,string>) =
     if front_matter = null then
         None
     else
-        match front_matter.TryGetValue("layout") with
-        | (true, layout_name) ->
+        match dict_get front_matter "layout" with
+        | Some layout_name ->
             if layout_name = "null" then
                 None
             else
                 Some layout_name
-        | _ ->
+        | None ->
             None
 
 let get_layout_name_opt (front_matter :Dictionary<string,string> option) =
@@ -266,24 +266,24 @@ let make_toc (magic: Dictionary<string,string>) dir_src (items: Dictionary<strin
 
     let kw_include = magic.["keyword"]
     let showdate =
-        match magic.TryGetValue("showdate") with
-        | (true, v) -> v = "true" // TODO parse bool
-        | _ -> true
+        match dict_get magic "showdate" with
+        | Some v -> v = "true" // TODO parse bool
+        | None -> true
     let showteaser =
-        match magic.TryGetValue("showteaser") with
-        | (true, v) -> v = "true" // TODO parse bool
-        | _ -> true
+        match dict_get magic "showteaser" with
+        | Some v -> v = "true" // TODO parse bool
+        | None -> true
     let sortby =
-        match magic.TryGetValue("sortby") with
-        | (true, s) -> s
-        | _ -> "date"
+        match dict_get magic "sortby" with
+        | Some s -> s
+        | None -> "date"
 
     // TODO allow multiple included keywords here?
     // TODO allow keyword exclusion here?
 
     let has_kw (fm :Dictionary<string,string>) (kw :string) =
-        match fm.TryGetValue("keywords") with
-        | (true, keywords) ->
+        match dict_get fm "keywords" with
+        | Some keywords ->
             let keywords = fm.["keywords"]
             let a = keywords.Split(' ').Select(fun s -> s.Trim())
             let h = HashSet<string>()
@@ -291,7 +291,7 @@ let make_toc (magic: Dictionary<string,string>) dir_src (items: Dictionary<strin
                 h.Add(k) |> ignore
             let b = h.Contains(kw)
             b
-        | _ ->
+        | None ->
             false
         
     let filtered = items.Where(fun kv -> has_kw (kv.Value) kw_include)
