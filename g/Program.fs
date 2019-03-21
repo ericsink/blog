@@ -6,6 +6,11 @@ open System.Collections.Generic
 open System.Text
 open System.Text.RegularExpressions;
 
+let dict_get<'TK,'TV> (d: Dictionary<'TK,'TV>) (k :'TK) =
+    match d.TryGetValue(k) with
+    | (true, v) -> Some v
+    | _ -> None
+
 // an implementation of Path.Combine which always uses fwd slash
 // TODO mv to util
 let path_combine (a :string) (b :string) =
@@ -100,9 +105,9 @@ let make_front_page template dir_src (items: Dictionary<string,Dictionary<string
     for kv in a do
         let path = kv.Key
         let title =
-            match kv.Value.TryGetValue("title") with
-            | (true, t) -> t
-            | (false, _) -> null
+            match dict_get kv.Value "title" with
+            | Some t -> t
+            | None -> null
         let date = kv.Value.["date"]
 
         let html = read_from_src dir_src path
