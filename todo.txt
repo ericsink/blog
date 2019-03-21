@@ -1,7 +1,4 @@
 
-the EF6 on Xamarin entry deserves an update to
-mention EF Core
-
 the mssql_to_sqlite articles deserve to be part of
 the sqlite topic?  or should mssql_to_sqlite be a
 topic of its own?
