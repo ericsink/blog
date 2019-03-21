@@ -10,6 +10,12 @@ vs. the rss feed
 
 --
 
+chg f script to gripe about things that have no
+tags.  or rather, no tags we care about.  cornsharp
+doesn't count, for example.
+
+consider sg services msg in footer
+
 toc for Best Of
 
 put the twitter and github links back somewhere
@@ -71,7 +77,8 @@ of its own.
 
 so many &nbsp;
 
-does google analytics still work?
+does google analytics still work?  trying to recover
+access to the GA account.
 
 generate some kind of complete index?  so that robots
 can find everything?
