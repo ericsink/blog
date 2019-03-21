@@ -264,7 +264,6 @@ let make_toc (magic: Dictionary<string,string>) dir_src (items: Dictionary<strin
     let add (sb :StringBuilder) (s :string) =
         sb.Append(s) |> ignore
 
-    let kw_include = magic.["keyword"]
     let showdate =
         match dict_get magic "showdate" with
         | Some v -> v = "true" // TODO parse bool
@@ -294,7 +293,10 @@ let make_toc (magic: Dictionary<string,string>) dir_src (items: Dictionary<strin
         | None ->
             false
         
-    let filtered = items.Where(fun kv -> has_kw (kv.Value) kw_include)
+    let filtered = 
+        match dict_get magic "keyword" with
+        | Some kw_include -> items.Where(fun kv -> has_kw (kv.Value) kw_include).ToArray()
+        | None -> items.ToArray()
 
     let a = filtered.OrderByDescending( fun kv -> match dict_get kv.Value sortby with | Some k -> k | None -> null )
 
@@ -302,13 +304,19 @@ let make_toc (magic: Dictionary<string,string>) dir_src (items: Dictionary<strin
 
     for kv in a do
         let path = kv.Key
-        let title = kv.Value.["title"]
+        let title = 
+            match dict_get kv.Value "title" with
+            | Some t -> t
+            | None -> null // TODO is this right?
 
         add content "<div class=\"toc_item\">\n"
 
         if showdate then
-            let date = kv.Value.["date"]
-            sprintf "  <p class=\"toc_item_date\">%s</p>\n" (format_date date) |> add content
+            let date = 
+                match dict_get kv.Value "date" with
+                | Some date -> (format_date date)
+                | None -> ""
+            sprintf "  <p class=\"toc_item_date\">%s</p>\n" date  |> add content
 
         sprintf "  <p class=\"toc_item_title\"><a href=\"%s\">%s</a></p>" path title |> add content
 
@@ -343,6 +351,8 @@ let crunch_magic html dir_src (items: Dictionary<string,Dictionary<string,string
             let gen_type = d.["type"]
             let replacement =
                 if gen_type = "toc" then
+                    make_toc d dir_src items
+                elif gen_type ="all" then
                     make_toc d dir_src items
                 else
                     raise(NotImplementedException(sprintf "magic type %s" gen_type))

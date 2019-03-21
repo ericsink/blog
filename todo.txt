@@ -1,4 +1,7 @@
 
+complete_index might be part of topics, but very low
+sort order?
+
 the mssql_to_sqlite articles deserve to be part of
 the sqlite topic?  or should mssql_to_sqlite be a
 topic of its own?
@@ -83,9 +86,6 @@ so many &nbsp;
 
 does google analytics still work?  trying to recover
 access to the GA account.
-
-generate some kind of complete index?  so that robots
-can find everything?
 
 hitting /vcbe yields error but vcbe/index.html works.
 bucket config issue?
