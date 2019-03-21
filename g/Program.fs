@@ -225,26 +225,28 @@ let get_layout_name_opt (front_matter :Dictionary<string,string> option) =
     | None -> None
 
 let rec wrap (layout_name :string option) (page_front_matter :Dictionary<string,string>) (src_content :string) (layouts: Dictionary<string,string>) =
-    let (layout_front_matter, before_crunch, content) =
+    let pairs = Dictionary<string,Dictionary<string,string>>()
+    add_site_defaults pairs
+    pairs.Add("page", page_front_matter)
+
+    let (next_layout, before_crunch, content) =
         match layout_name with
         | Some layout_name ->
             let layout = layouts.[layout_name]
             let (template_front, template_html) = util.fm.get_front_matter layout
-            (template_front, template_html, src_content)
+            let next_layout =
+                match template_front with
+                | Some fm ->
+                    pairs.Add("layout", fm)
+                    get_layout_name fm
+                | None ->
+                    None
+            (next_layout, template_html, src_content)
         | None ->
             (None, src_content, null)
 
-    let pairs = Dictionary<string,Dictionary<string,string>>()
-    add_site_defaults pairs
-    pairs.Add("page", page_front_matter)
-    match layout_front_matter with
-    | Some layout_front_matter ->
-        pairs.Add("layout", layout_front_matter)
-    | None ->
-        ()
-
     let after_crunch = crunch before_crunch content pairs
-    match get_layout_name_opt layout_front_matter with
+    match next_layout with
     | Some next_layout_name ->
         wrap (Some next_layout_name) page_front_matter after_crunch layouts
     | None ->
