@@ -1,0 +1,195 @@
+---
+layout: post
+title: Building PepTown with .NET: App Overview
+date: 2019-03-25 12:00:00
+keywords: dotnet front peptown xamarin
+teaser: PepTown is our smartphone-based fundraising solution for high-school sports teams.  The architecture of PepTown is .NET throughout.  This blog entry is an overview of some of the choices we made when building the mobile app.
+---
+
+<p><a href="https://peptown.com">PepTown</a> is our smartphone-based fundraising solution
+for high-school sports teams.  The architecture of
+PepTown is .NET throughout, including Xamarin.Forms, 
+Reactive Extensions, and ASP.NET Core.</p>
+
+<p>This blog entry is an overview of some of the
+choices we made when building the client side of
+PepTown, a Xamarin app for Android and iOS.</p>
+
+<h2>Xamarin.Forms, Kinda</h2>
+
+<p>We use Xamarin.Forms, but some folks might
+look at our code and think that we don't.</p>
+
+<p>We don't use XAML.  We don't even use the Xamarin.Forms binding 
+mechanism.  The only parts that we use are
+the wrappers around the native controls and the
+layout system.</p>
+
+<p>Each page (or partial page, or cell) is implemented
+with a viewmodel.  Those viewmodel classes interact
+with the actual UI controls through an Rx-centric API.
+This API is quite narrow, containing only the things
+that a viewmodel would need.  For example, the API
+cares about the text on a label, the items in a list,
+and the actions that happen on a button tap, but it
+has no concept of layouts or fonts.</p>
+
+<p>For example, for a Button, the API provided to our
+viewmodels looks like this:</p>
+
+<pre class="screen"><span style="color:blue;">public</span>&nbsp;<span style="color:#2b91af;">Func</span>&lt;<span style="color:#2b91af;">TViewModel</span>,<span style="color:#2b91af;">IObservable</span>&lt;<span style="color:blue;">string</span>&gt;&gt;&nbsp;Text&nbsp;{&nbsp;<span style="color:blue;">get</span>;&nbsp;<span style="color:blue;">set</span>;&nbsp;}
+<span style="color:blue;">public</span>&nbsp;<span style="color:#2b91af;">Func</span>&lt;<span style="color:#2b91af;">TViewModel</span>,<span style="color:#2b91af;">IObservable</span>&lt;<span style="color:blue;">string</span>&gt;&gt;&nbsp;ImagePath&nbsp;{&nbsp;<span style="color:blue;">get</span>;&nbsp;<span style="color:blue;">set</span>;&nbsp;}
+<span style="color:blue;">public</span>&nbsp;<span style="color:#2b91af;">Func</span>&lt;<span style="color:#2b91af;">TViewModel</span>,<span style="color:#2b91af;">IObservable</span>&lt;<span style="color:#2b91af;">Unit</span>&gt;,<span style="color:#2b91af;">IDisposable</span>&gt;&nbsp;Click&nbsp;{&nbsp;<span style="color:blue;">get</span>;&nbsp;<span style="color:blue;">set</span>;&nbsp;}
+<span style="color:blue;">public</span>&nbsp;<span style="color:#2b91af;">Func</span>&lt;<span style="color:#2b91af;">TViewModel</span>,<span style="color:#2b91af;">IObservable</span>&lt;<span style="color:blue;">bool</span>&gt;&gt;&nbsp;Enabled&nbsp;{&nbsp;<span style="color:blue;">get</span>;&nbsp;<span style="color:blue;">set</span>;&nbsp;}
+<span style="color:blue;">public</span>&nbsp;<span style="color:#2b91af;">Func</span>&lt;<span style="color:#2b91af;">TViewModel</span>,<span style="color:#2b91af;">IObservable</span>&lt;<span style="color:blue;">bool</span>&gt;&gt;&nbsp;Visible&nbsp;{&nbsp;<span style="color:blue;">get</span>;&nbsp;<span style="color:blue;">set</span>;&nbsp;}
+</pre>
+
+
+<p>The button control gets (from the viewmodel) Text, ImagePath, Enabled and Visible.  
+The viewmodel gets (from the button control) notifications of when the button was tapped/clicked.</p>
+
+<p>So all of the business logic for our app
+resides in assemblies that do not have a dependency on
+the Xamarin.Forms package.  All layout and aesthetic 
+issues are handled at a separate layer</p>
+
+<p>In that layer, for each viewmodel, we have a function that gets
+an object that contains a reference to all the
+controls.  The job of that function is simply to
+style those controls, put them into a layout, and
+return the layout.</p>
+
+<p>For example, here is a snippet from the beginning of the layout
+function for a football scoreboard:</p>
+
+<pre class="screen"><span style="color:blue;">public</span>&nbsp;<span style="color:#2b91af;">View</span>&nbsp;CreateLayout(<span style="color:#2b91af;">IXFReadOnlyLiveFootballCompositeViewControls</span>&nbsp;vc)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;vc.SchoolName.HorizontalOptions&nbsp;=&nbsp;<span style="color:#2b91af;">LayoutOptions</span>.Center;
+&nbsp;&nbsp;&nbsp;&nbsp;vc.SchoolName.FontSize&nbsp;=&nbsp;<span style="color:#2b91af;">Device</span>.GetNamedSize(<span style="color:#2b91af;">NamedSize</span>.Small,&nbsp;<span style="color:blue;">typeof</span>(<span style="color:#2b91af;">Label</span>));
+
+&nbsp;&nbsp;&nbsp;&nbsp;vc.OpponentName.HorizontalOptions&nbsp;=&nbsp;<span style="color:#2b91af;">LayoutOptions</span>.Center;
+&nbsp;&nbsp;&nbsp;&nbsp;vc.OpponentName.FontSize&nbsp;=&nbsp;<span style="color:#2b91af;">Device</span>.GetNamedSize(<span style="color:#2b91af;">NamedSize</span>.Small,&nbsp;<span style="color:blue;">typeof</span>(<span style="color:#2b91af;">Label</span>));
+
+&nbsp;&nbsp;&nbsp;&nbsp;vc.Versus.HorizontalOptions&nbsp;=&nbsp;<span style="color:#2b91af;">LayoutOptions</span>.Center;
+&nbsp;&nbsp;&nbsp;&nbsp;vc.Versus.FontSize&nbsp;=&nbsp;<span style="color:#2b91af;">Device</span>.GetNamedSize(<span style="color:#2b91af;">NamedSize</span>.Micro,&nbsp;<span style="color:blue;">typeof</span>(<span style="color:#2b91af;">Label</span>));
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#2b91af;">StackLayout</span>&nbsp;schoolsInfoHeader&nbsp;=&nbsp;<span style="color:blue;">new</span>&nbsp;<span style="color:#2b91af;">StackLayout</span>
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Padding&nbsp;=&nbsp;10,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Spacing&nbsp;=&nbsp;1,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Orientation&nbsp;=&nbsp;<span style="color:#2b91af;">StackOrientation</span>.Vertical,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BackgroundColor&nbsp;=&nbsp;<span style="color:#2b91af;">LayoutHelper</span>.DEFAULT_GRAY,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Children&nbsp;=
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vc.SchoolName,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vc.Versus,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vc.OpponentName
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;};
+</pre>
+
+<p>This highlights one of the reasons why we don't
+use XAML -- we want the creation of widgets to
+be very separate from the styling and layout of same.
+In contrast, XAML intermingles the creation and styling
+and layout of controls all in one place.</p>
+
+<h2>Automated UI Testing, Kinda</h2>
+
+<p>One of the classic benefits of a viewmodel is that
+it is testable.  Since the viewmodel doesn't have any
+dependencies on platform or UI specific stuff, we can
+write tests that create the viewmodel and pretend 
+to be the UI.</p>
+
+<p>One approach we use here is
+that we implemented a fake Xamarin.Forms library that does
+not actually create UI controls, but rather, exposes
+an API we can use to write scripts.  Those scripts
+are simply things that are pretending to be the user.</p>
+
+<p>So we have a scripting version of our "app" which
+is a console app running under .NET Core.  Instead
+of referencing the real Xamarin.Forms package, it
+references our fake Xamarin.Forms scripting library.</p>
+
+<p>For example, a typical test script starts with
+our fake user choosing a favorite school:</p>
+
+<pre class="screen">contentFrame
+&nbsp;&nbsp;&nbsp;&nbsp;.FindButton(<span style="color:blue;">nameof</span>(<span style="color:#2b91af;">ISFWelcomeViewControls</span>.SetFavoriteSchool))
+&nbsp;&nbsp;&nbsp;&nbsp;.Tap()
+&nbsp;&nbsp;&nbsp;&nbsp;;
+<span style="color:blue;">await</span>&nbsp;contentFrame.WaitForView(<span style="color:blue;">typeof</span>(<span style="color:#2b91af;">SetFavoriteSchoolView</span>));
+contentFrame
+&nbsp;&nbsp;&nbsp;&nbsp;.FindButton(<span style="color:blue;">nameof</span>(<span style="color:#2b91af;">ISFSetFavoriteSchoolViewControls</span>.State))
+&nbsp;&nbsp;&nbsp;&nbsp;.Tap();
+&nbsp;&nbsp;&nbsp;&nbsp;;
+<span style="color:blue;">await</span>&nbsp;contentFrame.WaitForView(<span style="color:blue;">typeof</span>(<span style="color:#2b91af;">ChooseStateView</span>));
+<span style="color:blue;">await</span>&nbsp;contentFrame
+&nbsp;&nbsp;&nbsp;&nbsp;.FindListView(<span style="color:blue;">nameof</span>(<span style="color:#2b91af;">ISFChooseStateViewControls</span>.StateItems))
+&nbsp;&nbsp;&nbsp;&nbsp;.Items
+&nbsp;&nbsp;&nbsp;&nbsp;.Where(a&nbsp;=&gt;&nbsp;a?.Count&nbsp;&gt;&nbsp;0)
+&nbsp;&nbsp;&nbsp;&nbsp;.Take(1)
+&nbsp;&nbsp;&nbsp;&nbsp;;
+contentFrame
+&nbsp;&nbsp;&nbsp;&nbsp;.FindListView(<span style="color:blue;">nameof</span>(<span style="color:#2b91af;">ISFChooseStateViewControls</span>.StateItems))
+&nbsp;&nbsp;&nbsp;&nbsp;.TapItem&lt;<span style="color:#2b91af;">StateCellViewModel</span>&gt;(st&nbsp;=&gt;&nbsp;st.Params.Id&nbsp;==&nbsp;<span style="color:#a31515;">&quot;IL&quot;</span>)
+&nbsp;&nbsp;&nbsp;&nbsp;;
+<span style="color:blue;">await</span>&nbsp;contentFrame.WaitForView(<span style="color:blue;">typeof</span>(<span style="color:#2b91af;">SetFavoriteSchoolView</span>));
+</pre>
+
+<p>This script, pretending to be a user, taps on a button to brings up the 
+SetFavoriteSchool viewmodel, then it taps on the button to choose a state, and waits for the list of 
+states to get its items, and then taps on the state for Illinois.</p>
+
+<h2>A Domain Specific Language, Kinda</h2>
+
+<p>It would be basically accurate to say that PepTown
+is written in C#.</p>
+
+<p>It might be even more accurate to say that the 
+viewmodels are written not in C#, but rather, 
+in a domain specific language (DSL) that is compiled to C#.  I'm stretching the definition
+of a "language" a little bit, because our language doesn't [currently] have
+a textual representation.</p>
+
+<p>But I still think of it as a DSL.  The first stage of a typical compiler 
+takes a textual representation and converts it
+to a data structure.  Well, our DSL has that data structure,
+and we process it to generate the C# class for 
+the viewmodel.</p>
+
+<p>For example, here is a snippet from the definition of the
+viewmodel which shows color and mascot information for a school:</p>
+
+<pre class="screen">.SetButtonAction(<span style="color:#a31515;">&quot;MenuEditMascot&quot;</span>,
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">new</span>&nbsp;<span style="color:#2b91af;">ViewModelInvocation</span>(<span style="color:#a31515;">&quot;UpdateSchoolMascot&quot;</span>)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.AddArgument_PassThru(<span style="color:#a31515;">&quot;SchoolId&quot;</span>,&nbsp;<span style="color:#a31515;">&quot;Id&quot;</span>)
+&nbsp;&nbsp;&nbsp;&nbsp;)
+</pre>
+
+<p>When someone wants to edit the school mascot info, we bring up the 
+UpdateSchoolMascot viewmodel with the SchoolId as a parameter.</p>
+
+<p>BTW, not only does our DSL not have a textual representation,
+it also lacks a name.  We informally refer to it as "Autogen".</p>
+
+<p>Autogen provides us a higher-level abstraction, allowing us to
+avoid manual repetition of common stuff.  The viewmodel
+mentioned above is defined in 44 lines, but Autogen converts
+that into a viewmodel class of over 1,000 lines of C#.</p>
+
+<p>Autogen also has a somewhat rudimentary type system.  For example, we have a SchoolTeams viewmodel that 
+shows a list of teams.  The "item tapped" action for that list control 
+will launch the TeamSchedule viewmodel to show the events for
+that team, so it needs to pass the Team Id as a parameter.
+For every viewmodel invocation, Autogen will verify that the parameters are
+provided and of the proper types.  If you try to pass a CoachId into a parameter that requires a TeamId, AutoGen will complain.  
+This allows us to catch errors much earlier.</p>
+
+<p>Autogen isn't quite expressive enough to describe everything PepTown does, 
+so in a few cases we augment the 
+generated viewmodel class manually.  Those handwritten methods
+amount to less than one percent of all the viewmodel code.</p>
+
