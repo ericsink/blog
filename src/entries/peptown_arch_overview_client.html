@@ -173,22 +173,22 @@ viewmodel which shows color and mascot information for a school:</p>
 UpdateSchoolMascot viewmodel with the SchoolId as a parameter.</p>
 
 <p>BTW, not only does our DSL not have a textual representation,
-it also lacks a name.  We informally refer to it as "Autogen".</p>
+it also lacks a name.  We informally refer to it as "AutoGen".</p>
 
-<p>Autogen provides us a higher-level abstraction, allowing us to
+<p>AutoGen provides us a higher-level abstraction, allowing us to
 avoid manual repetition of common stuff.  The viewmodel
-mentioned above is defined in 44 lines, but Autogen converts
+mentioned above is defined in 44 lines, but AutoGen converts
 that into a viewmodel class of over 1,000 lines of C#.</p>
 
-<p>Autogen also has a somewhat rudimentary type system.  For example, we have a SchoolTeams viewmodel that 
+<p>AutoGen also has a somewhat rudimentary type system.  For example, we have a SchoolTeams viewmodel that 
 shows a list of teams.  The "item tapped" action for that list control 
 will launch the TeamSchedule viewmodel to show the events for
 that team, so it needs to pass the Team Id as a parameter.
-For every viewmodel invocation, Autogen will verify that the parameters are
+For every viewmodel invocation, AutoGen will verify that the parameters are
 provided and of the proper types.  If you try to pass a CoachId into a parameter that requires a TeamId, AutoGen will complain.  
 This allows us to catch errors much earlier.</p>
 
-<p>Autogen isn't quite expressive enough to describe everything PepTown does, 
+<p>AutoGen isn't quite expressive enough to describe everything PepTown does, 
 so in a few cases we augment the 
 generated viewmodel class manually.  Those handwritten methods
 amount to less than one percent of all the viewmodel code.</p>
