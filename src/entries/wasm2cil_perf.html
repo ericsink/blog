@@ -1,0 +1,259 @@
+---
+layout: post
+title: Exploring wasm2cil performance
+date: 2019-04-30 16:00:00
+keywords: front
+teaser: Very early and very rough comparisons against wasmtime and native
+---
+
+<p>(What is wasm2cil?  See my <a href="/entries/wasm_wasi_dotnet.html">previous blog entry</a>.)</p>
+
+<p>I've been trying to do some measurements to get a 
+rough idea of performance for assemblies produced by
+wasm2cil.</p>
+
+<p>A VERY rough idea.  Take these numbers with a grain of salt.</p>
+
+<h2>Brotli compression</h2>
+
+<p>For a rather CPU-intensive test, the following Brotli library:</p>
+
+<p><a href="https://github.com/dropbox/rust-brotli">https://github.com/dropbox/rust-brotli</a></p>
+
+<p>... makes a nice test case because it compiles to wasm32-unknown-wasi with no problems:</p>
+
+<pre class="screen">
+erics-mac-mini:rust-brotli eric$ cargo +nightly build --release --target=wasm32-unknown-wasi
+</pre>
+
+<p>I made a <a href="https://github.com/ericsink/rust-brotli/commit/adbcea7638041c5ea95b4fb33a79208818e079e3">small code change</a> to write out the elapsed time after compressing something.</p>
+
+<p>My test case is measure the time required to compress sqlite3.c (the source code for 
+SQLite in a single 7.4 MB "amalgamation" file).</p>
+
+<p>First, I ran the original Rust version natively:</p>
+
+<pre class="screen">
+erics-mac-mini:rust-brotli eric$ cargo run --release --bin brotli -- -c sqlite3.c s1
+    Finished release [optimized] target(s) in 0.19s
+     Running `target/release/brotli -c sqlite3.c s1`
+elapsed: 17
+</pre>
+
+<p>Second, I ran brotli.wasm through wasmtime:</p>
+
+<pre class="screen">
+erics-mac-mini:wasm2cil eric$ wasmtime --dir=. brotli.wasm -- -c sqlite3.c s1
+elapsed: 81
+</pre>
+
+<p>Finally, I ran brotli.wasm through my own wasm2cil:</p>
+
+<pre class="screen">
+erics-mac-mini:tool eric$ dotnet run -- run ../brotli.wasm -- -c ../sqlite3.c s1
+elapsed: 37
+</pre>
+
+<p>Summarized results:</p>
+
+<table border="1" cellpadding="4">
+
+<tr align="center">
+    <th>Implementation</th>
+    <th>Elapsed Time (sec)</th>
+    </tr>
+
+<tr align="right">
+    <td>native</td>
+    <td>17</td>
+    </tr>
+
+<tr align="right">
+    <td>wasmtime</td>
+    <td>81</td>
+    </tr>
+
+<tr align="right">
+    <td>wasm2cil</td>
+    <td>37</td>
+    </tr>
+
+</table>
+
+<P>So the wasm2cil version takes over twice as long as the native code.
+Hopefully I can narrow that gap with more focused work on performance.</p>
+
+<p>It's a little surprising that wasmtime came in so much slower.  Or
+maybe it's not.  The comparison here has a little bit of apples-to-oranges going on.</p>
+
+<p>First of all, WebAssembly memory accesses are supposed
+to be range-checked, and wasm2cil isn't currently doing that, while
+wasmtime probably is.</p>
+
+<p>Second, we're probably seeing a basic difference in maturity
+between Cranelift JIT (which is fairly young) and .NET Core 2.2.</p>
+
+<p>Third, I could be using wasmtime incorrectly, although I did try the --optimize 
+flag, and it didn't help.</p>
+
+<p>Finally, this is just one benchmark.  In the next one, 
+wasmtime does very well indeed.</p>
+
+<h2>SQLite</h2>
+
+<p>To do some measurements with SQLite, I wrote a little C program
+that uses the sqlite3 API to construct a table and query a subset of the rows.
+Specifically, given parameters (count), (first) and (last), it
+inserts (count) rows, where each row is two columns, the loop index, and the loop index squared.
+After the inserts are done, it does a SELECT sum() on the squares
+column using (first) and (last) as the range of rows.</p>
+
+<p>In other words, the test program uses SQLite to calculate
+something basically equivalent to this:</p>
+
+<pre class="screen">
+int total = 0;
+for (int i=0; i&lt;count; i++)
+{
+    if ((i &gt;= first) &amp;&amp; (i &lt;= last))
+    {
+        total += i * i;
+    }
+}
+</pre>
+
+<p>The main() for this test case allows the count, first and last parameters 
+to be specified on the command line, 
+as well as the name of the sqlite database file.  So I did three runs:</p>
+
+<ul>
+<li><p>1,000 rows; sum the square from 200 through 400</p></li>
+<li><p>10,000 rows; sum the square from 2,000 through 4,000</p></li>
+<li><p>100,000 rows; sum the square from 20,000 through 40,000</p></li>
+</ul>
+
+<p>Here are those runs for the native code:</p>
+
+<pre class="screen">
+erics-mac-mini:reference eric$ ./a.out z1 1000 200 400
+filename=z1  count=1000  first=200  last=400
+elapsed: 472 ms
+rc: 18766700
+
+erics-mac-mini:reference eric$ ./a.out z2 10000 2000 4000
+filename=z2  count=10000  first=2000  last=4000
+elapsed: 4618 ms
+rc: 1496797816
+
+erics-mac-mini:reference eric$ ./a.out z3 100000 20000 40000
+filename=z3  count=100000  first=20000  last=40000
+elapsed: 46668 ms
+rc: 1738801584
+</pre>
+
+<p>And for wasmtime:</p>
+
+<pre class="screen">
+erics-mac-mini:sqlite3 eric$ wasmtime --dir=. sqlite3.wasm -- w1 1000 200 400
+filename=w1  count=1000  first=200  last=400
+elapsed: 534 ms
+rc: 18766700
+
+erics-mac-mini:sqlite3 eric$ wasmtime --dir=. sqlite3.wasm -- w2 10000 2000 4000
+filename=w2  count=10000  first=2000  last=4000
+elapsed: 5292 ms
+rc: 1496797816
+
+erics-mac-mini:sqlite3 eric$ wasmtime --dir=. sqlite3.wasm -- w3 100000 20000 40000
+filename=w3  count=100000  first=20000  last=40000
+elapsed: 53024 ms
+rc: 1738801584
+</pre>
+
+<p>And for wasm2cil:</p>
+
+<pre class="screen">
+erics-mac-mini:tool eric$ dotnet run -- run ../sqlite3/sqlite3.wasm -- c1 1000 200 400
+filename=c1  count=1000  first=200  last=400
+elapsed: 1860 ms
+rc: 18766700
+
+erics-mac-mini:tool eric$ dotnet run -- run ../sqlite3/sqlite3.wasm -- c2 10000 2000 4000
+filename=c2  count=10000  first=2000  last=4000
+elapsed: 5411 ms
+rc: 1496797816
+
+erics-mac-mini:tool eric$ dotnet run -- run ../sqlite3/sqlite3.wasm -- c3 100000 20000 40000
+filename=c3  count=100000  first=20000  last=40000
+elapsed: 42700 ms
+rc: 1738801584
+</pre>
+
+<p>The printed sum result is the same in each case, and the resulting sqlite database files
+are byte-for-byte identical within each run.</p>
+
+<p>To summarize the results, as elapsed time for each run, in milliseconds:</p>
+
+<table border="1" cellpadding="4">
+
+<tr align="center">
+    <th>Implementation</th>
+    <th>1,000 rows</th>
+    <th>10,000 rows</th>
+    <th>100,000 rows</th>
+    </tr>
+
+<tr align="right">
+    <td>native</td>
+    <td>472</td>
+    <td>4,618</td>
+    <td>46,668</td>
+    </tr>
+
+<tr align="right">
+    <td>wasmtime</td>
+    <td>534</td>
+    <td>5,292</td>
+    <td>53,024</td>
+    </tr>
+
+<tr align="right">
+    <td>wasm2cil</td>
+    <td>1,860</td>
+    <td>5,411</td>
+    <td>42,700</td>
+    </tr>
+
+</table>
+
+<p>Weird.</p>
+
+<p>The results for wasmtime are consistently about 13% higher
+than native, which is pretty impressive I think.</p>
+
+<p>But the results for wasm2cil are all over the place:</p>
+
+<ul>
+<li><p>At 1,000 rows, a LOT slower, 394 % of native</p></li>
+<li><p>At 10,000 rows, a little slower, 117 % of native</p></li>
+<li><p>At 100,000 rows, a little FASTER, 91 % of native</p></li> 
+</ul>
+
+<p>It seems bizarre for wasm2cil to be faster than the native code for ANY test,
+so for now I'm going to assume this is a defect in my approach.  I did
+repeat the runs and got similar results each time.  So this is an
+interesting mystery.</p>
+
+<h2>Bottom line</h2>
+
+<p>There is no bottom line.  Not yet.</p>
+
+<p>Well actually, I consider it good news that these test runs work (without
+crashing or incorrect results), and that timing comparisons are
+decent (in the same order of magnitude as native).</p>
+
+<p>Beyond that level of precision, I consider this data interesting as long as I'm not 
+drawing big-picture conclusions from it.  These results raise more questions than they answer.  
+Mostly I can use the information to guide my efforts to improve wasm2cil.</p>
+
+
