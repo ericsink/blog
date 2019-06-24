@@ -1,0 +1,137 @@
+---
+layout: post
+title: Dynamic loading of native code with .NET
+date: 2019-06-24 09:00:00
+keywords: front
+teaser: TODO
+---
+
+<p>I maintain <a href="https://github.com/ericsink/SQLitePCL.raw">SQLitePCLRaw</a>, a .NET wrapper for <a href-"https://sqlite.org/">SQLite</a>.
+In one sense, this project is not terribly unusual.  Plenty of other
+packages exist to provide a .NET-friendly way to access
+a native library.  For example, <a href="https://github.com/mono/SkiaSharp">SkiaSharp</a> is a .NET wrapper
+around the Skia graphics library.</p>
+
+<p>But even in this category, SQLitePCLRaw faces challenges that are uncommon, if not unique.</p>
+
+<ul>
+<li><p>There is more than one notion of "the SQLite library".  We have plain SQLite.  And then there is SQLCipher (derived from SQLite, developed by Zetetic).  And Windows 10 has a SQLite library built-in (winsqlite3.dll).  Android has one too, and then in version N they decided that people can't use it anymore.  Apple provides a SQLite library with iOS and MacOS.  People have custom builds of SQLite so they can configure it with compile options.  All these SQLite libraries can be different versions, and can be compiled with different features.  And SQLitePCLRaw tries to work with all of them.</p></li>
+
+<li><p>SQLite (in all its various forms) is extremely ubiquitous.  It runs on everything from servers to embedded devices, and people use it for all kinds of things.  .NET has become very diverse as well.  We have .NET Framework, .NET Core, Mono, Xamarin, Unity, Windows, Mac, Linux, Windows Phone, UWP, and so on.  Basically, SQLitePCLRaw tries to support .NET in all its forms.</p></li>
+</ul>
+
+<p>So the number of scenarios in play here is like a matrix with N flavors of SQLite as the rows and M platforms as the columns.  As an offhand count, I can name enough items to say that N is 9 and M is 11, so there are roughly 100 configurations to worry about.  Not every matrix cell is special, so that might be overstating things a little, but it's the right ballpark.</p>
+
+<h2>DllImport</h2>
+
+<p>The most common way of calling native code with .NET is <a href="https://docs.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke">P/Invoke</a>.  This is done with an extern method definition that has a DllImport attribute which specifies the name of the unmanaged library in which it should be found.  For example:</p>
+
+<pre class="screen">
+[DllImport("libc.dll")]
+public static extern int abs(int x);
+</pre>
+
+<p>This says "In the shared library 'libc.dll', find a function called 'abs' and treat it like it returns an int and has one parameter of type int."  Note that the actual signature of the unmanaged function must match the method definition, and nothing verifies this for you.  So for example, if the parameter for abs() were actually a pointer, you could expect Bad Things to happen when you call it with the P/Invoke definition above.</p>
+
+<p>It is also worth observing that the trivial example above does not show much of the power of P/Invoke.  Here's something a bit more complicated:</p>
+
+<pre class="screen">
+[DllImport("libc.dll")]
+public static extern int strlen(byte[] a);
+</pre>
+
+<p>This says "In the shared library 'libc.dll', find a function named 'strlen' which returns an int, and takes one parameter, and the actual type of the parameter is a pointer, but from the .NET side, let's pretend that the function takes an array of byte, and just do the right thing, mkay?"  So, when you call this method from C#, P/Invoke will take the byte[] and pin it, to prevent the garbage collector from moving it around while the unmanaged function has it.  And then when the native function returns, P/Invoke will automatically un-pin it.</p>
+
+<p>P/Invoke can do all kinds of stuff to bridge the gap between managed and native code.  We call that stuff "Marshaling".</p>
+
+<p>As powerful as P/Invoke is, I have one major complaint with it, and it goes back to the DllImport attribute.  Because DllImport is, well, an attribute, its parameters have to be constant.  So, the name of the unmanaged library has to be hard-coded at compile time.  But in my world, SQLite is running around using more names than Jason Bourne.</p>
+
+<h2>Like DllImport, but more dynamic</h2>
+
+<p>For several years my solution to this problem has been to take the P/Invoke part of my code and compile it multiple times, once for each name I need to give to DllImport.  I refer to the instances of this module as "providers", and they are somewhat like plugins.  The core of SQLitePCLRaw needs one of these providers to be registered.</p>
+
+<p>Anyway, having all these providers is inelegant.  It makes the build system awkward.  It increases the number of assemblies and packages.  For a long time I've been wanting to rework this code to use dynamic loading instead of DllImport.  I envisioned writing a Do-It-Yourself equivalent for DllImport, but without using attributes, so the library name wouldn't have to be hard-coded.</p>
+
+<p>The starting point for me was to think about how DllImport is implemented.  Conceptually, I pictured it like this:</p>
+
+<pre class="screen">
+MyDelegateType DoThatDllImportThing(string libraryName, string functionName)
+{
+    string path = FindTheLibrary(libraryName);
+    IntPtr hLibrary = LoadTheLibrary(path);
+    IntPtr hFunction = LoadTheFunction(hLibrary, functionName);
+    return CreateTheDelegate(hFunction);
+}
+</pre>
+
+<p>I figured FindTheLibrary() would be easy, because it's just path stuff.</p>
+
+<p>And LoadTheLibrary() is just a LoadLibraryEx() on Windows and dlopen() everywhere else.  Similarly, LoadTheFunction() is either GetProcAddress() or dlsym().  So those are not a problem.</p>
+
+<p>But CreateTheDelegate() would be a lot of work, 
+because I would have to implement all that magic that P/Invoke does.  Well anyway.  It would be worth it.</p>
+
+<p>Skipping ahead to today, I do now have dynamic loading implemented for SQLitePCLRaw 2.0 (a prerelease of which is now available on nuget.org), but things didn't go at all like I thought they would.</p>
+
+<p>It turns out that my expectations about difficulty were almost completely backwards.</p>
+
+<p>CreateTheDelegate() is already provided by the platform.  Once you have the function pointer, all the stuff I thought would be hard is actually done by Marshal.GetDelegateForFunctionPointer().</p>
+
+<p>But FindTheLibrary() is not "easy".  In fact, implementing this in a cross-platform manner appears to be impossible.  As far as I can tell, there are some .NET platforms where it just can't be done.  FindTheLibrary() (or something like it) must exist, because DllImport uses it, but it is not public.</p>
+
+<p>Side Rant:  People think the hard part of software is because of tricky algorithms or difficult concepts.  But very often, software is hard because you're trying to do something the platform won't let you do, because the platform only provides a higher-level interface, which, ironically, was intended to make things easier.  For me, I almost always want the lower level APIs.  You want to give me an HTTP library?  Fine, but I still need sockets.</p>
+
+<h2>Success and failure</h2>
+
+<p>All I want here is for the tooling to support a way for me to include a dynamic library (dll, dylib, so) and put it somewhere such that I can find its path at runtime.  But every .NET implementation does this a little differently.</p>
+
+<p>Xamarin iOS and Android are both kinda weird (in different ways).  In part, this is because of constraints of the underlying platforms, but it is also apparent that both of them were just designed to support DllImport (which is understandable).  If either of these Xamarin platforms have a documented/supported way of doing what I want, I have thus far been unable to find it.</p>
+
+<p>A bit surprising is that .NET Core 2.x is one of the most difficult situations.  It stores unmanaged libraries in a folder called runtimes and then in a subfolder named for the RID, but (1) at debug time, this is in the packages directory, which is weird and not discoverable relative to the executing assembly, and (2) there is no public API to get the RID.  I could try to figure out the RID myself, but that approach looks bug-prone.</p>
+
+<p>Strangely, the .NET Framework is one of the easier cases, because it doesn't try to do anything in this area.  It just lets me do.  So I can provide a nuget targets file that copies the dynamic libraries to the output directory at build time.  And then I use GetExecutingAssembly() and get its location and from there I can find the files I need.</p>
+
+<h2>Despair</h2>
+
+<p>The frustration of trying to solve this problem has driven me to some weird places.</p>
+
+<p>"It's a %*($^#@ file and I just want it stored next to my executable.  Why can't I do that?  The tooling does it for images.  Why can't I do this for an arbitrary file?  Hey, maybe this would work if I just change the suffix from .so to .png?"</p>
+
+<p>And I am apparently not alone in this.  In my search for answers I found a repo provided by the Quicken Loans team (see <a href="https://github.com/RockLib/RockLib.EmbeddedNativeLibrary">https://github.com/RockLib/RockLib.EmbeddedNativeLibrary</a>).  In a nutshell, they package the native library as an embedded resource inside an assembly and then at runtime they load the resource and write it to disk (so they know the path) and then load it.</p>
+
+<p>I've come <i>really</i> close to writing code to take a (dll | dylib | so) and encode it as base64 and dump it out as a string literal in C# source file.</p>
+
+<p>I should also admit that all this silliness is part of my motivation for exploring various ways of compiling C (and things like it) for the CLR.  I've made significant progress <a href="/entries/wasm_wasi_dotnet.html">compiling WASM to MSIL</a>, and I've been exploring the possibilites of doing the same for LLVM bitcode.  If I could have SQLite compiled as a .NET assembly, all this pain would go away.  Granted, it would be replaced by new and different pain, but I'm ready to welcome that.</p>
+
+<p>But alas, .NET Core 3.0 is arriving with a breath of fresh air.</p>
+
+<h2>System.Runtime.InteropServices.NativeLibrary</h2>
+
+<p>I first learned about this new API <a href="https://github.com/ericsink/SQLitePCL.raw/issues/248">from Brice Lambson</a> of the Entity Framework Core team.  Basically, it provides FindTheLibrary(), LoadTheLibrary(), and LoadTheFunction() in a cross-platform way.  It is pretty much exactly what I want, providing me a way to access the power of DllImport without its limitations.</p>
+
+<p>As I write this, .NET Core 3.0 is in preview, so the <a href="https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.nativelibrary.tryload?view=netcore-3.0">docs</a> on this API are a bit sparse.  But after some experimentation and a bit of "Use The Source Luke", I've been able to get things working nicely.</p>
+
+<p>One tricky part was that NativeLibrary.Load() has two overloads.</p>
+
+<pre class="screen">
+public static IntPtr Load(
+    string libraryPath
+    );
+
+public static IntPtr Load(
+    string libraryName, 
+    System.Reflection.Assembly assembly, 
+    Nullable<DllImportSearchPath> searchPath
+    );
+</pre>
+
+<p>The second call (the one that takes a "libraryName") is the one I want, because that's the one that has knowledge about where to look for unmanaged libraries.  The simpler first overload wants a "libraryPath", and seems to be just a trivial wrapper around LoadLibraryEx/dlopen, the thing to use when you already know the path of the dll/so/dylib you want.</p>
+
+<h2>Looking forward</h2>
+
+<p>So why am I excited about this API when I can only use it on .NET Core 3.0?</p>
+
+<p>Mostly, because of the <a href="https://devblogs.microsoft.com/dotnet/introducing-net-5/">the .NET 5</a> announcement.  I'm assuming that when .NET 5 ships (in late 2020), the Xamarin platforms will support the NativeLibrary API.  Eventually, I will be able to use NativeLibrary everywhere and get rid of DllImport completely.</p>
+
+<p>In the meantime, I'm using the NativeLibrary API as the pattern for implementing similar functionality for other platforms whereever possible.  For example, for .NET Framework support, I have implemented my own clone of (a subset of) NativeLibrary.  In the end, I still have to ship several of the old Dllimport providers with hard-coded names, but still, dynamic loading killed off some of the complexity, resulting in fewer packages and a simpler build.</p>
+
