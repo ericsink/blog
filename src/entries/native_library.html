@@ -131,7 +131,7 @@ public static IntPtr Load(
 
 <p>So why am I excited about this API when I can only use it on .NET Core 3.0?</p>
 
-<p>Mostly, because of the <a href="https://devblogs.microsoft.com/dotnet/introducing-net-5/">the .NET 5</a> announcement.  I'm assuming that when .NET 5 ships (in late 2020), the Xamarin platforms will support the NativeLibrary API.  Eventually, I will be able to use NativeLibrary everywhere and get rid of DllImport completely.</p>
+<p>Mostly, because of the <a href="https://devblogs.microsoft.com/dotnet/introducing-net-5/">.NET 5</a> announcement.  I'm assuming that when .NET 5 ships (in late 2020), the Xamarin platforms will support the NativeLibrary API.  Eventually, I will be able to use NativeLibrary everywhere and get rid of DllImport completely.</p>
 
 <p>In the meantime, I'm using the NativeLibrary API as the pattern for implementing similar functionality for other platforms whereever possible.  For example, for .NET Framework support, I have implemented my own clone of (a subset of) NativeLibrary.  In the end, I still have to ship several of the old Dllimport providers with hard-coded names, but still, dynamic loading killed off some of the complexity, resulting in fewer packages and a simpler build.</p>
 
