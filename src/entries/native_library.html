@@ -3,7 +3,7 @@ layout: post
 title: Dynamic loading of native code with .NET
 date: 2019-06-24 09:00:00
 keywords: front
-teaser: TODO
+teaser: My problem with DllImport is that the library name has to be hard-coded at compile time.
 ---
 
 <p>I maintain <a href="https://github.com/ericsink/SQLitePCL.raw">SQLitePCLRaw</a>, a .NET wrapper for <a href-"https://sqlite.org/">SQLite</a>.
@@ -83,7 +83,7 @@ because I would have to implement all that magic that P/Invoke does.  Well anywa
 
 <h2>Success and failure</h2>
 
-<p>All I want here is for the tooling to support a way for me to include a dynamic library (dll, dylib, so) and put it somewhere such that I can find its path at runtime.  But every .NET implementation does this a little differently.</p>
+<p>All I want here is for the tooling to support a way for me to include a dynamic library (dll | so | dylib) and put it somewhere such that I can find its path at runtime.  But every .NET implementation does this a little differently.</p>
 
 <p>Xamarin iOS and Android are both kinda weird (in different ways).  In part, this is because of constraints of the underlying platforms, but it is also apparent that both of them were just designed to support DllImport (which is understandable).  If either of these Xamarin platforms have a documented/supported way of doing what I want, I have thus far been unable to find it.</p>
 
@@ -97,17 +97,17 @@ because I would have to implement all that magic that P/Invoke does.  Well anywa
 
 <p>"It's a %*($^#@ file and I just want it stored next to my executable.  Why can't I do that?  The tooling does it for images.  Why can't I do this for an arbitrary file?  Hey, maybe this would work if I just change the suffix from .so to .png?"</p>
 
-<p>And I am apparently not alone in this.  In my search for answers I found a repo provided by the Quicken Loans team (see <a href="https://github.com/RockLib/RockLib.EmbeddedNativeLibrary">https://github.com/RockLib/RockLib.EmbeddedNativeLibrary</a>).  In a nutshell, they package the native library as an embedded resource inside an assembly and then at runtime they load the resource and write it to disk (so they know the path) and then load it.</p>
+<p>And I am apparently not alone in this.  In my search for answers I found a repo provided by the Quicken Loans team (see <a href="https://github.com/RockLib/RockLib.EmbeddedNativeLibrary">https://github.com/RockLib/RockLib.EmbeddedNativeLibrary</a>).  In a nutshell, they package the native library as an embedded resource inside an assembly and then at runtime they load the resource and write it to disk and then load it.</p>
 
-<p>I've come <i>really</i> close to writing code to take a (dll | dylib | so) and encode it as base64 and dump it out as a string literal in C# source file.</p>
+<p>Along those same lines, I've come <i>really</i> close to writing code to take a (dll | so | dylib) and encode it as base64 and dump it out as a string literal in C# source file.</p>
 
-<p>I should also admit that all this silliness is part of my motivation for exploring various ways of compiling C (and things like it) for the CLR.  I've made significant progress <a href="/entries/wasm_wasi_dotnet.html">compiling WASM to MSIL</a>, and I've been exploring the possibilites of doing the same for LLVM bitcode.  If I could have SQLite compiled as a .NET assembly, all this pain would go away.  Granted, it would be replaced by new and different pain, but I'm ready to welcome that.</p>
+<p>All this silliness is also part of my motivation for exploring various ways of compiling C (and things like it) for the CLR.  I've had early success <a href="/entries/wasm_wasi_dotnet.html">compiling WASM to MSIL</a>, and I've made significant progress doing the same for LLVM bitcode.  If I could have SQLite compiled as a .NET assembly, all this pain would go away.  Granted, it would be replaced by new and different pain, but I'm ready to welcome that.</p>
 
 <p>But alas, .NET Core 3.0 is arriving with a breath of fresh air.</p>
 
 <h2>System.Runtime.InteropServices.NativeLibrary</h2>
 
-<p>I first learned about this new API <a href="https://github.com/ericsink/SQLitePCL.raw/issues/248">from Brice Lambson</a> of the Entity Framework Core team.  Basically, it provides FindTheLibrary(), LoadTheLibrary(), and LoadTheFunction() in a cross-platform way.  It is pretty much exactly what I want, providing me a way to access the power of DllImport without its limitations.</p>
+<p>I first learned about this new API <a href="https://github.com/ericsink/SQLitePCL.raw/issues/248">from Brice Lambson</a> of the Entity Framework Core team.  Basically, it provides FindTheLibrary(), LoadTheLibrary(), and LoadTheFunction() in a cross-platform way.  It is pretty much exactly what I need, a way to load unmanaged libraries without the limitations of the DllImport attribute.</p>
 
 <p>As I write this, .NET Core 3.0 is in preview, so the <a href="https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.nativelibrary.tryload?view=netcore-3.0">docs</a> on this API are a bit sparse.  But after some experimentation and a bit of "Use The Source Luke", I've been able to get things working nicely.</p>
 
@@ -125,7 +125,7 @@ public static IntPtr Load(
     );
 </pre>
 
-<p>The second call (the one that takes a "libraryName") is the one I want, because that's the one that has knowledge about where to look for unmanaged libraries.  The simpler first overload wants a "libraryPath", and seems to be just a trivial wrapper around LoadLibraryEx/dlopen, the thing to use when you already know the path of the dll/so/dylib you want.</p>
+<p>The second call (the one that takes a "libraryName") is the one that has knowledge about where to look for unmanaged libraries.  The simpler first overload wants a "libraryPath", and seems to be just a trivial wrapper around LoadLibraryEx/dlopen, the thing to use when you already know the path of the (dll | so | dylib) you want.</p>
 
 <h2>Looking forward</h2>
 
