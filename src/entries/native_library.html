@@ -75,7 +75,7 @@ because I would have to implement all that magic that P/Invoke does.  Well anywa
 
 <p>It turns out that my expectations about difficulty were almost completely backwards.</p>
 
-<p>CreateTheDelegate() is already provided by the platform.  Once you have the function pointer, all the stuff I thought would be hard is actually done by Marshal.GetDelegateForFunctionPointer().</p>
+<p>CreateTheDelegate() is already provided by the platform.  Once you have the function pointer, all the stuff I thought would be hard is actually done by <a href="https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.getdelegateforfunctionpointer?view=netcore-2.2">Marshal.GetDelegateForFunctionPointer()</a>.</p>
 
 <p>But FindTheLibrary() is not "easy".  In fact, implementing this in a cross-platform manner appears to be impossible.  As far as I can tell, there are some .NET platforms where it just can't be done.  FindTheLibrary() (or something like it) must exist, because DllImport uses it, but it is not public.</p>
 
@@ -85,11 +85,11 @@ because I would have to implement all that magic that P/Invoke does.  Well anywa
 
 <p>All I want here is for the tooling to support a way for me to include a dynamic library (dll | so | dylib) and put it somewhere such that I can find its path at runtime.  But every .NET implementation does this a little differently.</p>
 
-<p>Xamarin iOS and Android are both kinda weird (in different ways).  In part, this is because of constraints of the underlying platforms, but it is also apparent that both of them were just designed to support DllImport (which is understandable).  If either of these Xamarin platforms have a documented/supported way of doing what I want, I have thus far been unable to find it.</p>
+<p>Xamarin iOS and Android are both kinda weird (in different ways).  In part, this is because of constraints of the underlying platforms (such as static linking on iOS), but it is also apparent that both of them were just designed to support DllImport (which is understandable).  If either of these Xamarin platforms have a documented/supported way of doing what I want, I have thus far been unable to find it.</p>
 
 <p>A bit surprising is that .NET Core 2.x is one of the most difficult situations.  It stores unmanaged libraries in a folder called runtimes and then in a subfolder named for the RID, but (1) at debug time, this is in the packages directory, which is weird and not discoverable relative to the executing assembly, and (2) there is no public API to get the RID.  I could try to figure out the RID myself, but that approach looks bug-prone.</p>
 
-<p>Strangely, the .NET Framework is one of the easier cases, because it doesn't try to do anything in this area.  It just lets me do.  So I can provide a nuget targets file that copies the dynamic libraries to the output directory at build time.  And then I use GetExecutingAssembly() and get its location and from there I can find the files I need.</p>
+<p>Strangely, the .NET Framework is one of the easier cases, because it doesn't try to do anything in this area.  It just lets me do.  So I can provide a nuget targets file that copies the dynamic libraries to the output directory at build time.  And then I use <a href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.assembly.getexecutingassembly?view=netcore-2.2">GetExecutingAssembly()</a> and get its location and from there I can find the files I need.</p>
 
 <h2>Despair</h2>
 
@@ -109,7 +109,7 @@ because I would have to implement all that magic that P/Invoke does.  Well anywa
 
 <p>I first learned about this new API <a href="https://github.com/ericsink/SQLitePCL.raw/issues/248">from Brice Lambson</a> of the Entity Framework Core team.  Basically, it provides FindTheLibrary(), LoadTheLibrary(), and LoadTheFunction() in a cross-platform way.  It is pretty much exactly what I need, a way to load unmanaged libraries without the limitations of the DllImport attribute.</p>
 
-<p>As I write this, .NET Core 3.0 is in preview, so the <a href="https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.nativelibrary.tryload?view=netcore-3.0">docs</a> on this API are a bit sparse.  But after some experimentation and a bit of "Use The Source Luke", I've been able to get things working nicely.</p>
+<p>As I write this, .NET Core 3.0 is in preview, so the <a href="https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.nativelibrary?view=netcore-3.0">docs</a> on this API are a bit sparse.  But after some experimentation and a bit of "Use The Source Luke", I've been able to get things working nicely.</p>
 
 <p>One tricky part was that NativeLibrary.Load() has two overloads.</p>
 
