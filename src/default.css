@@ -19,6 +19,15 @@ img[align=right]
     text-align : center;
 }
 
+code
+{
+    padding:2px 4px;
+    font-size:90%;
+    white-space:nowrap;
+    background-color: #f5f5f5; 
+    font-family: Consolas, Courier New, Courier, monospace;
+}
+
 pre.screen
 {
     display: block;
