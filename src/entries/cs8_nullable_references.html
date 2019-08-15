@@ -1,0 +1,441 @@
+---
+layout: post
+title:  Nullable references in C# 8.0
+date: 2019-08-14 15:00:00
+keywords: front dotnet
+teaser: There are a few aspects of C# 8.0 nullable references that may seem surprising, but I like my compiler to complain about potential problems, so I am enthusiastic about using this feature more.
+---
+
+<p style="text-align:center;"><img src="/images/warnings_everywhere.jpg" border="0"/></p>
+
+<p>Let's start with some background.  Recall that
+the CLR supports value types and reference types.</p>
+
+<p>Value types include primitive types like <code>int</code> and <code>double</code>,
+but also <code>struct</code> types:</p>
+
+<pre class="screen">
+struct Point
+{
+    public double x;
+    public double y;
+}
+
+Point p1 = new Point { x = 3, y = 5 };
+Point p2 = p1; // copy the whole struct
+Point p3 = null; // error -- not allowed
+</pre>
+
+<p>Like all value types, structs have "copy" semantics (shown in the <code>p2 = p1</code> assignment above) and they do not allow null as a value.</p>
+
+<p>But if we simply change the definition keyword from <code>struct</code> to <code>class</code>, then variables of type <code>Point</code> become references, and the semantics are different:</p>
+
+<pre class="screen">
+class Point
+{
+    public double x;
+    public double y;
+}
+
+Point p1 = new Point { x = 3, y = 5 };
+Point p2 = p1; // multiple refs to same object
+Point p3 = null; // reference to nothing
+</pre>
+
+<p>Now when we assign <code>p2 = p1</code>, the object is not copied, but rather, we end up with two references to the same object.</p>
+
+<p>Also a reference can refer to nothing, represented with the value null.</p>
+
+<p>And this can cause problems.</p>
+
+<h2>Problems with nulls</h2>
+
+<p>Consider the following (pre C# 8.0) method, a member of some sort of class which has fields <code>_x</code> and <code>_y</code> that represent a location.  The method is used to determine the distance from its coordinates to a given point, represented by the <code>class</code> form of <code>Point</code> shown above.</p>
+
+<pre class="screen">
+double DistanceTo(Point p)
+{
+    var dx = _x - p.x;
+    var dy = _y - p.y;
+    return Math.Sqrt(dx * dx + dy * dy);
+}
+</pre>
+
+<p>What should we do if parameter <code>p</code> is null?  In this implementation, a <code>NullReferenceException</code> will be thrown at runtime.  We want to do better.  But what options do we have?</p>
+
+<p>The first thing that comes to mind is to check for null before we use the reference.  But then what?</p>
+
+<p>This function is supposed to return a value representing the distance between two points.  It MUST either return a value or throw an exception.  Inserting a null check merely offers us a chance to return a different value or throw a different exception.</p>
+
+<p>To throw a different exception, I suppose we could do this:</p>
+
+<pre class="screen">
+double DistanceTo(Point p)
+{
+    if (p != null)
+    {
+        var dx = _x - p.x;
+        var dy = _y - p.y;
+        return Math.Sqrt(dx * dx + dy * dy);
+    }
+    else
+    {
+        throw new InvalidArgumentException();
+    }
+}
+</pre>
+
+<p>But that's really not much better than just letting the <code>NullReferenceException</code> happen.</p>
+
+<p>And the only option I see for returning a different value is something like this:</p>
+
+<pre class="screen">
+double DistanceTo(Point p)
+{
+    if (p != null)
+    {
+        var dx = _x - p.x;
+        var dy = _y - p.y;
+        return Math.Sqrt(dx * dx + dy * dy);
+    }
+    else
+    {
+        return 42 * new System.Random().NextDouble();
+    }
+}
+</pre>
+
+<p>Which would be absurd.</p>
+
+<p>So the truth is that once we have arrived in this method with a null reference, it's too late to do anything useful.  If we want to "do better", we need to prevent that from happening.</p>
+
+<h2>An ounce of prevention...</h2>
+
+<p>Ideally, any attempt to call <code>DistanceTo()</code> with a null value should be caught at compile time:</p>
+
+<pre class="screen">
+double DistanceTo(Point p)
+{
+    // p should never be null here
+    var dx = _x - p.x;
+    var dy = _y - p.y;
+    return Math.Sqrt(dx * dx + dy * dy);
+}
+
+// ... somewhere else ...
+
+   // fail HERE, at compile time, not at run time
+   var dist = p2.DistanceTo(null); 
+</pre>
+
+<p>We could accomplish that by checking every call to the method and making sure that the argument cannot be null.  But that's the sort of tedious work that we should expect the compiler to help with.  And C# (pre-8.0) doesn't have a way to express that <code>p</code> should never be null, so what do we do?.</p>
+
+<p>This kind of problem is what motivated the design of the nullable references feature for C# 8.0.  The designers of the feature probably continued by next asking themselves:
+"What kind of special syntax could we use to specify that a reference type should not be null?"</p>
+
+<p>And before going very far down that line of thinking, they remembered that we already have a syntax for nullable value types.  The syntax for that is to just append a <code>?</code> to the type name:</p>
+
+<pre class="screen">
+int? x = null;
+</pre>
+
+<p>That's the inverse of what we need for reference types, which are already nullable, and we need a way to make them not so.  But it's a syntactic pattern that is already in the language, and consistency is important.</p>
+
+<p>Bottom line, C# 8.0 uses the same syntax for nullability of reference types that we have been using for value types:</p>
+
+<pre class="screen">
+string  x; // not nullable
+string? y; //     nullable
+</pre>
+
+<p>And yes, that means that the meaning of a type declaration like <code>string</code> (without the <code>?</code>) has changed.</p>
+
+<p style="text-align:center;"><img src="/images/hair.gif" border="0"/></p>
+
+<p>Whoa, isn't that a massive break in compatibility?  Actually no.  
+In fact, although this feature looks like a huge breaking change, the entire thing was carefully designed to preserve backward compatibility.</p>
+
+<p>First of all, this whole feature is turned off by default, and has to be explicitly turned on.  Second, all it really does is generate warnings.</p>
+
+<h2>Beneficial warnings</h2>
+
+<p>For example, if you explicitly mark a reference as nullable and then dereference it, you will get a warning:</p>
+
+<pre class="screen">
+double DistanceTo(Point? p)
+{
+    // p can be null, so
+    // the compiler will complain about this:
+    var dx = _x - p.x;
+    var dy = _y - p.y;
+    return Math.Sqrt(dx * dx + dy * dy);
+}
+</pre>
+
+<p>Note that the compiler uses flow analysis to figure out a lot of stuff.  For example, it won't fuss at you about dereferencing that nullable reference if you check it for null first:</p>
+
+<pre class="screen">
+double DistanceTo(Point? p)
+{
+    if (p != null)
+    {
+        // no warning here
+        var dx = _x - p.x;
+        var dy = _y - p.y;
+        return Math.Sqrt(dx * dx + dy * dy);
+    }
+    else
+    {
+        // TODO whatever
+    }
+}
+</pre>
+
+<p>In addition (and returning to the problem we initially set out to solve here), the compiler will give a warning if you do anything which might store a null value in a non-nullable reference:</p>
+
+<pre class="screen">
+double DistanceTo(Point p)
+{
+    // p is not nullable, so no
+    // warnings here
+    var dx = _x - p.x;
+    var dy = _y - p.y;
+    return Math.Sqrt(dx * dx + dy * dy);
+}
+
+// ... somewhere else ...
+
+   // but HERE, the compiler will complain:
+   var dist = p2.DistanceTo(null); 
+</pre>
+
+<p>So there is cause for optimism here.  This feature can help us catch null problems earlier, before much damage is done.</p>
+
+<h2>Cars and clocks</h2>
+
+<p>Before I go on, please permit me a brief digression
+to ramble about how cars are different from clocks.
+</p>
+
+<p>A clock doesn't really expect me to know anything about how
+it works.  
+Clocks can have lots of cool technology inside, but generally speaking, 
+knowing how a clock works does not help me tell time any better.
+</p>
+
+<p>In contrast, people who know how cars work "under the hood" have
+a generally better experience driving and owning a vehicle.  I know
+this because I don't know much about cars, but I know folks who do, and their
+lives seem to have less misery than mine.</p>
+
+<p>(And it's not just cars.  I also have two
+lawn mowers, a string trimmer, a power washer, a garden tiller, an ATV,
+two generators, and a snow thrower.  All of them have an internal combustion engine,
+and because I don't know much about how such things work, I hate them
+all.)</p>
+
+<p>But to be fair, cars mostly do function for people who don't understand
+them.  When I get in my car, I nearly always end up where I wanted
+to go.</p>
+
+<p>But some things are even worse than cars.</p>
+
+<p>I don't have a 3D printer,
+but I've heard they are basically unusable without gaining a fair
+amount of knowledge about how they work.</p>
+
+<p>Returning to the world of software, another example is C# async/await, 
+which really doesn't work well until you understand its internals.</p>
+
+<p>Finally, and getting back to the subject at hand, I'm going to claim that the C# 8.0 nullable references feature is in this
+bucket as well.  I reserve the
+right to change my mind later, but right now it looks to me like 
+C# nullable references cannot be used effectively without knowing how they work "under the hood".</p>
+
+<h2>So how does the nullable references feature work?</h2>
+
+<p>It's all fake.</p>
+
+<p>(kinda)</p>
+
+<h2>Annotations</h2>
+
+<p>Consider the following two methods:</p>
+
+<pre class="screen">
+void Foo(string s)
+{
+    // whatever
+}
+
+void Bar(string? s)
+{
+    // whatever
+}
+</pre>
+
+<p>The first thing to understand is that at the CIL level, looking at the output of the C# compiler, these two methods have the same type signature.  Both of them accept a parameter of type string.  The code generated for these two methods will be the same.  The only thing different about them is their annotations.</p>
+
+<p>When Roslyn (the compiler) compiles these two methods, it will generate a C# attribute called <code>Nullable</code>, and it will use that attribute to annotate things.</p>
+
+<ul>
+<li><p>For <code>Foo()</code>, it will include an attribute saying that the parameter should not be null.</p></li>
+<li><p>For <code>Bar()</code>, it will include an attribute saying that the parameter might be null.</p></li>
+</ul>
+
+<p>And these attributes will make no difference in the behavior of the methods or in the code generated for them.</p>
+
+<h2>Consistency?</h2>
+
+<p>So now let us pause and observe that (as I mentioned earlier) the syntax of this feature was designed to be consistent with the way nullability is expressed for value types, but that consistency is very shallow.</p>
+
+<p>In both cases, the presence or absence of the question mark is the difference between nullable or not:</p>
+
+<pre class="screen">
+// not nullable
+int x;
+string a;
+
+// nullable
+int? y;
+string? b;
+</pre>
+
+<p>So the syntax is the same, but under the hood, things are very, very different.</p>
+
+<p>For value types, nullability is implemented using the CLR type system.  A type declaration like <code>int?</code> is just shorthand for <code>System.Nullable&lt;int&gt;</code>, which is an actual CLR type.</p>
+
+<p>But for a reference type, a declaration like <code>string?</code> is just an annotation to help the compiler complain.  There is no such thing as <code>System.Nullable&lt;string&gt;</code>.</p>
+
+<h2>More on the annotations</h2>
+
+<p>Earlier I said that the nullable references feature is turned off by default and has to be explicitly activated.  This makes it sound like there is a switch that needs to be flipped, but actually it's more like two switches.</p>
+
+<p>Relevant to the nullable references feature, the Roslyn compiler has two different "contexts" which can be activated.  It may help to think of these contexts as "modes" which can be turned on or off.</p>
+
+<ul>
+<li><p>Annotations.  When annotations are turned on, then Roslyn is generating attributes to annotate nullability of things.</p></li>
+<li><p>Warnings.  When warnings are turned on, then Roslyn is paying attention to the attributes and using them to generate warnings accordingly.</p></li>
+</ul>
+
+<p>These two things can be turned on or off independently, at the project level, at the file level, or even line-by-line.</p>
+
+<p>The result of these annotations is a "nullability" for each relevant expression in the code, and there are four possible nullabilities:</p>
+
+<ul>
+<li><p>Oblivious.  This is the result when code is compiled with annotations turned off.  All code compiled with C# 7.x or earlier has this nullability.  It is the absence of attributes.</p></li>
+<li><p>Nullable.  The code was compiled with annotations turned on, and the type declaration was explicitly nullable.  For example: <code>string?</code></p></li>
+<li><p>Not-nullable.  Annotations were turned on, and the type declaration did not specify nullable.  For example: <code>string</code></p></li>
+<li><p>Unknown.  None of the above.  Annotations were turned on, but the intent was not clearly expressed.  This happens in odd cases, dark corners of the C# language where the nullable references feature isn't fully figured out yet.  I mention it here only for completeness.  Don't worry about it.</p></li>
+</ul>
+
+<h2>Revisiting DistanceTo(null)</h2>
+
+<p>An important part of understanding how this feature works is
+understanding how to "defeat" it.</p>
+
+<pre class="screen">
+#nullable enable // turn on annotations
+double DistanceTo(Point p)
+{
+    var dx = _x - p.x;
+    var dy = _y - p.y;
+    return Math.Sqrt(dx * dx + dy * dy);
+}
+#nullable restore // reset annotations back to project default
+
+// ... somewhere else ...
+
+#pragma warning disable nullable
+   var dist = p2.DistanceTo(null); // let's tell a lie
+#pragma warning restore nullable
+</pre>
+
+<p>In the code snippet above, the <code>DistanceTo()</code> method is being compiled with annotations turned on (see the <code>#nullable</code> directives), so the parameter will get attributes saying that it is not-nullable.</p>
+
+<p>However, the call to <code>DistanceTo()</code> is compiled with the corresponding warnings turned off (see the <code>#pragma warning</code> directives), so the nullability feature isn't giving any benefit for that call site.  
+
+<p>At runtime, <code>DistanceTo()</code> will end up throwing a <code>NullReferenceException</code> in this case.</p>
+
+<p>Another (more convenient) way to bend the rules is to use the so-called "null-forgiving" operator:</p>
+
+<pre class="screen">
+#nullable enable // turn on annotations
+double DistanceTo(Point p)
+{
+    var dx = _x - p.x;
+    var dy = _y - p.y;
+    return Math.Sqrt(dx * dx + dy * dy);
+}
+#nullable restore // reset annotations back to project default
+
+// ... somewhere else ...
+
+   Point q = null;
+   var dist = p2.DistanceTo(q!);  // another way to lie
+</pre>
+
+<p>The intent of this operator is to provide convenient syntax for cases where
+Roslyn believes an expression might be null but we believe it cannot be,
+so we want Roslyn to "trust us and be quiet about it".  This operator is unofficially
+known as the "damn it" operator.</p>
+
+<p>Finally, it is worth noting that because all these nullability annotations
+are implemented in the compiler and not in the CLR's type system, another way
+to store null in a not-nullable thing is to do so from another language like F#.
+(Yes, given that F# has its own aversion to nulls, that's a poor choice of example,
+but you get the idea.  There are dozens of niche languages that can compile for
+the Common Language Runtime, and any of them not based on Roslyn will probably
+offer no objection if you call <code>DistanceTo()</code> with a null argument.)</p>
+</p>
+
+<h2>Big picture</h2>
+
+<p>So, the C# 8 nullable reference feature can't actually make any strong assurances
+about things being null or not.  This raises questions.</p>
+
+<ul>
+<li><p>Is this feature even useful?  (I think so)</p></li>
+<li><p>Will we end up forced to include null checks all over the place anyway? (Probably not)</p></li>
+</ul>
+
+<p>At the time of this writing, it is best to think of this feature as taking a few steps down a possibly
+long road which is headed vaguely in the direction of "better null handling for
+C#".  I don't think anybody knows exactly what things will look like at the
+place where the road ends.  Experience will tell.</p>
+
+<p>Even the folks at Microsoft don't seem to have a clear vision of this yet.
+Apparently the Microsoft libraries are only about 20% annotated, and that 
+effort has produced a lot of questions, plus a number of enhancements.</p>
+
+<p>For example, annotation of <code>System.Collections.Generic</code> highlighted that
+<code>Dictionary&lt;TKey,TValue&gt;</code> should have the ability to specify that
+<code>TKey</code> should not be a nullable type.  So they added a <code>notnull</code> generic constraint
+(which looks like it'll be pretty handy).</p>
+
+<p>I recommend <a href="https://devblogs.microsoft.com/dotnet/try-out-nullable-reference-types/">this recent blog entry</a> by Phillip Carter
+which 
+gives mention to several other new-ish
+aspects of the feature that I am not going to discuss in detail here:</p>
+
+<ul>
+<li><p>Nullable preconditions: <code>AllowNull</code>, <code>DisallowNull</code></p></li>
+<li><p>Nullable postconditions: <code>MaybeNull</code>, <code>NotNull</code></p></li>
+<li><p>Conditional postconditions: <code>MaybeNotNullWhen(bool)</code>, <code>NotNullWhen(bool)</code></p></li>
+<li><p>Dependent null-ness: <code>NotNullIfNotNull</code></p></li>
+<li><p>Flow attributes: <code>DoesNotReturn</code>, <code>DoesNotReturnIf(bool)</code></p></li>
+</ul>
+
+<h2>Bottom line</h2>
+
+<p>Personally, I look forward to using this feature more, and despite
+my whimsical use of words like "fake" and "lie", I am not trying to criticize the work
+of those who designed it.  Given a requirement of preserving backward
+compatibility, the design looks solid to me.</p>
+
+<p>I am merely saying that (1) it
+is critical to know what the feature will or will not do for us, and (2)
+this feature involves a lot of complexity, and there are costs associated with that.</p>
+
+<p>But overall, I am a big fan of strict compilers and static analysis, so I see this feature as a great step.</p>
+
