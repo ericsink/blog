@@ -1,0 +1,335 @@
+---
+layout: post
+title:  Xamarin.Forms: StackLayout vs Grid
+date: 2019-09-16 15:00:00
+keywords: front dotnet xamarin
+teaser: An example from Xamarin.Forms of how choosing the path that is the most convenient for the developer can end up making things worse for the user.
+---
+
+<p>When using Xamarin.Forms, it's pretty easy to get
+addicted to <code>StackLayout</code>.  And why not?  It's very convenient for the developer.
+Just toss in some child views, and they will get positioned
+nicely in a line.</p>
+
+<pre class="screen"><span style="color:blue;">&lt;</span><span style="color:#a31515;">StackLayout</span><span style="color:red;">&nbsp;Orientation</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Vertical&quot;</span><span style="color:blue;">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Label</span><span style="color:red;">&nbsp;Text</span><span style="color:blue;">=</span><span style="color:blue;">&quot;One&quot;</span><span style="color:blue;">/&gt;</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Label</span><span style="color:red;">&nbsp;Text</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Two&quot;</span><span style="color:blue;">/&gt;</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Label</span><span style="color:red;">&nbsp;Text</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Three&quot;</span><span style="color:blue;">/&gt;</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Label</span><span style="color:red;">&nbsp;Text</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Four&quot;</span><span style="color:blue;">/&gt;</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Label</span><span style="color:red;">&nbsp;Text</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Five&quot;</span><span style="color:blue;">/&gt;</span>&nbsp;
+<span style="color:blue;">&lt;/</span><span style="color:#a31515;">StackLayout</span><span style="color:blue;">&gt;</span>
+</pre>
+
+<p>In contrast, the <code>Grid</code> layout is relatively tedious, since we have to
+specify row and column definitions and then set the <code>Row</code> and <code>Column</code>
+attributes on each child view.</p>
+
+<pre class="screen"><span style="color:blue;">&lt;</span><span style="color:#a31515;">Grid</span><span style="color:blue;">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Grid.RowDefinitions</span><span style="color:blue;">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">RowDefinition</span><span style="color:red;">&nbsp;Height</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Auto&quot;</span><span style="color:blue;">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">RowDefinition</span><span style="color:red;">&nbsp;Height</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Auto&quot;</span><span style="color:blue;">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">RowDefinition</span><span style="color:red;">&nbsp;Height</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Auto&quot;</span><span style="color:blue;">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">RowDefinition</span><span style="color:red;">&nbsp;Height</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Auto&quot;</span><span style="color:blue;">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">RowDefinition</span><span style="color:red;">&nbsp;Height</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Auto&quot;</span><span style="color:blue;">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;/</span><span style="color:#a31515;">Grid.RowDefinitions</span><span style="color:blue;">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Grid.ColumnDefinitions</span><span style="color:blue;">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">ColumnDefinition</span><span style="color:red;">&nbsp;Width</span><span style="color:blue;">=</span><span style="color:blue;">&quot;*&quot;</span><span style="color:blue;">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;/</span><span style="color:#a31515;">Grid.ColumnDefinitions</span><span style="color:blue;">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Label</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Grid.Row</span><span style="color:blue;">=</span><span style="color:blue;">&quot;0&quot;</span><span style="color:red;">&nbsp;Grid.Column</span><span style="color:blue;">=</span><span style="color:blue;">&quot;0&quot;</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Text</span><span style="color:blue;">=</span><span style="color:blue;">&quot;One&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&nbsp;/&gt;</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Label</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Grid.Row</span><span style="color:blue;">=</span><span style="color:blue;">&quot;1&quot;</span><span style="color:red;">&nbsp;Grid.Column</span><span style="color:blue;">=</span><span style="color:blue;">&quot;0&quot;</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Text</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Two&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&nbsp;/&gt;</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Label</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Grid.Row</span><span style="color:blue;">=</span><span style="color:blue;">&quot;2&quot;</span><span style="color:red;">&nbsp;Grid.Column</span><span style="color:blue;">=</span><span style="color:blue;">&quot;0&quot;</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Text</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Three&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&nbsp;/&gt;</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Label</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Grid.Row</span><span style="color:blue;">=</span><span style="color:blue;">&quot;3&quot;</span><span style="color:red;">&nbsp;Grid.Column</span><span style="color:blue;">=</span><span style="color:blue;">&quot;0&quot;</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Text</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Four&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&nbsp;/&gt;</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Label</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Grid.Row</span><span style="color:blue;">=</span><span style="color:blue;">&quot;4&quot;</span><span style="color:red;">&nbsp;Grid.Column</span><span style="color:blue;">=</span><span style="color:blue;">&quot;0&quot;</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Text</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Five&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&nbsp;/&gt;</span>&nbsp;
+<span style="color:blue;">&lt;/</span><span style="color:#a31515;">Grid</span><span style="color:blue;">&gt;</span>
+</pre>
+
+<p>However, the developer convenience of <code>StackLayout</code> comes with a 
+tradeoff.
+This is a case where knowing how Xamarin.Forms works 
+"under the hood" can help us write better apps.</p>
+
+<h2>Measurement</h2>
+
+<p>A Xamarin.Forms <code>Layout</code> is responsible for setting
+the size and position of all its child views.  The issue
+in play for this blog entry is the question of whether
+the child view is participating in the decision.</p>
+
+<p>In every case, the decision ends with the <code>Layout</code> telling the child, 
+"Here is the box you have to live in.  Deal with it."
+In some cases, that edict is all that happens.</p>
+
+<p>But in other cases, the <code>Layout</code> first asks the child,
+"What size do you want to be?", and then it uses that information
+to make a final decision.</p>
+
+<p>In terms of performance, this "measurement" step can be expensive.
+It is worth avoiding when it is not needed.</p>
+
+<p>So how do we do that?  In other words, in the text above, when I said
+"in some cases" and "in other cases", exactly which cases
+are which?</p>
+
+<h2>Grid, Auto, StackLayout</h2>
+
+<p>Here's a mostly-correct answer:</p>
+
+<ul>
+
+<li><p>With a <code>Grid</code>, measurement only happens when <code>GridLength</code> uses <code>GridUnitType.Auto</code>.</p></li>
+
+<li><p>With a <code>StackLayout</code>, measurement always happens.</p></li>
+
+</ul>
+
+<p>And this is why my fondness for <code>StackLayout</code> is fading fast.
+It's a convenient abstraction, but it always
+measures its child views, whether that measurement is necessary or not.</p>
+
+<p>On the other hand, if I do the extra (read: "tedious") work involved in using a <code>Grid</code>, and
+if I take the time to define the rows and
+columns such that <code>Auto</code> is not needed, I can eliminate the
+measurement and get a better performing UI.</p>
+
+<h2>Example</h2>
+
+<p>Suppose I want a horizontal
+layout which has a label filling the space between two buttons.
+With a <code>StackLayout</code>, the corresponding XAML might look like this:</p>
+
+<pre class="screen"><span style="color:blue;">&lt;</span><span style="color:#a31515;">StackLayout</span><span style="color:red;">&nbsp;Orientation</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Horizontal&quot;</span><span style="color:blue;">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Button</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Text</span><span style="color:blue;">=</span><span style="color:blue;">&quot;One&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&nbsp;/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Label</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Text</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Hello&quot;</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;HorizontalOptions</span><span style="color:blue;">=</span><span style="color:blue;">&quot;FillAndExpand&quot;</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;HorizontalTextAlignment</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Center&quot;</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&nbsp;/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Button</span>&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Text</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Two&quot;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&nbsp;/&gt;</span>
+<span style="color:blue;">&lt;/</span><span style="color:#a31515;">StackLayout</span><span style="color:blue;">&gt;</span></pre>
+
+<p>The equivalent <code>Grid</code> is:</p>
+
+<pre class="screen"><span style="color:blue;">&lt;</span><span style="color:#a31515;">Grid</span><span style="color:blue;">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Grid.RowDefinitions</span><span style="color:blue;">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">RowDefinition</span><span style="color:red;">&nbsp;Height</span><span style="color:blue;">=</span><span style="color:blue;">&quot;*&quot;</span><span style="color:blue;">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;/</span><span style="color:#a31515;">Grid.RowDefinitions</span><span style="color:blue;">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Grid.ColumnDefinitions</span><span style="color:blue;">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">ColumnDefinition</span><span style="color:red;">&nbsp;Width</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Auto&quot;</span><span style="color:blue;">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">ColumnDefinition</span><span style="color:red;">&nbsp;Width</span><span style="color:blue;">=</span><span style="color:blue;">&quot;*&quot;</span><span style="color:blue;">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">ColumnDefinition</span><span style="color:red;">&nbsp;Width</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Auto&quot;</span><span style="color:blue;">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;/</span><span style="color:#a31515;">Grid.ColumnDefinitions</span><span style="color:blue;">&gt;</span>
+ 
+ &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Button</span>&nbsp;
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Grid.Row</span><span style="color:blue;">=</span><span style="color:blue;">&quot;0&quot;</span><span style="color:red;">&nbsp;Grid.Column</span><span style="color:blue;">=</span><span style="color:blue;">&quot;0&quot;</span>&nbsp;
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Text</span><span style="color:blue;">=</span><span style="color:blue;">&quot;One&quot;</span>&nbsp;
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&nbsp;/&gt;</span>
+ &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Label</span>&nbsp;
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Grid.Row</span><span style="color:blue;">=</span><span style="color:blue;">&quot;0&quot;</span><span style="color:red;">&nbsp;Grid.Column</span><span style="color:blue;">=</span><span style="color:blue;">&quot;1&quot;</span>&nbsp;
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Text</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Hello&quot;</span>&nbsp;
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;HorizontalTextAlignment</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Center&quot;</span>&nbsp;
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&nbsp;/&gt;</span>
+ &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Button</span>&nbsp;
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Grid.Row</span><span style="color:blue;">=</span><span style="color:blue;">&quot;0&quot;</span><span style="color:red;">&nbsp;Grid.Column</span><span style="color:blue;">=</span><span style="color:blue;">&quot;2&quot;</span>&nbsp;
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">&nbsp;Text</span><span style="color:blue;">=</span><span style="color:blue;">&quot;Two&quot;</span>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&nbsp;/&gt;</span>
+ <span style="color:blue;">&lt;/</span><span style="color:#a31515;">Grid</span><span style="color:blue;">&gt;</span></pre>
+
+<p>The <code>Grid</code> certainly does involve more clutter.  However, now I can tweak the column definitions to get rid of <code>Auto</code>.  For example, if I give the buttons absolute widths, they don't need to be measured during layout anymore:</p>
+
+<pre class="screen">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">Grid.ColumnDefinitions</span><span style="color:blue;">&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">ColumnDefinition</span><span style="color:red;">&nbsp;Width</span><span style="color:blue;">=</span><span style="color:blue;">&quot;80&quot;</span><span style="color:blue;">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">ColumnDefinition</span><span style="color:red;">&nbsp;Width</span><span style="color:blue;">=</span><span style="color:blue;">&quot;*&quot;</span><span style="color:blue;">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;</span><span style="color:#a31515;">ColumnDefinition</span><span style="color:red;">&nbsp;Width</span><span style="color:blue;">=</span><span style="color:blue;">&quot;80&quot;</span><span style="color:blue;">/&gt;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">&lt;/</span><span style="color:#a31515;">Grid.ColumnDefinitions</span><span style="color:blue;">&gt;</span></pre>
+
+<p>As I said, <code>StackLayout</code> is more convenient.  There may be cases where it is a bit tricky to express a desired layout with row and column definitions.  Don't give up too easily.  The layout capabilities of <code>Grid</code> are very powerful.</p>
+
+<h2>More correct</h2>
+
+<p>Remember earlier when I tagged an answer as "mostly-correct"?
+Well, it would have been a bit more correct if I had taken the time
+to explain the following exception to the rule:</p>
+
+<p>Measurement can still happen without <code>GridUnitType.Auto</code> if you use
+<code>HorizontalOptions</code> or <code>VerticalOptions</code> with a <code>LayoutOptions</code>
+that has alignment set to anything but <code>Fill</code>.</p>
+
+<p>(The previous paragraph was a mouthful, which is why
+I didn't want to inline that explanation into the section
+above.)</p>
+
+<p>It remains true that as long as <code>GridUnitType.Auto</code> is nowhere in sight, measurement is not 
+used to determine the row and column sizes for the grid.  
+The grid calculates the proper sizes for all its rows and
+columns without asking for advice from the child views.  
+And then, as always, it tells each child view, "Here is the box you have to live in.  Deal with it."</p>
+
+<p>But then, when it comes time to "Deal with it", depending on the <code>LayoutOptions</code>,
+measurement may be needed to determine
+how the child view is placed into that box:</p>
+
+<ul>
+
+<li><p>If the alignment is <code>Fill</code>, the child view
+is given the same size as the grid cell into which it is being placed,
+so we don't need measurement.  (Yay!)</p></li>
+
+<li><p>But if the alignment is <code>Start</code>, <code>Center</code>, or <code>End</code>,
+then that child view will instead be allowed to determine its own size and position within the box,
+which means we are back to needing measurement.</p></li>
+
+</ul>
+
+<p>For example, suppose a grid cell is determined to have a
+width of 100, and a label therein would say (if asked) that it wants to have a width of 80.  </p>
+
+<ul>
+
+<li><p>If that label has a horizontal alignment of <code>Fill</code>, it
+will not be measured, and it will get a width of 100.</p></li>
+
+<li><p>But if the alignment is <code>Start</code>, then measurement will happen,
+and it will get its requested width of 80,
+and it will be placed at the left (<code>Start</code>)
+edge of the grid cell, and there will be 20
+units of unused space to its right.</p></li>
+
+<li><p>Alignments of <code>Center</code> and <code>End</code> are handled similarly.</p></li>
+
+</ul>
+
+<p>To be fair, in terms of performance, this particular measurement scenario is not as bad as the cases mentioned above.</p>
+
+<ul>
+
+<li><p>When measurement happens because of <code>GridUnitType.Auto</code>,
+it can affect the height or width of
+all the child views in that row or column, and the grid layout code has to sort all that out.</p></li>
+
+<li><p>Even worse, if measurement happens in a child view and the <code>Layout</code> itself is also being measured (because it is nested), then the effects can bubble all the way to to the top of the layout hierarchy.</p></li>
+
+<li><p>But when measurement happens because of <code>LayoutOptions</code> alignment for a child of a <code>Grid</code>,
+it only matters to that one child view, so its effects are more isolated.</p></li>
+
+</ul>
+
+<h2>Still a little bit incorrect</h2>
+
+<p>A thorough discussion of Xamarin.Forms layout would be
+lengthy, and I'm trying to keep this blog post fairly focused.
+I have intentionally omitted some things.</p>
+
+<p>There are places in my explanations above where I speak of a
+grid cell in the singular when in fact it could be a span.</p>
+
+<p>Also, I didn't bother discussing the case where the measured size
+of a child view is larger than the size of grid cell provided by the
+grid.</p>
+
+<p>And I didn't talk about how <code>WidthRequest</code> and <code>HeightRequest</code> are
+used with measurement.</p>
+
+<p>Finally, I completely ignored the issue of margins and how they 
+affect the way the child view is placed during "Deal with it".</p>
+
+<h2>Summarizing</h2>
+
+<p>If you want to avoid measurement in your UI:</p>
+
+<ul>
+<li><p>Use <code>Grid</code> instead of <code>StackLayout</code></p></li>
+<li><p>Don't use <code>GridUnitType</code>.<code>Auto</code></p></li>
+<li><p>Don't use <code>HorizontalOptions</code> or <code>VerticalOptions</code></p></li>
+</ul>
+
+<h2>Problems</h2>
+
+<p>When you ask a child view to measure itself, the work to be
+done depends on what kind of child view it is.</p>
+
+<p>If it's a label, then something has to figure out the width and
+height of its text.  That involves font metrics, which probably has to happen
+in platform-specific code.</p>
+
+<p>If that child view is an image, then something has to figure out
+its width and height.  That involves reading (at least part of) the image
+file and decoding it.  And if the image file is actually coming from,
+say, an HTTP access, now we have a network delay.  And as always, make
+sure that website is using TLS.  So, now your simple need for a width
+involves file I/O, network latency, data compression, and cryptography.
+</p>
+
+<p>And what if the child view is itself a <code>Layout</code>?  Well, that
+<code>Layout</code> probably can't measure itself without asking its child views
+for measurements, after which it'll have some arithmetic to do.
+Now we've got recursion.</p>
+
+<p>So if you're trying to get the slowest possible UI with Xamarin.Forms,
+follow these guidelines:</p>
+
+<ul>
+<li><p>Nest a <code>StackLayout</code> inside another <code>StackLayout</code>, at least three or four deep.</p></li>
+<li><p>Throughout that layout hierarchy, put in some labels.  And use text wrapping, to make the measurement harder.</p></li>
+<li><p>And add some images.  Even better if they have to be loaded from a website.  On a different continent.</p></li>
+<li><p>Set up some background timers to change the text on those labels every few seconds, so the layout cycle will need to be rerun regularly.</p></li>
+</ul>
+
+<p>That should be fairly effective way to drain a mobile phone battery for no actual benefit.</p>
+
+<h2>Caveats</h2>
+
+<p>It is worth mentioning that having a child view provide information
+about its desired size is a feature that has legitimate use cases.</p>
+
+<p>First of all, I acknowledge that there could be situations where the "performance 
+vs developer convenience" tradeoff is worth it.</p>
+
+<p>A better example is the issue of localization.  The length of text
+(on, say, a label) can change a great deal depending on which natural language is being used.
+It is very common to create a piece of UI sized for a string in English
+and then discover that the text no longer fits after translation to another language.
+Allowing the label to request a size
+is a natural way to deal with that problem.</p>
+
+<h2>Bottom line</h2>
+
+<p>I am not saying you should never use Xamarin.Forms in ways
+that need child view measurement.
+If you actually need <code>StackLayout</code> or <code>GridUnitType.Auto</code>, go ahead
+and use them.</p>
+
+<p>Rather, I am recommending awareness of the tradeoffs:</p>
+
+<ul>
+
+<li><p>Consider the performance benefits of avoiding child view measurement
+wherever possible.</p></li>
+
+<li><p>Be aware that using <code>StackLayout</code>, although convenient, means you
+are using child view measurement all the time.</p></li>
+
+</ul>
+
+<p>For further reading on Xamarin.Forms performance, I suggest:</p>
+
+<p><a href="https://docs.microsoft.com/en-us/xamarin/xamarin-forms/deploy-test/performance">https://docs.microsoft.com/en-us/xamarin/xamarin-forms/deploy-test/performance</a></p>
+
