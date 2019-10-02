@@ -1,0 +1,155 @@
+---
+layout: post
+title:  Xamarin.Forms: LayoutOptions
+date: 2019-10-02 11:00:00
+keywords: front dotnet xamarin
+teaser: Things with LayoutOptions in Xamarin.Forms can get weird.
+---
+
+<p>Things with <code>LayoutOptions</code> in Xamarin.Forms can get weird.</p>
+
+<h2>Background</h2>
+
+<p>When using a <code>StackLayout</code>, there are four properties on each child view that determine how that child is positioned:</p>
+
+<ul>
+<li><p><code>HorizontalOptions</code>, of type <code>LayoutOptions</code></p></li>
+<li><p><code>VerticalOptions</code>, of type <code>LayoutOptions</code></p></li>
+<li><p><code>WidthRequest</code>, of type <code>double</code></p></li>
+<li><p><code>HeightRequest</code>, of type <code>double</code></p></li>
+</ul>
+
+<p><code>LayoutOptions</code> encapsulates two things, an <code>Alignment</code>, and a flag which indicates whether the child view <code>Expands</code> to use extra space.</p>
+
+<p>A <code>StackLayout</code> has an <code>Orientation</code> which can be either <code>Horizontal</code> or <code>Vertical</code>.  Let's call that the main axis, and the perpendicular direction the cross axis.</p>
+
+<p>The <code>Alignment</code> only affects the cross axis.  Specifying an <code>Alignment</code> for the main axis has no effect.  However, the possible values for <code>Alignment</code> are <code>Fill</code>, <code>Start</code>, <code>Center</code>, and <code>End</code>.  There is no value for <code>None</code>.  The best we can do is to just leave the <code>Alignment</code> at its default value, which is <code>Fill</code>.</p>
+
+<p>The <code>Expands</code> flag only affects the main axis.  Specifying <code>Expands = true</code> for the cross axis has no effect.</p>
+
+<p>Also, a <code>WidthRequest</code> or <code>HeightRequest</code> conflicts with a <code>Alignment = Fill</code> or <code>Expands = true</code> on the corresponding axis.  In other words, if you say "I want X to be 40 pixels height" and then you also say "I want X to fill all available vertical space", you are saying two probably-conflicting things about the height of X.  Which of your instructions is Xamarin.Forms supposed to obey?</p>
+
+<h2>Futility</h2>
+
+<p>So this API presents us with several ways to specify things that have no effect.</p>
+
+<p>Suppose I create a horizontal <code>StackLayout</code> and add a child view with <code>VerticalOptions = FillAndExpand</code>.  The -<code>AndExpand</code> part doesn't make sense on the cross axis.  Changing it to <code>Fill</code> would make the code look more correct (IMHO), but it won't affect the behavior of the app at all.</p>
+
+<p>Similarly, it makes no sense to use <code>VerticalOptions = Center</code> for a child of a vertical <code>StackLayout</code>.  That's a line of code that might as well be removed, but again, the user will never know or care.</p>
+
+<p>If stuff like this deserves to be called a bug, it is a bug that the user will never see.</p>
+
+<h2>To fix or not to fix</h2>
+
+<p>At the bottom of this blog post is a tidbit of code that walks through the children of a <code>StackLayout</code> and gripes about the various problems described above.</p>
+
+<p>When I run that checker on every <code>StackLayout</code> in our app, it finds hundreds of gripes.</p>
+
+<p>(Note also that <code>LayoutOptions.Expands</code> only applies for children of a <code>StackLayout</code>.  So I have another snippet (not shown here, but it's trivial) that complains whenever it finds a child of a <code>Grid</code> with a <code>LayoutOptions</code> with <code>Expands = true</code>.  Our app has lots of those gripes as well.)</p>
+
+<p>I believe code should be correct, so these gripes bother me.</p>
+
+<p>But I also believe that EVERY code change involves risk, and taking risk that offers little or no benefit to the user is a bad idea.</p>
+
+<p>I <a href="/Articles/Four_Questions.html">wrote</a> about this kind of quandary 14 years ago.  Often there are no easy answers.  As I said back then, "Figuring out exactly <i>how</i> your product is going to be imperfect is hard.  It <i>should</i> be hard.".</p>
+
+<h2>Bottom line</h2>
+
+<p>One thing I CAN (and often do) recommend is to arm yourself with lots of knowledge about how stuff works "under the hood".</p>
+
+<p>Trying random code changes until "it seems to work" is a lousy approach to software development.  Avoid the need to say, "I don't know what was going on, but I made this change and the problem went away."  Dig deeper.</p>
+
+<p>Things with <code>LayoutOptions</code> in Xamarin.Forms can get weird, and as with any other API, the best way to deal with that is to read the docs (and the <a href="https://github.com/xamarin/Xamarin.Forms">code</a>!) and gain a solid understanding of how things work.</p>
+
+<h2>Here's that gripe code</h2>
+
+<pre class="screen"><span style="color:blue;">using</span>&nbsp;System;
+<span style="color:blue;">using</span>&nbsp;Xamarin.Forms;
+ 
+<span style="color:blue;">static</span>&nbsp;<span style="color:blue;">class</span>&nbsp;<span style="color:#2b91af;">GripeLayoutOptions</span>
+{
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">static</span>&nbsp;<span style="color:blue;">void</span>&nbsp;<span style="color:#74531f;">Gripe</span>(<span style="color:blue;">string</span>&nbsp;<span style="color:#1f377f;">s</span>)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#2b91af;">Console</span>.<span style="color:#74531f;">WriteLine</span>(<span style="color:#1f377f;">s</span>);
+&nbsp;&nbsp;&nbsp;&nbsp;}
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">static</span>&nbsp;<span style="color:blue;">void</span>&nbsp;<span style="color:#74531f;">CheckChild</span>(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#2b91af;">Func</span>&lt;<span style="color:#2b91af;">View</span>,<span style="color:#2b91af;">LayoutOptions</span>&gt;&nbsp;<span style="color:#1f377f;">get_opt_main</span>,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#2b91af;">Func</span>&lt;<span style="color:#2b91af;">View</span>,<span style="color:blue;">double</span>&gt;&nbsp;<span style="color:#1f377f;">get_req_main</span>,
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#2b91af;">Func</span>&lt;<span style="color:#2b91af;">View</span>,<span style="color:#2b91af;">LayoutOptions</span>&gt;&nbsp;<span style="color:#1f377f;">get_opt_cross</span>,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#2b91af;">Func</span>&lt;<span style="color:#2b91af;">View</span>,<span style="color:blue;">double</span>&gt;&nbsp;<span style="color:#1f377f;">get_req_cross</span>,
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#2b91af;">View</span>&nbsp;<span style="color:#1f377f;">child</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">var</span>&nbsp;<span style="color:#1f377f;">opt_main</span>&nbsp;=&nbsp;<span style="color:#1f377f;">get_opt_main</span>(<span style="color:#1f377f;">child</span>);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8f08c4;">if</span>&nbsp;(<span style="color:#1f377f;">opt_main</span>.Alignment&nbsp;!=&nbsp;<span style="color:#2b91af;">LayoutAlignment</span>.Fill)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#74531f;">Gripe</span>(<span style="color:#a31515;">&quot;Alignment&nbsp;along&nbsp;main&nbsp;axis&quot;</span>);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8f08c4;">if</span>&nbsp;(<span style="color:#1f377f;">opt_main</span>.Expands)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8f08c4;">if</span>&nbsp;(<span style="color:#1f377f;">get_req_main</span>(<span style="color:#1f377f;">child</span>)&nbsp;&gt;=&nbsp;0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#74531f;">Gripe</span>(<span style="color:#a31515;">&quot;Width/Height&nbsp;request&nbsp;with&nbsp;Expands&quot;</span>);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">var</span>&nbsp;<span style="color:#1f377f;">opt_cross</span>&nbsp;=&nbsp;<span style="color:#1f377f;">get_opt_cross</span>(<span style="color:#1f377f;">child</span>);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8f08c4;">if</span>&nbsp;(<span style="color:#1f377f;">opt_cross</span>.Expands)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8f08c4;">if</span>&nbsp;(!(<span style="color:#1f377f;">child</span>&nbsp;<span style="color:blue;">is</span>&nbsp;<span style="color:#2b91af;">ListView</span>))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#74531f;">Gripe</span>(<span style="color:#a31515;">&quot;Expands&nbsp;along&nbsp;cross&nbsp;axis&quot;</span>);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8f08c4;">if</span>&nbsp;(<span style="color:#1f377f;">opt_cross</span>.Alignment&nbsp;==&nbsp;<span style="color:#2b91af;">LayoutAlignment</span>.Fill)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8f08c4;">if</span>&nbsp;(<span style="color:#1f377f;">get_req_cross</span>(<span style="color:#1f377f;">child</span>)&nbsp;&gt;=&nbsp;0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#74531f;">Gripe</span>(<span style="color:#a31515;">&quot;Width/Height&nbsp;request&nbsp;with&nbsp;Fill&quot;</span>);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:blue;">public</span>&nbsp;<span style="color:blue;">static</span>&nbsp;<span style="color:blue;">void</span>&nbsp;<span style="color:#74531f;">CheckStackLayout</span>(<span style="color:#2b91af;">StackLayout</span>&nbsp;<span style="color:#1f377f;">stk</span>)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8f08c4;">switch</span>&nbsp;(<span style="color:#1f377f;">stk</span>.Orientation)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8f08c4;">case</span>&nbsp;<span style="color:#2b91af;">StackOrientation</span>.Horizontal:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8f08c4;">foreach</span>&nbsp;(<span style="color:blue;">var</span>&nbsp;<span style="color:#1f377f;">child</span>&nbsp;<span style="color:#8f08c4;">in</span>&nbsp;<span style="color:#1f377f;">stk</span>.Children)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#74531f;">CheckChild</span>(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#1f377f;">x</span>&nbsp;=&gt;&nbsp;<span style="color:#1f377f;">x</span>.HorizontalOptions,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#1f377f;">x</span>&nbsp;=&gt;&nbsp;<span style="color:#1f377f;">x</span>.WidthRequest,
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#1f377f;">x</span>&nbsp;=&gt;&nbsp;<span style="color:#1f377f;">x</span>.VerticalOptions,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#1f377f;">x</span>&nbsp;=&gt;&nbsp;<span style="color:#1f377f;">x</span>.HeightRequest,
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#1f377f;">child</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8f08c4;">break</span>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8f08c4;">case</span>&nbsp;<span style="color:#2b91af;">StackOrientation</span>.Vertical:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8f08c4;">foreach</span>&nbsp;(<span style="color:blue;">var</span>&nbsp;<span style="color:#1f377f;">child</span>&nbsp;<span style="color:#8f08c4;">in</span>&nbsp;<span style="color:#1f377f;">stk</span>.Children)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#74531f;">CheckChild</span>(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#1f377f;">x</span>&nbsp;=&gt;&nbsp;<span style="color:#1f377f;">x</span>.VerticalOptions,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#1f377f;">x</span>&nbsp;=&gt;&nbsp;<span style="color:#1f377f;">x</span>.HeightRequest,
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#1f377f;">x</span>&nbsp;=&gt;&nbsp;<span style="color:#1f377f;">x</span>.HorizontalOptions,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#1f377f;">x</span>&nbsp;=&gt;&nbsp;<span style="color:#1f377f;">x</span>.WidthRequest,
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#1f377f;">child</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8f08c4;">break</span>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8f08c4;">default</span>:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8f08c4;">throw</span>&nbsp;<span style="color:blue;">new</span>&nbsp;<span style="color:#2b91af;">NotImplementedException</span>();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}
+</pre>
+
+
