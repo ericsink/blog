@@ -78,7 +78,7 @@ let add_pair (d: Dictionary<string,Dictionary<string,string>>) section k v =
 let add_site_defaults (d: Dictionary<string,Dictionary<string,string>>) =
     add_pair d "site" "title" "Eric Sink"
     add_pair d "site" "tagline" "SourceGear Founder"
-    add_pair d "site" "copyright" "Copyright 2001-2019 Eric Sink. All Rights Reserved"
+    add_pair d "site" "copyright" "Copyright 2001-2020 Eric Sink. All Rights Reserved"
 
 // dir is a platform path
 // uri_path is forward-slashes
