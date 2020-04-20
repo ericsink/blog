@@ -1,0 +1,109 @@
+---
+layout: post
+title: SourceGear.Rust.NET preview 0.1.0
+date: 2020-04-20 12:00:00
+keywords: rust dotnet front
+teaser: Don't even think about trying to use this for real work.
+---
+
+<p>A few weeks ago I posted a <a href="/entries/dotnet_rust.html">blog entry</a> about stuff I've been
+building to compile Rust code for .NET.</p>
+
+<p>You wanna try it?  <tt>:-)</tt></p>
+
+<p>First let me try to scare away the sane people.</p>
+
+<h2>Coder Beware</h2>
+
+<ul>
+    <li><p>This project is not production ready.</p></li>
+    <li><p>Think of this as just a demo or a proof of concept.</p></li>
+    <li><p>Don't even think about trying to use this for real work.</p></li>
+    <li><p>Lots of things are broken or incomplete.</p></li>
+    <li><p>This has never been used to write anything but Hello World and test cases.</p></li>
+    <li><p>This is not open source.</p></li>
+    <li><p>I am making no promises about the future of this project.</p></li>
+    <li><p>If more releases happen in the future, things may change with no regard whatsoever for backward compatibility.</p></li>
+</ul>
+
+<p>This preview release is simply for interested folks who
+want to fiddle around with Rust and .NET.</p>
+
+<h2>Preview release 0.1.0</h2>
+
+<p>Making a release of this project has forced me to give it a name, so I'm calling it SourceGear.Rust.NET.
+The preview release consists of two NuGet packages:</p>
+
+<ul>
+    <li><p>SourceGear.Rust.NET.Templates -- for use with `dotnet new`</p></li>
+    <li><p>SourceGear.Rust.NET.Sdk -- an MSBuild Sdk</p></li>
+</ul>
+
+<p>You'll need .NET Core 3.1 on one of the following platforms:</p>
+
+<ul>
+    <li><p>Windows (x64)</p></li>
+    <li><p>MacOS</p></li>
+    <li><p>Ubuntu 18.04 (x64)</p></li>
+</ul>
+
+<p>(The Sdk includes a native code library (libLLVM), and for now, I am only bundling it for the 3 platforms above.)</p>
+
+<p>And you'll need Rust nightly, plus its `rust-src` component.</p>
+
+<pre class="screen">
+rustup toolchain install nightly
+rustup component add rust-src --toolchain nightly
+</pre>
+
+<p>First, install the templates:</p>
+
+<pre class="screen">
+dotnet new -i SourceGear.Rust.NET.Templates
+</pre>
+
+<p>Now create a project:</p>
+
+<pre class="screen">
+mkdir MyRustProject1
+cd MyRustProject1
+dotnet new console -lang Rust
+</pre>
+
+<p>The project directory should now contain an .rsproj file.  This is very similar to a .csproj or .fsproj, except of course that it's for Rust.</p>
+
+<p>The source code for the console app is in `src/main.rs`, and it's pretty ugly at the moment, because there is a bunch of ceremony at the top that I need to find a way to move out.</p>
+
+<p>Now build:</p>
+
+<pre class="screen">
+dotnet build
+</pre>
+
+<p>This will take quite a while and you'll see a bunch of
+output scrolling by.  Subsequent builds of the project will be quicker
+because the Rust core library and the .NET Core bindings are already
+compiled.</p>
+
+<p>If the build succeeds, try running the app:</p>
+
+<pre class="screen">
+dotnet run
+</pre>
+
+<p>And you should see it say Hello World.</p>
+
+<h2>Limitations:</h2>
+
+<ul>
+    <li><p>The Sdk's compiler can only target .NET Core 3.1.  No netstandard, no Xamarin, no Mono, no .NET Framework.</p></li>
+    <li><p>The Rust std library is absent.  Only core and alloc.</p></li>
+    <li><p>The Sdk only works with Rust nightly, not stable.</p></li>
+    <li><p>There is no support yet for Rust code referencing other assemblies (besides .NET Core itself).</p></li>
+    <li><p>The bindings for .NET Core are missing quite a few methods.</p></li>
+</ul>
+
+<h2>Followups</h2>
+
+<p>If you want to talk to me about this project, feel free to drop me an email or a tweet.</p>
+
