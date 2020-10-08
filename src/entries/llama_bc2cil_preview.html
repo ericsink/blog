@@ -1,0 +1,424 @@
+---
+layout: post
+title: Llama preview 0.1.2
+date: 2020-10-08 12:00:00
+keywords: llvm dotnet front
+teaser: A dotnet tool for compiling an LLVM bitcode file into a dotnet assembly
+---
+
+<p>So you may have seen in previous blog entries that I've been working on tools to compile LLVM bitcode into a .NET assembly.  
+A lot of this effort has been <a href="/entries/dotnet_rust.html">focused on Rust</a>, but the approach can be used for other languages
+as well.  I've started referring to this overall project as "Llama".</p>
+
+<p>Today I published the core functionality of Llama as a dotnet tool on nuget.org.  This tool is called "bc2cil", and its only feature is to compile a bitcode file into a .NET assembly.</p>
+
+<pre class="screen">
+dotnet tool install -g sourcegear.llama.bc2cil
+</pre>
+
+<p>In this blog entry I'll walk through a couple of examples to show how this tool is used.</p>
+
+<h2>Coder Beware</h2>
+
+<ul>
+    <li><p>This project is not production ready.</p></li>
+    <li><p>Think of this as just a demo or a proof of concept.</p></li>
+    <li><p>Lots of things are broken or incomplete.</p></li>
+    <li><p>This is not (currently) open source.</p></li>
+    <li><p>I am making no promises about the future of this project.</p></li>
+</ul>
+
+<p>This preview release is simply for interested folks who
+want to fiddle around with LLVM bitcode and .NET.</p>
+
+<h2>Llama.bc2cil</h2>
+
+<p>To install the Llama bc2cil tool:</p>
+
+<pre class="screen">
+dotnet tool install -g sourcegear.llama.bc2cil
+</pre>
+
+<p>Now if you have an LLVM bitcode file called foo.bc, you can compile it into a .NET assembly like this:</p>
+
+<pre class="screen">
+bc2cil foo.bc
+</pre>
+
+<p>This will produce foo.dll, which you can use like any other .NET assembly.  With a few caveats.</p>
+
+<p>But where did that foo.bc file come from?
+
+<h2>Bitcode files</h2>
+
+<p>The LLVM system is built around an Intermediate Representation (IR), 
+which is basically a quasi-portable assembly language.  The textual form of IR is
+usually stored in a file with a .ll extension.  This form looks like this:</p>
+
+<pre class="screen">
+  %127 = getelementptr i8, i8* %94, i64 %106
+  %128 = add i64 %123, %122
+  %129 = icmp eq i64 %103, %106
+  br i1 %129, label %143, label %130
+</pre>
+
+<p>In its binary form, an IR file
+has a .bc extension, and is often referred to as "bitcode".  These two
+representations are equivalent, and can be easily converted to and
+from each other.</p>
+
+<p>When a developer is using an LLVM-based compiler, most of this stuff is usually hidden.  The compiler parses the language and generates IR, then it manipulates the IR, then it translates the IR into machine code for a specific CPU, and the developer never actually sees the IR.</p>
+
+<p>But there is [usually] a way to tell the compiler to stop the pipeline early and 
+emit bitcode instead.  For example, when using clang, this is done by passing the -emit-llvm option on the command line.</p>
+
+<p>(Llama could have been implemented in C++ as an LLVM target and backend.  In fact, there is archeological evidence that LLVM once had a backend for CIL, but it was abandoned and removed a long time ago.  Instead, my implementation is a separate tool that reads a bitcode file.)</p>
+
+<h2>Hello World in C</h2>
+
+<p>Let's take a look at the following C program:</p>
+
+<pre class="screen">
+int puts(const char*);
+
+int main()
+{
+    puts("Hello World");
+}
+</pre>
+
+<p>Note that I've intentionally added my own C prototype delaration for <code>puts()</code> instead of <code>#include &lt;stdio.h&gt;</code> because I don't want the system header files bringing in any surprises.  For this trivial example, I just want the code to depend on one externally defined function called <code>puts()</code>, nothing more.</p>
+
+<h2>A look at IR</h2>
+
+<p>Let's compile this hello program into a bitcode file:</p>
+
+<pre class="screen">
+clang -emit-llvm -c hello.c
+</pre>
+
+<p>This will give me the hello.bc I wanted, but I also want to see it in text form, so I use the LLVM disassembler:</p>
+
+<pre class="screen">
+llvm-dis hello.bc
+</pre>
+
+<p>Now I get hello.ll, which contains a bit too much noise to be suitable for a blog post.  Instead of showing you the whole thing, 
+here's the essence of it:</p>
+
+<pre class="screen">
+@"??_C@_0M@KPLPPDAC@Hello?5World?$AA@" = constant [12 x i8] c"Hello World\00"
+
+define dso_local i32 @main() #0 {
+  %1 = call i32 @puts(i8* @"??_C@_0M@KPLPPDAC@Hello?5World?$AA@")
+  ret i32 0
+}
+
+declare dso_local i32 @puts(i8*) #1
+</pre>
+
+<p>There are 3 global symbols here:</p>
+
+<ul>
+    <li>@(expletive deleted) is a memory block, 12 bytes long, containing the string literal</li>
+    <li><code>main()</code> is defined as a function which simply calls <code>puts()</code> and returns 0</li>
+    <li><code>puts()</code> is declared, meaning that its implementation is not here, so it needs to be provided by somebody else</li>
+</ul>
+
+<h2>From bitcode to CIL</h2>
+
+<p>So let's compile that bitcode file with Llama:</p>
+
+<pre class="screen">
+$ bc2cil hello.bc
+import method not found: puts
+Call Missing method b: puts
+</pre>
+
+<p>Unsurprisingly, we're getting complaints about the missing <code>puts()</code> function.</p>
+
+<p>Typically, when a compiler toolchain finds an unresolved symbol, the build process is halted with a fatal error.  Currently Llama behaves differently, replacing the method call with an exception throw.  When Llama is ready for production use, it won't do that, but for now, I often find it handy to have it work this way.</p>
+
+<p>So despite the missing symbol, I do get an assembly.  Let's see what it's in it, using ildasm to output the DLL to CIL in textual form:</p>
+
+<pre class="screen">
+dotnet ildasm hello.dll &gt; hello.cil
+</pre>
+
+<p>Just as with the .ll file, the textual form of CIL is a bit much for a blog post, so again I'll just show the essence:</p>
+
+<pre class="screen">
+  .method public static default int32 main() cil managed
+  {
+    // Method begins at Relative Virtual Address (RVA) 0x2050
+    // Code size 17 (0x11)
+    .maxstack 8
+    IL_0000: ldstr "Call Missing method b: puts"
+    IL_0005: newobj instance void class [System.Private.CoreLib]System.Exception::.ctor(string)
+    IL_000a: throw
+    IL_000b: ldc.i4 0
+    IL_0010: ret
+  } // End of method System.Int32 foo::main()
+</pre>
+
+<p>Yup, that's what I expected.  The <code>puts()</code> function wasn't available, so that function call has been replaced with an exception.</p>
+
+<div style="background-color:#aaaaaa;border:3px solid #000000;"><img style="float:right;padding:10px" src="/images/coding_horror_100.png"/><p style="padding:20px;">And then my code generator blithely goes on to return 0 even though that's unreachable after the throw.</p></div>
+
+<p>The point here is to illustrate that compiling bitcode to CIL is just one piece of the story.  
+Most code has lots of external dependencies.  
+For Llama to be useful, we need those external dependencies to be provided somehow, and that can be a big problem.
+</p>
+
+<p>But for this situation, I'm only missing one thing.  We can push through this.</p>
+
+<h2>The world's most pathetic libc</h2>
+
+<p>All we need for this case is <code>puts()</code>.  It accepts a string and prints it on stdout.  How hard could that be?</p>
+
+<p>The only slightly complicated thing here is that C and .NET have differing notions of what a string is.  Our C code will provide a pointer to a zero-terminated "C string" of unspecified encoding, whereas .NET strings are managed objects encoded as UTF-16.</p>
+
+<p>But we can deal with that.  Let's implement <code>puts()</code> using C#.</p>
+
+<p>Create a class library project:</p>
+
+<pre class="screen">
+mkdir libc
+cd libc
+dotnet new classlib
+</pre>
+
+<p>And here's what Class1.cs needs:</p>
+
+<pre class="screen">
+public static class pathetic
+{
+    static unsafe int strlen(byte* p)
+    {
+        var n = 0;
+        while (*p != 0)
+        {
+            n++;
+            p++;
+        }
+        return n;
+    }
+    public static unsafe int puts(byte* s)
+    {
+        var str = System.Text.Encoding.UTF8.GetString(s, strlen(s));
+        System.Console.WriteLine(str);
+        return 0;
+    }
+}
+</pre>
+
+<p>Mostly we just need to convert the C string to a .NET string and call <code>Console.WriteLine()</code>.  For the purpose of converting to a .NET string, I'm assuming the C string to be UTF8.</p>
+
+<p>And then there's the fact that C deals with pointers, so this code needs to be compiled with <code>unsafe</code> turned on.  Here's my libc.csproj file:</p>
+
+<pre class="screen">
+&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+
+  &lt;PropertyGroup&gt;
+    &lt;TargetFramework&gt;netcoreapp3.1&lt;/TargetFramework&gt;
+    &lt;AllowUnsafeBlocks&gt;True&lt;/AllowUnsafeBlocks&gt;
+  &lt;/PropertyGroup&gt;
+
+&lt;/Project&gt;
+</pre>
+
+<h2>Fulfilling the external dependency</h2>
+
+<p>So how do we make our pathetic libc available for hello to use it?</p>
+
+<p>Llama's bc2cil tool has a command line option to provide assemblies to be referenced.  The argument value for the --ref option is (1) the path to the assembly, and (2) the name of the class in which to search, separated by a comma.  So I copied libc.dll into my work directory and did this:</p>
+
+<pre class="screen">
+bc2cil --ref=libc.dll,pathetic hello.bc
+</pre>
+
+<p>Now we aren't getting those missing function errors that we saw before.  When Llama encounters that reference to <code>puts()</code>, it looks in libc.dll, in the class called <code>pathetic</code>, and finds it there.  And the resulting CIL (from ildasm again) looks better:</p>
+
+<pre class="screen">
+  .method public static default int32 main() cil managed
+  {
+    // Method begins at Relative Virtual Address (RVA) 0x2050
+    // Code size 20 (0x14)
+    .maxstack 1
+    IL_0000: ldsfld [mscorlib]System.IntPtr foo::??_C@_0M@KPLPPDAC@Hello?5World?$AA@
+    IL_0005: call int32 class [libc]pathetic::puts(pointer)
+    IL_000a: stloc class V_0
+    IL_000e: ldc.i4 0
+    IL_0013: ret
+  } // End of method System.Int32 foo::main()
+</pre>
+
+<div style="background-color:#aaaaaa;border:3px solid #000000;"><img style="float:right;padding:10px" src="/images/coding_horror_100.png"/><p style="padding:20px;">Again, you may notice that my code generator isn't going to win any awards.  It stores the integer result of the puts() call in a local that never gets used.</p></div>
+
+<h2>Running the program</h2>
+
+<p>How do we run this?  We're using .NET Core, so we need a hello.runtimeconfig.json file:</p>
+
+<pre class="screen">
+{
+  "runtimeOptions": {
+    "tfm": "netcoreapp3.1",
+    "framework": {
+      "name": "Microsoft.NETCore.App",
+      "version": "3.1.8"
+    }
+  }
+}
+</pre>
+
+<p>Now we can try:</p>
+
+<pre class="screen">
+$ dotnet hello.dll
+Unhandled exception. System.MissingMethodException: Entry point not found in assembly 'hello...
+</pre>
+
+<p>Ooops.  We never told .NET about an entry point.  Llama.bc2cil has another option for that, called --exe.  When this option is true, it looks for a <code>main()</code> and provides startup code to call it.</p>
+
+<pre class="screen">
+bc2cil --ref=libc.dll,pathetic --exe=true hello.bc
+</pre>
+
+<p>Finally:</p>
+
+<pre class="screen">
+$ dotnet hello.dll
+Hello World
+</pre>
+
+<p>WELL then.  That was a lot of work just for Hello World.</p>
+
+<p>Let's walk through one more example.</p>
+
+<h2>Swift</h2>
+
+<p>Swift's compiler is based on LLVM (which is unsurprising, as Swift and LLVM were developed by the same folks).  Can we do .NET development with Swift?</p>
+
+<p>Warning:  I have VERY little actual experience with Swift, so let's not be surprised if I do or say something stupid here.</p>
+
+<p>The first thing is to figure out if the Swift compiler can give me a .bc file.  Looks like the swiftc option I need is -emit-bc.</p>
+
+<p>(Some experimentation and digging suggests that I want the -parse-as-library option as well.  Without this flag, swiftc seems to assume the source file is a script, putting its contents into an implicit <code>main()</code>.)</p>
+
+<p>Now I need a bit of Swift code to compile.  But I don't want to be ambitious at all.  People tend to think of "Hello World" as simple, but writing text to stdout can require all kinds of stuff in terms of library dependencies.  For this first test, I just want a snippet of code that has no dependencies at all, if that's possible.  Like maybe just a function that multiplies two integers.</p>
+
+<pre class="screen">
+func mul(_ a : Int, b : Int) -&gt; Int {
+    return a * b;
+}
+</pre>
+
+<p>That might work.  My goal is to to compile this to a .NET assembly and then call it from C#.  First the bitcode file:</p>
+
+<pre class="screen">
+swiftc -parse-as-library -emit-bc mul.swift
+</pre>
+
+<p>That gives me mul.bc, so this looks promising so far.  But let's run llvm-dis and look at the textual IR:</p>
+
+<pre class="screen">
+define hidden swiftcc i64 @"$s3mulAA_1bS2i_SitF"(i64 %0, i64 %1) #0 {
+  %3 = alloca i64, align 8
+  %4 = bitcast i64* %3 to i8*
+  call void @llvm.memset.p0i8.i64(i8* align 8 %4, i8 0, i64 8, i1 false)
+  %5 = alloca i64, align 8
+  %6 = bitcast i64* %5 to i8*
+  call void @llvm.memset.p0i8.i64(i8* align 8 %6, i8 0, i64 8, i1 false)
+  store i64 %0, i64* %3, align 8
+  store i64 %1, i64* %5, align 8
+  %7 = call { i64, i1 } @llvm.smul.with.overflow.i64(i64 %0, i64 %1)
+  %8 = extractvalue { i64, i1 } %7, 0
+  %9 = extractvalue { i64, i1 } %7, 1
+  %10 = call i1 @llvm.expect.i1(i1 %9, i1 false)
+  br i1 %10, label %12, label %11
+
+11:                                               ; preds = %2
+  ret i64 %8
+
+12:                                               ; preds = %2
+  call void @llvm.trap()
+  unreachable
+}
+</pre>
+
+<p>WHOA -- that's a lot of code.  I was expecting something much shorter.  What I had in mind was something more like this:</p>
+
+<pre class="screen">
+define hidden swiftcc i64 @mul(i64 %0, i64 %1) #0 {
+  %2 = mul i64 %0, %1
+  ret i64 %2
+}
+</pre>
+
+<p>Looking more closely at what Swift gave me, a lot of what is happening is overflow checking on the integer multiplication (<code>llvm.smul.with.overflow.i64</code>).  Llama does have some support for those features, so we can keep going.</p>
+
+<p>But the other problem is the name of the function.  The Swift compiler mangled it to <code>$s3mulAA_1bS2i_SitF</code>.  That's not a valid C# identifer.  How am I supposed to call that?  There's gotta be a way to tell Swift not to mangle that name.</p>
+
+<p>After a bit of digging, I found the <code>@_cdecl</code> attribute.  People describe it as rather unofficial, but for now I'll take it.  So now mul.swift looks like this.</p>
+
+<pre class="screen">
+@_cdecl("mul")
+func mul(_ a : Int, b : Int) -&gt; Int {
+  return * b;
+}
+</pre>
+
+<p>I re-run the Swift compiler and then try Llama on the resulting .bc file:</p>
+
+<pre class="screen">
+$ swiftc -parse-as-library -emit-bc mul.swift
+$ bc2cil mul.bc
+</pre>
+
+<p>This does produce a mul.dll assembly.  Now I need a little C# console app to call Swift <code>mul()</code>.</p>
+
+<pre class="screen">
+mkdir main
+cd main
+dotnet new console
+</pre>
+
+<p>One thing I haven't explained yet is that when Llama compiles a bitcode file, it outputs each function as a static method, putting all of them in a static class.  The name of that class is configurable, but its default name is <code>foo</code>, for no particular reason.  So from the perspective of C#, the Swift <code>mul()</code> function is named <code>foo.mul()</code>:
+
+<pre class="screen">
+using System;
+
+namespace main
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var x = foo.mul(7, 6);
+            Console.WriteLine($"Hello {x}!");
+        }
+    }
+}
+</pre>
+
+<p>And of course I need to reference the mul.dll assembly by adding the following to main.csproj:</p>
+
+<pre class="screen">
+  &lt;ItemGroup&gt;
+    &lt;Reference Include="..\mul.dll" /&gt;
+  &lt;/ItemGroup&gt;
+</pre>
+
+<p>So hopefully now I can run this and get Swift to multiply 7 times 6:</p>
+
+<pre class="screen">
+$ dotnet run
+Hello 42!
+</pre>
+
+<p>Yay!</p>
+
+<div style="background-color:#aaaaaa;border:3px solid #000000;"><img style="float:right;padding:10px" src="/images/coding_horror_100.png"/><p style="padding:20px;">If you want to see something truly dreadful, run ildasm/ilspy/dnspy on hello.dll and look in the cctor() at how that string literal is initialized.  (Sooner or later I'll write the code to do that properly.)</p></div>
+
+<p>Comments or questions?  Find me on Twitter at @eric_sink.</p>
+
