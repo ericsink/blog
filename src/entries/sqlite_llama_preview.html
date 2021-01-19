@@ -1,0 +1,122 @@
+---
+layout: post
+title: Preview: The SQLite Llibrary as a .NET assembly
+date: 2021-01-19 12:00:00
+keywords: llvm dotnet front sqlite llama
+teaser: A preview release of SQLite compiled for .NET with Llama
+---
+
+<p>The latest pre-release of SQLitePCLRaw contains
+a new bundle package called <a href="https://www.nuget.org/packages/SQLitePCLRaw.bundle_cil/2.0.5-pre20210119130047">SQLitePCLRaw.bundle_cil</a>.
+This package is like SQLitePCLRaw's other "bundle" packages
+except that it involves no P/Invoke and no platform-specific
+shared libraries.
+Instead, bundle_cil provides the SQLite library as a pure 
+.NET assembly which was compiled by Llama.</p>
+
+<h2><img align="right" width="250" src="/images/llama_small.jpg"/>What is Llama?</h2>
+
+<ul>
+    <li><p>A toolchain for compiling "other languages" for .NET</p></li>
+    <li><p>My side project</p></li>
+</ul>
+
+<p>Llama includes a compiler that translates LLVM bitcode 
+into CIL (Common Intermediate Language), aka MSIL, aka the instruction set 
+of .NET assemblies.</p>
+
+<p>For a bit more info on Llama, see my <a href="/tocs/llama.html">other blog posts</a>.</p>
+
+<h2>How was this CIL build of SQLite made?</h2>
+
+<p>I compiled <code>sqlite3.c</code> with clang, just as one normally would, except I added the <code>-emit-llvm</code> flag to make it generate bitcode instead of the usual .o/.obj file.</p>
+
+<p>Then I run Llama's compiler on <code>sqlite3.bc</code>, which results in <code>sqlite3.dll</code>, a .NET assembly.  I also needed to provide various dependencies (handwave, handwave).</p>
+
+<h2>So will this new bundle be part of SQLitePCLRaw 2.0.5?</h2>
+
+<p>Sorry, no, Llama isn't "ready" yet.  I've included bundle_cil in this 2.0.5 pre-release so folks can see my progress, but it will be excluded when I release 2.0.5 final.  Hopefully bundle_cil will graduate later.</p>
+
+<h2>What is the status of this then?</h2>
+
+<p>Llama is still at "proof of concept" stage.  Lots of things are broken or incomplete.</p>
+
+<h2>And how is that "proof of concept" going?</h2>
+
+<p>Quite well.  The reason for this pre-release and blog entry is that Llama just
+passed a big milestone:</p>
+
+<p>The CIL build of SQLite now passes all of the following:</p>
+
+<ul>
+    <li><p>the test cases for SQLitePCLRaw</p></li>
+    <li><p>the 600+ test cases for Microsoft.Data.Sqlite</p></li>
+    <li><p>the 22,000+ SQLite test cases for Entity Framework Core (in EFCore.Sqlite.FunctionalTests)</p></li>
+</ul>
+
+<p>... on Windows.  On Linux, things are close but not quite there yet.  I haven't tried on Mac yet.</p>
+
+<h2>What versions of .NET does Llama support?</h2>
+
+<p>Currently, Llama only works with .NET 5.0.</p>
+
+<h2>How is the performance of Llama-compiled code?</h2>
+
+<p>I haven't done any actual benchmarks.  I assume that things are at least a little bit slower.  I see lots of places where I know I could improve performance.  I believe that Llama-compiled code will (eventually) be competitive on performance, but I currently have no evidence or measurements to support that belief.</p>
+
+<h2>How was the CIL build of SQLite integrated with SQLitePCLRaw?</h2>
+
+<p>SQLitePCLRaw uses an architecture wherein the
+details of the integration with the native SQLite
+library are encapsulated inside a "provider".</p>
+
+<p>For the CIL build of SQLite, I added a new provider.
+It simply calls stuff in the <code>sqlite3.dll</code> assembly
+instead of using P/Invoke.</p>
+
+<p>Nothing in SQLitePCLRaw above the provider API
+boundary had to be changed, so bundle_cil can be
+a drop-in replacement for bundle_e_sqlite3.</p>
+
+<h2>Will Llama work for other libraries in C besides SQLite?</h2>
+
+<p>That is certainly the goal.</p>
+
+<p>In some ways, SQLite is much easier than other libraries.
+It is an incredibly high quality project and it is very cross-platform.</p>
+
+<p>Also, SQLite is provided as an "amalgamation", a single C source
+file that contains the entire library.  In this case, the easiest build system is no build system at
+all.  As I've explored building other C-language projects with Llama, getting
+their build system to create an LLVM bitcode file is one of
+the trickiest parts.</p>
+
+<p>OTOH, SQLite offers its own challenges.  It has minimal dependencies,
+but those do include some very tricky things such as shared memory,
+thread synchronization primitives, and file locking.</p>
+
+<h2>So is Llama just for C code?</h2>
+
+<p>No, I hope to get Llama working for several other
+languages which have LLVM-based
+compilers.  Llama's support for Rust is actually a bit
+further along than C.  I am eager to try and get
+Llama working with Swift.</p>
+
+<h2>Why is it called bundle_cil?</h2>
+
+<p>I don't like the name, but I haven't thought of anything better yet.</p>
+
+<h2>How do I try it?</h2>
+
+<p>If you are using SQLitePCLRaw or some other wrapped that
+is built on same (such as sqlite-net or Microsoft.Data.Sqlite or
+Entity Framework Core), you just need to replace your bundle_e_sqlite3 package reference
+with bundle_cil, and set the version to the pre-release:
+
+<pre class="screen">
+    &lt;PackageReference Include="SQLitePCLRaw.bundle_cil" Version="2.0.5-pre20210119130047" /&gt;
+</pre>
+
+<p>If you do give this a try, please let me know how it goes.</p>
+
