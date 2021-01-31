@@ -1,0 +1,360 @@
+---
+layout: post
+title: Llama Rust SDK preview 0.1.3
+date: 2021-01-31 12:00:00
+keywords: rust dotnet front llama
+teaser: Progress on std.  Still not ready for prime time.
+---
+
+<p>The last time I released a preview of Llama's Rust SDK (around 8 months ago) the <a href="/entries/sg_rust_dotnet_preview.html">blog entry</a> 
+was filled with caveats about its limitations.  Most of those still apply, but there has been significant progress.  The
+most notable thing is that I now have partial support for the Rust std library.</p>
+
+<p>(Background and terminology:  Llama is my project focused on using "other languages" with .NET.  Its core component is a compiler that translates LLVM bitcode to .NET CIL.  SourceGear.Rust.NET.Sdk (aka the Llama Rust SDK) is an MSBuild project SDK that integrates Rust into the regular .NET build process.)</p>
+
+<p>SourceGear.Rust.NET.Sdk version <a href="https://www.nuget.org/packages/SourceGear.Rust.NET.Sdk/0.1.3">0.1.3</a> is available on nuget.org now.  This blog entry
+is a walkthrough of using it to build an actual Rust program.</p>
+
+<p>Reminder: Llama is at the "proof of concept" stage, and is not production ready.</p>
+
+<h2>Prerequisites</h2>
+
+<p>Llama currently requires .NET 5.0 on one of the following platforms:</p>
+
+<ul>
+    <li><p>Windows (x64)</p></li>
+    <li><p>MacOS (x64)</p></li>
+    <li><p>Ubuntu 18.04 (x64)</p></li>
+</ul>
+
+<p>And you'll need Rust nightly, plus its `rust-src` component.  For this walkthrough, I am using a specific nightly that I know works.</p>
+
+<pre class="screen">
+rustup toolchain install nightly-2020-10-13
+rustup component add rust-src --toolchain nightly-2020-10-13
+</pre>
+
+<h2>ruplacer</h2>
+
+<p>For this walkthrough, the demo project is "ruplacer", a utility to find and replace text in multiple files.  I found it on GitHub:</p>
+
+<p><a href="https://github.com/TankerHQ/ruplacer">https://github.com/TankerHQ/ruplacer</a></p>
+
+<p>This program has been a handy test case for Llama.  It has some dependencies, but not too many.  As Llama becomes more capable, I look for slightly-more-difficult projects to build.</p>
+
+<p>If you have Rust installed, you should find it simple to clone the repo and build it with the regular Rust tools:</p>
+
+<pre class="screen">
+git clone https://github.com/TankerHQ/ruplacer
+cd ruplacer
+cargo build
+</pre>
+
+<h2>Both bin and lib</h2>
+
+<p>The first challenge with ruplacer is that it builds both a library crate and a binary crate, because <code>src/lib.rs</code> and <code>src/main.rs</code> are both present.  This is a common practice with Rust, and is perfectly acceptable to Cargo, but it's not really a great fit for how MSBuild works.  For example, when working with C#, one csproj file results in building one .NET assembly.  Building two assemblies from one project file is not really a thing.</p>
+
+<p>So before we get involved with .NET, let's separate things.</p>
+
+<p>The ruplacer Cargo.toml file looks like this:</p>
+
+<pre class="screen">
+[package]
+name = "ruplacer"
+version = "0.4.3"
+authors = ["Dimitri Merejkowsky <d.merej@gmail.com>"]
+description = "Find and replace text in source files"
+license = "BSD-3-Clause"
+readme = "README.md"
+edition = "2018"
+keywords = ["ruplacer", "find", "grep", "command", "line"]
+categories = ["command-line-utilities"]
+repository = "https://github.com/TankerHQ/ruplacer"
+
+[package.metadata.deb]
+extended-description = "Find and replace text in source files"
+
+[dependencies]
+difference = "2.0"
+ignore = "0.4"
+structopt = "0.2"
+colored = "1.6"
+regex = "1"
+isatty = "0.1"
+Inflector = "0.11"
+anyhow = "1.0.32"
+
+
+[dev-dependencies]
+tempdir = "0.3"
+</pre>
+
+<p>What I'm going to do is create a separate "ruexe" crate as a peer of ruplacer.</p>
+
+<pre class="screen">
+mkdir ../ruexe
+mkdir ../ruexe/src
+cp ./src/main.rs ../ruexe/src
+cp ./Cargo.toml ../ruexe
+</pre>
+
+<p>Inside <code>ruexe/Cargo.toml</code>, we need to change the package name from ruplacer to ruexe, and add a dependency for the library:</p>
+
+<pre class="screen">
+[dependencies.ruplacer]
+path = "../ruplacer"
+</pre>
+
+<p>So now the ruplacer executable has its own build directory, but it references the original ruplacer crate, unchanged, as a library.</p>
+
+<p>You should be able to <code>cargo build</code> this and run it.  For example, here I try to replace "pointer" with "terrier" in my copy of the Mono.Cecil tree:</p>
+
+<pre class="screen">
+cargo run pointer terrier ../cecil
+
+(blah blah blah)
+
+Would perform 160 replacements on 5 matching files
+Re-run ruplacer with --go to write these changes to the filesystem
+</pre>
+
+<p>It's nice that ruplacer's default is to preview what changes would be made instead of making any actual changes to the files.</p>
+
+<h2>Now with Llama</h2>
+
+<p>To use Rust with .NET we want it to be like any other .NET language.  Instead of a Cargo.toml file, we want an .rsproj, which would be an SDK-style project file.  Like modern .csproj, except for Rust.  Providing this experience is basically what the Llama Rust SDK does.</p>
+
+<p>The content of <code>ruexe.rsproj</code> looks like this:</p>
+
+<pre class="screen">
+&lt;Project Sdk="SourceGear.Rust.NET.Sdk/0.1.3"&gt;
+
+  &lt;PropertyGroup&gt;
+    &lt;OutputType&gt;Exe&lt;/OutputType&gt;
+    &lt;TargetFramework&gt;net5.0&lt;/TargetFramework&gt;
+    &lt;RustToolChain&gt;+nightly-2020-10-13&lt;/RustToolChain&gt;
+  &lt;/PropertyGroup&gt;
+
+  &lt;ItemGroup&gt;
+    &lt;RustReference Include="..\ruplacer" Name="ruplacer" /&gt;
+
+    &lt;RustCrateReference Include="difference" Version="2.0" /&gt;
+    &lt;RustCrateReference Include="ignore" Version="0.4" /&gt;
+    &lt;RustCrateReference Include="structopt" Version="0.2" /&gt;
+    &lt;RustCrateReference Include="colored" Version="1.6" /&gt;
+    &lt;RustCrateReference Include="regex" Version="1" /&gt;
+    &lt;RustCrateReference Include="isatty" Version="0.1" /&gt;
+    &lt;RustCrateReference Include="Inflector" Version="0.11" /&gt;
+    &lt;RustCrateReference Include="anyhow" Version="1.0.32" /&gt;
+  &lt;/ItemGroup&gt;
+
+&lt;/Project&gt;
+</pre>
+
+<p>This is basically a translation of the Cargo.toml to MSBuild.</p>
+
+<ul>
+    <li><p>The <code>Project</code> element at the top specifies that we want to use SourceGear.Rust.NET.Sdk as the SDK for this project.  The dotnet build system will retrieve the SDK package from nuget.org.</p></li>
+
+    <li><p>The <code>PropertyGroup</code> should look familiar.  It's mostly the same as it would be for C#.  The <code>OutputType</code> specifies that we are building an Exe, and the <code>TargetFramework</code> says we are targeting .NET 5.  The one new piece here is <code>RustToolChain</code>, which I am using to set the specific nightly for this walkthrough.</p></li>
+
+    <li><p>The <code>ItemGroup</code> below that is to specify the references, corresponding to the <code>dependencies</code> section from <code>Cargo.toml</code>.  In this case, the <code>RustReference</code> is like a <code>ProjectReference</code>.  It references a Rust crate in source form with a path.</p></li>
+
+    <li><p>The <code>RustCrateReference</code> element is like <code>PackageReference</code>.  It specifies a reference that will be obtained from crates.io, which is the Rust world's equivalent of nuget.org.</p></li>
+</ul>
+
+<p>Before we try to build this, we need to make one change to the code itself.  Currently, the Llama compiler can't find Rust <code>main()</code> because its name is mangled.  At some point I will figure out a better solution for this problem, but for now, let's tweak the signature of <code>main()</code> just a bit.</p>
+
+<p>In <code>src/main.rs</code>, change:</p>
+
+<pre class="screen">
+fn main() -&gt; Result<()> {
+</pre>
+
+<p>to:</p>
+
+<pre class="screen">
+#[no_mangle]
+pub extern "C" fn main() -&gt; Result<()> {
+</pre>
+
+<p>So now we should be able to build this .rsproj just like any other .NET project:</p>
+
+<pre class="screen">
+dotnet build
+</pre>
+
+<p>And running our .NET build of ruplacer should give the same results as the one built the regular way.</p>
+
+<pre class="screen">
+dotnet run --no-build pointer terrier ../cecil
+
+(blah blah blah)
+
+Would perform 160 replacements on 5 matching files
+Re-run ruplacer with --go to write these changes to the filesystem
+</pre>
+
+<p>Voila.</p>
+
+<h2>How does this work?</h2>
+
+<p>In the big picture, the Llama Rust SDK does two things:</p>
+
+<ol>
+    <li><p>Use the regular Rust tools to build, except generate an LLVM bitcode file instead of the usual platform-specific outputs</p></li>
+    <li><p>Run that bitcode file through the Llama compiler to create a .NET assembly</p></li>
+</ol>
+
+<p>At a more detailed level, there are quite a few steps here.  Each step is done inside the <code>obj</code> directory, and you can look in there to see what has happened.</p>
+
+<p>To get the regular Rust tooling to generate a bitcode file, we need a custom target.  The Rust compiler supports custom targets in JSON, and you can see the one Llama uses at <code>obj/aarch64-sourcegear-windows.json</code>.  It looks like this:</p>
+
+<pre class="screen">
+{
+"arch": "aarch64",
+"data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128",
+"dynamic-linking": true,
+"dll-prefix" : "",
+"dll-suffix" : ".bc",
+"only-cdylib": true,
+"no-builtins": true,
+"allow_asm": false,
+"requires-lto": true,
+"executables": false,
+"is-builtin": false,
+"linker": "dotnet",
+"pre-link-args": { "gcc" : [ "C:/Users/eric/.nuget/packages/sourcegear.rust.net.sdk/0.1.3/build/../tools/rsfakelink/rsfakelink.dll" ] },
+"linker-flavor": "gcc",
+"linker-is-gnu": false,
+"llvm-target": "aarch64-pc-windows-msvc",
+"max-atomic-width": 64,
+"obj-is-bitcode": true,
+"os": "windows",
+"panic-strategy" : "abort",
+"target-c-int-width": "32",
+"target-endian": "little",
+"target-family": "windows",
+"target-pointer-width": "64",
+"vendor": "sourcegear"
+}
+</pre>
+
+<p>Things to note here:</p>
+
+<ul>
+    <li><p>The <code>arch</code> and <code>llvm-target</code> settings are telling LLVM to generate bitcode for aarch64 (aka arm64).  But in practice this doesn't matter very much, because we're stopping the LLVM build process at the bitcode step instead of going all the way to native CPU-specific output.  Very often I find that Llama works fine whether LLVM is targeting aarch64 or x86_64 or even riscv64.</p></li>
+    <li><p>With the <code>llvm-target</code> and <code>os</code> and <code>target-family</code> settings, we are claiming that we are building for Windows.  Note that this does not result in a Windows-specific build.  This is just the technique I use to avoid porting std.  By telling Rust that the target is Windows, std will use Win32 functions for things like file IO.  But Llama doesn't actually connect those calls to the Windows-specific KERNEL32.DLL.  Rather, Llama includes a library called sgwin32, which is an implementation of the Win32 API on top of .NET 5.0 BCL.</p></li>
+    <li><p>The <code>requires-lto</code> and <code>obj-is-bitcode</code> settings are what specifies that the target should generate bitcode instead of CPU-specific code.  The dll-suffix value is part of this as well.</p></li>
+    <li><p>The <code>linker</code> and <code>pre-link-args</code> settings specify a custom linker to be used.  The custom linker is called "rsfakelink", and it is "fake" because it doesn't really do any linking.</p></li>
+</ul>
+
+<p>We use this custom target to build a sysroot, and then we use that sysroot to build the project itself, including all of its dependencies.</p>
+
+<p>The build directory for the sysroot is in <code>obj/sr</code>, and the <code>Cargo.toml</code> file we generated there looks like this:</p>
+
+<pre class="screen">
+[package]
+authors = ["The Rust Project Developers"]
+name = "sysroot"
+version = "0.0.0"
+[dependencies.std]
+path = "C:/Users/eric/.rustup/toolchains/nightly-x86_64-pc-windows-msvc/lib/rustlib/src/rust/library/std"
+[patch.crates-io.rustc-std-workspace-alloc]
+path = "C:/Users/eric/.rustup/toolchains/nightly-x86_64-pc-windows-msvc/lib/rustlib/src/rust/library/rustc-std-workspace-alloc"
+[patch.crates-io.rustc-std-workspace-core]
+path = "C:/Users/eric/.rustup/toolchains/nightly-x86_64-pc-windows-msvc/lib/rustlib/src/rust/library/rustc-std-workspace-core"
+[patch.crates-io.rustc-std-workspace-std]
+path = "C:/Users/eric/.rustup/toolchains/nightly-x86_64-pc-windows-msvc/lib/rustlib/src/rust/library/rustc-std-workspace-std"
+[dependencies.compiler_builtins]
+features = ['mem']
+</pre>
+
+<p>The paths are obtained from <code>rustc --print sysroot</code> and will be different on your system.  They reference the source code for std, which is why the rust-src component is required as a prerequisite.</p>
+
+<p>The command line to build std looks like this (with some line wrapping because it's so wide):</p>
+
+<pre class="screen">
+cargo +nightly-2020-10-13 build --release 
+    --manifest-path sr/Cargo.toml 
+    --target ./aarch64-sourcegear-windows.json 
+    --verbose -p std
+</pre>
+
+<p>After the build is done, we copy the results from <code>obj/sr/target</code> into <code>obj/sysroot</code> with the layout that rustc expects.  Now we can use that sysroot to build the project itself.
+That build directory is in <code>obj/rs</code>.  We generated that <code>Cargo.toml</code> file as well:</p>
+
+<pre class="screen">
+[package]
+name = "ruexe"
+version = "1.0.0"
+edition = "2018"
+autobins = false
+autoexamples = false
+autotests = false
+autobenches = false
+
+[lib]
+crate-type = ["cdylib"]
+path = "../../src/main.rs"
+
+[dependencies.ruplacer]
+path = "C:/Users/eric/dev/ruplacer"
+
+[dependencies.difference]
+version = "2.0"
+
+[dependencies.ignore]
+version = "0.4"
+
+[dependencies.structopt]
+version = "0.2"
+
+[dependencies.colored]
+version = "1.6"
+
+[dependencies.regex]
+version = "1"
+
+[dependencies.isatty]
+version = "0.1"
+
+[dependencies.Inflector]
+version = "0.11"
+
+[dependencies.anyhow]
+version = "1.0.32"
+</pre>
+
+<p>This is the content of <code>ruexe.rsproj</code> rewritten into <code>Cargo.toml</code> form.  Yes, that's right, this walkthrough started with a Cargo file, and we translated it to an MSBuild rsproj, and then the SDK converted it back to Cargo.</p>
+
+<p>The command line to build this is (again with some line wrapping):</p>
+
+<pre class="screen">
+cargo +nightly-2020-10-13 -vv build --verbose --release 
+    --manifest-path C:\Users\eric\dev\ruexe\obj\rs\Cargo.toml 
+    --target ./aarch64-sourcegear-windows.json
+</pre>
+
+<p>But where is the sysroot specified?  Well that part is a bit dorky, as it requires specifying the <code>--sysroot</code> argument in an environment variable called <code>RUSTFLAGS</code>.</p>
+
+<p>BTW, much of what the Llama Rust SDK does is similar to xargo, and I learned a lot about how to do such things by studying the xargo code:</p>
+
+<p><a href="https://github.com/japaric/xargo">https://github.com/japaric/xargo</a></p>
+
+<p>The result of all this is the bitcode file: <code>obj/rs/target/aarch64-sourcegear-windows/release/ruexe.bc</code></p>
+
+<p>So we run that through the Llama compiler and put the resulting assembly in <code>bin/Debug/net5.0</code>.</p>
+
+<pre class="screen">
+$ ls -l bin/Debug/net5.0/*.dll
+-rwxr-xr-x 1 eric 197609 13735936 Jan 31 08:22 bin/Debug/net5.0/ruexe.dll*
+-rwxr-xr-x 1 eric 197609    33280 Jan 30 23:27 bin/Debug/net5.0/sgwin32.dll*
+</pre>
+
+<p>Note that the SDK has automatically added a reference to <code>sgwin32.dll</code>.  That's the "implementation of Win32 on .NET" library that I mentioned earlier.</p>
+
+<p>(Tangent: I should probably do a separate blog entry on sgwin32.  The library is far from complete, but has gradually become quite capable.  It implements enough of Win32 to support a Llama-compiled SQLite that can pass the Entity Framework Core test suite on both Windows and Linux.  OTOH, it's not a panacea.  I also have sgposix, and in some cases that alternative works better.)</p>
+
+<p>Bottom line, there is a lot going on "under the hood", and there are a lot of improvements yet to be made, but I am generally happy with how the Llama Rust SDK can provide an experience that is so similar to csproj.</p>
+
