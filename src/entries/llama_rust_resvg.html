@@ -54,7 +54,7 @@ In this case, I'm rendering SVG into PNG files, so the symptoms are visual.  The
 <p>There are a variety of things I can try to isolate where the problem is, but this step is rarely straightforward.
 Sometimes I discover that I'm chasing multiple problems that all look the same.  Very often I add a debug print statement and it completely changes what the LLVM optimizer does and the symptoms change or go away.</p>
 
-<p>Finally, after fixing a whole bunch of bugs, I was able to successful run:</p>
+<p>Finally, after fixing a whole bunch of bugs, I was able to successfully run:</p>
 
 <pre class="screen">
 dotnet run car.svg car.png
@@ -68,7 +68,7 @@ dotnet run car.svg car.png
 
 <p><a href="https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/">https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/</a></p>
 
-<p>That final step in the loop is <code>delude_self()</code>.  I'm not saying this is constructive, but I pause for this bit of silliness on every iteration, and I have no plans to stop.</p>
+<p>The final step in the loop is <code>delude_self()</code>.  I'm not saying this is constructive, but I pause for this bit of silliness on every iteration, and I have no plans to stop.</p>
 
 <ul>
     <li><p>Wow, it worked!</p></li>
@@ -87,11 +87,11 @@ dotnet run car.svg car.png
 
 <h2>What got fixed</h2>
 
-<p>I'll close with a list of things I fixed for this iteration.  Each
+<p>I'll finish here with a list of things I fixed for this iteration.  Each
 of the features in the unreadable wall of text below was either previously unimplemented or needed some 
 kind of fix in order to get resvg working.</p>
 
-<p>The thing I found remarkable here is to think about the
+<p>The thing I found remarkable is to think about the
 previous projects that were working fine WITHOUT these fixes.  
 I mean, there are dozens of items here.  How did anything work
 at all?</p>
