@@ -1,0 +1,224 @@
+---
+layout: post
+title: Calling .NET APIs from Rust
+date: 2021-03-10 12:00:00
+keywords: rust dotnet front llama
+teaser: This is, without a doubt, the worst implementation of 'grep' I've ever heard of.
+---
+
+<p>SourceGear.Rust.NET.Sdk (aka the Llama Rust SDK) version <a href="https://www.nuget.org/packages/SourceGear.Rust.NET.Sdk/0.1.5">0.1.5</a> contains some progress on
+using Rust to call .NET APIs.  This blog entry
+is a closer look at those features.</p>
+
+<p>Reminder: <a href="/tocs/llama.html">Llama</a> is at the "proof of concept" stage, and is not production ready.</p>
+
+<h2>lousygrep</h2>
+
+<p>For this walkthrough, I am writing a simplistic implementation of "grep".  Here's the C# version:</p>
+
+<pre class="screen">
+class Program
+{
+    static void run(string file, string search)
+    {
+        var a = System.IO.File.ReadAllLines(file);
+        var len = a.Length;
+        for (var i=0; i&lt;len; i++)
+        {
+            var s = a[i];
+            if (s.Contains(search))
+            {
+                System.Console.WriteLine(s);
+            }
+        }
+    }
+
+    static void Main(string[] args)
+    {
+        run(args[0], args[1]);
+    }
+}
+</pre>
+
+<p>It's a console program that takes exactly two arguments on the command line: the name of a file, and the string to search for.  It reads all the lines of the file into memory, and prints the ones that contain the search string.</p>
+
+<p>If you drop this code into Program.cs, and then add the following as lousygrep.csproj, it should build and run.</p>
+
+<pre class="screen">
+&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+
+  &lt;PropertyGroup&gt;
+    &lt;OutputType&gt;Exe&lt;/OutputType&gt;
+    &lt;TargetFramework&gt;net5.0&lt;/TargetFramework&gt;
+  &lt;/PropertyGroup&gt;
+
+&lt;/Project&gt;
+</pre>
+
+<p>The goal in this blog entry is to port lousygrep to Rust while keeping it as a .NET program.  In other words, 
+instead of rewriting it to use, for example,
+the file I/O stuff in the Rust Standard Library, we want to show how to call .NET Base Class Library things like <code>System.IO</code> from Rust.</p>
+
+<p>This capability is provided by a binding generator that takes a set of .NET assemblies and generates Rust
+glue code to expose the APIs to Rust.</p>
+
+<h2>Porting to Rust</h2>
+
+<p>First we need lousygrep.rsproj, the MSBuild project file.  This is the counterpart to the .csproj, and it's pretty similar:</p>
+
+<pre class="screen">
+&lt;Project Sdk="SourceGear.Rust.NET.Sdk/0.1.5"&gt;
+
+  &lt;PropertyGroup&gt;
+    &lt;OutputType&gt;Exe&lt;/OutputType&gt;
+    &lt;TargetFramework&gt;net5.0&lt;/TargetFramework&gt;
+    &lt;RustWantRefDotnet&gt;true&lt;/RustWantRefDotnet&gt;
+  &lt;/PropertyGroup&gt;
+
+&lt;/Project&gt;
+</pre>
+
+<p>The only two differences here are:</p>
+
+<ul>
+    <li><p>On the <code>Project</code> element, the <code>Sdk</code> attribute is "SourceGear.Rust.NET.Sdk/0.1.5".  This is what tells MSBuild that we are using a special project SDK.</p></li>
+    <li><p>The <code>WantRefDotnet</code> element tells the Llama Rust SDK to include a reference to the crates that expose .NET APIs to Rust.</p></li>
+</ul>
+
+<p>And the code itself goes in src/main.rs:</p>
+
+<pre class="screen">
+use dotnet::overloads_with_tuple::*;
+use dotnet::overloads_special::*;
+use dotnet::*;
+
+fn run(file : &amp;System::String, search : &amp;System::String) -&gt; Result&lt;(),System::Exception&gt; {
+    let a = System::IO::File::ReadAllLines((file,))?;
+    let len = a.Length()?;
+    for i in 0 .. len {
+        let s = a.get_item(i);
+        if s.Contains((search,))? {
+            System::Console::WriteLine((&amp;s,))?;
+        }
+    }
+    Ok(())
+}
+
+#[no_mangle]
+pub extern "C" fn main() {
+    let args = System::Environment::GetCommandLineArgs(()).unwrap();
+    let file = args.get_item(1);
+    let search = args.get_item(2);
+    run(&amp;file, &amp;search).unwrap();
+}
+</pre>
+
+<p>Comparing the C# and Rust implementions, you should see several things
+that are similar in both versions.  But even in this very simple example,
+there are a number of differences worth highlighting.</p>
+
+<h2>Importing names</h2>
+
+<pre class="screen">
+use dotnet::overloads_with_tuple::*;
+use dotnet::overloads_special::*;
+use dotnet::*;
+</pre>
+
+<p>These <code>use</code> statements bring things from the dotnet crate into scope, similar to <code>using</code> from C#.  At the present time, they are a bit more complicated than they need to be.  At some point in the future, the ones that contain "overloads" should go away and become implicit.</p>
+
+<h2>Namespace separator</h2>
+
+<pre class="screen">
+    let a = System::IO::File::ReadAllLines((file,))?;
+</pre>
+
+<p>In C#, the namespace separator is a dot, so the full name of the method here is <code>System.IO.File.ReadAllLines()</code>.  But when we expose things to Rust as a module hierarchy, we end up with double colons instead.</p>
+
+<p>Note also that this hierarchy would be more Rust-y is the names were all lower case.  I've kept the .NET names here.</p>
+
+<h2>No overloading</h2>
+
+<pre class="screen">
+            System::Console::WriteLine((&amp;s,))?;
+</pre>
+
+<p>Rust does not support function overloading.  More accurately, the only overloading capabilities offered by Rust are through the trait system, which is being used here, but that approach does not offer a way to deal with overloads that have differing number of arguments.</p>
+
+<p>I have implemented two different ways of dealing with overloads.  The one shown here is based on tuples.  
+Each .NET method accepts one argument, a tuple, and the contents of that tuple can vary according to the
+overloads.  This means that calling a .NET API involves an extra set of parenthesis.</p>
+
+<p>It also means that a method with exactly one parameter looks even weirder, because the syntax for a single-item
+tuple in Rust includes an extra comma.</p>
+
+<h2>Error propagation</h2>
+
+<pre class="screen">
+    let len = a.Length()?;
+</pre>
+
+<p>Any .NET API can throw an exception, but Rust doesn't have exceptions.  The Rust-y way of propagating
+errors is to use <code>Result&lt;T,E&gt;</code>.</p>
+<p>So when the binding generator creates a Rust
+wrapper, the return type it gives is <code>Result&lt;T, System::Exception&gt;</code>.  Any
+exception that gets thrown will be caught and returned as the <code>Err</code> case of the <code>Result</code>.</p>
+
+<p>This allows
+use of the standard Rust approach of appending a <code>?</code> to propagate errors.</p>
+
+<p>The line of code above also illustrates two other things worth mentioning.  First, the <code>Length</code> of a .NET array is a property, so why does this look like a method call?  Well, properties in .NET are just a special syntax for a special method call.  And Rust does not have this property syntax.  So the binding generator exposes them to Rust as methods.</p>
+
+<p>Finally, note that the extra set of parens does not appear here.  The argument tuple is not needed at all.  A property getter cannot be overloaded, so 
+it is treated as a special case.</p>
+
+<h2>Array indexing</h2>
+
+<pre class="screen">
+        let s = a.get_item(i);
+</pre>
+
+<p>Just like in .NET itself, arrays require special handling.
+For now, they are exposed to Rust as a type with a <code>get_item()</code>
+method.  I haven't implemented the Rust <code>Index</code> trait yet,
+but I certainly plan to.</p>
+
+<p>(Hmmm.  Actually, <code>get_item()</code> should return <code>Result</code>.  I need to fix that.)</p>
+
+<h2>Signature of main</h2>
+
+<pre class="screen">
+#[no_mangle]
+pub extern "C" fn main() {
+</pre>
+
+<p>I've mentioned this bit of annoyance in previous blog entries, and it continues to linger:
+Llama needs Rust <code>main</code> to be FFI (<code>extern "C"</code>) and to have a non-mangled name.</p>
+
+<h2>Command line arguments</h2>
+
+<pre class="screen">
+    let args = System::Environment::GetCommandLineArgs(()).unwrap();
+</pre>
+
+<p>Rust doesn't pass the command line arguments to main like C# does, so we have to call <code>System.Environment.GetCommandLineArgs()</code> to retrieve them.</p>
+
+<h2>Demo</h2>
+
+<p>Each version shown searching its own source code for the word "System":</p>
+
+<pre class="screen">
+$ dotnet run --no-build Program.cs System
+        var a = System.IO.File.ReadAllLines(file);
+                System.Console.WriteLine(s);
+</pre>
+
+<pre class="screen">
+$ dotnet run --no-build src/main.rs System
+fn run(file : &amp;System::String, search : &amp;System::String) -&gt; Result&lt;(),System::Exception&gt; {
+    let a = System::IO::File::ReadAllLines((file,))?;
+            System::Console::WriteLine((&amp;s,))?;
+    let args = System::Environment::GetCommandLineArgs(()).unwrap();
+</pre>
+
+
