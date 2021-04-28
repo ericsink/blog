@@ -1,0 +1,59 @@
+---
+layout: post
+title: Llama Preview: Swift Closures and Delegates
+date: 2021-04-28 12:00:00
+keywords: swift dotnet front llama
+teaser: TODO
+---
+
+<p>A new preview release of SourceGear.Llama.Swift.Sdk is now available on <a href="https://www.nuget.org/packages/SourceGear.Llama.Swift.Sdk/0.1.7">NuGet</a>.  It's an MSBuild project SDK for .NET 5 that allows compiling Swift, with support for calling .NET class libraries.  See my <a href="/entries/dotnet_swift.html">previous blog entry</a> for more background.</p>
+
+<p>This release:</p>
+
+<ul>
+    <li><p>is updated for Swift 5.4, which was released a couple days ago</p></li>
+    <li><p>contains a bunch of bug fixes</p></li>
+    <li><p>adds support for interop between Swift closures and .NET delegates</p></li>
+</ul>
+
+<p>Reminder: <a href="/tocs/llama.html">Llama</a> is at the "proof of concept" stage, and is not production ready.</p>
+
+<h2>More on Closures and Delegates</h2>
+
+<p>Consider the generic delegate type <code>System.Func&lt;T,TResult&gt;</code>.  
+The Llama binding generator creates a Swift class named <code>System.Func_2&lt;T,TResult&gt;</code>, as a wrapper for its .NET counterpart.</p>
+
+<p>Right away we
+encounter the one thing here that I find a little bit sad:
+To match C#, I wish the name <code>Func_2</code> could be just <code>Func</code>.  
+But Swift won't allow us to define multiple types with the same name but varying number of type parameters, like <code>Func&lt;T1&gt;</code> and <code>Func&lt;T1,T2&gt;</code> and <code>Func&lt;T1,T2,T3&gt;</code> and so on.  
+Actually, under the hood, .NET isn't really doing this either, as the real names for these types have a suffix containing a backtick plus the number of type params, but C# hides the <code>System.Func`2</code> name from us.  Anyway, when this kind of conflicting name situation happens, Llama gives them names like <code>Func_2</code>.</p>
+
+<p>The <code>Func_2</code> class contains an initializer that accepts a closure, so we can create one of these delegates like this:</p>
+
+<pre class="screen">
+let d = try! System.Func_2({ (x : Int64) in x * 4});
+</pre>
+
+<p>The Swift closure itself is the expression <code>{ (x : Int64) in x * 4}</code>, a simple function that multiples its argument by 4.</p>
+
+<p>The resulting .NET delegate is a wrapper that will call the closure when the delegate is invoked.  Under the hood, this is accomplished by converting the closure to a function pointer and using the CIL instruction <code>calli</code> when <code>Invoke()</code> happens.</p>
+
+<p>I am rather fond of the fact that Swift can figure out the generic types in this case, but specifying the types explicitly would have been fine too:</p>
+
+<pre class="screen">
+let d = try! System.Func_2&lt;Int64,Int64&gt;(callback: { (x : Int64) in x * 4});
+</pre>
+
+<p>So now that we have one of these delegates, we can just call it:</p>
+
+<pre class="screen">
+let x = try d(13);
+try! System.Console.WriteLine(x);
+</pre>
+
+<p>This bit of magic is implemented using the <code>callAsFunction</code> feature of Swift, which was added in version 5.2 of the language.  The Llama binding generator exposes the delegate's <code>Invoke()</code> method with the name <code>callAsFunction</code>, and it Just Works.</p>
+
+<p>Which broadly describes why I find Swift to be such a pleasant language -- so many things Just Work.</p>
+
+
