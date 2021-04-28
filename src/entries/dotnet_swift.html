@@ -1,0 +1,218 @@
+---
+layout: post
+title: Llama Preview: Swift on .NET
+date: 2021-04-19 12:00:00
+keywords: swift dotnet front llama
+teaser: I see the potential for Swift to feel like a good fit for .NET.
+---
+
+<p>SourceGear.Llama.Swift.Sdk, now available on <a href="https://www.nuget.org/packages/SourceGear.Llama.Swift.Sdk/0.1.6">NuGet</a>, is an MSBuild project SDK for .NET 5 that allows compiling Swift, with support for calling .NET class libraries.
+This blog entry is a closer look at those features.</p>
+
+<p>Reminder: <a href="/tocs/llama.html">Llama</a> is at the "proof of concept" stage, and is not production ready.</p>
+
+<p>In my previous Llama <a href="/entries/lousygrep.html">blog entry</a>, I walked through a simplistic implementation of "grep" in both C# and Rust.  Let's revisit that sample now in Swift.</p>
+
+<h2>The .swiftproj file</h2>
+
+<p>Recall that the project file for the C# version looked like this:</p>
+
+<pre class="screen">
+&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+
+  &lt;PropertyGroup&gt;
+    &lt;OutputType&gt;Exe&lt;/OutputType&gt;
+    &lt;TargetFramework&gt;net5.0&lt;/TargetFramework&gt;
+  &lt;/PropertyGroup&gt;
+
+&lt;/Project&gt;
+</pre>
+
+<p>Using Swift, the project file ends up identical except for the first line:</p>
+
+<pre class="screen">
+&lt;Project Sdk="SourceGear.Llama.Swift.Sdk/0.1.6"&gt;
+
+  &lt;PropertyGroup&gt;
+    &lt;OutputType&gt;Exe&lt;/OutputType&gt;
+    &lt;TargetFramework&gt;net5.0&lt;/TargetFramework&gt;
+  &lt;/PropertyGroup&gt;
+
+&lt;/Project&gt;
+</pre>
+
+<p>All we need is to declare a different <code>Sdk</code> in the <code>Project</code> element.  
+Just as the C# SDK finds all the <code>*.cs</code> files and compiles them, the Llama Swift SDK will look for <code>*.swift</code>.</p>
+
+<h2>The code</h2>
+
+<p>For comparison purposes, here is the C# version (Program.cs):</p>
+
+<pre class="screen">
+static void run(string file, string search) 
+{
+    var lines = System.IO.File.ReadAllLines(file);
+    foreach (var s in lines) 
+    {
+        if (s.Contains(search)) 
+        {
+            System.Console.WriteLine(s);
+        }
+    }
+}
+
+var a = System.Environment.GetCommandLineArgs();
+try 
+{
+    run(a[1], a[2]);
+} 
+catch (System.Exception e) 
+{
+    System.Console.WriteLine(e.ToString());
+}
+</pre>
+
+<p>I have modified it a little bit since last time, so I can contrast certain details with Swift.  It now uses the implicit main feature of C# 9, and there is a try/catch.  But this version of "lousygrep" is functionally the same, a console program that takes exactly two arguments on the command line: the name of a file, and the string to search for.  It reads all the lines of the file into memory, and prints the ones that contain the search string.</p>
+
+<p>The Swift counterpart (Program.swift) looks like this:</p>
+
+<pre class="screen">
+import dotnet;
+
+func run(_ file : System.String, _ search : System.String) throws 
+{
+    let lines = try System.IO.File.ReadAllLines(file);
+    for s in lines 
+    {
+        if (try s.Contains(search)) 
+        {
+            try System.Console.WriteLine(s);
+        }
+    }
+}
+
+let a = try! System.Environment.GetCommandLineArgs();
+do 
+{
+    try run(a[1], a[2]);
+} 
+catch let e as System.Exception 
+{
+    try! System.Console.WriteLine(e.ToString());
+}
+</pre>
+
+<h2>Build and run</h2>
+
+<p>The Llama Swift SDK is doing everyting necessary for this project to work just like its C# counterpart.</p>
+
+<p>For C#, you have two files, <code>lousygrep.csproj</code> and <code>Program.cs</code>.</p>
+
+<p>For Swift, youhave two files, <code>lousygrep.swiftproject</code> and <code>Program.swift</code>.</p>
+
+<p>In either case, you can just <code>dotnet build</code> and <code>dotnet run</code>.</p>
+
+<pre class="screen">
+$ dotnet run Program.swift sole
+            try System.Console.WriteLine(s);
+    try! System.Console.WriteLine(e.ToString());
+</pre>
+
+<h2>Fit and Feel</h2>
+
+<p>Compared to Rust, Swift seems to have the potential
+to feel like a better fit for .NET.</p>
+
+<ul>
+    <li><p>.NET is built heavily on classes, which Swift has, and Rust does not.</p></li>
+    <li><p>.NET makes heavy use of overloaded function names.  Swift supports this as well.</p></li>
+    <li><p>Using a Swift struct to implement namespaces means that things like <code>System.Console.WriteLine()</code> have the exact same name on Swift and C#.</p></li>
+    <li><p>Swift has a runtime metadata system, like .NET.  There is much potential to be explored in bridging these two models.</p></li>
+    <li><p>Swift's garbage collection through reference counting is conceptually closer to .NET's garbage collector than Rust's ownership model is.</p></li>
+</ul>
+
+<p>All that said, Swift is (of course) a different language from C#, and it does some things very differently.</p>
+
+<h2>Error handling</h2>
+
+<p>Almost all the diffs between <code>Program.cs</code> and <code>Program.swift</code> are because of the differences in how errors are handled.  Swift does not support exceptions.</p>
+
+<p>A C# developer looking at the Swift code above would certainly <b>think</b> that Swift supports exceptions.  After all, we see words like "throw", "try", and "catch".  But Swift is simply using the same terminology for an error handling model that isn't really exceptions.  Swift's error handling does not do stack unwinding.</p>
+
+<p>It is more-or-less correct to think of Swift error handling as "exceptions, but confined to a single function".</p>
+
+<p>When wrapping .NET class libraries for Swift, Llama's binding generator currently makes two assumptions:</p>
+
+<ul>
+    <li><p>Every .NET method might throw an exception.</p></li>
+    <li><p>Every thrown exception might need to be propagated and handled.</p></li>
+</ul>
+
+<p>There are probably lots of exceptions (egregious pun intended) to these two rules, but right now, this is how things are.
+So the Swift bindings for the .NET class libraries present all methods with
+support for Swift error propagation.  This is why we see "try" in front of <code>System.Console.WriteLine()</code>.</p>
+
+<p>In Swift, any type can be used for throwing an error if it conforms to the protocol called <code>Error</code>.  For .NET developers, think of <code>Error</code> as a marker interface.  Llama adds this protocol conformance to its wrapping of <code>System.Exception</code>, which allows the <code>catch</code> in Swift to look quite pleasant IMHO:</p>
+
+<pre class="screen">
+catch let e as System.Exception 
+{
+    try! System.Console.WriteLine(e.ToString());
+}
+</pre>
+
+<h2>Arrays</h2>
+
+<p>Swift's protocols for sequence and iterator are remarkably similar to enumerables in .NET.  Llama adds these protocols when it wraps a .NET array, which is what allows us to use a <code>for</code>-<code>in</code> loop on the result from <code>System.IO.File.ReadAllLines</code>:</p>
+
+<pre class="screen">
+    let lines = try System.IO.File.ReadAllLines(file);
+    for s in lines 
+</pre>
+
+<p>I've also added support for subscripts to that array wrapper, which allows retrieving specific items from the command line args:</p>
+
+<pre class="screen">
+let a = try! System.Environment.GetCommandLineArgs();
+do 
+{
+    try run(a[1], a[2]);
+} 
+</pre>
+
+<p>But this one is a little bit problematic, since Swift subscripts currently cannot do error propagation, but the underlying item getter in .NET <b>can</b> throw.  So if you use this subscript with an out of range index, there is no way to propagate the error.  In practice, that kind of problem is typically not the sort of error one might propagate.  Nonetheless, there has been discussion in the Swift community about support for subscripts that can throw, and I might want to use such a thing in a case like this.</p>
+
+<h2>Under the hood</h2>
+
+<p>One big challenge with Swift has been its runtime libary.  Swift code depends on this for
+implementing reference counting and things like that.  But as I mentioned above, there is support for
+a type metadata system, and the runtime is where that is implemented as well.  The runtime is written
+mostly in C++ and also some Objective-C.  It's not really <b>that</b> large, but neither is it small,
+and it forced me to fix a lot of Llama bugs to get it working.</p>
+
+<p>And then we also have the Swift "core" library.  It is written in Swift, and it is somewhat
+unusual in one respect:  it is where basic types like Int32 are implemented.  It's weird
+to think of Int32 as an abstraction, but I found it quite elegant once I wrapped
+my head around the concept.  One layer below, there really is a simple 32 bit int.
+It's called Builtin.Int32, but normal Swift code is not allowed to see it.
+Also, the Builtin version of Int32 can't really do anything.  Even simple operations
+like addition require an operator to be defined, and that operator calls thin
+wrappers around primitive LLVM things.</p>
+
+<p>These two things together comprise the Swift standard library, which appears in the Llama Swift SDK as a .NET assembly called Swift.dll.  
+It is made by running all the C++ and ObjC code from "runtime" through clang to get a bunch of LLVM bitcode files.  
+And then all the Swift code from "core" is treated the same way.  The resulting bunch of .bc files are then compiled by
+Llama into one .NET assembly.  The Llama Swift SDK adds a reference to this assembly when it builds Swift projects for .NET.</p>
+
+<h2>Wanna try it?</h2>
+
+<p>All the Llama preview releases have been a bit rough, but this one is perhaps more so.  My apologies.
+I am releasing this mostly as proof that I did it.  If by chance it is a crime to compile Swift for .NET,
+there should be enough evidence here to convict me.  But let's not expect this preview release to be useful.
+</p>
+
+<ul>
+    <li><p>You need a 5.4 prerelease version of the Swift compiler.  The currently-released versons are 5.3.x, and those won't work.</p></li>
+    <li><p>In theory, everything here is cross-platform, but I have only tested the Swifty parts on Windows, so it probably doesn't work yet on Mac or Linux.  In the future, it will.</p></li>
+</ul>
+
