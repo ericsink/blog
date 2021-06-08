@@ -1,0 +1,57 @@
+---
+layout: post
+title: Llama Preview: Swift with ASP.NET Core
+date: 2021-06-08 12:00:00
+keywords: swift dotnet front llama aspnet
+teaser: Musing out loud about the possibilities of ASP.NET for server-side Swift
+---
+
+<p>This preview of <a href="/tocs/llama.html">Llama</a> is in the form of a little GitHub repo:</p>
+
+<p><a href="https://github.com/ericsink/demo-llama-aspnet-swift">https://github.com/ericsink/demo-llama-aspnet-swift</a></p>
+
+<p>It's a simple demo of a web API in ASP.NET Core, written in Swift.  It uses <code>System.Text.Json</code> (requiring .NET 6 <a href="https://devblogs.microsoft.com/dotnet/announcing-net-6-preview-4/">preview 4</a>) for serialization of the request and response.  The trivial functionality provided is a server that multiplies two integers and returns the product.</p>
+
+<h2>Y Tho?</h2>
+
+<p>I've been exploring Llama for quite a while now, sharing previews and blog articles to show the world what I'm up to.  In general, early adopters and nerds (like myself) tell me it's cool.</p>
+
+<p>But sometimes a more pragmatic person encounters Llama and wants to know why I'm doing this.  What are the use cases?</p>
+
+<p>(Eric thought balloon: "Humph.  I bet people who write Game Boy emulators don't have to endure rude questions about possible use cases.")</p>
+
+<p>The purpose of this particular demo is to show one area where I think Llama might have the potential to be useful.</p>
+
+<h2>Swift beyond iOS</h2>
+
+<p>The Swift language is an interesting situation.  It's quite popular, very well-designed, and a pleasure to use.  And with Apple's backing as the primary language for iOS development, it will continue to grow.</p>
+
+<p>But so far, Swift is getting a LOT more traction in iOS development than in other areas.  Like server-side.  Or cross-platform.</p>
+
+<p>The appeal of Swift on server is clear, especially for the backend of iOS apps, where some developers would like the benefits of using the same language on client and server.</p>
+
+<p>To be clear, there IS activity here:</p>
+
+<ul>
+    <li><p>There is an active community at <a href="https://swift.org/">Swift.org</a>.</p></li>
+    <li><p>Swift has had <a href="https://swift.org/platform-support/">Linux support</a> for several years.</p></li>
+    <li><p>A <a href="https://swift.org/blog/swift-on-windows/">Windows port</a> was released with Swift 5.3.</p></li>
+    <li><p>A <a href="https://swift.org/sswg/">work group</a> is focused on server-side Swift.</p></li>
+    <li><p><a href="https://github.com/vapor/vapor">Vapor</a> is cool.</p></li>
+</ul>
+
+<p>But I (and surely others as well) see potential for other ways that Swift's reach could be extended.</p>
+
+<h2>Server-side Swift with ASP.NET ?</h2>
+
+<p>Building a complete server-side stack specifically in and for Swift is a fine approach, and
+no criticism of such efforts is intended here.
+But another approach would be to make Swift work well with an existing ecosystem.</p>
+
+<p>What if Swift had seamless integration with ASP.NET Core, a mature and high-performance stack for server-side development?</p>
+
+<p>Azure and .NET are very popular in the enterprise world.  Enterprises write iOS apps too.</p>
+
+<p>This proof-of-concept demo is a glimpse of some possibilities I like to think about.</p>
+
+
