@@ -1,0 +1,84 @@
+---
+layout: post
+title: Will deep understanding still be valuable?
+date: 2021-06-29 12:00:00
+keywords: front
+teaser: Crabby old guy sees GitHub Copilot and says "get off my lawn", except with more words
+---
+
+<p>This morning GitHub made a big announcement: <a href="https://github.blog/2021-06-29-introducing-github-copilot-ai-pair-programmer/">Introducing GitHub Copilot: your AI pair programmer</a>.  Everybody's talking about it.  And for good reason -- it looks really cool.</p>
+
+<p>But my own reactions are mixed.  I admire the accomplishment, and I am eager to try it, but I am also troubled by the apparent trend.</p>
+
+<p>This blog entry is my attempt to write about that.  As
+I begin, I hope the paragraphs below favor questions over judgments.  I hope to express my feelings and perspectives without
+being critical of others.  I hope to write something that is not just another "get off my lawn" rant.
+Let's see if I succeed.</p>
+
+<p>In short:  It looks to me like AI-assisted software development is just getting started, and will probably become a very big thing.  And,
+it feels to me like yet another step toward shallow understanding in our field.</p>
+
+<p>Hmmm.  That last sentence looks kinda harsh.  I wonder if I've already crossed the line I didn't want to cross.</p>
+
+<p>Let me try to say this another way.</p>
+
+<p>In my nearly 4 decades of writing code, I have consistently found that the most valuable thing is to know how things work.  Nothing in software development is more effective than the ability to see deeper.  To borrow Joel Spolsky's terminology, I claim that almost all abstractions are leakier than you think, so it is valuable to see through them.</p>
+
+<ul>
+    <li><p>Knowing how to allocate and free memory is one thing.  Much better is to have understanding of how the memory allocator works.  That is the kind of depth that gives me what I need to make decisions.</p></li>
+    <li><p>Writing SQL statements is fairly easy.  But there is a lot going on under the hood.  The whole experience goes so much better if I understand indexes and table scans and lock escalation.</p></li>
+    <li><p>Networking code?  Don't even get me started.</p></li>
+</ul>
+
+<p>I am utterly convinced that deep understanding is important.</p>
+
+<p>But increasingly, I feel like I'm swimming upstream.  It seems like most people in our industry care far more about "how to do" rather than "how does it work".</p>
+
+<p>And yes, there are good reasons for this.  People have jobs.  An employer's expectations are typically about getting things done.</p>
+
+<p>So I am not saying it is unimportant know how to do things.  Rather, what I'm saying is that after I understand how things work, seeing how to do something is usually trivial.  And the next time I need to figure "how to do", it will go faster.</p>
+
+<p>But the world and I seem to be at odds about this.  I feel like I crash into this conflict every. single. day.</p>
+
+<ul>
+    <li><p>A lot of programming documentation is structured around the steps to follow to perform a certain job, but that is almost never what I'm looking for.</p></li>
+
+    <li><p>On question/answer sites, it seems like every interesting question yields responses from people saying "You shouldn't do that", which seems unhelpful.</p></li>
+
+    <li><p>After years of seeing people say "Don't write your own crypto", I made peace with it, but now I see "Don't write your own X" for all kinds of X.  I mean, if we want X in the world, somebody has to write it, right?</p></li>
+
+    <li><p>Last week I was trying to confirm that the CIL <code>castclass</code> instruction returns the same object reference it was given (when it doesn't throw).  Previous people who asked this question were mostly told some form of "you shouldn't need to know that".  But surely somebody on this planet needs to know that?</p></li>
+
+    <li><p>Most people facing a software problem will move forward as soon
+        as they are unblocked, without stopping to learn why the given solution worked.</p></li>
+</ul>
+
+<p>I feel like I'm drowning in a sea of people saying "I did (whatever) and the problem went away".</p>
+
+<p>Most online interaction I have with other software developers results in me feeling different and alone.</p>
+
+<p>But I remain "utterly convinced".  I have bet my career on the importance of
+depth, and I will continue to do so.  And, when given the opportunity to guide and
+mentor younger people, I steer them along the same path.</p>
+
+<p>And yet, as the trends in the industry seem to move away from me, I am forced to
+wonder about how well my own experience will map onto a very different
+future.  Am I giving newbies bad advice when I suggest (for example) that they 
+learn what's really going on with async/await?</p>
+
+<p>Sometimes I worry that my posture is a form of gatekeeping.  I 
+don't want to be someone who insists that everybody's path needs to
+mirror mine.  If you are having an enjoyable and successful software career
+without studying stuff like two's-complement arithmetic and B-trees, I am
+happy for you.  But do I believe, broadly speaking, that your career would take another positive
+step every time you learn more?  Yeah, I do.</p>
+
+<p>Simply put, I see two basic possibilities here.  Either I am correct, and
+technical depth is still important even as fewer people value it, or I am
+a dinosaur, and nature has selected my kind for extinction.</p>
+
+<p>So...  GitHub Copilot looks like fun.  But the day is coming soon when I'm going to
+see somebody respond to a coding question with "Why are you asking this?  Just use
+the AI pair programmer."  And I'm probably going to throw a tantrum.</p>
+
+
