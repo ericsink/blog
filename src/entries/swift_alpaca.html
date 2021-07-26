@@ -1,0 +1,101 @@
+---
+layout: post
+title: Alpaca Preview: Native Swift with ASP.NET Core
+date: 2021-07-26 12:00:00
+keywords: swift dotnet front llama aspnet alpaca
+teaser: Alpaca is, er, Llama without Llama
+---
+
+<p>I have pushed up nuget packages for a preview version (<a href="https://www.nuget.org/packages/SourceGear.Alpaca.Swift.Sdk/0.1.10">0.1.10</a>) of SourceGear.Alpaca.  Yes, I said "Alpaca" rather than "Llama".  So I should probably explain...</p>
+
+<h2>What is Alpaca? (starting from Llama)</h2>
+
+<p>My <a href="/tocs/llama.html">Llama</a> project has grown to have two major pieces:</p>
+
+<ul>
+    <li><p>A compiler that converts LLVM bitcode to .NET CIL, allowing other languages to be used for .NET development.  This piece was my starting point.</p></li>
+    <li><p>A binding generator that creates glue code so that those other languages can interact with .NET libraries.  This piece came along later.</p></li>
+</ul>
+
+<p>Llama takes its name from the first of these two pieces, because it has been the core concept, and because that piece is LLVM-centric, and because the word "Llama" starts with two L's, and because naming things is hard, so I saw no reason to be more creative.</p>
+
+<p>But I recently realized that the second piece could be used without the first.  I should probably have figured this out sooner.</p>
+
+<p>My "LLVM bitcode to CIL" approach results in a strange kind of code which has no common name.</p>
+
+<ul>
+<li><p>It is code running on the CLR, so it's not really "native code".</p></li>
+<li></p>But it is also code that never deals with object references or GC, so it's not "managed code" either.</p></li>
+</ul>
+
+<p>For the moment, let's just call it "purple code".  Over time, I have noticed that, with respect to interop with the CLR, the rules for purple code are awfully similar to the rules for native code.</p>
+
+<p>And the thing I only recently realized is that those rules are not merely "similar" -- they are exactly the same.</p>
+
+<p>Which means those bindings could be independent of the core of Llama.  Yes, they need to be hooked up in different ways, but aside from that, they can be used unchanged with either purple code or native code.</p>
+
+<p>So maybe those bindings deserve a life of their own, an opportunity to explore their place in the world without LLVM-to-CIL stuff.</p>
+
+<p>So the name I am giving to that second piece is "Alpaca".</p>
+
+<h2>What is Alpaca? (starting from nothing)</h2>
+
+<p>Alpaca refers to my exploration of "great interop between .NET and other language ecosystems".</p>
+
+<p>What do I mean by "great interop"?  For one thing, I'm talking about calling .NET libraries from the other languages.  .NET has always had excellent native interop features like P/Invoke, but those features are mostly focused on calling languages like C from C#.  I'm talking about the opposite direction.</p>
+
+<p>What if I want to call .NET libraries from native code?  What if I want to write my ASP.NET Core web service in Swift instead of C#?  Alpaca is about libraries and tooling to make that kind of use case simpler.</p>
+
+<h2>Llama SDK vs Alpaca SDK</h2>
+
+<p>Earlier I spoke of my project having two major pieces, which I am now calling Llama and Alpaca.  The "third piece", which is smaller but more visible, is an MSBuild project SDK that integrates things into the regular <code>dotnet</code> tooling.</p>
+
+<p>In my <a href="/entries/swift_aspnetcore_llama_demo.html">previous</a> Llama blog entry I showed a simple ASP.NET Core sample written in Swift:</p>
+
+<p>The Llama Swift project SDK makes things work for Swift like they do for C# or F#.  There is a <code>Program.swift</code> file and a <code>whatever.swiftproj</code> file.  You can do <code>dotnet build</code>, or <code>dotnet run</code>, and so on.</p>
+
+<p>The Alpaca Swift project SDK provides the same user experience, but accomplished in a very different way.  Whereas the Llama SDK is compiling the Swift code to CIL, the Alpaca SDK is compiling to a native shared library.  Both SDKs then provide their respective scaffolding to hook up the bindings and run the program.</p>
+
+<p>One of my former coworkers often said that "sometimes a software project is like a car which has been disassembled and its parts are scattered on the front lawn".  
+Conceptually, given an ASP.NET Core program in Swift, I could switch between Llama and Alpaca by changing only the <code>.swiftproj</code> file and not the Swift code itself.  
+Right now, some parts of my car are sitting out in the grass, so I can't actually do this.  But it should work.</p>
+
+<p>Why did I choose the name "Alpaca"?  Because Wikipedia <a href="https://en.wikipedia.org/wiki/Alpaca">says</a> an alpaca "is similar to, and often confused with, the llama", and I figured this blog entry was going to be darn confusing.</p>
+
+<h2>Sample</h2>
+
+<p>Inspired by <a href="https://twitter.com/ben_a_adams">Ben Adams</a> (and building on his attempt with Llama), the sample for this preview is a Swift--Alpaca implementation of the TechEmpower benchmarks (plaintext and json):</p>
+
+<a href="https://github.com/ericsink/FrameworkBenchmarks/tree/alpaca/frameworks/Swift/alpaca">https://github.com/ericsink/FrameworkBenchmarks/tree/alpaca/frameworks/Swift/alpaca</a>
+
+<p>Brief summary of the early results:  Swift--Alpaca--AspNetCore is Not Terribly Fast.  It's maybe a little faster than Swift--Vapor, but neither is in the ballpark of C#--AspNetCore.  I don't know yet how much of the blame goes to my bindings as opposed to Swift itself.  I'm still digging...</p>
+
+<h2>Moving forward</h2>
+
+<p>I still describe all this stuff using terms like "side project" and "exploratory project".  So I don't do formal planning, and I don't make commitments.</p>
+
+<p>I have no plans to abandon the Llama side of things, but for now, Alpaca is where I have traction, so that's where my current focus is.</p>
+
+<p>And I should also admit that Alpaca differs from Llama in two ways that I find myself thinking about:</p>
+
+<ul>
+    <li><p>I'm pretty sure that "great interop between .NET and other language ecosystems" is a category of things that folks actually need.  In contrast, "converting LLVM bitcode to CIL" is cool and interesting, but so far I'm not sure that it solves anybody's problem.</p></li>
+    <li></p>Alpaca is a lot simpler than Llama.  I mean, it's still pretty complicated.  For example, the inheritance rules for C# and Swift are not quite the same, so I've got lots of edge cases to deal with.  But my implementation of LLVM bitcode to CIL is still very "proof of concept", and getting that tool and its support libraries from here to "reliable and performant" would still be a big effort.</p></li>
+</ul>
+
+<h2>Technical requirements for this preview</h2>
+
+<p>The last few preview releases of Llama have been Windows-only.  This one only supports Linux.  I'm using Ubuntu 20.04 with WSL 2 on Windows 10.</p>
+
+<p>The Alpaca Swift SDK needs Swift 5.4.  And .NET Core 6 preview 6.</p>
+
+<p>If you want to try the TE benchmarks, you need Docker, but the <code>dockerfile</code> will setup the other prerequisites for you.
+So you should be able to clone my fork (of Ben's fork) and do this:</p>
+
+<pre>
+./tfb --mode verify --test alpaca
+./tfb --mode benchmark --test alpaca
+</pre>
+
+<p>Enjoy!</p>
+
