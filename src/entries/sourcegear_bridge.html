@@ -1,0 +1,264 @@
+---
+layout: post
+title: SourceGear Bridge preview:  Swift with .NET in Xcode
+date: 2021-09-20 12:00:00
+keywords: swift dotnet front aspnet bridge
+teaser: TODO
+---
+
+<p>For quite some time I have been working on various
+things involving interop between .NET and other ecosystems.
+If you follow my blog or tweets, you've seen me talk about "Llama",
+and then "Alpaca", and so on.  Generally speaking, I have
+referred to these efforts as my exploratory projects.</p>
+
+<p>But now, one of those efforts (the one previously called "Alpaca") is 
+now called "SourceGear Bridge", and the new name reflects
+our intention to develop this into a production-ready
+solution with support available.  (Note that I'm not
+saying that it is production-ready now, simply that now we
+are focused on getting it there.)</p>
+
+<p>In broad brush strokes, we will describe SourceGear Bridge in terms of 
+delivering great interop between .NET and other things.
+We hope to expand to more languages in the future, but for now the
+primary focus is Swift.  And for that reason, most of
+my attention lately has been on providing the user
+experience that Swift developers expect.  In
+other words, everything needs to work well in Xcode on a
+Mac.</p>
+
+<p>Preview release 0.2.0 is now available, and in this
+blog entry I will walk through a simple demo.  If you
+want to follow along on a Mac, you will need Xcode 13,
+configured to run Swift 5.5 on the command-line.  The
+non-Xcode parts of this demo will also work on Linux
+if you install a Swift 5.5 development snapshot.</p>
+
+<p>And of course you will need .NET 6 rc1:</p>
+
+<p><a href="https://dotnet.microsoft.com/download/dotnet/6.0">https://dotnet.microsoft.com/download/dotnet/6.0</a></p>
+
+<p>(If you're on a Mac, I recommend using the installer.)</p>
+
+<p>For this blog entry, I'm going to start with the command-line
+for a while and then switch to Xcode a bit later.</p>
+
+<h3>The .NET command-line interface</h3>
+
+<p>The .NET command-line interface is called <code>dotnet</code>, and its
+basic design is similar to <code>swift</code>, where the first argument is
+the name of a command.  
+Building with .NET?  Use <code>dotnet build</code>.
+Building with Swift?  Use <code>swift build</code>.</p>
+
+<p>To create a new web project with .NET,
+you would use <code>dotnet new</code>:</p>
+
+<pre class="screen">
+mkdir foo
+cd foo
+dotnet new web -lang C#
+</pre>
+
+<p>(The <code>-lang C#</code> argument is usually optional because
+it's the default language for .NET.)</p>
+
+<p>This will result in several files being generated.
+The two important ones are <code>foo.csproj</code> (the project
+file) and <code>Program.cs</code> (the source file).</p>
+
+<p>You can take a look at these files if you like, but
+I just wanted to mention them and move on to focus on how
+to create the equivalent project in Swift.</p>
+
+<h3>Using dotnet with Swift</h3>
+
+<p>Many things about the .NET command-line interface
+can be customized, including support for other languages.
+So the first thing we want to do here is to install
+some templates to let <code>dotnet</code> know about Swift:</p>
+
+<pre class="screen">
+dotnet new --install sourcegear.bridge.swift.templates
+</pre>
+
+<p>In the command just above, <code>sourcegear.bridge.swift.templates</code>
+is the ID of a package on <code>nuget.org</code>.  NuGet is the package
+manager for .NET.</p>
+
+<p>Having installed the templates, we can can list the templates like this:</p>
+
+<pre class="screen">
+dotnet new --list
+</pre>
+
+<p>And we can see that a couple of new templates are now available,
+both of which are for the Swift language.</p>
+
+<p>Let's use one of those templates to create the same project we did above, 
+except now in Swift:
+
+<pre class="screen">
+mkdir bar
+cd bar
+dotnet new web -lang Swift
+</pre>
+
+<p>This should create three things:</p>
+
+<pre class="screen">
+bar.swiftproj
+Package.swift
+Sources/
+</pre>
+
+<p>The presence of the <code>Package.swift</code> file indicates that this
+directory is now a SwiftPM package, and can be used with any
+Swift tooling that supports Swift Package Manager, including the <code>swift</code> command
+line tool as well as Xcode.</p>
+
+<p>(For .NET devs: <code>Package.swift</code> looks like a Swift
+source file but it's actually a project file, the equivalent of
+a <code>csproj</code>.)</p>
+
+<p>The presence of the <code>bar.swiftproj</code> file means that this
+directory is also a .NET project, and can be used with
+the <code>dotnet</code> command-line interface as well.
+This file is the Swift equivalent of the
+<code>foo.csproj</code> file.  It's in a format called MSBuild, but
+Swift developers shouldn't need to worry about that.  Mostly
+what this file does is explain to MSBuild how to get the information it
+needs from <code>Package.swift</code>.</p>
+
+<p>The source code for project is in
+<code>Sources/app/Program.swift</code> just as one would expect for a 
+Swift package.  We'll take a look at the code itself
+later when we open it up in Xcode.</p>
+
+<p>Continuing on the command-line a bit more, try <code>swift build</code>.  
+The first time you build the project
+will take longer because it has to compile all the bindings.
+The result of the build should appear as a shared library (on Mac, a dylib) in
+<code>.build/debug/</code>.</p>
+
+<p>The compilation model here is to build the
+Swift code into a shared library.  Then the tooling
+generates a trivial .NET host program that
+(1) initializes the bindings so that Swift
+can call .NET APIs, and (2) passes control to the
+the Swift code.</p>
+
+<p>Now we can do <code>dotnet run</code> and you should see messages indicating
+that the web server is running on port 5000:</p>
+
+<pre class="screen">
+TODO replace this
+eric@LAPTOP-6A6HQVJ9:~/dev/bridge/swift/projects/minimal$ dotnet run
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5000
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: https://localhost:5001
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /home/eric/dev/bridge/swift/projects/minimal
+</pre>
+
+<p>And now you should be able to go to a browser and access <code>http://localhost:5000/</code>
+to see: Hello World!</p>
+
+<h3>In the IDE</h3>
+
+<p>Okay, let's try opening the <code>Package.swift</code> file in Xcode, 
+either from Finder, or from the command-line, like this:</p>
+
+<pre class="screen">
+open Package.swift
+</pre>
+
+<p>Here in Xcode, things should mostly work as you would expect,
+like any other Swift project, with syntax coloring and code completion
+and other niceties.</p>
+
+TODO screen shot of the code in Program.swift
+
+<p>Most .NET APIs have documentation comments, and that
+information is propagated through the bindings to make it
+available with Quick Help:</p>
+
+TODO screen shot of Quick Help
+
+<p>Code completion is especially helpful for a framework
+like ASP.NET Core, which has many features and a large
+surface area:</p>
+
+TODO screen shot of code completion for a .NET API
+
+<h3>A brief look at the code</h3>
+
+<p>Looking at <code>Program.swift</code>, there are <code>import</code> statements, <code>typealias</code> declarations, some
+error handling, and a function declaration, but the essence of the matter is:</p>
+
+<pre class="screen">
+let app = try WebApplication.Create()
+
+try app.MapGet(
+	pattern: "/",
+	handler:
+		Func<System.String>
+		{
+			() -&gt; System.String in
+			"Hello World!"
+		}
+	);
+
+try app.Run();
+</pre>
+
+<p>Three API calls:</p>
+
+<ul>
+    <li><p>One to create the web app</p></li>
+    <li><p>One to set things up</p></li>
+    <li><p>One to run it</p></li>
+</ul>
+
+<p>The most interesting call here is the second one, the call to <code>MapGet(pattern:handler:)</code>, which basically says "when somebody accesses the root URL, run this closure, which returns a string".</p>
+
+<p>One thing you might notice is that the C# version is more concise
+than its Swift equivalent.  Both are using the same 3
+API calls from the so-called
+"minimal" APIs which are new in ASP.NET Core 6.
+TODO
+https://www.hanselman.com/blog/minimal-apis-at-a-glance-in-net-6
+But currently the Swift incarnation ends up more verbose.
+There are some things we can do in the future to
+make things tighter.
+A full explanation would fill another blog entry, but
+for now I'll highlight a few of the ways that the Swift and C# code differ:</p>
+
+<ul>
+    <li><p>It is common in Swift to use named parameters.  The <code>MapGet()</code> call shows this, with <code>pattern:</code> and <code>handler:</code> labels for its arguments.</p></li>
+    <li><p>The <code>handler</code> argument for <code>MapGet(pattern:handler:)</code> is a Swift closure.  In the C# version, the lambda is much shorter, because it makes use of a new C# 10 compiler feature to infer delegate types..</p></li>
+    <li><p>Swift doesn't have namespaces.  We cope with this limitation by using nested types (which kinda works), and the Swift <code>typealias</code> feature (which is actually quite powerful).</p></li>
+    <li><p>If you're a C# developer, I'd like to clarify that Swift doesn't have exceptions even though this code makes it look otherwise.</p></li>
+</ul>
+
+<h3>Next steps</h3>
+
+<p>We have lots to do as we move SourceGear Bridge toward a production-ready release.
+Here's a few things in progress but not yet finished:</p>
+
+<ul>
+    <li><p>F#-style object expressions</p></li>
+    <li><p>Support for async/await (new in Swift 5.5)</p></li>
+    <li><p>Fix handling of formatting and other inline tags in documentation comments</p></li>
+    <li><p>Automatic generation of bindings for nuget packages</p></li>
+    <li><p>Test this stuff on Windows and see if it works</p></li>
+</ul>
+
+<p>Enjoy!</p>
+
