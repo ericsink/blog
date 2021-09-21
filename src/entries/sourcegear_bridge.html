@@ -153,8 +153,7 @@ the Swift code.</p>
 that the web server is running on port 5000:</p>
 
 <pre class="screen">
-TODO replace this
-eric@LAPTOP-6A6HQVJ9:~/dev/bridge/swift/projects/minimal$ dotnet run
+eric@Erics-MacBook-Pro bar % dotnet run
 info: Microsoft.Hosting.Lifetime[14]
       Now listening on: http://localhost:5000
 info: Microsoft.Hosting.Lifetime[14]
@@ -164,7 +163,6 @@ info: Microsoft.Hosting.Lifetime[0]
 info: Microsoft.Hosting.Lifetime[0]
       Hosting environment: Production
 info: Microsoft.Hosting.Lifetime[0]
-      Content root path: /home/eric/dev/bridge/swift/projects/minimal
 </pre>
 
 <p>And now you should be able to go to a browser and access <code>http://localhost:5000/</code>
@@ -183,19 +181,19 @@ open Package.swift
 like any other Swift project, with syntax coloring and code completion
 and other niceties.</p>
 
-TODO screen shot of the code in Program.swift
+<p><img width="480" src="xcode_syntax.png"/></p>
 
 <p>Most .NET APIs have documentation comments, and that
 information is propagated through the bindings to make it
 available with Quick Help:</p>
 
-TODO screen shot of Quick Help
+<p><img width="480" src="xcode_quickhelp.png"/></p>
 
 <p>Code completion is especially helpful for a framework
 like ASP.NET Core, which has many features and a large
 surface area:</p>
 
-TODO screen shot of code completion for a .NET API
+<p><img width="480" src="xcode_completion.png"/></p>
 
 <h3>A brief look at the code</h3>
 
@@ -231,10 +229,12 @@ try app.Run();
 <p>One thing you might notice is that the C# version is more concise
 than its Swift equivalent.  Both are using the same 3
 API calls from the so-called
-"minimal" APIs which are new in ASP.NET Core 6.
-TODO
-https://www.hanselman.com/blog/minimal-apis-at-a-glance-in-net-6
-But currently the Swift incarnation ends up more verbose.
+"minimal" APIs which are new in ASP.NET Core 6.  See the
+recent blog entry by Scott Hanselman:</p>
+
+<p><a href="https://www.hanselman.com/blog/minimal-apis-at-a-glance-in-net-6</a">https://www.hanselman.com/blog/minimal-apis-at-a-glance-in-net-6</a></p>
+
+<p>But currently the Swift incarnation ends up more verbose.
 There are some things we can do in the future to
 make things tighter.
 A full explanation would fill another blog entry, but
