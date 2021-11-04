@@ -37,7 +37,7 @@ module fm =
                 elif n_crlf > 0 then
                     (n_crlf, marker_back_crlf.Length)
                 else
-                    raise (Exception("second front matter marker not found"))
+                    raise (Exception($"second front matter marker not found: {s}"))
 
             let s3 = s2.Substring(0, n)
             let remain = s2.Substring(n + len)

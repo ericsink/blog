@@ -85,7 +85,8 @@ let add_site_defaults (d: Dictionary<string,Dictionary<string,string>>) =
 // result is a platform path
 let weird_path_combine (dir :string) (uri_path :string) =
     // TODO windows-specific code below
-    let path_fixed = uri_path.Substring(1).Replace("/", "\\")
+    let path_fixed = 
+        uri_path.Substring(1)//.Replace("/", "\\")
     let path = Path.Combine(dir, path_fixed)
     path
 
