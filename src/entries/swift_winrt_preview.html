@@ -1,0 +1,198 @@
+---
+layout: post
+title: Swift with Windows App SDK
+date: 2022-07-07 12:00:00
+keywords: swift front sgbridge
+teaser: Demos of my work toward a Swift projection for WinRT
+---
+
+<p>My exploration of interop between Microsoft Things
+and Other Things has brought me to work on creating a Swift
+projection for WinRT.</p>
+
+<p>This effort is currently taking place in the following repo:</p>
+
+<p><a href="https://github.com/ericsink/SwiftWinRT">https://github.com/ericsink/SwiftWinRT</a></p>
+
+<p>The code for the generated bindings, support libraries, and
+samples is all available there.</p>
+
+<h3>Background</h3>
+
+<p>Modern Windows APIs are based on WinRT, which is based on COM, which has
+a long history at Microsoft.  The nice thing about WinRT is that it is
+designed to be used from a variety of programming languages.  A few years
+ago, Microsoft created the "xlang" project as "the hub for the constellation of tools 
+that enable development of Windows applications across a variety of programming languages":
+
+<p><a href="https://github.com/microsoft/xlang">https://github.com/microsoft/xlang</a></p>
+
+<p>Nowadays, the broader aspects of xlang don't seem to have a lot of momentum.
+The languages getting the most traction are C++, C#, and Rust, while some
+others appear to have run out of steam.  But the
+underpinnings remain solid, and it is quite feasible to develop a WinRT
+projection for other languages.</p>
+
+<p>Swift is a language mostly associated with Apple platforms, but
+its cross-platform presence is growing, and its use of Automatic
+Reference Counting (ARC) makes it a natural fit for WinRT, which
+also uses reference counting for memory management.  Like C++ and Rust, Swift compiles
+to native code.
+Swift is also considered very pleasant to use, comparable to
+C# in terms of overall developer experience.</p>
+
+<p>No discussion of Swift on Windows would be complete without mention of
+Saleem Abdulrasool (GitHub: <a href="https://github.com/compnerd">@compnerd</a>),
+member of the Swift Core Team.  Basically everything about Swift on
+Windows is built on his efforts.  In fact, my working repo linked
+above is a fork of his repo where he did some experimental work in this area.</p>
+
+<h3>Samples</h3>
+
+<p>I am accumulating a collection of samples in the repo.
+Here in this blog post, I want to highlight four of them:</p>
+
+<ul>
+    <li><p>HttpClient is a console app, demonstrating the use of <code>Windows.Web.Http</code>, and showing how async WinRT calls are projected using Swift's async/await features.</p></li>
+    <li><p>MazeGame is a port of <a href="https://github.com/microsoft/Win2DMazeGame">https://github.com/microsoft/Win2DMazeGame</a>, demonstrating the use of Win2D from Swift.</p></li>
+    <li><p>Physics is a little app that simply brings up a window with 3 balls bouncing around, further demonstrating the use of Win2D, and also showing C interop with the Chipmunk2D physics engine.</p></li>
+    <li><p>Calc is a WinUI 3 app, demonstrating the use of controls such as TextBox and ListView with Windows App SDK 1.1.1.</p></li>
+</ul>
+
+<h3>HttpClient</h3>
+
+<p>This sample is short enough to just include all the code right here:</p>
+
+<pre class="screen">
+import WinRT
+import WindowsSdk
+
+@main
+class HttpClientDemo {
+  public static func main() async throws {
+    try RoInitialize()
+
+    let httpClient = try Windows.Web.Http.HttpClient();
+    let requestUri = try Windows.Foundation.Uri(uri: "https://ericsink.com");
+    let httpResponse = try await httpClient.Get(uri: requestUri)!;
+    let _ = try httpResponse.EnsureSuccessStatusCode();
+    let httpResponseBody = try await httpResponse.Content!.ReadAsString();
+    print(httpResponseBody);
+  }
+}
+</pre>
+
+<p>The projection for asynchronous WinRT methods uses Swift <code>await</code>,
+resulting in a code that is rather similar to C#,
+which I consider to be a pleasant outcome.</p>
+
+<h3>MazeGame</h3>
+
+<p>As mentioned above, this one is just a straight port of a Microsoft
+sample from C# to Swift.</p>
+
+<p><img width="500" src="swift_mazegame.png"/></p>
+
+<p>One thing that turns out very nice in Swift is projecting
+WinRT delegates as closures, and then using Swift's idiomatic
+"trailing closure" syntax:</p>
+
+<pre class="screen">
+_ = try self.Timer.add_Tick
+{
+    (_, _) in
+    try canvas.Invalidate();
+}
+</pre>
+
+<h3>Physics</h3>
+
+<p>This sample was me experimenting with Swift's C interop (which is
+lovely) while learning how to use a 2D physics engine (Chipmunk2D).</p>
+
+<p><img width="500" src="swift_physics.png"/></p>
+
+<p>The typical way to use a C library with Swift is to
+allow Swift to "import" it, and then write a Swift wrapper
+which presents things in more idiomatic ways.  But that
+wrapper isn't required, and I didn't write one here.  I'm
+just using the Chipmunk2D API in its Swift form, pointers
+and all.</p>
+
+<pre class="screen">
+func canvasControl_Draw(sender : CanvasControl?, args: CanvasDrawEventArgs?) throws
+{
+    // The screen is cleared, so we need to redraw everything
+
+    // call chipmunk to update
+    // doing multiple Step calls here prevents things going too fast
+    // and passing through the static body barrier lines.
+    for _ in 0..&lt;10 {
+	cpSpaceStep(space, ms_to_s(ms: 3))
+    }
+
+    // then draw the bouncing ball at its current position
+    let pos1 = cpBodyGetPosition(body1)
+    try args!.DrawingSession!.FillCircle(
+        x: Float(pos1.x), 
+        y: Float(pos1.y), 
+        radius: Float(ballRadius), 
+        color: Microsoft.UI.Colors.Orange
+        );
+</pre>
+
+<p>Looking at the call to 
+Win2D's <code>FillCircle</code> method, note that the generated
+projections use Swift parameter labels.  Most of the time,
+in the Swift world, This is the Way.</p>
+
+<h3>Calc</h3>
+
+<p>This sample is an RPN-style calculator, with delusions of grandeur.  It is my attempt to write a 
+sample that (1) uses WinUI controls,
+and (2) is a bit more than just a demo, perhaps even useful.</p>
+
+<p><img width="500" src="swift_calc.png"/></p>
+
+<p>Note that this sample uses controls from the <code>Microsoft.UI.Xaml</code> namespace,
+but it does not use XAML syntax.  For example, here is part of the code
+to setup the Grid layout for the window:</p>
+
+<pre class="screen">
+let grid = try Microsoft.UI.Xaml.Controls.Grid();
+
+let c0 = try Microsoft.UI.Xaml.Controls.ColumnDefinition()
+try c0.put_Width(value: GridLength(Value: 1, GridUnitType: GridUnitType.Star))
+
+let c1 = try Microsoft.UI.Xaml.Controls.ColumnDefinition()
+try c1.put_Width(value: GridLength(Value: 120, GridUnitType: GridUnitType.Pixel))
+
+try grid.ColumnDefinitions!.Append(value: c0)
+try grid.ColumnDefinitions!.Append(value: c1)
+</pre>
+
+<p>One complication here is that using WinUI controls from the
+Windows App SDK is not quite as simple as I <a href="https://github.com/microsoft/WindowsAppSDK/discussions/2691">expected</a> it to be.
+Instead of sidetracking this blog entry with a long discussion
+of the details, let me summarize with the bottom line:  Currently,
+using WinUI controls from Swift requires building as a DLL
+which then gets hosted in a small bootstrap program written in C++.</p>
+
+<h3>Next Steps</h3>
+
+<ul>
+    <li><p>Full API coverage.  Currently, I only generate Swift bindings for certain things, because if I generate them all, the resulting DLL fails to link because it has too many symbols.  I need to break things into pieces.</p></li>
+    <li><p>Integrate the C++/Swift build.  For the WinUI sample, I manually copy the Swift build outputs into the output directory of the boostrap program.  That is Not Very Friendly.</p></li>
+    <li><p>Generalize the reg-free activation stuff.  The support for Win2D should be made general-purpose, so it can support wrapping other third party WinUI controls.</p></li>
+    <li><p>And plenty more...</p></li>
+</ul>
+
+<p>If you have questions or feedback on any of this, or are simply interested in cross-platform Swift,
+feel free to contact me using GitHub <a href="https://github.com/ericsink/SwiftWinRT/discussions">discussions</a>
+in the repo at the top of this post, or on the
+Swift Forums:</p>
+
+<p><a href="https://forums.swift.org/c/development/windows/67">https://forums.swift.org/c/development/windows/67</a></p>
+
+<p>Cheers!</p>
+
