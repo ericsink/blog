@@ -1,0 +1,352 @@
+---
+layout: post
+title: SQLitePCLRaw and open source sustainability
+date: 2023-01-05 12:00:00
+keywords: front sqlite
+teaser: Reflections on why I maintain an open source library
+---
+
+<h3>Background</h3>
+
+<p>SQLite is an extremely popular database library used by almost
+everything.  It is written in C, so many languages require
+some sort of wrapper library.</p>
+
+<p>SQLitePCLRaw is an open source library (which I maintain) that 
+provides a low-level .NET wrapper for SQLite.</p>
+
+<p>Hopefully we can agree that there is no open source library with a worse
+name than "SQLitePCLRaw", but
+there are historical reasons for the name and its 3 components:</p>
+
+<ul>
+    <li><p>"SQLite": for obvious reasons</p></li>
+
+        <li><p>"PCL": because it dates back to the days of Portable
+            Class Libraries, which were the thing before .NET Standard.</p></li>
+
+        <li><p>"Raw": because of the low-level nature of this library.</p></li>
+</ul>
+
+<p>SQLitePCLRaw is not user friendly.  It is intended to be a low-level core upon
+which other libraries can be built.
+For example, it is used by the popular nuget package sqlite-net,
+by Frank Krueger aka <code>@praeclarum</code>.</p>
+
+<p>And, perhaps most relevant here, SQLitePCLRaw is a dependency of 
+Microsoft.Data.Sqlite, which is used for Entity Framework Core,
+developed and maintained by Microsoft.</p>
+
+<h3>Stats</h3>
+
+<p>SQLitePCLRaw is widely used.</p>
+
+<p>The core package has about 125 million nuget downloads.</p>
+
+<p>There are 7 copies of SQLitePCLRaw inside Visual Studio.</p>
+
+<p>As far as I can tell, in one way or another, 
+nearly all current .NET usage of SQLite is based on my work.</p>
+
+<p>I've never been to Nebraska, but the classic xkcd comic hits home for me:</p>
+
+<p><img src="https://imgs.xkcd.com/comics/dependency.png"/></p>
+
+<h3>Sustainability</h3>
+
+<p>I have never received any financial compensation for maintaining
+SQLitePCLRaw.</p>
+
+<p>It has been interesting to watch various other popular open source projects
+wrestle with sustainability issues, including IdentityServer,
+ImageSharp, etc.  To be clear, I intend no criticism here
+of any decisions made by these projects, or of Microsoft's
+handling of such situations.  I mention them simply because
+they have made me think.</p>
+
+<p>I don't actually see much appeal in being the
+person who triggers the next wave of "drama" in the .NET
+ecosystem.  But I'll confess that every year on April Fools Day,
+I consider posting an absurd and farcical announcement of a change to a proprietary license,
+just to see how much trouble I could stir up.</p>
+
+<p>Anyway, I sometimes find myself reflecting on why I do maintain
+this library, and in the interest
+of transparency, I am sharing some of those thoughts here.
+I am making no announcements or changes.  
+This is simply my attempt at an honest and completely objective
+discussion of the issues.</p>
+
+<h3>The status quo is apparently okay</h3>
+
+<p>The situation with SQLitePCLRaw has been about the same for
+quite a few years.  I must therefore conclude that the status quo
+"kinda works" for everyone involved.</p>
+
+<p>Sometimes it <i>seems</i> like this isn't working.  But it apparently is.  
+Nobody is forcing me to maintain this package.  Nobody is
+forcing people to use it.  I mean, if this weren't basically okay,
+somebody would opt out, right?.</p>
+
+<p>So this (kinda) works.  But why?  If the xkcd comic is relevant
+here, it is not usually interpreted to have healthy connotations.</p>
+
+<p>I'll limit my conjecture about the motivation of others and speak for myself.  
+Why do I do this?
+I suppose people do things because the positives outweigh the negatives.</p>
+
+<p>In terms of positives, even though I get no
+money for this, I am aware that there are certain
+non-monetary benefits.  I'll mention those in a bit.</p>
+
+<p>But I suspect the real key for me is limiting the
+negatives (stress, time investment, etc).</p>
+
+<h3>Underpromise</h3>
+
+<p>The most important way that I limit the negatives is
+to carefully keep my commitments to a minimum.
+I usually describe this as an effort to "underpromise and overdeliver".</p>
+
+<p>And when I say "underpromise", what I mean is that I promise
+basically nothing at all.</p>
+
+<p>Somebody asked me recently if I had a written security policy 
+for SQLitePCLRaw.  I said no.  And I have no intention of creating one.</p>
+
+<p>Isn't that kind of unprofessional?  Darn right.  The word "professional" implies 
+payment.  As maintainer of this library, I have amateur status.</p>
+
+<p>Nobody is entitled to my time or attention,
+even if I choose to give them some.</p>
+
+<ul>
+    <li><p>Helping you with a problem?  Sure, I've got some time.  Let's figure this out.</p></li>
+
+    <li><p>Promising to help you?  This relationship is getting too serious.</p></li>
+</ul>
+
+<p>I also have complete control over how and when I spend
+time working on this library.  I tend to do my maintenance work in bursts.  
+Some weeks this gig is full time.  Some weeks I do nothing at all.</p>
+
+<p>SQLitePCLRaw lives in a piece of my life with
+a big fence around it.  Those boundaries are important.</p>
+
+<h3>Intangible Benefits</h3>
+
+<p>And then there are the positives.</p>
+
+<ul>
+    <li><p>Despite the importance I place on boundaries,
+I do value providing service to the community.
+The satisfaction from that effort is an intangible benefit.</p>
+
+        <li><p>Microsoft takes a dependency on my library.
+Their choice is an expression of trust in me.  My reputation in the community
+is enhanced.</p>
+
+            <li><p>I am a Microsoft MVP, and I assume my work on SQLitePCLRaw
+is part of the reason why I have been selected.</p>
+
+                <li><p>Finally, it is always nice to work on something people actually use.  
+I am a serial product entrepreneur.  I fail a lot.
+SQLitePCLRaw is a reminder that I do build something that is
+widely used, even if it is non-commercial.</p>
+</ul>
+
+<p>My work on SQLitePCLRaw is connected to my role as one
+of the owners of SourceGear, and to some extent, these intangibles
+indirectly benefit my company as well.  
+Nonetheless, I am accountable to my business partner and my coworkers.
+Whether the situation makes sense for SourceGear is an
+important and ongoing consideration.</p>
+
+<p>(Some might observe that most of "my" 125 M downloads came through Microsoft.  
+Just how much right do I have to brag about them?  I will happily concede that I am like a basketball
+player who can't get his own shot, but I score 30 pts a game
+because the point guard keeps feeding me assists.)</p>
+
+<h3>Possible changes</h3>
+
+<p>So, what if I wanted something <i>better</i> than the status quo?
+How might I change things to get fewer negatives or more positives?
+There are a few ideas that keep coming up for consideration.</p>
+
+<h4>Should I try to recruit other maintainers?</h4>
+
+<p>Some would look at my situation and suggest that I try to
+recruit other maintainers to share the load.  But I tend
+to think that would make things harder, not easier.</p>
+
+<p>Joining the .NET Foundation is another idea in the same
+bucket.  I support the Foundation and its goals,
+and I very much appreciate the efforts of those who
+serve there.  But in my case, I think joining would likely
+increase the time I have to "work and play well with
+others".</p>
+
+<p>I can see how users of this library might prefer that
+it had more than one maintainer or Foundation membership, but nobody has pushed
+me in that direction, and working on this as a solo endeavor
+is just easier.</p>
+
+<h4>Should I try to do even less?</h4>
+
+<p>"Never let it be said I didn't do the least I could do."<br/>
+-- Hawkeye Pierce, M*A*S*H</p>
+
+<p>There are some good possibilities here.  In fact, I've
+taken measured steps in this direction by placing
+lower priority on things like support for <code>packages.config</code>.
+Sometimes I wonder when I can discontinue support
+for .NET Framework or Mono.</p>
+
+<p>At some point I might stop providing builds of
+SQLCipher.  I ended up accepting responsibility for that
+chore somewhat accidentally.  In fact, my regrets there
+are part of the "lessons learned" that taught me to
+be more careful about making commitments.</p>
+
+<h4>Should I try to charge money?</h4>
+
+<p>I tend to think that most of the ideas in this bucket
+just wouldn't work.</p>
+
+<p>If there was a way to make truckloads
+of cash from this project, I would probably do it.  I just don't
+think there is.
+If I changed the license to something non-open-source,
+it would probably backfire.
+If I tried charging for support or special builds or features, 
+most people wouldn't pay.</p>
+
+<p>Part of what's going on here is that I'm only interested
+in money if it's significant.</p>
+
+<p>Sometimes people offer to pay for an hour of my time
+to sort out their problem.  
+I appreciate that, but frankly, it's not worth the trouble.  Our company
+isn't well configured to deal with single-hour engagements.
+Keep the money, I'll probably try to help you anyway.</p>
+
+<p>This is the same reason I haven't tried GitHub Sponsors.
+That model seems like it could end up being the worst of
+both worlds, increasing my obligations, but not for enough money to make a 
+difference.  I am quite willing to be convinced I am wrong about this.</p>
+
+<p>I generally prefer to keep my amateur status unless
+there is real money on the table.</p>
+
+<h4>Should I try to get Microsoft to pay me?</h4>
+
+<p>Some would say that Microsoft should be compensating me
+for maintaining SQLitePCLRaw.</p>
+
+<p>And to be clear, they are welcome to do so.
+I've told various folks at Microsoft that if they ever want more
+structure or assurances, just let me know.  After all, SourceGear is
+(at least partially) in the business of selling my time and attention.</p>
+
+<p>But nobody at Microsoft has ever expressed an interest in that,
+and I assume there are good reasons why.</p>
+
+<p>Yes, if I didn't maintain this library, then somebody at
+Microsoft would probably have to do it, and that person would need 
+to be paid, which means it comes out of somebody's budget.</p>
+
+<p>But the other side of the coin is that dealing with budget issues
+might be simpler for them than dealing with an external dependency.
+I'm applying some conjecture here, but I think Microsoft's
+structure probably makes it hard to deal with a situation like mine.</p>
+
+<p>For my part, my working relationship with the EF Core team is extremely positive.
+That's the team with whom I coordinate most closely, and they're great folks.</p>
+
+<p>But on their side, I bet there is at least some awkwardness that I can't see.  
+For example, I speculate that 
+they get complaints from enterprise customers about their use of my
+library.</p>
+
+<p>Similarly, Microsoft doesn't control my time, and that probably
+makes their project planning more difficult sometimes.  Whenever they want something about
+SQLitePCLRaw to change, they have to ask me instead of assigning me tasks.</p>
+
+<p>All I'm saying here is if we assume that my maintenance of this library
+is of some benefit to Microsoft (and I think it is), it is also reasonable
+to assume that it presents them with certain challenges as well.
+I tend to believe that there are interesting ways that Microsoft could use financial
+resources to improve the health of the .NET ecosystem, but I don't want to approach that issue from
+a perspective of entitlement or ignorance.</p>
+
+<p>One final thought here:  People often criticize Microsoft for
+(what they see as) a need to control everything.  Their dependency on my
+library is a counter-example of this claim.  
+Let's give them some credit for that.</p>
+
+<h4>Inertia</h4>
+
+<p>Looking at all these possible changes I might try to
+make, it's just not clear that any of them would make things
+better, and some would make things worse.  </p>
+
+<p>In general, that's another
+reason people accept ther status quo -- when they believe they
+are in the best (or least-bad) available option.</p>
+
+<h3>Overdeliver</h3>
+
+<p>People who choose to take a dependency on SQLitePCLRaw
+are doing so voluntarily.  Why would they do that when
+I'm making so few promises?</p>
+
+<p>A dependency can be a terrible thing.  In my own
+work, I approach every potential dependency with 
+a degree of cynicism that is downright unfair.
+Every library I meet is guilty until proven innocent.</p>
+
+<p>And there are risks in play when depending on a library
+that is maintained by one person.  What if I get hit by
+a bus?</p>
+
+<p>In the sections above, I have
+enumerated several ways that I am difficult and 
+uncooperative.
+I mean, whether your product is free or paid, folks
+usually work hard to attract users, whereas I have
+emphasized the boundaries I use to protect myself
+from those users.
+This is not a typical recipe for a project that lots of
+people actually want to adopt.
+And yet they do.  Why?</p>
+
+<p>I assume the reason is that even though I promise
+nothing, in practice, I tend to do a little better than
+that.</p>
+
+<p>I try to "underpromise and overdeliver".</p>
+
+<ul>
+        <li><p>I spend a fair amount of time helping people work through
+problems using SQLite.</p></li>
+
+    <li><p>I try to fix bugs promptly.  If somebody asks me for a feature,
+        I do at least give it serious consideration, and I usually
+        implement the stuff that makes sense.</p></li>
+
+    <li><p>I coordinate with the #dotnet team 
+        each time they have a release cycle.</p></li>
+
+</ul>
+
+<p>Obviously, if I did not overdeliver, people
+would stop using this library.  And I would lose my
+intangible benefits.</p>
+
+<p>There is a symmetry here.  Just as the benefits I receive 
+are intangible (not monetary), the benefits I provide are intangible 
+(not promised).</p>
+
+<p>Apparently a lot of people using SQLitePCLRaw are okay with that.  
+So far, I am too.</p>
+

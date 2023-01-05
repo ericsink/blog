@@ -73,9 +73,9 @@ fn get_front_matter(s : &NString) -> Result<(Option<Dictionary<NString,NString>>
 
 		// split on lf should work for either eol here.
 		// the cr will remain, but it gets trimmed out.
-		const CR : i16 = 13;
+		const CR : i16 = 10;
 		let a = s3.Split_Char_StringSplitOptions(System::Char::from_value(CR), System::StringSplitOptions::None())?;
-		let mut d = Dictionary::ctor()?;
+		let d = Dictionary::ctor()?;
 		for pair in a.iter()? {
 			if pair.get_Length()? > 0 {
 				let n_colon = pair.IndexOf_String(NString::from(":"))?;
@@ -161,7 +161,7 @@ fn add_pair(d: &mut Dictionary<NString,Dictionary<NString,NString>>, section: &s
 		},
 		None =>
 		{
-			let mut d3 = Dictionary::ctor()?;
+			let d3 = Dictionary::ctor()?;
 			d3.Add(NString::from(k), NString::from(v))?;
 			d.Add(NString::from(section), d3)?;
 		},
@@ -215,11 +215,10 @@ fn make_rss(dir_src: &NString, items: &Dictionary<NString,Dictionary<NString,NSt
     add(&mut content, "<generator>mine</generator>")?;
 
 	let mut a = Vec::new(); // TODO don't use a Vec here
-	for kv in items.get_iter() {
-		let path = kv.get_Key()?;
-		let v = kv.get_Value()?;
+	for path in items.get_Keys()?.get_iter() {
+		let v = items.get_Item(&path)?;
 		if v.ContainsKey(NString::from("date"))? {
-			a.push(kv);
+			a.push((path,v));
 		}
 	}
 
@@ -227,15 +226,15 @@ fn make_rss(dir_src: &NString, items: &Dictionary<NString,Dictionary<NString,NSt
 		|a,b|
 		{
 			// TODO these are unwrap because this closure doesn't return Result
-			let va = a.get_Value().unwrap();
-			let vb = b.get_Value().unwrap();
+			let va = &a.1;
+			let vb = &b.1;
 			let sa = va.MyGet(NString::from("date")).unwrap();
 			let sb = vb.MyGet(NString::from("date")).unwrap();
 			let c =
 				match sa {
 					Some(sa) =>
 						match sb {
-							Some(sb) => sa.get_iter().cmp(sb.get_iter()).reverse(),
+							Some(sb) => sa.to_string().cmp(&sb.to_string()).reverse(),
 							None => std::cmp::Ordering::Less
 						},
 					None => 
@@ -264,8 +263,8 @@ fn make_rss(dir_src: &NString, items: &Dictionary<NString,Dictionary<NString,NSt
 		*/
 
     for kv in a {
-        let path = kv.get_Key()?;
-        let v = kv.get_Value()?;
+        let path = &kv.0;
+        let v = &kv.1;
         let title = match v.MyGet(NString::from("title"))? {
 			Some(t) => t,
 			None => NString::from(""),
@@ -274,7 +273,7 @@ fn make_rss(dir_src: &NString, items: &Dictionary<NString,Dictionary<NString,NSt
 
         let html = read_from_src(dir_src, &path)?;
         let (_, my_content) = get_front_matter(&html)?;
-		let local_link = System::String::Format_String_Object(NString::from("https://ericsink.com{}"), Some(path.as_base()))?;
+		let local_link = System::String::Format_String_Object(NString::from("https://ericsink.com{0}"), Some(path.as_base()))?;
 
         add(&mut content, "<item>")?;
         add(&mut content, "<title>")?;
@@ -438,7 +437,7 @@ fn make_toc (magic: &Dictionary<NString,NString>, items: &Dictionary<NString,Dic
 			Some(keywords) =>
 			{
 				//let keywords = &fm["keywords"];
-				let mut h = System::Collections::Generic::HashSet_1::<NString>::ctor()?;
+				let h = System::Collections::Generic::HashSet_1::<NString>::ctor()?;
 				for k in 
 				keywords.Split_Char_StringSplitOptions(System::Char::from_value(SPACE), System::StringSplitOptions::None())?
 					.iter()?
@@ -455,25 +454,39 @@ fn make_toc (magic: &Dictionary<NString,NString>, items: &Dictionary<NString,Dic
 	}
 
 	// TODO don't use Vec/collect here
-	let mut filtered : Vec<System::Collections::Generic::KeyValuePair_2<NString,Dictionary<NString,NString>>> =
-        match magic.MyGet(NString::from("keyword"))? {
-			Some(kw_include) => items.get_iter().filter(|kv| has_kw(&(kv.get_Value().unwrap()), &kw_include).unwrap()).collect(),
-			None => items.get_iter().collect()
-		};
+	let mut filtered = Vec::new();
+	match magic.MyGet(NString::from("keyword"))? {
+		Some(kw_include) => 
+		{
+			for k in items.get_Keys()?.get_iter() {
+				let v = items.get_Item(&k)?;
+				if has_kw(&v, &kw_include)? {
+					filtered.push((k, v));
+				}
+			}
+		},
+		None => 
+		{
+			for k in items.get_Keys()?.get_iter() {
+				let v = items.get_Item(&k)?;
+				filtered.push((k, v));
+			}
+		}
+	};
 
 	filtered.sort_by(
 		|a,b|
 		{
 			// TODO these are unwrap because this closure doesn't return Result
-			let va = a.get_Value().unwrap();
-			let vb = b.get_Value().unwrap();
+			let va = &a.1;
+			let vb = &b.1;
 			let sa = va.MyGet(sortby.clone_handle()).unwrap();
 			let sb = vb.MyGet(sortby.clone_handle()).unwrap();
 			let c =
 				match sa {
 					Some(sa) =>
 						match sb {
-							Some(sb) => sa.get_iter().cmp(sb.get_iter()).reverse(),
+							Some(sb) => sa.to_string().cmp(&sb.to_string()).reverse(),
 							None => std::cmp::Ordering::Less
 						},
 					None => 
@@ -492,8 +505,8 @@ fn make_toc (magic: &Dictionary<NString,NString>, items: &Dictionary<NString,Dic
     let mut content = System::Text::StringBuilder::ctor()?;
 
     for kv in filtered {
-		let path = kv.get_Key()?;
-		let v = kv.get_Value()?;
+		let path = kv.0;
+		let v = kv.1;
         let title = match v.MyGet(NString::from("title"))? {
 			Some(t) => t,
 			None => NString::from(""),
@@ -537,18 +550,17 @@ fn make_toc (magic: &Dictionary<NString,NString>, items: &Dictionary<NString,Dic
 
 fn crunch_magic(html: &NString, items: &Dictionary<NString,Dictionary<NString,NString>>) -> Result<NString,System::Exception> {
 	let mut t = html.clone_handle();
-    let tcopy = html;
 
-    let expr = r"\{@(?P<magic>[^{}]+)@}";
+    let expr = "{@(?<magic>[^{}]+)@}";
     let regx = System::Text::RegularExpressions::Regex::ctor_String(NString::from(expr))?;
     let a = regx.Matches_String(&t)?;
 	const COMMA : i16 = 44;
-	const EQUALS : i16 = 32;
+	const EQUALS : i16 = 61;
 	for m in a.get_iter() {
 		let grp = m.get_Groups()?.get_Item_String(NString::from("magic"))?;
 		let cap : System::Text::RegularExpressions::Capture = grp.as_base();
 		let magic = cap.get_Value()?.Trim()?.ToLower()?;
-		let mut d = Dictionary::ctor()?;
+		let d = Dictionary::ctor()?;
 		for p in 
 		magic.Split_Char_StringSplitOptions(System::Char::from_value(COMMA), System::StringSplitOptions::None())?
 			.iter()?
@@ -624,7 +636,7 @@ fn do_file(url_dir: &NString, path_from: &NString, dir_dest: &NString, layouts: 
 		}
 	} else if name.EndsWith_String(NString::from(".xml"))? {
 		let html = File::ReadAllText_String(path_from)?;
-		let (page_front_matter, src_content) = get_front_matter(&html)?;
+		let (page_front_matter, _) = get_front_matter(&html)?;
 		match page_front_matter {
 			Some(page_front_matter) => {
 				if page_front_matter.ContainsKey(NString::from("gen"))? {
@@ -713,7 +725,7 @@ fn main() -> Result<(),System::Exception>
 
     let layouts = 
     {
-		let mut layouts = Dictionary::<NString,NString>::ctor()?;
+		let layouts = Dictionary::<NString,NString>::ctor()?;
 
 		for f in Directory::GetFiles_String(Path::Combine_String_String(&dir_src, NString::from("_layouts"))?)?.iter()? {
 			//println!("{:?}", entry.path().file_name().ok_or("none")?);
@@ -738,9 +750,8 @@ fn main() -> Result<(),System::Exception>
 
 	let full_path_content = Path::GetFullPath_String(dir_src)?;
 
-	for kv in items.get_iter() {
-        let path = kv.get_Key()?;
-        let front_matter = kv.get_Value()?;
+	for path in items.get_Keys()?.get_iter() {
+        let front_matter = items.get_Item(&path)?;
 		if front_matter.ContainsKey(NString::from("gen"))? {
 			do_gen(&full_path_content, &dir_dest, &path, &layouts, &items)?;
 		}
