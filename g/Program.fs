@@ -23,6 +23,65 @@ let path_combine (a :string) (b :string) =
     else
         a + "/" + b;
 
+let get_front_matter (s :string) =
+    let marker_front_lf = "---\n"
+    let marker_front_crlf = "---\r\n"
+    if (s.StartsWith(marker_front_lf)) || (s.StartsWith(marker_front_crlf)) then
+        // first remove that first line
+        let s2 = 
+            // whether it was lf or crlf, we can just find the lf and chop there
+            let n = s.IndexOf("\n") // TODO could assert, must be > 0
+            s.Substring(n + 1)
+
+        // now find the other marker
+
+        let (n, len) = 
+            // the second marker should match \n--- for either EOL
+            let marker_back_lf = "\n---\n"
+            let marker_back_crlf = "\n---\r\n"
+            let n_lf = s2.IndexOf(marker_back_lf)
+            let n_crlf = s2.IndexOf(marker_back_crlf)
+            if n_lf > 0 then
+                if n_crlf > 0 then
+                    // found 2nd marker in BOTH lf and crlf forms?
+                    // take the first one
+                    if n_lf < n_crlf then
+                        (n_lf, marker_back_lf.Length)
+                    else
+                        (n_crlf, marker_back_crlf.Length)
+                else
+                    (n_lf, marker_back_lf.Length)
+            elif n_crlf > 0 then
+                (n_crlf, marker_back_crlf.Length)
+            else
+                raise (Exception($"second front matter marker not found: {s}"))
+
+        let s3 = s2.Substring(0, n)
+        let remain = s2.Substring(n + len)
+
+        // split on lf should work for either eol here.
+        // the cr will remain, but it gets trimmed out.
+        let a = s3.Split('\n')
+        let d = Dictionary<string,string>()
+        for pair in a do
+            if pair.Length > 0 then
+                let n_colon = pair.IndexOf(":")
+                let k = pair.Substring(0, n_colon).Trim()
+                let v = pair.Substring(n_colon + 1).Trim()
+                // TODO we may want to allow v to be empty string or null
+                if (k.Length > 0) && (v.Length > 0) then
+                    d.Add(k, v)
+        (*
+        if d.ContainsKey("date") then
+            let s = d.["date"]
+            let dt = DateTime.Parse(s)
+            let normalized = dt.ToString("yyyy-MMM-dd HH:mm:ss")
+            d.["date"] <- normalized
+        *)
+        (Some d, remain)
+    else
+        (None, s)
+
 // TODO this is probably too strict
 // just use DateTime.Parse?
 let parse_date (s :string) =
@@ -86,7 +145,7 @@ let add_site_defaults (d: Dictionary<string,Dictionary<string,string>>) =
 let weird_path_combine (dir :string) (uri_path :string) =
     // TODO windows-specific code below
     let path_fixed = 
-        uri_path.Substring(1)//.Replace("/", "\\")
+        uri_path.Substring(1).Replace("/", "\\")
     let path = Path.Combine(dir, path_fixed)
     path
 
@@ -94,41 +153,6 @@ let read_from_src (dir_src :string) (uri_path :string) =
     let path_content = weird_path_combine dir_src uri_path
     let html = File.ReadAllText(path_content)
     html
-
-let make_front_page template dir_src (items: Dictionary<string,Dictionary<string,string>>) = 
-    let add (sb :StringBuilder) (s :string) =
-        sb.Append(s) |> ignore
-
-    let content = StringBuilder()
-
-    let a = items.Where(fun kv -> kv.Value.ContainsKey("date")).OrderByDescending(fun kv -> kv.Value.["date"]).Take(10).ToList()
-
-    for kv in a do
-        let path = kv.Key
-        let title =
-            match dict_get kv.Value "title" with
-            | Some t -> t
-            | None -> null
-        let date = kv.Value.["date"]
-
-        let html = read_from_src dir_src path
-        let (_, my_content) = util.fm.get_front_matter html
-
-        let line1 = sprintf """<p class="ArticleDate" align=right>%s</p><h1><a href="%s">%s</a></h1>""" (format_date date) path title
-
-        add content line1
-        add content "\n"
-        add content my_content
-        add content "\n"
-        add content "<hr/>\n"
-
-    let s = content.ToString()
-    let pairs = Dictionary<string,Dictionary<string,string>>()
-    add_site_defaults pairs
-    add_pair pairs "page" "title" "Eric Sink"
-    add_pair pairs "page" "title_markup" ""
-    let result = crunch template s pairs
-    result
 
 let make_rss dir_src (items: Dictionary<string,Dictionary<string,string>>) = 
     let add (sb :StringBuilder) (s :string) =
@@ -155,7 +179,7 @@ let make_rss dir_src (items: Dictionary<string,Dictionary<string,string>>) =
         let date = kv.Value.["date"]
 
         let html = read_from_src dir_src path
-        let (_, my_content) = util.fm.get_front_matter html
+        let (_, my_content) = get_front_matter html
         let local_link = "https://ericsink.com" + path
 
         add content "<item>"
@@ -242,7 +266,7 @@ let rec wrap (layout_name :string option) (page_front_matter :Dictionary<string,
         match layout_name with
         | Some layout_name ->
             let layout = layouts.[layout_name]
-            let (template_front, template_html) = util.fm.get_front_matter layout
+            let (template_front, template_html) = get_front_matter layout
             let next_layout =
                 match template_front with
                 | Some fm ->
@@ -363,7 +387,7 @@ let crunch_magic html dir_src (items: Dictionary<string,Dictionary<string,string
 
 let do_file_with_magic (from :string) (dir_src :string) (dest_path :string) (layouts: Dictionary<string,string>) (items: Dictionary<string,Dictionary<string,string>>) =
     let html = File.ReadAllText(from)
-    let (page_front_matter, src_content) = util.fm.get_front_matter html
+    let (page_front_matter, src_content) = get_front_matter html
     match page_front_matter with
     | Some page_front_matter ->
         let tocs_done = crunch_magic src_content dir_src items
@@ -379,7 +403,7 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictio
     let dest_path = Path.Combine(dest_dir, name)
     if (from.EndsWith(".html")) then
         let html = File.ReadAllText(from)
-        let (page_front_matter, src_content) = util.fm.get_front_matter html
+        let (page_front_matter, src_content) = get_front_matter html
         match page_front_matter with
         | Some page_front_matter ->
             if not (page_front_matter.ContainsKey("gen")) then
@@ -396,7 +420,7 @@ let do_file (url_dir :string) (from :string) (dest_dir :string) (layouts: Dictio
             copy_if_changed from dest_path
     elif (from.EndsWith(".xml")) then
         let html = File.ReadAllText(from)
-        let (page_front_matter, src_content) = util.fm.get_front_matter html
+        let (page_front_matter, src_content) = get_front_matter html
         match page_front_matter with
         | Some page_front_matter ->
             if (page_front_matter.ContainsKey("gen")) then
@@ -445,11 +469,6 @@ let do_gen dir_src dir_dest path (layouts: Dictionary<string,string>) (items: Di
     if gen_type = "rss" then
         let rss = make_rss dir_src items
         write_if_changed rss path_dest
-    elif gen_type = "front_index" then
-        let layout_name = front_matter.["layout"]
-        let layout = layouts.[layout_name]
-        let front_page = make_front_page layout dir_src items
-        write_if_changed front_page path_dest
     elif gen_type = "magic" then
         let path_src = weird_path_combine dir_src path
         let path_dest = weird_path_combine dir_dest path
