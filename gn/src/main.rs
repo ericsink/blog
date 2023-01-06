@@ -11,17 +11,39 @@ use System::IO::FileInfo as FileInfo;
 use System::IO::Path as Path;
 use System::Text::StringBuilder;
 
+trait StringExtensions {
+	fn starts_with(&self, s : &str) -> Result<bool, System::Exception>;
+	fn ends_with(&self, s : &str) -> Result<bool, System::Exception>;
+	fn index_of(&self, s : &str) -> Result<i32, System::Exception>;
+	fn split(&self, c : char) -> Result<mybatch::Arr<NString>, System::Exception>;
+}
+
+impl StringExtensions for NString {
+	fn starts_with(&self, s : &str) -> Result<bool, System::Exception> {
+        return self.StartsWith_String(NString::from(s));
+	}
+	fn ends_with(&self, s : &str) -> Result<bool, System::Exception> {
+        return self.EndsWith_String(NString::from(s));
+	}
+	fn index_of(&self, s : &str) -> Result<i32, System::Exception> {
+        return self.IndexOf_String(NString::from(s));
+	}
+	fn split(&self, c : char) -> Result<mybatch::Arr<NString>, System::Exception> {
+		let mut b = [0; 1];
+		// this will panic if it doesn't fit
+		let b2 = c.encode_utf16(&mut b);
+		let c2 = b2[0] as i16;
+		return self.Split_Char_StringSplitOptions(System::Char::from_value(c2), System::StringSplitOptions::None());
+	}
+}
+
 // an implementation of Path.Combine which always uses fwd slash
 fn path_combine(a : &NString, b : &NString) -> Result<NString,System::Exception> {
 	if a.get_Length()? == 0 {
-		// TODO silly way to do clone
-		let s = System::String::Concat_String_String(Some(b), Some(NString::from("")))?;
-		Ok(s)
-	} else if b.StartsWith_String(NString::from("/"))? {
-		// TODO silly way to do clone
-		let s = System::String::Concat_String_String(Some(b), Some(NString::from("")))?;
-		Ok(s)
-	} else if a.EndsWith_String(NString::from("/"))? {
+		Ok(b.clone_handle())
+	} else if b.starts_with("/")? {
+		Ok(b.clone_handle())
+	} else if a.ends_with("/")? {
 		let s = System::String::Concat_String_String(Some(a), Some(b))?;
 		Ok(s)
 	} else {
@@ -33,11 +55,11 @@ fn path_combine(a : &NString, b : &NString) -> Result<NString,System::Exception>
 fn get_front_matter(s : &NString) -> Result<(Option<Dictionary<NString,NString>>, NString),System::Exception> {
 	let marker_front_lf = "---\n";
 	let marker_front_crlf = "---\r\n";
-	if (s.StartsWith_String(NString::from(marker_front_lf))?) || (s.StartsWith_String(NString::from(marker_front_crlf))?) {
+	if (s.starts_with(marker_front_lf)?) || (s.starts_with(marker_front_crlf)?) {
 		let s2 =
 		{
 			// whether it was lf or crlf, we can just find the lf and chop there
-			let n = s.IndexOf_String(NString::from("\n"))?; // TODO could assert, must be > 0
+			let n = s.index_of("\n")?; // TODO could assert, must be > 0
 			s.Substring_i32(n)?
 		};
 		// now find the other marker
@@ -47,8 +69,8 @@ fn get_front_matter(s : &NString) -> Result<(Option<Dictionary<NString,NString>>
 			// the second marker should match \n--- for either EOL
 			let marker_back_lf = "\n---\n";
 			let marker_back_crlf = "\n---\r\n";
-			let n_lf = s2.IndexOf_String(NString::from(marker_back_lf))?;
-			let n_crlf = s2.IndexOf_String(NString::from(marker_back_crlf))?;
+			let n_lf = s2.index_of(marker_back_lf)?;
+			let n_crlf = s2.index_of(marker_back_crlf)?;
 			if n_lf >= 0 {
 				if n_crlf >= 0 {
 					// found 2nd marker in BOTH lf and crlf forms?
@@ -73,12 +95,11 @@ fn get_front_matter(s : &NString) -> Result<(Option<Dictionary<NString,NString>>
 
 		// split on lf should work for either eol here.
 		// the cr will remain, but it gets trimmed out.
-		const CR : i16 = 10;
-		let a = s3.Split_Char_StringSplitOptions(System::Char::from_value(CR), System::StringSplitOptions::None())?;
+		let a = s3.split('\n')?;
 		let d = Dictionary::ctor()?;
 		for pair in a.iter()? {
 			if pair.get_Length()? > 0 {
-				let n_colon = pair.IndexOf_String(NString::from(":"))?;
+				let n_colon = pair.index_of(":")?;
 				let k = pair.Substring_i32_i32(0, n_colon)?.Trim()?;
 				let v = pair.Substring_i32(n_colon + 1)?.Trim()?;
 				// TODO we may want to allow v to be empty string or null
@@ -89,19 +110,15 @@ fn get_front_matter(s : &NString) -> Result<(Option<Dictionary<NString,NString>>
 		}
 		Ok((Some(d), remain))
 	} else {
-		// TODO silly way to do clone
-		let t = System::String::Concat_String_String(Some(s), Some(NString::from("")))?;
+		let t = s.clone_handle();
 		Ok((None, t))
 	}
 }
 
 fn parse_date(s: &NString) -> Result<System::DateTime,System::Exception> {
-	const SPACE : i16 = 32;
-	const HYPHEN : i16 = 45;
-	const COLON : i16 = 58;
-	let twoparts = s.Split_Char_StringSplitOptions(System::Char::from_value(SPACE), System::StringSplitOptions::None())?;
-    let dateparts = twoparts.get_item(0)?.Split_Char_StringSplitOptions(System::Char::from_value(HYPHEN), System::StringSplitOptions::None())?;
-    let timeparts = twoparts.get_item(1)?.Split_Char_StringSplitOptions(System::Char::from_value(COLON), System::StringSplitOptions::None())?;
+	let twoparts = s.split(' ')?;
+    let dateparts = twoparts.get_item(0)?.split('-')?;
+    let timeparts = twoparts.get_item(1)?.split(':')?;
 	let year = System::Int32::Parse_String(dateparts.get_item(0)?)?;
 	let month = System::Int32::Parse_String(dateparts.get_item(1)?)?;
 	let day = System::Int32::Parse_String(dateparts.get_item(2)?)?;
@@ -140,8 +157,7 @@ fn crunch(html: &NString, content: &NString, pairs: &Dictionary<NString,Dictiona
 				content.clone_handle()
 			}
 			else {
-				const DOT : i16 = 46;
-				let parts = v.Split_Char_StringSplitOptions(System::Char::from_value(DOT), System::StringSplitOptions::None())?;
+				let parts = v.split('.')?;
 				let section = parts.get_item(0)?;
 				let k = parts.get_item(1)?;
 				pairs.get_Item(section)?.get_Item(k)?
@@ -172,7 +188,7 @@ fn add_pair(d: &mut Dictionary<NString,Dictionary<NString,NString>>, section: &s
 fn add_site_defaults(d: &mut Dictionary<NString,Dictionary<NString,NString>>) -> Result<(),System::Exception> {
     add_pair(d, "site", "title", "Eric Sink")?;
     add_pair(d, "site", "tagline", "SourceGear Founder")?;
-    add_pair(d, "site", "copyright", "Copyright 2001-2021 Eric Sink. All Rights Reserved")?;
+    add_pair(d, "site", "copyright", "Copyright 2001-2023 Eric Sink. All Rights Reserved")?;
     Ok(())
 }
 
@@ -339,7 +355,7 @@ fn copy_if_changed(src : &NString, dest : &NString) -> Result<(),System::Excepti
 					let buf = File::ReadAllBytes(dest)?;
 					buf
 				};
-                ba_src.iter()?.ne(ba_dest.iter()?) // TODO is this doing a full compare?
+                ba_src.iter()?.ne(ba_dest.iter()?)
 			}
         } else {
             true
@@ -369,8 +385,7 @@ fn wrap(layout_name : Option<NString>, page_front_matter : &Dictionary<NString,N
     add_site_defaults(&mut pairs)?;
     pairs.Add(NString::from("page"), page_front_matter.clone())?;
 
-	// TODO silly way to do clone
-	let src_content = System::String::Concat_String_String(Some(src_content), Some(NString::from("")))?;
+	let src_content = src_content.clone_handle();
 
     let (next_layout, before_crunch, content) =
         match layout_name {
@@ -432,14 +447,13 @@ fn make_toc (magic: &Dictionary<NString,NString>, items: &Dictionary<NString,Dic
     // TODO allow keyword exclusion here?
 
     fn has_kw (fm: &Dictionary<NString,NString>, kw :&NString) -> Result<bool,System::Exception> {
- 	    const SPACE : i16 = 32;
         match fm.MyGet(NString::from("keywords"))? {
 			Some(keywords) =>
 			{
 				//let keywords = &fm["keywords"];
 				let h = System::Collections::Generic::HashSet_1::<NString>::ctor()?;
 				for k in 
-				keywords.Split_Char_StringSplitOptions(System::Char::from_value(SPACE), System::StringSplitOptions::None())?
+				keywords.split(' ')?
 					.iter()?
 					.map(|x| x.Trim().unwrap())
 				{
@@ -453,7 +467,7 @@ fn make_toc (magic: &Dictionary<NString,NString>, items: &Dictionary<NString,Dic
 		}
 	}
 
-	// TODO don't use Vec/collect here
+	// TODO don't use Vec here
 	let mut filtered = Vec::new();
 	match magic.MyGet(NString::from("keyword"))? {
 		Some(kw_include) => 
@@ -554,19 +568,17 @@ fn crunch_magic(html: &NString, items: &Dictionary<NString,Dictionary<NString,NS
     let expr = "{@(?<magic>[^{}]+)@}";
     let regx = System::Text::RegularExpressions::Regex::ctor_String(NString::from(expr))?;
     let a = regx.Matches_String(&t)?;
-	const COMMA : i16 = 44;
-	const EQUALS : i16 = 61;
 	for m in a.get_iter() {
 		let grp = m.get_Groups()?.get_Item_String(NString::from("magic"))?;
 		let cap : System::Text::RegularExpressions::Capture = grp.as_base();
 		let magic = cap.get_Value()?.Trim()?.ToLower()?;
 		let d = Dictionary::ctor()?;
 		for p in 
-		magic.Split_Char_StringSplitOptions(System::Char::from_value(COMMA), System::StringSplitOptions::None())?
+		magic.split(',')?
 			.iter()?
 			.map(|x| x.Trim().unwrap())
 		{
-			let subparts = p.Split_Char_StringSplitOptions(System::Char::from_value(EQUALS), System::StringSplitOptions::None())?;
+			let subparts = p.split('=')?;
 			let k = subparts.get_item(0)?.Trim()?;
 			let v = subparts.get_item(1)?.Trim()?;
 			d.Add(k, v)?;
@@ -612,7 +624,7 @@ fn do_file(url_dir: &NString, path_from: &NString, dir_dest: &NString, layouts: 
 {
 	let name = Path::GetFileName_String(Some(path_from))?.unwrap();
 	let dest_path = Path::Combine_String_String(dir_dest, &name)?;
-	if name.EndsWith_String(NString::from(".html"))? {
+	if name.ends_with(".html")? {
 		let html = File::ReadAllText_String(path_from)?;
 		let (page_front_matter, src_content) = get_front_matter(&html)?;
 		match page_front_matter {
@@ -634,7 +646,7 @@ fn do_file(url_dir: &NString, path_from: &NString, dir_dest: &NString, layouts: 
 				copy_if_changed(path_from, &dest_path)?;
 			}
 		}
-	} else if name.EndsWith_String(NString::from(".xml"))? {
+	} else if name.ends_with(".xml")? {
 		let html = File::ReadAllText_String(path_from)?;
 		let (page_front_matter, _) = get_front_matter(&html)?;
 		match page_front_matter {
