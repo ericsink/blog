@@ -231,10 +231,10 @@ fn make_rss(dir_src: &NString, items: &Dictionary<NString,Dictionary<NString,NSt
     add(&mut content, "<generator>mine</generator>")?;
 
 	let mut a = Vec::new(); // TODO don't use a Vec here
-	for path in items.get_Keys()?.get_iter() {
-		let v = items.get_Item(&path)?;
+	for kv in items.get_iter() {
+		let v = kv.get_Value()?;
 		if v.ContainsKey(NString::from("date"))? {
-			a.push((path,v));
+			a.push(kv);
 		}
 	}
 
@@ -242,8 +242,8 @@ fn make_rss(dir_src: &NString, items: &Dictionary<NString,Dictionary<NString,NSt
 		|a,b|
 		{
 			// TODO these are unwrap because this closure doesn't return Result
-			let va = &a.1;
-			let vb = &b.1;
+			let va = a.get_Value().unwrap();
+			let vb = b.get_Value().unwrap();
 			let sa = va.MyGet(NString::from("date")).unwrap();
 			let sb = vb.MyGet(NString::from("date")).unwrap();
 			let c =
@@ -279,8 +279,8 @@ fn make_rss(dir_src: &NString, items: &Dictionary<NString,Dictionary<NString,NSt
 		*/
 
     for kv in a {
-        let path = &kv.0;
-        let v = &kv.1;
+        let path = kv.get_Key()?;
+        let v = kv.get_Value()?;
         let title = match v.MyGet(NString::from("title"))? {
 			Some(t) => t,
 			None => NString::from(""),
@@ -472,18 +472,17 @@ fn make_toc (magic: &Dictionary<NString,NString>, items: &Dictionary<NString,Dic
 	match magic.MyGet(NString::from("keyword"))? {
 		Some(kw_include) => 
 		{
-			for k in items.get_Keys()?.get_iter() {
-				let v = items.get_Item(&k)?;
+			for kv in items.get_iter() {
+				let v = kv.get_Value()?;
 				if has_kw(&v, &kw_include)? {
-					filtered.push((k, v));
+					filtered.push(kv);
 				}
 			}
 		},
 		None => 
 		{
-			for k in items.get_Keys()?.get_iter() {
-				let v = items.get_Item(&k)?;
-				filtered.push((k, v));
+			for kv in items.get_iter() {
+				filtered.push(kv);
 			}
 		}
 	};
@@ -492,8 +491,8 @@ fn make_toc (magic: &Dictionary<NString,NString>, items: &Dictionary<NString,Dic
 		|a,b|
 		{
 			// TODO these are unwrap because this closure doesn't return Result
-			let va = &a.1;
-			let vb = &b.1;
+			let va = a.get_Value().unwrap();
+			let vb = b.get_Value().unwrap();
 			let sa = va.MyGet(sortby.clone_handle()).unwrap();
 			let sb = vb.MyGet(sortby.clone_handle()).unwrap();
 			let c =
@@ -519,8 +518,8 @@ fn make_toc (magic: &Dictionary<NString,NString>, items: &Dictionary<NString,Dic
     let mut content = System::Text::StringBuilder::ctor()?;
 
     for kv in filtered {
-		let path = kv.0;
-		let v = kv.1;
+		let path = kv.get_Key()?;
+		let v = kv.get_Value()?;
         let title = match v.MyGet(NString::from("title"))? {
 			Some(t) => t,
 			None => NString::from(""),
@@ -762,8 +761,9 @@ fn main() -> Result<(),System::Exception>
 
 	let full_path_content = Path::GetFullPath_String(dir_src)?;
 
-	for path in items.get_Keys()?.get_iter() {
-        let front_matter = items.get_Item(&path)?;
+	for kv in items.get_iter() {
+        let path = kv.get_Key()?;
+        let front_matter = kv.get_Value()?;
 		if front_matter.ContainsKey(NString::from("gen"))? {
 			do_gen(&full_path_content, &dir_dest, &path, &layouts, &items)?;
 		}
