@@ -2,8 +2,12 @@
 use mybatch::System;
 use mybatch::GetIter;
 use mybatch::AsBase;
+use mybatch::AsInterface;
 use mybatch::CloneHandle;
 use System::Collections::Generic::Dictionary_2 as Dictionary;
+use System::Collections::Generic::List_1 as List;
+use System::Collections::Generic::KeyValuePair_2 as KeyValuePair;
+use System::Collections::Generic::IEnumerable_1 as IEnumerable;
 use System::String as NString;
 use System::IO::Directory as Directory;
 use System::IO::File as File;
@@ -230,55 +234,24 @@ fn make_rss(dir_src: &NString, items: &Dictionary<NString,Dictionary<NString,NSt
     add(&mut content, "<copyright>{{site.copyright}}</copyright>")?;
     add(&mut content, "<generator>mine</generator>")?;
 
-	let mut a = Vec::new(); // TODO don't use a Vec here
+	let a = List::ctor()?;
 	for kv in items.get_iter() {
 		let v = kv.get_Value()?;
 		if v.ContainsKey(NString::from("date"))? {
-			a.push(kv);
+			a.Add(kv)?;
 		}
 	}
 
-	a.sort_by(
-		|a,b|
-		{
-			// TODO these are unwrap because this closure doesn't return Result
-			let va = a.get_Value().unwrap();
-			let vb = b.get_Value().unwrap();
-			let sa = va.MyGet(NString::from("date")).unwrap();
-			let sb = vb.MyGet(NString::from("date")).unwrap();
-			let c =
-				match sa {
-					Some(sa) =>
-						match sb {
-							Some(sb) => sa.to_string().cmp(&sb.to_string()).reverse(),
-							None => std::cmp::Ordering::Less
-						},
-					None => 
-						match sb {
-							Some(_) => std::cmp::Ordering::Greater,
-							None => std::cmp::Ordering::Equal
-						},
-				};
-			//dbg!(sa);
-			//dbg!(sb);
-			//dbg!(c);
-			c
-		}
-		);
+	let z_enumerable : IEnumerable<KeyValuePair<NString,Dictionary<NString,NString>>> = a.as_interface();
+	let f_orderby = System::Func_2::<KeyValuePair<NString,Dictionary<NString,NString>>, NString>::create(
+        |kv| kv.get_Value()?.get_Item(NString::from("date"))
+        )?;
+	let z_ordered = System::Linq::Enumerable::OrderByDescending_System_Collections_Generic_IEnumerable_UTSource__System_Func_UTSource_UTKey_(z_enumerable, f_orderby)?;
+	let z2_enumerable : IEnumerable<KeyValuePair<NString,Dictionary<NString,NString>>> = z_ordered.as_interface();
+	let z_take : IEnumerable<KeyValuePair<NString,Dictionary<NString,NString>>> = System::Linq::Enumerable::Take_System_Collections_Generic_IEnumerable_UTSource__i32(z2_enumerable, 10)?;
+	let a = z_take;
 
-	let a = &a[..10];
-
-	/*
-	let a : Vec<(&String,&HashMap<String,HashMap<String,String>>)> = 
-		items.iter()
-		//.filter(|(k,v)| v.contains_key("date"))
-		//.OrderByDescending(fun kv -> kv.Value.["date"])
-		//.Take(10)
-		.collect()
-		;
-		*/
-
-    for kv in a {
+    for kv in a.get_iter() {
         let path = kv.get_Key()?;
         let v = kv.get_Value()?;
         let title = match v.MyGet(NString::from("title"))? {
@@ -467,57 +440,42 @@ fn make_toc (magic: &Dictionary<NString,NString>, items: &Dictionary<NString,Dic
 		}
 	}
 
-	// TODO don't use Vec here
-	let mut filtered = Vec::new();
+	let filtered = List::ctor()?;
 	match magic.MyGet(NString::from("keyword"))? {
 		Some(kw_include) => 
 		{
 			for kv in items.get_iter() {
 				let v = kv.get_Value()?;
 				if has_kw(&v, &kw_include)? {
-					filtered.push(kv);
+					filtered.Add(kv)?;
 				}
 			}
 		},
 		None => 
 		{
 			for kv in items.get_iter() {
-				filtered.push(kv);
+				filtered.Add(kv)?;
 			}
 		}
 	};
 
-	filtered.sort_by(
-		|a,b|
-		{
-			// TODO these are unwrap because this closure doesn't return Result
-			let va = a.get_Value().unwrap();
-			let vb = b.get_Value().unwrap();
-			let sa = va.MyGet(sortby.clone_handle()).unwrap();
-			let sb = vb.MyGet(sortby.clone_handle()).unwrap();
-			let c =
-				match sa {
-					Some(sa) =>
-						match sb {
-							Some(sb) => sa.to_string().cmp(&sb.to_string()).reverse(),
-							None => std::cmp::Ordering::Less
-						},
-					None => 
-						match sb {
-							Some(_) => std::cmp::Ordering::Greater,
-							None => std::cmp::Ordering::Equal
-						},
-				};
-			//dbg!(sa);
-			//dbg!(sb);
-			//dbg!(c);
-			c
-		}
-		);
+	let z_enumerable : IEnumerable<KeyValuePair<NString,Dictionary<NString,NString>>> = filtered.as_interface();
+
+	let f_where = System::Func_2::<KeyValuePair<NString,Dictionary<NString,NString>>, bool>::create(
+		|kv| kv.get_Value()?.ContainsKey(&sortby)
+        )?;
+	let z_where = System::Linq::Enumerable::Where_System_Collections_Generic_IEnumerable_UTSource__System_Func_UTSource_bool_(z_enumerable, f_where)?;
+
+	let f_orderby = System::Func_2::<KeyValuePair<NString,Dictionary<NString,NString>>, NString>::create(
+        |kv| kv.get_Value()?.get_Item(&sortby) 
+        )?;
+	let z_ordered = System::Linq::Enumerable::OrderByDescending_System_Collections_Generic_IEnumerable_UTSource__System_Func_UTSource_UTKey_(z_where, f_orderby)?;
+
+	let filtered = z_ordered;
 
     let mut content = System::Text::StringBuilder::ctor()?;
 
-    for kv in filtered {
+    for kv in filtered.get_iter() {
 		let path = kv.get_Key()?;
 		let v = kv.get_Value()?;
         let title = match v.MyGet(NString::from("title"))? {
