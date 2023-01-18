@@ -1,0 +1,57 @@
+---
+layout: post
+title: Silly
+date: 2023-01-18 13:00:00
+keywords: nativeaot
+teaser: Calling the multiply() function using P/Invoke from C#
+ord: 09600
+---
+
+<p style="text-align: center; font-style: italic">
+This is part of a series on Native AOT.<br/>
+<a href="mul_rs_win_dynamic.html">Previous</a> -- <a href="index.html">Top</a>
+</p>
+
+<hr/>
+
+<p>Native AOT produces libraries that can be called from
+any language that can call C.</p>
+
+<p>C# is one such language.</p>
+
+<p>Yes folks, that's right -- even though it is [probably] not useful, 
+you can call into a Native AOT library from C# using P/Invoke:</p>
+
+<pre class="screen">
+using System;
+using System.Runtime.InteropServices;
+
+static class MulCsPinvoke
+{
+    [DllImport("mul")]
+    static extern int multiply(int a, int b);
+
+    public static void Main()
+    {
+        var c = multiply(7, 6);
+
+        Console.WriteLine($"{c}");
+    }
+}
+</pre>
+
+<p>After we copy mul.dll into place, we can run it:</p>
+
+<pre class="screen">
+$ cp ../mul_cs/bin/Debug/net7.0/win-x64/publish/mul.dll .
+
+$ dotnet run
+42
+</pre>
+
+<hr/>
+<p>The code for this blog entry is available at:</p>
+
+<p><a href="https://github.com/ericsink/native-aot-samples/tree/main/mul_cs_pinvoke">https://github.com/ericsink/native-aot-samples/tree/main/mul_cs_pinvoke</a></p>
+
+

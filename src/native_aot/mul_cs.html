@@ -1,0 +1,210 @@
+---
+layout: post
+title: Trivial example
+date: 2023-01-18 11:00:00
+keywords: nativeaot
+teaser: A very simplistic C# library, with one function that multiplies two integers
+ord: 09800
+---
+
+<p style="text-align: center; font-style: italic">
+This is part of a series on Native AOT.<br/>
+<a href="libraries.html">Previous</a> -- <a href="index.html">Top</a> -- <a href="mul_rs_win_dynamic.html">Next</a>
+</p>
+<hr/>
+
+<p>Let's walk through a very simplistic example,
+a function that multiplies two integers and returns
+the result.</p>
+
+<p>Conceptually, that function in C# might look like this:</p>
+
+<pre class="screen">
+using System;
+
+public static class NativeExports
+{
+    public static int Multiply(int a, int b)
+    {
+        return a * b;
+    }
+}
+</pre>
+
+<p>But that's not quite sufficient.  Native AOT requires us to
+use an <code>UnmanagedCallersOnly</code>  attribute to explicitly identify 
+and give names to the entry points we want to export:</p>
+
+<pre class="screen">
+using System;
+using System.Runtime.InteropServices;
+
+public static class NativeExports
+{
+    <span style="color: red">[UnmanagedCallersOnly(EntryPoint = "multiply")]</span>
+    public static int Multiply(int a, int b)
+    {
+        return a * b;
+    }
+}
+</pre>
+
+<p>What we're saying with the attribute above is that the function known in .NET as <code>NativeExports.Multiply</code> will be exported as a C-compatible function called <code>multiply</code>.  
+The function resides in a static class only because C# needs it to, and the name of that class doesn't matter.</p>
+
+<p>Let's remember here that Native AOT doesn't support
+reference types.  If one of the function parameters was
+of type <code>string</code>, the compiler would complain:</p>
+
+<pre class="screen">
+Build FAILED.
+
+...\mul_cs\lib.cs(8,46): error CS8894: Cannot use 'string' as a parameter type 
+    on a method attributed with 'UnmanagedCallersOnly'.
+</pre>
+
+<p>We'll talk later about how to cope with that.  For now,
+we're using integers to keep things simple.</p>
+
+<p>When building for Native AOT, we need to add a <code>PublishAOT</code> property to our csproj file:</p>
+
+<pre class="screen">
+&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+
+  &lt;PropertyGroup&gt;
+    &lt;TargetFramework&gt;net7.0</TargetFramework>
+    <span style="color: red">&lt;PublishAOT&gt;True</PublishAOT></span>
+  &lt;/PropertyGroup&gt;
+
+&lt;/Project&gt;
+</pre>
+
+<p>And that's it.  You can build this as a native library with <code>dotnet publish</code>.</p>
+
+<pre class="screen">
+$ dotnet publish
+MSBuild version 17.4.1+9a89d02ff for .NET
+  Determining projects to restore...
+  Restored C:\Users\eric\dev\native-aot-samples\mul_cs\mul.csproj (in 71 ms).
+  mul -&gt; C:\Users\eric\dev\native-aot-samples\mul_cs\bin\Debug\net7.0\mul.dll
+... Microsoft.NETCore.Native.Publish.targets(48,5): <span style="color: red">error : RuntimeIdentifier is required</span>
+    for native compilation. Try running dotnet publish with the -r option value 
+    specified. [C:\Users\eric\dev\native-aot-samples\mul_cs\mul.csproj]
+</pre>
+
+<p>Okay, actually we need one more thing.  Since Native AOT is compiling everything to native code, 
+it needs to know the target operating system and CPU at build time.  
+We specify this with a RuntimeIdentifier, such as <code>win-x64</code>, <code>linux-arm64</code>.  
+(Note, however, that the .NET SDK currently doesn't support Native AOT cross-compilation from one 
+OS to another, so <code>dotnet publish -r linux-x64</code> won't work on a Windows host.)</p>
+
+<pre class="screen">
+$ dotnet publish -r win-x64
+MSBuild version 17.4.1+9a89d02ff for .NET
+  Determining projects to restore...
+  Restored C:\Users\eric\dev\native-aot-samples\mul_cs\mul.csproj (in 97 ms).
+  mul -&gt; C:\Users\eric\dev\native-aot-samples\mul_cs\bin\Debug\net7.0\win-x64\mul.dll
+  Generating native code
+     Creating library bin\Debug\net7.0\win-x64\native\mul.lib 
+     and object bin\Debug\net7.0\win-x64\native\mul.exp
+  mul -&gt; C:\Users\eric\dev\native-aot-samples\mul_cs\bin\Debug\net7.0\win-x64\publish\
+</pre>
+
+<p>Mission accomplished, we have a native dll:</p>
+
+<pre class="screen">
+ Directory of C:\Users\eric\dev\native-aot-samples\mul_cs\bin\Debug\net7.0\win-x64\publish
+
+...
+01/17/2023  01:18 PM         4,755,968 mul.dll
+...
+</pre>
+
+<p>WAIT -- it's over 4 megabytes?!?  All it does is multiply two ints!</p>
+
+<p>Yep, that's dreadful, isn't it?</p>
+
+<p>Native AOT involves a certain amount
+of overhead.  There are ways to make this tighter, but that's beyond
+the scope of this trivial example, so I'll duck the issue for now.</p>
+
+<p>To be fair, we should note that this dll 
+is completely standalone, and even at 4+ MB, it is much smaller than a 
+full deployment of the .NET runtime and class libraries.
+But still.</p>
+
+<p>One thing worth clarifying is that on Windows, native shared libraries use
+the same <code>.dll</code> file extension as .NET assemblies, which can be confusing.
+One level up from the publish directory, we have another
+mul.dll:</p>
+
+<pre class="screen">
+ Directory of C:\Users\eric\dev\native-aot-samples\mul_cs\bin\Debug\net7.0\win-x64
+
+...
+01/17/2023  01:18 PM             3,584 mul.dll
+...
+</pre>
+
+<p>But these two mul.dll files are very different.</p>
+
+<ul>
+    <li><p>The mul.dll in the publish directory
+        is the native library we've been talking about, the one produced by Native AOT.</p></li>
+
+    <li><p>The smaller one up a level is a .NET assembly.</p></li>
+</ul>
+
+<p>(And yes, 3,584 bytes is still huge for a function that
+multiplies two ints, but keep in mind that .NET assemblies
+contain lots of useful metadata that regular native object
+files do not.)</p>
+
+<p>Finally, let's try building a static library.  The
+dynamic library is the default setting, so in order to
+get a <code>.lib</code>, we need to specify the msbuild property <code>NativeLib</code>
+with a value of <code>Static</code>:</p>
+
+<pre class="screen">
+$ dotnet publish --property NativeLib=Static -r win-x64
+MSBuild version 17.4.1+9a89d02ff for .NET
+  Determining projects to restore...
+  Restored C:\Users\eric\dev\native-aot-samples\mul_cs\mul.csproj (in 98 ms).
+  mul -&gt; C:\Users\eric\dev\native-aot-samples\mul_cs\bin\Debug\net7.0\win-x64\mul.dll
+  Generating native code
+  Microsoft (R) Library Manager Version 14.34.31935.0
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+
+  "/OUT:bin\Debug\net7.0\win-x64\native\mul.lib"
+  "obj\Debug\net7.0\win-x64\native\mul.obj"
+  mul -&gt; C:\Users\eric\dev\native-aot-samples\mul_cs\bin\Debug\net7.0\win-x64\publish\
+</pre>
+
+<p>Now the publish directory looks like this:</p>
+
+<pre class="screen">
+ Directory of C:\Users\eric\dev\native-aot-samples\mul_cs\bin\Debug\net7.0\win-x64\publish
+
+...
+01/17/2023  01:42 PM        23,589,176 mul.lib
+...
+</pre>
+
+<p>Wow -- the static library is even bigger than the DLL!
+Yeah, I still don't want to talk about that issue right now.
+For the moment, let's just say a lot of stuff is going to get
+removed when that .lib meets the linker.</p>
+
+<h3>Next steps</h3>
+
+<p>So, we can package our trivial multiply function as a
+native library.
+Now we need something to call into that library.  Here is where we
+have lots and lots of choices.  The details of calling
+native code vary by platform and language.</p>
+
+<hr/>
+<p>The code for this blog entry is available at:</p>
+
+<p><a href="https://github.com/ericsink/native-aot-samples/tree/main/mul_cs">https://github.com/ericsink/native-aot-samples/tree/main/mul_cs</a></p>
+

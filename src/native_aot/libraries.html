@@ -1,0 +1,93 @@
+---
+layout: post
+title: Libraries
+date: 2023-01-18 10:00:00
+keywords: nativeaot
+teaser: Using Native AOT to build libraries can open many opportunities for interop.
+ord: 09900
+---
+
+<p style="text-align: center; font-style: italic">
+This is part of a series on Native AOT.<br/>
+<a href="overview.html">Previous</a> -- <a href="index.html">Top</a> -- <a href="mul_cs.html">Next</a>
+</p>
+<hr/>
+
+<p>Native AOT is not just limited to executables.
+It can also generate libraries, either static or dynamic,
+compatible with the native code tooling on each platform.</p>
+
+<table border="1" cellpadding="4" width="100%">
+    <tr align="center">
+        <th>Platform</th>
+        <th>Static</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr align="center">
+        <td>Windows</td>
+        <td><code>.lib</code></td>
+        <td><code>.dll</code></td>
+    </tr>
+    <tr align="center">
+        <td>Linux</td>
+        <td><code>.a</code></td>
+        <td><code>.so</code></td>
+    </tr>
+    <tr align="center">
+        <td>macOS</td>
+        <td><code>.a</code></td>
+        <td><code>.dylib</code></td>
+    </tr>
+</table>
+
+<p>Functions exported by Native AOT libraries use the same conventions as C, 
+so they are usable from any language 
+and platform that can call C, which means ... almost everything.</p>
+
+<p>This opens new opportunities for .NET code to be
+integrated with other languages and ecosystems.</p>
+
+<p>Many software projects are composed of components written
+in a variety of languages.  With the traditional .NET
+compilation model (IL + JIT), the impedance mismatch
+is a significant obstacle.  Native AOT offers an
+opportunity to change that.</p>
+
+<h3>Limitations</h3>
+
+<p>Using Native AOT to build a library involves all the
+general limitations of Native AOT, plus some new ones.</p>
+
+<p>Suppose you take your existing C# library and compile it
+with Native AOT.  Even if there no AOT compatibility problems,
+the resulting native library will
+contain nothing.  This is because Native AOT requires
+us to explicitly specify what functions should be exported
+by the library we are building.</p>
+
+<p>And those functions must follow the rules of C.  In a nutshell,
+that means that:</p>
+
+<ul>
+    <li><p>The return type and parameter types must be primitive types (or structs that are carefully designed).  Reference types are not allowed.</p></li>
+    <li><p>Exceptions cannot be thrown.</p></li>
+    <li><p>Function names must be unique (no overloading).</p></li>
+</ul>
+
+<p>Note that we are free to use all [AOT-compatible] .NET
+features <b>within</b> a Native AOT library, just not in
+the signature of the exported functions.  Inside the library,
+objects and strings are exceptions are fine, but the Grail cannot pass
+beyond the Great Seal.  That is the boundary, and the price
+of interoperability.</p>
+
+<p>Native AOT might look bleak at this point, but try not to despair.
+There are techniques for dealing with these limitations,
+but they involve effort.  If you were hoping to just
+click one "Native AOT" checkbox and immediately begin calling your
+C# library from Haskell, you will be
+disappointed.</p>
+
+<p>Nonetheless, despite the conspicuous absence of a free lunch, 
+there is a lot of cool stuff here to be explored.</p>
+

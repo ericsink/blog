@@ -1,0 +1,86 @@
+---
+layout: post
+title: Multiplying two integers from Rust
+date: 2023-01-18 12:00:00
+keywords: nativeaot
+teaser: Calling the multiply() function from Rust (Windows, dynamic)
+ord: 09700
+---
+
+<p style="text-align: center; font-style: italic">
+This is part of a series on Native AOT.<br/>
+<a href="mul_cs.html">Previous</a> -- <a href="index.html">Top</a> -- <a href="mul_cs_pinvoke.html">Next</a>
+</p>
+<hr/>
+
+<p>Rust has a really nice feature called raw-dylib,
+which allows calling external functions without linking
+at build time.  Given the name of the shared library,
+Rust will dynamically load the library and lookup the function.
+(At the time of this writing, raw-dylib is supported only
+on Windows.)</p>
+
+<p>So, because of this raw-dylib feature, Rust is one of the simpler examples
+of how to invoke our trivial <code>multiply()</code> function.  We
+just need to declare the <code>extern</code> function signature and include
+a <code>link</code> attribute to let Rust know that
+the function should be found in a shared library with the base name "mul":</p>
+
+<pre class="screen">
+#[link(name="mul", kind="raw-dylib")]
+extern {
+    fn multiply(a : i32, b : i32) -&gt; i32;
+}
+</pre>
+
+<p>FWIW, raw-dylib in Rust is basically the same feature
+as P/Invoke in .NET:</p>
+
+<pre class="screen">
+[DllImport("mul")]
+static extern int multiply(int a, int b);
+</pre>
+
+<p>Anyway, once the declaration is in place, we can call
+the function from Rust, keeping in mind that Rust considers
+any FFI function to be unsafe:</p>
+
+<pre class="screen">
+fn main() {
+    let c = unsafe { multiply(7, 6) };
+
+    println!("{}", c);
+}
+</pre>
+
+<p>Of course, the program will complain if it can't find the dynamic library:</p>
+
+<pre class="screen">
+$ cargo run
+   Compiling mul_rs_win_dynamic v0.1.0 (C:\Users\eric\dev\native-aot-samples\mul_rs_win_dynamic)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.41s
+     Running `target\debug\mul_rs_win_dynamic.exe`
+error: process didn't exit successfully: `target\debug\mul_rs_win_dynamic.exe` 
+    (exit code: 0xc0000135, <span style="color: red">STATUS_DLL_NOT_FOUND</span>)
+C:/Users/eric/.cargo/bin/cargo.exe: error while loading shared libraries: 
+    ?: cannot open shared object file: No such file or directory
+</pre>
+
+<p>But once mul.dll (built with Native AOT in the <a href="mul_cs.html">previous chapter</a>)
+is copied into place, we can finally multiply two numbers from Rust:</p>
+
+<pre class="screen">
+$ cp ../mul_cs/bin/Debug/net7.0/win-x64/publish/mul.dll .
+
+$ cargo run
+    Finished dev [unoptimized + debuginfo] target(s) in 0.00s
+     Running `target\debug\mul_rs_win_dynamic.exe`
+42
+</pre>
+
+<hr/>
+<p>The code for this blog entry is available at:</p>
+
+<p><a href="https://github.com/ericsink/native-aot-samples/tree/main/mul_rs_win_dynamic">https://github.com/ericsink/native-aot-samples/tree/main/mul_rs_win_dynamic</a></p>
+
+
