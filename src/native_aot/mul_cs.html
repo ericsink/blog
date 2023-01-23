@@ -166,7 +166,7 @@ get a <code>.lib</code>, we need to specify the msbuild property <code>NativeLib
 with a value of <code>Static</code>:</p>
 
 <pre class="screen">
-$ dotnet publish --property NativeLib=Static -r win-x64
+$ dotnet publish <span style="color: red">--property NativeLib=Static</span> -r win-x64
 MSBuild version 17.4.1+9a89d02ff for .NET
   Determining projects to restore...
   Restored C:\Users\eric\dev\native-aot-samples\mul_cs\mul.csproj (in 98 ms).

@@ -1,0 +1,137 @@
+---
+layout: post
+title: Static libraries
+date: 2023-01-23 10:00:00
+keywords: nativeaot
+teaser: Calling the multiply() function in a static library from C++
+ord: 09500
+---
+
+<p style="text-align: center; font-style: italic">
+This is part of a series on Native AOT.<br/>
+<a href="mul_cs_pinvoke.html">Previous</a> -- <a href="index.html">Top</a>
+</p>
+
+<hr/>
+
+<p>Buckle up folks, this part of the ride gets a little bumpy.
+As of .NET 7, using Native AOT with static libraries is
+implemented, but is not yet considered a supported and documented
+feature.</p>
+
+<p>As mentioned previously, building a static library with Native AOT
+is straightforward. Just set the
+<code>NativeLib</code> property to <code>static</code>:</p>
+
+<pre class="screen">
+$ dotnet publish <span style="color: red">--property NativeLib=Static</span> -r win-x64
+</pre>
+
+<p>And the code to call our <code>multiply()</code> function is
+no more complicated than it would normally be for whatever language
+is in play.  In this sample, we're using C++:</p>
+
+<pre class="screen">
+#include &lt;cstdint&gt;
+#include &lt;stdio.h&gt;
+
+extern "C" int32_t multiply(int32_t, int32_t);
+
+int main()
+{
+    int32_t c = multiply(7, 6);
+    printf("%d\n", c);
+    return 0;
+}
+</pre>
+
+<p>Where things get tricky is when we try to link.</p>
+
+<p>To be fair, the various command line options for any
+C++ compiler are usually arcane and complicated,
+so we'll try to blame Native AOT only for the complexity
+that it added to an already messy situation.</p>
+
+<p>Using the Microsoft C++ compiler, our first attempt to build the 
+program shown above might look something like the following: </p>
+
+<pre class="screen">
+cl.exe 
+    (compiler options)
+    mul_main.cpp
+    ../mul_cs/bin/Debug/net7.0/win-x64/publish/mul.lib 
+    (windows libraris)
+</pre>
+
+<p>I've omitted the usual compiler options and the long list of
+Windows libraries so we can focus on the two things we really
+care about.  What we want is to compile the C++ snippet from
+above, and link it with the static library containing our 
+<code>multiply()</code> function, built by Native AOT.</p>
+
+<p>Unfortunately, this command will result in the linker
+complaining about a bunch of unresolved symbols.
+These symbols correspond to the various things that
+Native AOT code needs, a stripped-down
+form of the .NET runtime.</p>
+
+<p>In principle, our trivial <code>multiply()</code> function
+should not need that stuff, but it is a degenerate case.
+There are settings we could have used to
+omit certain dependencies, but we didn't use those settings,
+so Native AOT has assumed that this library will need all
+the usual stuff.</p>
+
+<p>So we need to add a bunch of static libraries to our link.
+When Native AOT building a dynamic library, this chore is performed
+automatically, because the .dll (or .so or .dylib) is built by
+the linker, but with a static library, we're deferring
+the actual link step until later.</p>
+
+<p>But what libraries do we need?  And where are they?</p>
+
+<p>A few chapters ago, when we set things up for building
+with Native AOT, we had to add the <code>PublishAOT</code>
+property to our <code>csproj</code>.</p>
+
+<p>When the .NET SDK sees this property, it does a lot of work
+behind the scenes, including adding references to several
+nuget packages which contain the tools and libraries that 
+Native AOT needs.  In the case of Windows, those libraries
+are in the nuget package 
+<code>runtime.win-x64.microsoft.dotnet.ilcompiler</code>.</p>
+
+<p>I mentioned above that none of this is considered to be
+a supported feature for .NET 7.  In fact, the currently 
+<a href="https://github.com/dotnet/samples/commit/3870722f5c5e80fd6a70946e6e96a5c990620e42">suggested</a>
+way to figure this stuff out is to run a Native AOT build with
+detailed logging and examine the output to see the actual
+command line options for the C++ compiler.
+That gives us the list of libraries, plus the fact that we
+need to require the <code>NativeAOT_StaticInitialization</code> symbol.</p>
+
+<p>The final command line is just too ugly to show in a
+blog entry, but all the gory detail is in a BAT file in
+the sample code.</p>
+
+<p>We end up with one self-contained executable file (which is still
+ridiculously large, grumble).</p>
+
+<pre class="screen">
+C:\Users\eric\dev\native-aot-samples\mul_cpp_win_static&gt; dir
+
+ Directory of C:\Users\eric\dev\native-aot-samples\mul_cpp_win_static
+
+...
+01/23/2023  09:53 AM         4,763,136 mul_main.exe
+...
+
+C:\Users\eric\dev\native-aot-samples\mul_cpp_win_static&gt; .\mul_main.exe
+42
+</pre>
+
+<hr/>
+<p>The code for this blog entry is available at:</p>
+
+<p><a href="https://github.com/ericsink/native-aot-samples/tree/main/mul_cpp_win_static">https://github.com/ericsink/native-aot-samples/tree/main/mul_cpp_win_static</a></p>
+
