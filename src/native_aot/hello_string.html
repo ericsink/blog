@@ -1,0 +1,214 @@
+---
+layout: post
+title: Objects
+date: 2023-01-25 11:00:00
+keywords: nativeaot
+teaser: Using object references across Native AOT
+ord: 09400
+---
+
+<p style="text-align: center; font-style: italic">
+This is part of a series on Native AOT.<br/>
+<a href="mul_cpp_win_static.html">Previous</a> -- <a href="index.html">Top</a>
+</p>
+<hr/>
+
+<p>So far, our examples have been very simplistic,
+using only integer types.  Native AOT won't be 
+very useful if we can never use objects.</p>
+
+<p>And we can.  We just need to express them in
+terms of the conventions of C.</p>
+
+<p>Actually, the techniques for dealing with
+.NET objects in unmanaged code are not new.
+We've had good interop capabilities
+much longer than we've had Native AOT.
+The primary way to pass an object reference to unmanaged code
+is a <code>GCHandle</code>, and it first appeared
+in .NET Framework about 20 years ago.</p>
+
+<p>If you are already familiar with <code>GCHandle</code>,
+please bear with me as I explain things from first
+principles in the context of Native AOT.</p>
+
+<p>In many languages, memory is managed manually.
+If you need a bit of memory, you have to ask for it,
+and when you are done, you have to release it.  In C, the
+standard library functions for this are called <code>malloc</code>
+and <code>free</code>.  The need to carefully manage
+memory has been the source of countless bugs.</p>
+
+<p>The memory for .NET objects is managed automatically
+by a Garbage Collector (GC).  When you construct an object,
+memory is allocated, but you don't have to worry about
+explicitly releasing it.  The .NET runtime keeps track of
+things for you, and when a block of memory is no longer
+being used, it is classified as "garbage" and freed.</p>
+
+<p>This works because .NET knows about all objects.
+But if you want to store an object reference somewhere
+that .NET cannot see, then the GC doesn't know about
+that reference, so it might decide the object is
+garbage, and your reference would become invalid.</p>
+
+<p>This is the problem a <code>GCHandle</code> is designed to solve.
+We can create a <code>GCHandle</code> for any object, and when we
+do so, we are telling the GC that "as long as this handle
+exists, the object is not garbage".  The <code>GCHandle</code> can
+be passed into unmanaged code and stored in unmanaged
+memory.</p>
+
+<p>The following Native AOT function returns an object (a string):</p>
+
+<pre class="screen">
+[UnmanagedCallersOnly(EntryPoint = "get_hello_string")]
+public static IntPtr GetHelloString()
+{
+    string s = "Hello World";
+    GCHandle h = GCHandle.Alloc(s);
+    return GCHandle.ToIntPtr(h);
+}
+</pre>
+
+<ul>
+    <li><p>Start with a string value.</p></li>
+    <li><p>Construct a <code>GCHandle</code> for that string using <code>GCHandle.Alloc()</code>.</p></li>
+    <li><p>Convert the <code>GCHandle</code> to an integer representation using <code>GCHandle.ToIntPtr()</code>.</p></li>
+    <li><p>Because the string variable is local to the function, it would become garbage when the function returns, but the <code>GCHandle</code> prevents that.</p></li>
+</ul>
+
+<p>An <code>IntPtr</code> is an integer that is the same size as a pointer.  
+On most modern systems, that'll be 64 bits.  On 32-bit systems, pointers are 32 bits wide, so <code>IntPtr</code> is as well.</p>
+
+<p>In any case, an <code>IntPtr</code> is an integer, so we can return it across the Native AOT boundary, 
+where it can be used by unmanaged code
+in whatever way we like.</p>
+
+<p>Well, actually, the unmanaged code can't do much with it at all.  The <code>IntPtr</code> is "opaque".  
+It's probably the numerical address
+of a block of memory, but it doesn't have to be, and even if it is, we're not
+supposed to modify that memory or even look at it.</p>
+
+<p>The only thing we can do with our
+<code>IntPtr</code> is give it back to the .NET code and ask it to do something.  
+But that opens lots of possibilities.</p>
+
+<p>Here's a Native AOT function that retrieves the length
+of a string:</p>
+
+<pre class="screen">
+[UnmanagedCallersOnly(EntryPoint = "get_string_length")]
+public static int GetStringLength(IntPtr v)
+{
+    GCHandle h = GCHandle.FromIntPtr(v);
+    object ob = h.Target;
+    string s = (string) ob;
+    int len = s.Length;
+    return len;
+}
+</pre>
+
+<p>This is the typical pattern when we have an object handle
+in unmanaged code and we pass it back to .NET and ask it to
+do something.</p>
+
+<ul>
+    <li><p>Start with the <code>IntPtr</code></p></li>
+    <li><p>Convert it back to a <code>GCHandle</code> with <code>GCHandle.FromIntPtr</code></p></li>
+    <li><p>Retrieve the underlying object with the <code>Target</code> property of the <code>GCHandle</code></p></li>
+    <li><p>Cast the object to the type we expect it to be</p></li>
+    <li><p>Do something</p></li>
+</ul>
+
+<p>So far, we've seen one code snippet that converts an object to an <code>IntPtr</code>, 
+and one code snippet that converts an <code>IntPtr</code> back to an object.
+But it's quite common to need both in the same function.
+Here's a Native AOT function that accepts a string
+and returns another string made by calling <code>String.Replace()</code>.</p>
+
+<pre class="screen">
+[UnmanagedCallersOnly(EntryPoint = "banish_letter_l")]
+public static IntPtr BanishLetterL(IntPtr v)
+{
+    var s = (string) GCHandle.FromIntPtr(v).Target;
+    var s2 = s.Replace("l", "NOT");
+    return GCHandle.ToIntPtr(GCHandle.Alloc(s2));
+}
+</pre>
+
+<p>It is important to remember that every <code>GCHandle</code>
+must be released.
+So, if we're going to return objects from Native AOT functions,
+we must also provide something like the following:</p>
+
+<pre class="screen">
+[UnmanagedCallersOnly(EntryPoint = "free_object_handle")]
+public static void FreeObjectHandle(IntPtr v)
+{
+    GCHandle h = GCHandle.FromIntPtr(v);
+    h.Free();
+}
+</pre>
+
+<p>The <code>GCHandle</code> concept is a way
+of bridging the gap between the automatic memory management
+of .NET and the world where memory is managed manually.
+Like most any other form of manual memory management,
+<code>GCHandle</code> is very unforgiving.  If we
+don't release a handle, the object will never be freed,
+and we get a memory leak.  If we release a handle more
+than once, or if we release a handle that does not exist,
+we are likely to cause memory corruption.</p>
+
+<p>Finally, the C++ code below shows an example of how
+to call the functions shown above.</p>
+
+<pre class="screen">
+#include &lt;cstdint&gt;
+#include &lt;stdio.h&gt;
+
+extern "C" uintptr_t get_hello_string();
+extern "C" int32_t get_string_length(uintptr_t);
+extern "C" uintptr_t banish_letter_l(uintptr_t);
+extern "C" void free_object_handle(uintptr_t);
+
+int main()
+{
+    // the original string is "Hello World"
+    uintptr_t s1 = get_hello_string();
+
+    // the length of the original string is 11
+    int32_t len1 = get_string_length(s1);
+    printf("%d\n", len1);
+
+    // the new string should be "HeNOTNOTo WorNOTd"
+    uintptr_t s2 = banish_letter_l(s1);
+
+    // the length of the new string is now 17
+    int32_t len2 = get_string_length(s2);
+    printf("%d\n", len2);
+
+    // need to release both string objects
+    free_object_handle(s1);
+    free_object_handle(s2);
+
+    return 0;
+}
+</pre>
+
+<p>Two final thoughts about the code sample for this chapter:</p>
+
+<ul>
+    <li><p>To keep things focused, I'm still giving no attention to proper error handling,
+        but that topic needs to be discussed.</p></li>
+
+    <li><p>So far, all the samples have been shown on Windows, even though they are inherently cross-platform.
+        For the sake of mixing things up, this one is configured for Linux.</p></li>
+</ul>
+
+<hr/>
+<p>The code for this blog entry is available at:</p>
+
+<p><a href="https://github.com/ericsink/native-aot-samples/tree/main/hello_string">https://github.com/ericsink/native-aot-samples/tree/main/hello_string</a></p>
+
