@@ -1,0 +1,219 @@
+---
+layout: post
+title: Must follow C rules, no exceptions
+date: 2023-02-09 13:00:00
+keywords: nativeaot
+teaser: TODO
+ord: 09200
+---
+
+<p style="text-align: center; font-style: italic">
+This is part of a series on Native AOT.<br/>
+<a href="objects_gotcha.html">Previous</a> -- <a href="index.html">Top</a>
+</p>
+<hr/>
+
+<p>As we have said, functions exported by
+a Native AOT library must follow the rules of C, and
+that means exceptions cannot be thrown.
+More specifically, it means that if we attempt to throw
+an exception past the Native AOT function
+boundary, the program will crash.  C doesn't have
+exceptions, so it can't deal with them.</p>
+
+<p>Once again, here's the code for a Native AOT function
+to get the length of a string:</p>
+
+<pre class="screen">
+[UnmanagedCallersOnly(EntryPoint = "get_string_length")]
+public static int GetStringLength(IntPtr v)
+{
+    GCHandle h = GCHandle.FromIntPtr(v);
+    object ob = h.Target;
+    string s = (string) ob;
+    int len = s.Length;
+    return len;
+}
+</pre>
+
+<p>As trivial as this code is, it does have places an exception might get
+thrown.  In fact, we did that intentionally in the previous chapter
+by passing in an invalid <code>GCHandle</code>.</p>
+
+<p>What should we do about this?  We basically have only two
+options.  We can allow the exception to cause a crash, or we
+can catch the exception and somehow propagate the error.</p>
+
+<p>For this particular function, we might actually just
+want to leave it alone.  Some errors can't be usefully
+handled.  As far as I can tell, aside from memory corruption,
+the only way this function can crash is when it was given an
+invalid argument, which suggests a bug somewhere else that
+should be found and fixed.</p>
+
+<p>But that won't work in every scenario.
+ In many cases, the body of a Native AOT
+function might need to look something like this:</p>
+
+<pre class="screen">
+[UnmanagedCallersOnly(EntryPoint = "my_function")]
+public static int my_function()
+{
+    try
+    {
+        // do something
+        return 0; // 0 means no error
+    }
+    <span style="color: red">catch</span> (Exception e)
+    {
+        return -1; // TODO some kind of meaningful error code
+    }
+}
+</pre>
+
+<p>There are a myriad of choices here, but the basic point
+is that we would need to decide how we want to represent
+errors, catch exceptions, and return those exceptions
+in the representation we chose.  In this example I chose
+the commonly used approach of an integer error code,
+but I do not wish to imply that this would be simple.
+Error handling rarely is.</p>
+
+<p>Let's pretend for a moment that we actually do want
+our string length function to catch and propagate.
+How would do that?  If we want to return an error code,
+we now have two return values, since the function already
+wants to return the string length.  One or both of these values
+are going to need to be returned through a pointer parameter
+(C rules, remember?).</p>
+
+<p>Let's propagate the error code through a pointer
+(which requires <code>unsafe</code>):</p>
+
+<pre class="screen">
+[UnmanagedCallersOnly(EntryPoint = "get_string_length_errcode_parm")]
+public unsafe static int WithErrorCodeParm(IntPtr v, <span style="color: red">int* ptr_error_code</span>)
+{
+    try
+    {
+        GCHandle h = GCHandle.FromIntPtr(v);
+        object ob = h.Target;
+        string s = (string) ob;
+        int len = s.Length;
+        *ptr_error_code = 0; // no error
+        return len;
+    }
+    catch (Exception e)
+    {
+        *ptr_error_code = -1; // TODO meaningful error code
+        return -1; // TODO but what result should we return?
+    }
+}
+</pre>
+
+<p>One problem here is that we still have to return
+something for the result even when the exception is caught.
+A string length cannot be less than zero, so we just
+return something invalid.</p>
+
+<p>Hey, maybe this function doesn't need the error code to be separate?  
+Couldn't we just make all our error codes negative and
+thus store the length and the error code in the same
+number?  In this case, sure, that'll work:</p>
+
+<pre class="screen">
+[UnmanagedCallersOnly(EntryPoint = "get_string_length_neg")]
+public static int AsNegativeLength(IntPtr v)
+{
+    try
+    {
+        GCHandle h = GCHandle.FromIntPtr(v);
+        object ob = h.Target;
+        string s = (string) ob;
+        int len = s.Length;
+        return len;
+    }
+    catch (Exception e)
+    {
+        return -1; // TODO meaningful negative error code
+    }
+}
+</pre>
+
+<p>But that certainly won't work in all cases.
+This function just happens to have a return type
+that isn't using all its possible values.</p>
+
+<p>And either way, the caller of this function now
+has to actually deal with error conditions.  It needs
+to check for a negative length, or it needs to check
+that separate error code.  There is not much reason to
+propagate errors and then ignore them.</p>
+
+<p>And that brings us full circle to the realization
+that error propagation for this particular function
+is a cure that is worse than the disease.</p>
+
+<p>Broadly speaking, error handling is a very complex topic.
+For now, my intent is merely to scratch the surface,
+and to observe that Native AOT libraries bring
+error handling challenges that many .NET developers will
+find unfamiliar.</p>
+
+<p>In typical .NET development:</p>
+
+<ul>
+    <li><p>We don't need to decide how to represent errors,
+        because <code>System.Exception</code> is the standard
+        way to do that.</p></li>
+
+    <li><p>The decision of whether to propagate error information
+        does not affect the signature of a method, because
+        exceptions can be thrown from anywhere.</p></li>
+</ul>
+
+<p>Providing a Native AOT API for a library can raise
+a bunch of questions that don't typically come up.</p>
+
+<p>I'll close with one more thing.  Even with Native AOT,
+we could maaaaaybe stay with <code>System.Exception</code>
+as the standard way of propagating error information.
+Using a <code>GCHandle</code>, we can return exception 
+objects -- we just can't throw them.</p>
+
+<pre class="screen">
+[UnmanagedCallersOnly(EntryPoint = "get_string_length_ex_parm")]
+public unsafe static int WithExceptionParm(IntPtr v, IntPtr* ptr_ex)
+{
+    try
+    {
+        GCHandle h = GCHandle.FromIntPtr(v);
+        object ob = h.Target;
+        string s = (string) ob;
+        int len = s.Length;
+        *ptr_ex = IntPtr.Zero; // no error
+        return len;
+    }
+    catch (Exception e)
+    {
+        *ptr_ex = <span style="color: red">GCHandle.ToIntPtr(GCHandle.Alloc(e))</span>;
+        return -1; // TODO but what result should we return?
+    }
+}
+</pre>
+
+<p>That solves only one of our problems (and not
+one of the more difficult ones).  And it raises
+more problems of its own:  Object handles are opaque,
+so in order to turn that <code>Exception</code> object into
+any sort of useful information, we'll have to make
+another trip across the Native AOT boundary, and,
+well, what happens if an exception gets thrown while
+trying to get information about the exception that
+got thrown?</p>
+
+<hr/>
+<p>The code for this blog entry is available at:</p>
+
+<p><a href="https://github.com/ericsink/native-aot-samples/tree/main/no_exceptions">https://github.com/ericsink/native-aot-samples/tree/main/no_exceptions</a></p>
+
