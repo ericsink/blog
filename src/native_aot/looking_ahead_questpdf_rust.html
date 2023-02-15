@@ -1,0 +1,158 @@
+---
+layout: post
+title: Looking ahead: QuestPDF/Rust demo
+date: 2023-02-15 13:00:00
+keywords: nativeaot
+teaser: We're going to want binding generators.
+ord: 09100
+---
+
+<p style="text-align: center; font-style: italic">
+This is part of a series on Native AOT.<br/>
+<a href="no_exceptions.html">Previous</a> -- <a href="index.html">Top</a>
+</p>
+<hr/>
+
+<p>So far in this blog series, I have been writing
+about Native AOT mostly in the context of libraries,
+discussing how things work at a fairly low level.</p>
+
+<p>For this post, I want to take a step back
+and look at the big picture, and the road ahead.  
+Where is all this going?  Why do we care about Native AOT libraries,
+and what can we do with them?</p>
+
+<p>One of the most commonly cited benefits of
+Native AOT is faster startup time.  But if that
+were the only thing that mattered, we wouldn't
+need support for libraries, would we?</p>
+
+<p>A primary benefit of Native AOT for libraries
+is the ability to interop with other languages
+and ecosystems.  If we can compile our C# library
+into a regular native library that pretends to be
+written in C, then we can integrate it into almost
+anything.</p>
+
+<p>Native AOT libraries do make some new things
+possible, but that doesn't mean those things are easy.  As we
+have noted in this series, exported functions need
+to follow the rules of C, and that's a really big
+impedance mismatch with .NET classes.</p>
+
+<p>Furthermore, unless we are actually consuming
+the library from C, we have another canyon to
+cross, bridging to something idomatic for Go or Rust
+or Python or whatever.</p>
+
+<p>This set of problems is somewhat new to .NET, but
+in general, it is fairly well-trodden ground.  Typically,
+these kinds of gaps get crossed by generating
+bindings automatically.</p>
+
+<p>There are many examples of tools that generate
+bindings or glue code or middleware to make it easier
+to connect code written in one language to another.
+Citing one example seems better than zero,
+so I'll mention <a href="https://www.swig.org/">SWIG</a>.
+Wikipedia says it has been around for 27 years.
+But like I said, there are lots of other examples.
+Anything that becomes popular creates a demand for it
+to interoperate with something else.</p>
+
+<p>But for .NET there hasn't been much of this
+kinda thing going on, at least not for the
+"calling .NET code from something else" direction.  
+Prior to Native AOT, calling a C# library
+from native code usually involved hosting the CLR.
+I'm not saying <i>nobody</i> does that, but, well, nobody
+does that.</p>
+
+<p>But now we have Native AOT libraries.
+We're going to want binding generators.  And intuitively,
+we should be able to have good ones.  All that metadata in a .NET
+assembly ought to be really useful information when 
+generating glue.</p>
+
+<p>I've been
+experimenting along these lines, and I am seeing
+some encouraging results.</p>
+
+<p>There are several pieces in play:</p>
+
+<ul>
+    <li><p>The core binding generator is a console app that reads
+        a set of .NET assemblies and uses the metadata to generate
+        exported Native AOT functions, plus
+        Rust bindings.  Its command-line options are ... complicated.</p></li>
+
+    <li><p>That console app is contained within
+        a nuget package that provides MSBuild
+        targets which integrate with the Native AOT stuff
+        in the .NET SDK.   It gathers up the necessary
+        information and invokes the binding
+        generator.</p></li>
+
+    <li><p>A Cargo build script provides integration
+        with the Rust tools.  It invokes <code>dotnet publish</code>,
+        which triggers the MSBuild targets, which
+        generates the bindings and makes them available for the rest of
+        the build process.</p></li>
+
+    <li><p>A <code>.csproj</code> file in the Rust crate directory
+        is used to specify which assemblies are
+        available for Native AOT binding.  This includes
+        the regular .NET class libraries, and can also include
+        nuget package references, or other references.</p></li>
+
+    <li><p>A config file is used to specify which
+        classes and members we want to generate bindings
+        for.  This is currently not very friendly,
+        but if we didn't provide a way to limit things, we 
+        would end up generating bindings for everything,
+        including all the nuget packages and the entire
+        .NET system.  This would greatly increase build time and 
+        the size of the resulting library.</p></li>
+</ul>
+
+<p>These tools have not yet been released, so in lieu
+of posting sample code, the demo for this chapter is in the
+form of a video.  It's just a few minutes long, and it
+shows a QuestPDF sample app, first in C#, then compiled
+to a native library with Native AOT, and ported to Rust.</p>
+
+<p>As a teaser, here's a snippet from the original C#,
+using fluent extension methods, and a lambda:</p>
+
+<pre class="screen">
+page.Footer()
+    .AlignCenter()
+    .Text(x =&gt;
+    {
+        x.Span("Page ");
+        x.CurrentPageNumber();
+    });
+</pre>
+
+<p>The Rust equivalent is noisier, as Rust tends to be, but
+it's structurally similar.  The binding generator has created
+wrapper objects for the necessary .NET classes, and traits for the extension methods.  
+Where the lambda used to be, we have a Rust closure that gets wrapped as a .NET delegate.</p>
+
+<pre class="screen">
+page.Footer()?
+    .AlignCenter()?
+    .Text_Action(
+        |x : &amp;TextDescriptor|
+        {
+            x.Span_String(Some(&amp;System::String::from("Page ")))?;
+            x.CurrentPageNumber()?;
+            Ok(())
+        }
+    )?;
+</pre>
+
+<p>The video is available at:</p>
+
+<p><a href="https://youtu.be/XQI1SvvqbGk">https://youtu.be/XQI1SvvqbGk</a></p>
+
