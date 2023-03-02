@@ -1,0 +1,225 @@
+---
+layout: post
+title: Delegates
+date: 2023-03-02 13:00:00
+keywords: nativeaot
+teaser: Bridging between the world of C function pointers and #dotnet delegates
+ord: 09000
+---
+
+<p style="text-align: center; font-style: italic">
+This is part of a series on Native AOT.<br/>
+<a href="looking_ahead_questpdf_rust.html">Previous</a> -- <a href="index.html">Top</a>
+</p>
+<hr/>
+
+<p>Developing with .NET often involves delegates,
+which we can think of as objects that represent things that are callable.
+For example:</p>
+
+<pre class="screen">
+public static int count_files_with_e(string path)
+{
+    return System.IO.Directory.GetFiles(path)
+        .<span style="color: red">Where</span>(x =&gt; x.Contains("e"))
+        .Count()
+        ;
+}
+</pre>
+
+<p>The extension method <code>Where</code>
+accepts a delegate.  We're calling
+it with a lambda expression, which the compiler
+converts into the correct delegate type.</p>
+
+<p>How do we deal with delegates in a Native AOT
+library?</p>
+
+<p>The signature for <code>System.Linq.Enumerable.Where()</code>
+is fairly hard on the eyes:</p>
+
+<pre class="screen">
+public static IEnumerable&lt;TSource&gt; Where&lt;TSource&gt;(
+    this IEnumerable&lt;TSource&gt; source, 
+    Func&lt;TSource,bool&gt; predicate
+    );
+</pre>
+
+<p>All those generics!  Yikes.  We need to start with a 
+simpler example:</p>
+
+<pre class="screen">
+public delegate int MapOne(int x);
+
+public static int MapSum(
+    int n, 
+    <span style="color: red">MapOne</span> f
+    )
+{
+    var sofar = 0;
+    for (var i=0; i&lt;n; i++)
+    {
+        sofar += f(i);
+    }
+    return sofar;
+}
+</pre>
+
+<ul>
+    <li><p>The delegate type
+<code>MapOne</code> is a simple mapping of one integer value
+to another.</p></li>
+<li><p>The <code>MapSum</code> function loops over the first <code>n</code>
+integers and applies a delegate to each one, returning the
+sum of the results.</p></li>
+</ul>
+
+<p>Calling <code>MapSum</code> from C#
+with a lambda expression might look like this:</p>
+
+<pre class="screen">
+public static int CountDivisibleBy42(int n)
+{
+    return MapSum(
+        n, 
+        x =&gt; ((x % 42) == 0) ? 1 : 0
+        );
+}
+</pre>
+
+<p>But functions exposed by a Native AOT library must
+follow the rules of C, and C doesn't have delegates --
+it has function pointers:</p>
+
+<pre class="screen">
+typedef int (*MapOne)(int);
+</pre>
+
+<p>For the sake of illustration, let's observe that
+C# 9 added support for function pointers, so one option
+here is to 
+just rewrite <code>MapSum</code> to use them:</p>
+
+<pre class="screen">
+[UnmanagedCallersOnly(EntryPoint = "map_sum_with_funcptr")]
+public static unsafe int MapSumWithFuncPtr(
+    int n, 
+    <span style="color: red">delegate* unmanaged&lt;int,int&gt;</span> f
+    )
+{
+    var sofar = 0;
+    for (var i=0; i&lt;n; i++)
+    {
+        sofar += f(i);
+    }
+    return sofar;
+}
+</pre>
+
+<p>This results in a function signature which is
+compatible with Native AOT, so we could call it from
+C.  First, since C doesn't have lambdas, we need
+to define the map function:</p>
+
+<pre class="screen">
+int divisible_by_42(int x)
+{
+    return ((x % 42) == 0) ? 1 : 0;
+}
+</pre>
+
+<p>And the call from C to the Native AOT function
+looks like this:</p>
+
+<pre class="screen">
+    int32_t total = map_sum_with_funcptr(
+        1000, 
+        divisible_by_42
+        );
+    printf("%d\n", total);
+</pre>
+
+<p>But Native AOT libraries won't be much fun
+if we need to rewrite everything.
+It would be preferable to leave <code>MapSum</code> unchanged and
+still provide a way to call it.  In other words,
+we want to convert our function pointer into a
+delegate.  We can do that with <code>System.Delegate.CreateDelegate()</code>.</p>
+
+<p>The .NET class libraries provide <code>CreateDelegate</code> as
+a way to create delegates of a given type from other methods.
+It has several overloads, but none of them accept a function
+pointer, so we need to wrap our function pointer in a something
+that <code>CreateDelegate</code> can accept.  I call this
+wrapper a "shadow" class:</p>
+
+<pre class="screen">
+private unsafe class my_shadow 
+{
+    readonly delegate* unmanaged&lt;int,int&gt; <span style="color: red">_funcptr</span>;
+    public my_shadow(delegate* unmanaged&lt;int,int&gt; funcptr)
+    {
+        _funcptr = funcptr;
+    }
+    public unsafe int Invoke(int x)
+    {
+        return _funcptr(x);
+    }
+}
+</pre>
+
+<p>Now we have a regular C# object that contains the
+function pointer and provides a method to invoke it.
+So we can create a delegate of type <code>MapOne</code>
+by making an instance of that shadow class and passing it
+to <code>CreateDelegate</code>:</p>
+
+<pre class="screen">
+var shadow = new my_shadow(funcptr);
+var del = <span style="color: red">Delegate.CreateDelegate</span>(
+    typeof(MapOne), 
+    shadow, 
+    typeof(my_shadow).GetMethod("Invoke")
+    );
+</pre>
+
+<p>Note that some of the overloads for <code>CreateDelegate</code>
+cause AOT or trimmer warnings.  I'm using an overload that
+Native AOT likes.</p>
+
+<p>Using the <code>GCHandle</code> approach described previously,
+we can return the delegate object across the Native AOT
+boundary so it can be passed back, and for that purpose we
+need to expose our original <code>MapSum</code> function with a signature
+that accepts that delegate object handle:</p>
+
+<pre class="screen">
+[UnmanagedCallersOnly(EntryPoint = "map_sum_with_delegate")]
+public static int MapSumWithDelegate(
+    int n, 
+    IntPtr del
+    )
+{
+    var actualDelegate = (MapOne) GCHandle.FromIntPtr(del).Target;
+    return MapSum(n, actualDelegate);
+}
+</pre>
+
+<p>And finally, we can call <code>MapSum</code> from C like this:</p>
+
+<pre class="screen">
+    intptr_t del = create_delegate(
+        divisible_by_42
+        );
+    int32_t total = map_sum_with_delegate(
+        1000, 
+        del
+        );
+    printf("%d\n", total);
+</pre>
+
+<hr/>
+<p>The code for this blog entry is available at:</p>
+
+<p><a href="https://github.com/ericsink/native-aot-samples/tree/main/delegate_i32">https://github.com/ericsink/native-aot-samples/tree/main/delegate_i32</a></p>
+
