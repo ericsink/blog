@@ -1,0 +1,90 @@
+---
+layout: post
+title: SourceGear Bridge 0.5.0
+date: 2023-04-10 13:00:00
+keywords: nativeaot
+teaser: Preview release of Native AOT binding generator with Rust support
+ord: 08900
+---
+
+<p style="text-align: center; font-style: italic">
+This is part of a series on Native AOT.<br/>
+<a href="delegate_i32.html">Previous</a> -- <a href="index.html">Top</a>
+</p>
+<hr/>
+
+<p>I have finally published a preview release of the
+Native AOT binding generator I've been working on.
+I wouldn't call it "production-ready" yet, but 
+having the tool publicly available makes it more tangible and
+real.  Folks can give it a try, and give
+feedback if they wish.</p>
+
+<p>There's a GitHub repo for samples and other information:</p>
+
+<p><a href="https://github.com/sourcegear/bridge-info">https://github.com/sourcegear/bridge-info</a></p>
+
+<p>The content there is fairly bare-bones right now, but 
+there are a few Rust samples, including the QuestPDF demo I
+discussed a few weeks ago, plus two little apps that use Avalonia.
+One of the Avalonia samples is written against the very basic
+controls.  The other uses NXUI, which is a pretty cool library
+offering a different way of working with Avalonia:</p>
+
+<p><a href="https://github.com/wieslawsoltes/NXUI">https://github.com/wieslawsoltes/NXUI</a></p>
+
+<p>These "Work on My Machine", and should
+hopefully work for you as well.</p>
+
+<h3>A word about ugliness</h3>
+
+<p>Some folks have contributed various aesthetic opinions
+about the nature of .NET APIs projected into Rust.
+<code>:-)</code></p>
+
+<p>The simple fact is that Rust lacks a number of
+key things that C# uses a lot:</p>
+
+<ul>
+    <li><p>Method overloading</p></li>
+    <li><p>Exceptions</p></li>
+    <li><p>Default parameter values</p></li>
+    <li><p>Inheritance</p></li>
+    <li><p>Properties</p></li>
+    <li><p>etc</p></li>
+</ul>
+
+<p>This impedance mismatch causes the Rust projection
+of a .NET API to be far less ergonomic than things are in C#.</p>
+
+<p>So I am certainly not suggesting that Rust could become a 
+preferred way of using .NET.  I am exploring the boundaries
+of what is possible in interop situations.
+Some .NET libraries turn out better than others.  For
+Rust, Avalonia hits almost all of the difficulties at one
+time.  That makes it a nice test case, but not necessarily
+a practical use case.</p>
+
+<h3>What got published</h3>
+
+<p>The binding generator itself is contained in a nuget package:
+</p>
+
+<p><a href="https://www.nuget.org/packages/SourceGear.Bridge.NativeAOT.Rust/0.5.0">https://www.nuget.org/packages/SourceGear.Bridge.NativeAOT.Rust/0.5.0</a></p>
+
+<p>But that package is not intended to be used directly.  Rather,
+a Cargo build script will deal with all that.  The dependency
+for that build script is this crate:</p>
+
+<p><a href="https://crates.io/crates/sourcegear-bridge-build">https://crates.io/crates/sourcegear-bridge-build</a></p>
+
+<p>Several things need to be done to integrate that build script into a Cargo project.
+Take a look at the samples I mentioned above.  Also, there is a Cargo subcommand designed
+to help make this easier:</p>
+
+<p><a href="https://crates.io/crates/sourcegear-bridge-cargo">https://crates.io/crates/sourcegear-bridge-cargo</a></p>
+
+<p>If you have any questions or feedback, please feel free to post in the Discussions or Issues area of the <a href="https://github.com/sourcegear/bridge-info">sourcegear/bridge-info</a> repo linked above.</p>
+
+<p>Enjoy!</p>
+
