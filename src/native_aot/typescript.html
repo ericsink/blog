@@ -1,0 +1,121 @@
+---
+layout: post
+title: Native AOT libraries with TypeScript
+date: 2023-05-03 13:00:00
+keywords: nativeaot
+teaser: Musings about the potential viability of TypeScript/.NET interop
+ord: 08800
+---
+
+<p style="text-align: center; font-style: italic">
+This is part of a series on Native AOT.<br/>
+<a href="sgbridge_050.html">Previous</a> -- <a href="index.html">Top</a>
+</p>
+<hr/>
+
+<p>A few weeks ago I published some samples showing the use of
+Native AOT libraries from Rust.  As I mentioned, the projection
+of .NET APIs to Rust requires quite a few ergonomic compromises.
+For example, the following line in C# is a call to the QuestPDF
+method to set the size of a page:</p>
+
+<pre class="screen">
+    page.Size(PageSizes.Letter);
+</pre>
+
+<p>But the Rust projection is messier:</p>
+
+<pre class="screen">
+    page.<span style="color: red">Size_PageSize</span>(&amp;PageSizes::get_Letter()<span style="color: red">?</span>)<span style="color: red">?</span>;
+</pre>
+
+<ul>
+    <li><p>Rust doesn't have method overloading by name, and the <code>Size()</code> method
+        has multiple overloads, so we have to give each one its own name, like <code>Size_PageSize()</code>.</p></li>
+
+    <li><p>Rust doesn't have exceptions, and every .NET method might throw, but the metadata doesn't tell us
+        anything about which kinds of errors we might want to propagate or not.  So for the
+        moment, the binding generator outputs every method with a return type of <code>Result<></code>,
+        which means we need to use <code>?</code> after every call.</p></li>
+</ul>
+
+<p>Rust also lacks other things that .NET wants, including 
+optional parameters, property getters/setters, and inheritance.
+Because of all these differences, Rust for general .NET development 
+would typically involve too much pain to be practical.</p>
+
+<p>But the nice thing about Native AOT libraries, is that
+they can be used with anything that can call C.</p>
+
+<h3>Hello TypeScript</h3>
+
+<p>TypeScript has method overloads, exceptions, property getters/setters,
+and inheritance.  Hmmm.</p>
+
+<p>For the last few weeks, I've been adding
+TypeScript as another output language for my 
+binding generator.  Things are in a rough state,
+but the results look positive, so I have published
+a nuget package and a working port of the QuestPDF sample.
+That sample is short, but it involves things like generic delegates and
+extension methods, so I consider it non-trivial.
+</p>
+
+<p>Interop between any two languages will always involve trouble
+spots, but TypeScript can look awfully similar to C#.
+Here's a visual diff from the Quest PDF sample, with TypeScript on
+the left, and C# on the right:</p>
+
+<p><a href="questpdf_diff_ts_cs.png"><img width="750" src="questpdf_diff_ts_cs.png"/></a></p>
+
+<p>All of the differences here are because
+I am projecting nullability more strictly 
+than it is in C#.  I currently think this is
+a feature rather than a bug, but I'm not completely settled
+on that, and if I stopped doing it this way, these two
+snippets would actually be identical.</p>
+
+<p>To be fair, let's acknowledge that this is just one sample.
+TypeScript lacks several things that require extra effort
+for .NET interop, including:</p>
+
+<ul>
+    <li><p>byref parameters</p></li>
+    <li><p>extension methods</p></li>
+    <li><p>runtime type information</p></li>
+</ul>
+
+<p>I mean, if TypeScript were exactly like C#, it would
+be C#.</p>
+
+<p>Still, I see potential here.</p>
+
+<h3>Details</h3>
+
+<p>The binding generator itself is contained in a nuget package:
+</p>
+
+<p><a href="https://www.nuget.org/packages/SourceGear.Bridge.NativeAOT.TypeScript/0.6.0">https://www.nuget.org/packages/SourceGear.Bridge.NativeAOT.TypeScript/0.6.0</a></p>
+
+<p>The QuestPDF sample is in the <code>samples/typescript</code> directory of this repo:</p>
+
+<p><a href="https://github.com/sourcegear/bridge-info">https://github.com/sourcegear/bridge-info</a></p>
+
+<p>For this prototype, all the FFI-level stuff is setup for Deno (apologies to fans of node).</>
+
+<h3>Related</h3>
+
+<p>There's something going on in the following repo:</p>
+
+<p><a href="https://github.com/microsoft/node-api-dotnet">https://github.com/microsoft/node-api-dotnet</a></p>
+
+<p>I'm not super-clear on where that project is headed.
+And there are significant differences relative
+to what I'm doing, but also some common ground.  I think it looks interesting.</p>
+
+<h3>Next steps</h3>
+
+<p>I'm hoping that I will soon have an AvaloniaUI sample (it's a fair bit more complicated).  Down the road a bit, I'd love to get this working with [at least the desktop versions of] MAUI, but I'm not sure yet what will be feasible.</p>
+
+<p>If you have any questions or feedback, please feel free to post in the Discussions or Issues area of the <a href="https://github.com/sourcegear/bridge-info">sourcegear/bridge-info</a> repo linked above.</p>
+
